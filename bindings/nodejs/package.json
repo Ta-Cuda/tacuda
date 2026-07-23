@@ -1,0 +1,58 @@
+{
+  "name": "tacuda",
+  "version": "0.7.1",
+  "description": "Node.js bindings for tacuda: full TA-Lib coverage (161 functions) on CUDA incl. MACDEXT and vector math, host + zero-copy device API, structured OHLCV inputs, batched multi-symbol execution for 52 indicator families, and generated candlestick pattern wrappers",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test_pipeline.js"
+  },
+  "keywords": [
+    "cuda",
+    "gpu",
+    "technical-analysis",
+    "trading",
+    "finance",
+    "indicators",
+    "ta-lib",
+    "macd",
+    "rsi",
+    "sma",
+    "ema",
+    "bollinger-bands",
+    "candlestick",
+    "quantitative-finance",
+    "nvidia"
+  ],
+  "author": "Paul Deecalov <paul@deecalov.com>",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/Ta-Cuda/tacuda",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ta-Cuda/tacuda.git",
+    "directory": "bindings/nodejs"
+  },
+  "bugs": {
+    "url": "https://github.com/Ta-Cuda/tacuda/issues"
+  },
+  "changelog": "https://github.com/Ta-Cuda/tacuda/blob/main/docs/CHANGELOG.md",
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "koffi": "^2.9.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "os": [
+    "win32",
+    "linux",
+    "darwin"
+  ],
+  "files": [
+    "index.js",
+    "batch_generated.js",
+    "README.md",
+    "LICENSE"
+  ]
+}

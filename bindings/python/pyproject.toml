@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tacuda"
+version = "0.7.1"
+description = "Python bindings for tacuda: full TA-Lib coverage (161 functions) on CUDA, incl. MACDEXT and 19 vector math kernels, device pipeline support, structured OHLCV inputs, batched multi-symbol execution, and runtime dtype selection (float16/float32/float64)"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+requires-python = ">=3.8"
+authors = [
+    {name = "Paul Deecalov", email = "paul@deecalov.com"},
+]
+keywords = [
+    "cuda", "gpu", "technical-analysis", "trading", "finance",
+    "indicators", "ta-lib", "macd", "rsi", "sma", "ema",
+    "bollinger-bands", "candlestick", "quantitative-finance",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial",
+    "Topic :: Scientific/Engineering",
+]
+dependencies = [
+    "numpy>=1.20",
+]
+
+[project.urls]
+Homepage = "https://github.com/Ta-Cuda/tacuda"
+Repository = "https://github.com/Ta-Cuda/tacuda"
+Issues = "https://github.com/Ta-Cuda/tacuda/issues"
+Changelog = "https://github.com/Ta-Cuda/tacuda/blob/main/docs/CHANGELOG.md"
+
+[tool.setuptools.packages.find]
+include = ["tacuda*"]
+
+[tool.setuptools.package-data]
+tacuda = ["*.pyd", "*.so", "*.dylib", "*.dll"]

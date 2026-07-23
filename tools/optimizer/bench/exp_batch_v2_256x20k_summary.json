@@ -1,0 +1,2848 @@
+{
+ "bars": 20000,
+ "symbols": 256,
+ "seed": 42,
+ "costModel": {
+  "commissionBps": 2,
+  "slippageTicks": 1,
+  "tickSize": 0.01
+ },
+ "totalSec": 226.7,
+ "aggregate": {
+  "strategies": 94,
+  "indicatorSecTotal": {
+   "tacuda": 17.633,
+   "tacuda-device": 27.606,
+   "talib": 12.085
+  },
+  "indicatorSecMedian": {
+   "tacuda": 0.1472,
+   "tacuda-device": 0.1359,
+   "talib": 0.1249
+  },
+  "speedupBatchVsDevice": 1.57,
+  "speedupBatchVsTalib": 0.69
+ },
+ "strategies": {
+  "exp01_channel_breakout": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.758,
+    "indicatorSec": 0.142102236,
+    "signalSec": 0.087178483,
+    "netProfit": 95915.46647,
+    "trades": 284457
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.747,
+    "indicatorSec": 0.139448686,
+    "signalSec": 0.087487976,
+    "netProfit": 95915.46647,
+    "trades": 284457
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.695,
+    "indicatorSec": 0.136974904,
+    "signalSec": 0.087103939,
+    "netProfit": 95915.46647,
+    "trades": 284457
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp01_ma_crossover": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.722,
+    "indicatorSec": 0.183350581,
+    "signalSec": 0.047996058,
+    "netProfit": 92.81396135,
+    "trades": 57
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.739,
+    "indicatorSec": 0.197415835,
+    "signalSec": 0.047795642,
+    "netProfit": 92.81396135,
+    "trades": 57
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.732,
+    "indicatorSec": 0.235775657,
+    "signalSec": 0.047862189,
+    "netProfit": 92.81396135,
+    "trades": 57
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp01_macd_breakout": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.778,
+    "indicatorSec": 0.196395055,
+    "signalSec": 0.082938813,
+    "netProfit": 86470.98712,
+    "trades": 128553
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.776,
+    "indicatorSec": 0.187927964,
+    "signalSec": 0.082775449,
+    "netProfit": 86470.98712,
+    "trades": 128553
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.721,
+    "indicatorSec": 0.17828922,
+    "signalSec": 0.08255799,
+    "netProfit": 86470.98712,
+    "trades": 128553
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp01_pivot_points": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.822,
+    "indicatorSec": 0.156010328,
+    "signalSec": 0.095660121,
+    "netProfit": 11484.49427,
+    "trades": 648401
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.825,
+    "indicatorSec": 0.158134765,
+    "signalSec": 0.100023416,
+    "netProfit": 11484.49427,
+    "trades": 648401
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.751,
+    "indicatorSec": 0.131138851,
+    "signalSec": 0.099608543,
+    "netProfit": 11484.49427,
+    "trades": 648401
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp01_sr_levels": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.814,
+    "indicatorSec": 0.165296105,
+    "signalSec": 0.151766994,
+    "netProfit": -75331.55581,
+    "trades": 40281
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.817,
+    "indicatorSec": 0.162130563,
+    "signalSec": 0.156937995,
+    "netProfit": -75331.55581,
+    "trades": 40281
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.751,
+    "indicatorSec": 0.14438287,
+    "signalSec": 0.158605702,
+    "netProfit": -75331.55581,
+    "trades": 40281
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp01_trend_follower": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.763,
+    "indicatorSec": 0.168161569,
+    "signalSec": 0.079915788,
+    "netProfit": 70539.58054,
+    "trades": 285085
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.761,
+    "indicatorSec": 0.155956032,
+    "signalSec": 0.083106215,
+    "netProfit": 70539.58054,
+    "trades": 285085
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.674,
+    "indicatorSec": 0.110444355,
+    "signalSec": 0.084376904,
+    "netProfit": 70539.58054,
+    "trades": 285085
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp01_volex": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.782,
+    "indicatorSec": 0.118613938,
+    "signalSec": 0.091591815,
+    "netProfit": -26252.45989,
+    "trades": 732825
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.784,
+    "indicatorSec": 0.110964331,
+    "signalSec": 0.096840992,
+    "netProfit": -26252.45989,
+    "trades": 732825
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.706,
+    "indicatorSec": 0.077237341,
+    "signalSec": 0.095952209,
+    "netProfit": -26252.45989,
+    "trades": 732825
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp02_ad_divergence": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.89,
+    "indicatorSec": 0.11949403,
+    "signalSec": 0.257934203,
+    "netProfit": -121571.7291,
+    "trades": 228472
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.89,
+    "indicatorSec": 0.109904653,
+    "signalSec": 0.264581358,
+    "netProfit": -121571.7291,
+    "trades": 228472
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.832,
+    "indicatorSec": 0.094668593,
+    "signalSec": 0.271566449,
+    "netProfit": -121571.7291,
+    "trades": 228472
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp02_adx_diff": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.839,
+    "indicatorSec": 0.179088806,
+    "signalSec": 0.118800904,
+    "netProfit": 61371.97829,
+    "trades": 485645
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.83,
+    "indicatorSec": 0.166783746,
+    "signalSec": 0.118765207,
+    "netProfit": 61371.97829,
+    "trades": 485645
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.757,
+    "indicatorSec": 0.138014155,
+    "signalSec": 0.11845934,
+    "netProfit": 61371.97829,
+    "trades": 485645
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp02_bull_beater": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.722,
+    "indicatorSec": 0.18618937,
+    "signalSec": 0.04218984,
+    "netProfit": 400.0715639,
+    "trades": 5207
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.724,
+    "indicatorSec": 0.183969553,
+    "signalSec": 0.047114885,
+    "netProfit": 400.0715639,
+    "trades": 5207
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.671,
+    "indicatorSec": 0.171187662,
+    "signalSec": 0.046529742,
+    "netProfit": 400.0715639,
+    "trades": 5207
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp02_cci_bollinger": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.799,
+    "indicatorSec": 0.178491609,
+    "signalSec": 0.114043898,
+    "netProfit": -15000.54753,
+    "trades": 145646
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.793,
+    "indicatorSec": 0.174269943,
+    "signalSec": 0.113747598,
+    "netProfit": -15000.54753,
+    "trades": 145646
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.769,
+    "indicatorSec": 0.197944931,
+    "signalSec": 0.114670878,
+    "netProfit": -15001.83883,
+    "trades": 145650
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp02_head_shoulders": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.556,
+    "indicatorSec": 2.313e-06,
+    "signalSec": 0.114755974,
+    "netProfit": 3233.528889,
+    "trades": 38741
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.569,
+    "indicatorSec": 2.313e-06,
+    "signalSec": 0.114383845,
+    "netProfit": 3233.528889,
+    "trades": 38741
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.568,
+    "indicatorSec": 2.354e-06,
+    "signalSec": 0.114992319,
+    "netProfit": 3233.528889,
+    "trades": 38741
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp02_obv_extremes": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.838,
+    "indicatorSec": 0.119431159,
+    "signalSec": 0.203674304,
+    "netProfit": -25441.80908,
+    "trades": 155365
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.806,
+    "indicatorSec": 0.094835953,
+    "signalSec": 0.205796336,
+    "netProfit": -25441.80908,
+    "trades": 155365
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.712,
+    "indicatorSec": 0.051097178,
+    "signalSec": 0.205541676,
+    "netProfit": -25441.80908,
+    "trades": 155365
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp02_pct_change_channel": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.667,
+    "indicatorSec": 0.142381228,
+    "signalSec": 0.036311181,
+    "netProfit": 0,
+    "trades": 0
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.666,
+    "indicatorSec": 0.137344459,
+    "signalSec": 0.036715363,
+    "netProfit": 0,
+    "trades": 0
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.614,
+    "indicatorSec": 0.134322769,
+    "signalSec": 0.036664187,
+    "netProfit": 0,
+    "trades": 0
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp02_stochastics": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.772,
+    "indicatorSec": 0.148847377,
+    "signalSec": 0.087258116,
+    "netProfit": 39059.92958,
+    "trades": 433491
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.767,
+    "indicatorSec": 0.13725019,
+    "signalSec": 0.086065449,
+    "netProfit": 39059.92958,
+    "trades": 433491
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.741,
+    "indicatorSec": 0.158446942,
+    "signalSec": 0.086139952,
+    "netProfit": 39059.92958,
+    "trades": 433491
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp03_bollinger": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.692,
+    "indicatorSec": 0.135112847,
+    "signalSec": 0.061021668,
+    "netProfit": -18227.15518,
+    "trades": 89157
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.687,
+    "indicatorSec": 0.129307679,
+    "signalSec": 0.060898252,
+    "netProfit": -18227.15518,
+    "trades": 89157
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.568,
+    "indicatorSec": 0.058315103,
+    "signalSec": 0.061578897,
+    "netProfit": -18227.15518,
+    "trades": 89157
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp03_buy_dips": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.745,
+    "indicatorSec": 0.177664839,
+    "signalSec": 0.07534565,
+    "netProfit": 173414.6171,
+    "trades": 50397
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.737,
+    "indicatorSec": 0.165916416,
+    "signalSec": 0.075783715,
+    "netProfit": 173414.6171,
+    "trades": 50397
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.665,
+    "indicatorSec": 0.143623313,
+    "signalSec": 0.075403704,
+    "netProfit": 173414.6171,
+    "trades": 50397
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp03_engulfing": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.686,
+    "indicatorSec": 0.105064847,
+    "signalSec": 0.092860575,
+    "netProfit": -4300.498428,
+    "trades": 34219
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.683,
+    "indicatorSec": 0.09844023,
+    "signalSec": 0.093115282,
+    "netProfit": -4300.498428,
+    "trades": 34219
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.568,
+    "indicatorSec": 0.031122535,
+    "signalSec": 0.093644311,
+    "netProfit": -4300.498428,
+    "trades": 34219
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp03_micro_mw": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 1.012,
+    "indicatorSec": 0.142276875,
+    "signalSec": 0.357960427,
+    "netProfit": 32252.45656,
+    "trades": 234417
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 1.009,
+    "indicatorSec": 0.132452562,
+    "signalSec": 0.361301446,
+    "netProfit": 32252.45656,
+    "trades": 234417
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.957,
+    "indicatorSec": 0.123610225,
+    "signalSec": 0.360587761,
+    "netProfit": 32252.45656,
+    "trades": 234417
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp03_obtr": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 1.319,
+    "indicatorSec": 0.774281328,
+    "signalSec": 0.053256198,
+    "netProfit": -8497.287224,
+    "trades": 43934
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 2.915,
+    "indicatorSec": 2.373502619,
+    "signalSec": 0.053318564,
+    "netProfit": -8497.287224,
+    "trades": 43934
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.626,
+    "indicatorSec": 0.127331967,
+    "signalSec": 0.053544796,
+    "netProfit": -8497.287224,
+    "trades": 43934
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp03_oc_histogram": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.776,
+    "indicatorSec": 0.148234467,
+    "signalSec": 0.096048843,
+    "netProfit": 87362.16477,
+    "trades": 445195
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.78,
+    "indicatorSec": 0.138391085,
+    "signalSec": 0.100996245,
+    "netProfit": 87362.16477,
+    "trades": 445195
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.692,
+    "indicatorSec": 0.097141107,
+    "signalSec": 0.100581632,
+    "netProfit": 87362.16477,
+    "trades": 445195
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp03_stddev_vol": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.67,
+    "indicatorSec": 0.128425413,
+    "signalSec": 0.049121036,
+    "netProfit": -9964.177196,
+    "trades": 48012
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.676,
+    "indicatorSec": 0.131834226,
+    "signalSec": 0.05022291,
+    "netProfit": -9964.177196,
+    "trades": 48012
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.559,
+    "indicatorSec": 0.063199465,
+    "signalSec": 0.049544181,
+    "netProfit": -9964.177196,
+    "trades": 48012
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp03_var_zones": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.799,
+    "indicatorSec": 0.107512091,
+    "signalSec": 0.182415851,
+    "netProfit": -3290.116983,
+    "trades": 224908
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.79,
+    "indicatorSec": 0.095135891,
+    "signalSec": 0.181842533,
+    "netProfit": -3290.116983,
+    "trades": 224908
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.693,
+    "indicatorSec": 0.046315856,
+    "signalSec": 0.182891906,
+    "netProfit": -3290.182713,
+    "trades": 224908
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp03_vol_clusters": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.669,
+    "indicatorSec": 2.321e-06,
+    "signalSec": 0.217754979,
+    "netProfit": -23472.12958,
+    "trades": 135905
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.67,
+    "indicatorSec": 2.428e-06,
+    "signalSec": 0.218514125,
+    "netProfit": -23472.12958,
+    "trades": 135905
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.681,
+    "indicatorSec": 2.436e-06,
+    "signalSec": 0.216293816,
+    "netProfit": -23472.12958,
+    "trades": 135905
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp04_consec_close": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.781,
+    "indicatorSec": 0.144869284,
+    "signalSec": 0.091870009,
+    "netProfit": 4799.652693,
+    "trades": 360346
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.751,
+    "indicatorSec": 0.127483769,
+    "signalSec": 0.092675895,
+    "netProfit": 4799.652693,
+    "trades": 360346
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.701,
+    "indicatorSec": 0.125790598,
+    "signalSec": 0.091519009,
+    "netProfit": 4799.652693,
+    "trades": 360346
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp04_dma_volume": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.739,
+    "indicatorSec": 0.162015621,
+    "signalSec": 0.070924418,
+    "netProfit": 21490.87096,
+    "trades": 178250
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.743,
+    "indicatorSec": 0.161846656,
+    "signalSec": 0.071208801,
+    "netProfit": 21490.87096,
+    "trades": 178250
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.702,
+    "indicatorSec": 0.168639984,
+    "signalSec": 0.071050156,
+    "netProfit": 21490.87096,
+    "trades": 178250
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp04_dmi_adx": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.792,
+    "indicatorSec": 0.21870999,
+    "signalSec": 0.07204693,
+    "netProfit": 7566.945,
+    "trades": 112554
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.776,
+    "indicatorSec": 0.203626141,
+    "signalSec": 0.073009311,
+    "netProfit": 7566.945,
+    "trades": 112554
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.688,
+    "indicatorSec": 0.16044769,
+    "signalSec": 0.073369607,
+    "netProfit": 7566.945,
+    "trades": 112554
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp04_hpi_breakout": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 1.357,
+    "indicatorSec": 0.75366592,
+    "signalSec": 0.092572532,
+    "netProfit": 58978.16075,
+    "trades": 255734
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 3.054,
+    "indicatorSec": 2.443950058,
+    "signalSec": 0.092509965,
+    "netProfit": 58978.16075,
+    "trades": 255734
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.799,
+    "indicatorSec": 0.233507127,
+    "signalSec": 0.092121755,
+    "netProfit": 58978.16075,
+    "trades": 255734
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp04_keltner": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.742,
+    "indicatorSec": 0.139112054,
+    "signalSec": 0.091321079,
+    "netProfit": 65793.82684,
+    "trades": 242244
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.751,
+    "indicatorSec": 0.142881339,
+    "signalSec": 0.092152324,
+    "netProfit": 65793.82684,
+    "trades": 242244
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.678,
+    "indicatorSec": 0.116581976,
+    "signalSec": 0.091057746,
+    "netProfit": 65793.82684,
+    "trades": 242244
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp04_linreg_mom": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.729,
+    "indicatorSec": 0.160204318,
+    "signalSec": 0.072669998,
+    "netProfit": 63521.56034,
+    "trades": 85571
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.733,
+    "indicatorSec": 0.159559383,
+    "signalSec": 0.072627761,
+    "netProfit": 63521.56034,
+    "trades": 85571
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.723,
+    "indicatorSec": 0.197685759,
+    "signalSec": 0.072918034,
+    "netProfit": 63521.56034,
+    "trades": 85571
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp04_mom_retrace": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.878,
+    "indicatorSec": 0.270497945,
+    "signalSec": 0.101008333,
+    "netProfit": 53982.49803,
+    "trades": 100630
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.876,
+    "indicatorSec": 0.273290881,
+    "signalSec": 0.101504553,
+    "netProfit": 53982.49803,
+    "trades": 100630
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.852,
+    "indicatorSec": 0.294655986,
+    "signalSec": 0.101288762,
+    "netProfit": 53982.49803,
+    "trades": 100630
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp04_price_dist": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.673,
+    "indicatorSec": 0.12019148,
+    "signalSec": 0.05519891,
+    "netProfit": 6957.481592,
+    "trades": 109626
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.668,
+    "indicatorSec": 0.115353542,
+    "signalSec": 0.055192258,
+    "netProfit": 6957.481592,
+    "trades": 109626
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.873,
+    "indicatorSec": 0.369506885,
+    "signalSec": 0.055177619,
+    "netProfit": 6957.481592,
+    "trades": 109626
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp04_three_ema": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.691,
+    "indicatorSec": 0.138089905,
+    "signalSec": 0.057708376,
+    "netProfit": 33697.22799,
+    "trades": 107233
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.686,
+    "indicatorSec": 0.13183178,
+    "signalSec": 0.057350309,
+    "netProfit": 33697.22799,
+    "trades": 107233
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.581,
+    "indicatorSec": 0.072218278,
+    "signalSec": 0.057792495,
+    "netProfit": 33697.22799,
+    "trades": 107233
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp05_chan_pullback": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.775,
+    "indicatorSec": 0.161949733,
+    "signalSec": 0.080650267,
+    "netProfit": -38997.23033,
+    "trades": 428404
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.792,
+    "indicatorSec": 0.16888777,
+    "signalSec": 0.080644284,
+    "netProfit": -38997.23033,
+    "trades": 428404
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.78,
+    "indicatorSec": 0.205345443,
+    "signalSec": 0.081061033,
+    "netProfit": -38997.23033,
+    "trades": 428404
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp05_currency_4day": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.765,
+    "indicatorSec": 0.112465544,
+    "signalSec": 0.066974829,
+    "netProfit": 10442.04213,
+    "trades": 1021440
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.76,
+    "indicatorSec": 0.095999477,
+    "signalSec": 0.066950566,
+    "netProfit": 10442.04213,
+    "trades": 1021440
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.659,
+    "indicatorSec": 0.045556838,
+    "signalSec": 0.065767192,
+    "netProfit": 10441.97118,
+    "trades": 1021440
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp05_disp_stddev": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.679,
+    "indicatorSec": 0.118895873,
+    "signalSec": 0.060057411,
+    "netProfit": 141022.7223,
+    "trades": 132076
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.673,
+    "indicatorSec": 0.116587698,
+    "signalSec": 0.059952408,
+    "netProfit": 141022.7223,
+    "trades": 132076
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.562,
+    "indicatorSec": 0.048658485,
+    "signalSec": 0.060739062,
+    "netProfit": 141022.7223,
+    "trades": 132076
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp05_fib_retrace": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.976,
+    "indicatorSec": 0.1412795,
+    "signalSec": 0.338590747,
+    "netProfit": 117250.9527,
+    "trades": 67126
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.972,
+    "indicatorSec": 0.130767573,
+    "signalSec": 0.343517922,
+    "netProfit": 117250.9527,
+    "trades": 67126
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.943,
+    "indicatorSec": 0.147235715,
+    "signalSec": 0.342435839,
+    "netProfit": 117250.9527,
+    "trades": 67126
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp05_hilo_osc": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.736,
+    "indicatorSec": 0.155075209,
+    "signalSec": 0.074761369,
+    "netProfit": 93207.72678,
+    "trades": 183572
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.73,
+    "indicatorSec": 0.140117725,
+    "signalSec": 0.079664686,
+    "netProfit": 93207.72678,
+    "trades": 183572
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.636,
+    "indicatorSec": 0.093704962,
+    "signalSec": 0.079142913,
+    "netProfit": 93207.72678,
+    "trades": 183572
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp05_pivot_sr": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.791,
+    "indicatorSec": 0.183696456,
+    "signalSec": 0.109715406,
+    "netProfit": -5082.583333,
+    "trades": 37036
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.797,
+    "indicatorSec": 0.187663573,
+    "signalSec": 0.109747458,
+    "netProfit": -5082.583333,
+    "trades": 37036
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.81,
+    "indicatorSec": 0.248461982,
+    "signalSec": 0.109611952,
+    "netProfit": -5082.583333,
+    "trades": 37036
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp05_stoch_obos": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.741,
+    "indicatorSec": 0.122605847,
+    "signalSec": 0.086797508,
+    "netProfit": -49608.60584,
+    "trades": 394233
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.727,
+    "indicatorSec": 0.109164083,
+    "signalSec": 0.087319819,
+    "netProfit": -49608.60584,
+    "trades": 394233
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.674,
+    "indicatorSec": 0.099040817,
+    "signalSec": 0.087558625,
+    "netProfit": -49608.60584,
+    "trades": 394233
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp06_asi": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 1.927,
+    "indicatorSec": 1.325126273,
+    "signalSec": 0.095592354,
+    "netProfit": 69934.08401,
+    "trades": 206692
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 5.411,
+    "indicatorSec": 4.803879318,
+    "signalSec": 0.095624891,
+    "netProfit": 69934.08401,
+    "trades": 206692
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.665,
+    "indicatorSec": 0.108078866,
+    "signalSec": 0.096501158,
+    "netProfit": 69934.08401,
+    "trades": 206692
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp06_cci_avg": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.698,
+    "indicatorSec": 0.132816398,
+    "signalSec": 0.065795435,
+    "netProfit": -18376.60617,
+    "trades": 105243
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.691,
+    "indicatorSec": 0.126300551,
+    "signalSec": 0.065745864,
+    "netProfit": -18376.60617,
+    "trades": 105243
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.731,
+    "indicatorSec": 0.206914811,
+    "signalSec": 0.065630396,
+    "netProfit": -18375.32318,
+    "trades": 105241
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp06_dma_chan": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.736,
+    "indicatorSec": 0.121629348,
+    "signalSec": 0.10272021,
+    "netProfit": 125474.8966,
+    "trades": 247404
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.73,
+    "indicatorSec": 0.109528573,
+    "signalSec": 0.106623332,
+    "netProfit": 125474.8966,
+    "trades": 247404
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.622,
+    "indicatorSec": 0.048710726,
+    "signalSec": 0.106475448,
+    "netProfit": 125474.8966,
+    "trades": 247404
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp06_first_pullback": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.746,
+    "indicatorSec": 0.18221389,
+    "signalSec": 0.068293092,
+    "netProfit": 87533.95437,
+    "trades": 64397
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.734,
+    "indicatorSec": 0.163690905,
+    "signalSec": 0.072401617,
+    "netProfit": 87533.95437,
+    "trades": 64397
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.668,
+    "indicatorSec": 0.144878565,
+    "signalSec": 0.072252777,
+    "netProfit": 87533.95437,
+    "trades": 64397
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp06_ma_pairs": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.8,
+    "indicatorSec": 0.180453389,
+    "signalSec": 0.090615028,
+    "netProfit": 104736.7373,
+    "trades": 430787
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.814,
+    "indicatorSec": 0.187683251,
+    "signalSec": 0.089874777,
+    "netProfit": 104736.7373,
+    "trades": 430787
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.71,
+    "indicatorSec": 0.127647781,
+    "signalSec": 0.090582868,
+    "netProfit": 104736.7373,
+    "trades": 430787
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp06_mac_adx": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.753,
+    "indicatorSec": 0.186701572,
+    "signalSec": 0.070887315,
+    "netProfit": 160253.2617,
+    "trades": 88450
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.755,
+    "indicatorSec": 0.177115835,
+    "signalSec": 0.075859311,
+    "netProfit": 160253.2617,
+    "trades": 88450
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.653,
+    "indicatorSec": 0.124097503,
+    "signalSec": 0.075698241,
+    "netProfit": 160253.2617,
+    "trades": 88450
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp06_mrtr": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.677,
+    "indicatorSec": 0.119788528,
+    "signalSec": 0.062511224,
+    "netProfit": 151723.9578,
+    "trades": 34005
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.673,
+    "indicatorSec": 0.111341472,
+    "signalSec": 0.067679094,
+    "netProfit": 151723.9578,
+    "trades": 34005
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.618,
+    "indicatorSec": 0.10514711,
+    "signalSec": 0.067689206,
+    "netProfit": 151723.9578,
+    "trades": 34005
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp06_parabolic_vol": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.874,
+    "indicatorSec": 0.30332013,
+    "signalSec": 0.065100318,
+    "netProfit": 27024.72772,
+    "trades": 204084
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 1.225,
+    "indicatorSec": 0.645430739,
+    "signalSec": 0.070327053,
+    "netProfit": 27024.72772,
+    "trades": 204084
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.591,
+    "indicatorSec": 0.056996146,
+    "signalSec": 0.069840279,
+    "netProfit": 27025.26326,
+    "trades": 204083
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp06_vwm": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.707,
+    "indicatorSec": 0.129654679,
+    "signalSec": 0.074872627,
+    "netProfit": 123957.4091,
+    "trades": 159073
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.699,
+    "indicatorSec": 0.113900905,
+    "signalSec": 0.078496165,
+    "netProfit": 123957.4091,
+    "trades": 159073
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.621,
+    "indicatorSec": 0.08239735,
+    "signalSec": 0.079110783,
+    "netProfit": 123957.4091,
+    "trades": 159073
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp07_deriv_ma": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.688,
+    "indicatorSec": 0.100276994,
+    "signalSec": 0.079946881,
+    "netProfit": 120259.202,
+    "trades": 226455
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.682,
+    "indicatorSec": 0.092771792,
+    "signalSec": 0.080748609,
+    "netProfit": 120259.202,
+    "trades": 226455
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.569,
+    "indicatorSec": 0.024912471,
+    "signalSec": 0.080191168,
+    "netProfit": 120259.202,
+    "trades": 226455
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp07_ma_suppres": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.736,
+    "indicatorSec": 0.131945817,
+    "signalSec": 0.089093262,
+    "netProfit": 107523.9733,
+    "trades": 242399
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.722,
+    "indicatorSec": 0.116073868,
+    "signalSec": 0.093131066,
+    "netProfit": 107523.9733,
+    "trades": 242399
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.641,
+    "indicatorSec": 0.082816214,
+    "signalSec": 0.09352845,
+    "netProfit": 107523.9733,
+    "trades": 242399
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp07_sr_osc": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 1.022,
+    "indicatorSec": 0.112097858,
+    "signalSec": 0.159041536,
+    "netProfit": -138188.1231,
+    "trades": 2099182
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 1.009,
+    "indicatorSec": 0.10147107,
+    "signalSec": 0.157878673,
+    "netProfit": -138188.1231,
+    "trades": 2099182
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.907,
+    "indicatorSec": 0.043193222,
+    "signalSec": 0.158606048,
+    "netProfit": -138188.1231,
+    "trades": 2099182
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp07_tr_breakout": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.825,
+    "indicatorSec": 0.167299875,
+    "signalSec": 0.149474368,
+    "netProfit": 111329.2617,
+    "trades": 215497
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.821,
+    "indicatorSec": 0.158819265,
+    "signalSec": 0.149416453,
+    "netProfit": 111329.2617,
+    "trades": 215497
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.806,
+    "indicatorSec": 0.1889178,
+    "signalSec": 0.149094677,
+    "netProfit": 111329.2617,
+    "trades": 215497
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp08_escalator": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.731,
+    "indicatorSec": 0.123871775,
+    "signalSec": 0.099790139,
+    "netProfit": 45652.10028,
+    "trades": 213780
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.723,
+    "indicatorSec": 0.117891141,
+    "signalSec": 0.09970142,
+    "netProfit": 45652.10028,
+    "trades": 213780
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.606,
+    "indicatorSec": 0.040002502,
+    "signalSec": 0.100773808,
+    "netProfit": 45652.10028,
+    "trades": 213780
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp08_jack_in_box": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.757,
+    "indicatorSec": 0.13440111,
+    "signalSec": 0.096941856,
+    "netProfit": 41982.35194,
+    "trades": 367282
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.742,
+    "indicatorSec": 0.117446266,
+    "signalSec": 0.097021636,
+    "netProfit": 41982.35194,
+    "trades": 367282
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.7,
+    "indicatorSec": 0.120025143,
+    "signalSec": 0.097246228,
+    "netProfit": 41982.35194,
+    "trades": 367282
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp08_ryans_hope": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.719,
+    "indicatorSec": 0.130410892,
+    "signalSec": 0.080901061,
+    "netProfit": 121410.0129,
+    "trades": 223122
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.719,
+    "indicatorSec": 0.118979079,
+    "signalSec": 0.085820784,
+    "netProfit": 121410.0129,
+    "trades": 223122
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.636,
+    "indicatorSec": 0.083402438,
+    "signalSec": 0.086266161,
+    "netProfit": 121409.6224,
+    "trades": 223122
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp08_stampede": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.708,
+    "indicatorSec": 0.147603042,
+    "signalSec": 0.062087677,
+    "netProfit": 134995.1696,
+    "trades": 123798
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.7,
+    "indicatorSec": 0.131186771,
+    "signalSec": 0.067020758,
+    "netProfit": 134995.1696,
+    "trades": 123798
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.664,
+    "indicatorSec": 0.142256959,
+    "signalSec": 0.067140525,
+    "netProfit": 134995.1696,
+    "trades": 123798
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp09_double_fun": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.659,
+    "indicatorSec": 0.10605761,
+    "signalSec": 0.056919684,
+    "netProfit": 13832.34322,
+    "trades": 110237
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.645,
+    "indicatorSec": 0.091347467,
+    "signalSec": 0.056878151,
+    "netProfit": 13832.34322,
+    "trades": 110237
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.535,
+    "indicatorSec": 0.025518627,
+    "signalSec": 0.057691397,
+    "netProfit": 13832.34322,
+    "trades": 110237
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp09_luxor": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.727,
+    "indicatorSec": 0.114944935,
+    "signalSec": 0.082134007,
+    "netProfit": 99810.53015,
+    "trades": 416628
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.726,
+    "indicatorSec": 0.10997708,
+    "signalSec": 0.081263297,
+    "netProfit": 99810.53015,
+    "trades": 416628
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.619,
+    "indicatorSec": 0.045031234,
+    "signalSec": 0.082340074,
+    "netProfit": 99810.70586,
+    "trades": 416626
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp09_no_hurry": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.691,
+    "indicatorSec": 0.147411701,
+    "signalSec": 0.05377618,
+    "netProfit": 90920.49788,
+    "trades": 54189
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.69,
+    "indicatorSec": 0.134762465,
+    "signalSec": 0.058627698,
+    "netProfit": 90920.49788,
+    "trades": 54189
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.646,
+    "indicatorSec": 0.135769117,
+    "signalSec": 0.057895994,
+    "netProfit": 90920.49788,
+    "trades": 54189
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp09_obv_revisited": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 1.999,
+    "indicatorSec": 1.403321843,
+    "signalSec": 0.081803899,
+    "netProfit": 111350.3009,
+    "trades": 282750
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 5.647,
+    "indicatorSec": 5.046296083,
+    "signalSec": 0.081994439,
+    "netProfit": 111350.3009,
+    "trades": 282750
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.713,
+    "indicatorSec": 0.155472968,
+    "signalSec": 0.081397046,
+    "netProfit": 111350.3009,
+    "trades": 282750
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp09_red_rover": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.959,
+    "indicatorSec": 0.115621756,
+    "signalSec": 0.136577874,
+    "netProfit": -69677.61521,
+    "trades": 1770720
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.953,
+    "indicatorSec": 0.10471418,
+    "signalSec": 0.136049783,
+    "netProfit": -69677.61521,
+    "trades": 1770720
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.875,
+    "indicatorSec": 0.068395883,
+    "signalSec": 0.145920794,
+    "netProfit": -69677.61521,
+    "trades": 1770720
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp09_skinny_dipper": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.721,
+    "indicatorSec": 0.155655891,
+    "signalSec": 0.066295249,
+    "netProfit": 48923.23537,
+    "trades": 123173
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.711,
+    "indicatorSec": 0.135382067,
+    "signalSec": 0.070815526,
+    "netProfit": 48923.23537,
+    "trades": 123173
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.64,
+    "indicatorSec": 0.111348373,
+    "signalSec": 0.0715583,
+    "netProfit": 48923.23537,
+    "trades": 123173
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp09_swinger": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.74,
+    "indicatorSec": 0.165321089,
+    "signalSec": 0.071220788,
+    "netProfit": 34448.82423,
+    "trades": 145690
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.735,
+    "indicatorSec": 0.156589969,
+    "signalSec": 0.075493672,
+    "netProfit": 34448.82423,
+    "trades": 145690
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.644,
+    "indicatorSec": 0.111679749,
+    "signalSec": 0.074831833,
+    "netProfit": 34448.82423,
+    "trades": 145690
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp09_traffic_jam": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.717,
+    "indicatorSec": 0.165412183,
+    "signalSec": 0.05153196,
+    "netProfit": -10498.22959,
+    "trades": 129799
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.71,
+    "indicatorSec": 0.155863649,
+    "signalSec": 0.051950093,
+    "netProfit": -10498.22959,
+    "trades": 129799
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.636,
+    "indicatorSec": 0.128843599,
+    "signalSec": 0.051453963,
+    "netProfit": -10498.22959,
+    "trades": 129799
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp10_eight_ball": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.713,
+    "indicatorSec": 0.151147468,
+    "signalSec": 0.064041851,
+    "netProfit": 94009.16559,
+    "trades": 93427
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.704,
+    "indicatorSec": 0.136400984,
+    "signalSec": 0.068183131,
+    "netProfit": 94009.16559,
+    "trades": 93427
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.634,
+    "indicatorSec": 0.109920711,
+    "signalSec": 0.068034177,
+    "netProfit": 94009.16559,
+    "trades": 93427
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp10_go_in_style": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.733,
+    "indicatorSec": 0.153960681,
+    "signalSec": 0.074945047,
+    "netProfit": 87553.95603,
+    "trades": 163264
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.727,
+    "indicatorSec": 0.148501145,
+    "signalSec": 0.073834091,
+    "netProfit": 87553.95603,
+    "trades": 163264
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.716,
+    "indicatorSec": 0.182213304,
+    "signalSec": 0.073809796,
+    "netProfit": 87553.95603,
+    "trades": 163264
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp10_monday_trade": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.754,
+    "indicatorSec": 0.100593478,
+    "signalSec": 0.065998539,
+    "netProfit": -57816.10082,
+    "trades": 1024000
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.752,
+    "indicatorSec": 0.092857973,
+    "signalSec": 0.066940009,
+    "netProfit": -57816.10082,
+    "trades": 1024000
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.639,
+    "indicatorSec": 0.025110385,
+    "signalSec": 0.066775409,
+    "netProfit": -57816.10082,
+    "trades": 1024000
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp10_ref_dev": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.674,
+    "indicatorSec": 0.111899804,
+    "signalSec": 0.060932082,
+    "netProfit": 140285.4773,
+    "trades": 136297
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.664,
+    "indicatorSec": 0.104887041,
+    "signalSec": 0.060218573,
+    "netProfit": 140285.4773,
+    "trades": 136297
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.924,
+    "indicatorSec": 0.411506875,
+    "signalSec": 0.06019964,
+    "netProfit": 140285.4773,
+    "trades": 136297
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp10_serendipity": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.719,
+    "indicatorSec": 0.142066997,
+    "signalSec": 0.068325239,
+    "netProfit": 134679.2807,
+    "trades": 235618
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.71,
+    "indicatorSec": 0.12033912,
+    "signalSec": 0.073199574,
+    "netProfit": 134679.2807,
+    "trades": 235618
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.646,
+    "indicatorSec": 0.106182829,
+    "signalSec": 0.072653005,
+    "netProfit": 134679.5955,
+    "trades": 235618
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp10_store": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.753,
+    "indicatorSec": 0.180070245,
+    "signalSec": 0.074717164,
+    "netProfit": 5767.283204,
+    "trades": 43936
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.752,
+    "indicatorSec": 0.182126843,
+    "signalSec": 0.075153274,
+    "netProfit": 5767.283204,
+    "trades": 43936
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.79,
+    "indicatorSec": 0.264585303,
+    "signalSec": 0.074357733,
+    "netProfit": 5767.283204,
+    "trades": 43936
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp10_superman": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.713,
+    "indicatorSec": 0.156590046,
+    "signalSec": 0.055680428,
+    "netProfit": 19154.22922,
+    "trades": 83328
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.711,
+    "indicatorSec": 0.155199132,
+    "signalSec": 0.060295993,
+    "netProfit": 19154.22922,
+    "trades": 83328
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.702,
+    "indicatorSec": 0.191122316,
+    "signalSec": 0.060259624,
+    "netProfit": 19154.22922,
+    "trades": 83328
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp11_bullseye": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.739,
+    "indicatorSec": 0.150821594,
+    "signalSec": 0.085588715,
+    "netProfit": 80562.06478,
+    "trades": 147799
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.743,
+    "indicatorSec": 0.155381947,
+    "signalSec": 0.086145829,
+    "netProfit": 80562.06478,
+    "trades": 147799
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.7,
+    "indicatorSec": 0.154821146,
+    "signalSec": 0.085906485,
+    "netProfit": 80562.06478,
+    "trades": 147799
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp11_high_five": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.808,
+    "indicatorSec": 0.198132244,
+    "signalSec": 0.109891243,
+    "netProfit": 157042.6236,
+    "trades": 97724
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.812,
+    "indicatorSec": 0.193495738,
+    "signalSec": 0.114020106,
+    "netProfit": 157042.6236,
+    "trades": 97724
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.712,
+    "indicatorSec": 0.142794599,
+    "signalSec": 0.114567982,
+    "netProfit": 157042.6236,
+    "trades": 97724
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp11_night_train": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.929,
+    "indicatorSec": 0.125399359,
+    "signalSec": 0.131477616,
+    "netProfit": -111978.2675,
+    "trades": 1521008
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.905,
+    "indicatorSec": 0.100749673,
+    "signalSec": 0.129640396,
+    "netProfit": -111978.2675,
+    "trades": 1521008
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.835,
+    "indicatorSec": 0.067831135,
+    "signalSec": 0.13782834,
+    "netProfit": -111978.2675,
+    "trades": 1521008
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp11_sym_triangle": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.793,
+    "indicatorSec": 0.177253227,
+    "signalSec": 0.124742079,
+    "netProfit": 5825.737562,
+    "trades": 25162
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.781,
+    "indicatorSec": 0.165984385,
+    "signalSec": 0.125701346,
+    "netProfit": 5825.737562,
+    "trades": 25162
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.729,
+    "indicatorSec": 0.157912682,
+    "signalSec": 0.125789742,
+    "netProfit": 5825.737562,
+    "trades": 25162
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp11_trendscore": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.789,
+    "indicatorSec": 0.154543007,
+    "signalSec": 0.092512207,
+    "netProfit": 24569.80381,
+    "trades": 502383
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.784,
+    "indicatorSec": 0.145158953,
+    "signalSec": 0.091557877,
+    "netProfit": 24569.80381,
+    "trades": 502383
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.745,
+    "indicatorSec": 0.152982688,
+    "signalSec": 0.09179359,
+    "netProfit": 24569.80381,
+    "trades": 502383
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp11_triple_play": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.762,
+    "indicatorSec": 0.135063134,
+    "signalSec": 0.142670423,
+    "netProfit": 62.95729861,
+    "trades": 1834
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.762,
+    "indicatorSec": 0.128204037,
+    "signalSec": 0.142625716,
+    "netProfit": 62.95729861,
+    "trades": 1834
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.644,
+    "indicatorSec": 0.058909012,
+    "signalSec": 0.142630716,
+    "netProfit": 62.95729861,
+    "trades": 1834
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp11_win_gapper": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.785,
+    "indicatorSec": 0.231034423,
+    "signalSec": 0.062559082,
+    "netProfit": 57390.90362,
+    "trades": 61480
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.783,
+    "indicatorSec": 0.221323528,
+    "signalSec": 0.062614881,
+    "netProfit": 57390.90362,
+    "trades": 61480
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.724,
+    "indicatorSec": 0.209940054,
+    "signalSec": 0.062588281,
+    "netProfit": 57390.90362,
+    "trades": 61480
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp12_first_prize": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.766,
+    "indicatorSec": 0.194613289,
+    "signalSec": 0.072393247,
+    "netProfit": 48511.33192,
+    "trades": 70580
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.758,
+    "indicatorSec": 0.180996531,
+    "signalSec": 0.07723597,
+    "netProfit": 48511.33192,
+    "trades": 70580
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.699,
+    "indicatorSec": 0.165354409,
+    "signalSec": 0.076525447,
+    "netProfit": 48510.16623,
+    "trades": 70579
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp12_in_the_zone": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.72,
+    "indicatorSec": 0.125339089,
+    "signalSec": 0.090079448,
+    "netProfit": 45795.96018,
+    "trades": 174915
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.697,
+    "indicatorSec": 0.101212548,
+    "signalSec": 0.089943408,
+    "netProfit": 45795.96018,
+    "trades": 174915
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.62,
+    "indicatorSec": 0.06942812,
+    "signalSec": 0.089426991,
+    "netProfit": 45795.96018,
+    "trades": 174915
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp12_jailbreak": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.71,
+    "indicatorSec": 0.163633496,
+    "signalSec": 0.053229233,
+    "netProfit": 175768.4187,
+    "trades": 43591
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.712,
+    "indicatorSec": 0.157721136,
+    "signalSec": 0.058269198,
+    "netProfit": 175768.4187,
+    "trades": 43591
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.752,
+    "indicatorSec": 0.236659578,
+    "signalSec": 0.057445195,
+    "netProfit": 175768.4187,
+    "trades": 43591
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp12_kinda_shifty": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.73,
+    "indicatorSec": 0.154132751,
+    "signalSec": 0.075397402,
+    "netProfit": 171532.6708,
+    "trades": 124048
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.728,
+    "indicatorSec": 0.142028524,
+    "signalSec": 0.07913034,
+    "netProfit": 171532.6708,
+    "trades": 124048
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.633,
+    "indicatorSec": 0.097058167,
+    "signalSec": 0.078983088,
+    "netProfit": 171532.6708,
+    "trades": 124048
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp12_lr_crossing": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.782,
+    "indicatorSec": 0.143822467,
+    "signalSec": 0.083302334,
+    "netProfit": -40012.03988,
+    "trades": 620064
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.78,
+    "indicatorSec": 0.129657295,
+    "signalSec": 0.08779134,
+    "netProfit": -40012.03988,
+    "trades": 620064
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.762,
+    "indicatorSec": 0.159322262,
+    "signalSec": 0.08651898,
+    "netProfit": -40012.03988,
+    "trades": 620064
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp12_mist2": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.703,
+    "indicatorSec": 0.140347526,
+    "signalSec": 0.069724303,
+    "netProfit": 8885.734953,
+    "trades": 45697
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.692,
+    "indicatorSec": 0.127934741,
+    "signalSec": 0.074128429,
+    "netProfit": 8885.734953,
+    "trades": 45697
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.649,
+    "indicatorSec": 0.12714692,
+    "signalSec": 0.074536922,
+    "netProfit": 8885.734953,
+    "trades": 45697
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp12_ntw": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.757,
+    "indicatorSec": 0.148709581,
+    "signalSec": 0.110385917,
+    "netProfit": 8207.986964,
+    "trades": 101190
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.747,
+    "indicatorSec": 0.139424941,
+    "signalSec": 0.111551645,
+    "netProfit": 8207.986964,
+    "trades": 101190
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.65,
+    "indicatorSec": 0.087776965,
+    "signalSec": 0.110829455,
+    "netProfit": 8207.986964,
+    "trades": 101190
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp12_springs": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.754,
+    "indicatorSec": 0.116747426,
+    "signalSec": 0.148010412,
+    "netProfit": 647.4051388,
+    "trades": 7483
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.736,
+    "indicatorSec": 0.099615362,
+    "signalSec": 0.147379289,
+    "netProfit": 647.4051388,
+    "trades": 7483
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.664,
+    "indicatorSec": 0.069288861,
+    "signalSec": 0.14787523,
+    "netProfit": 647.4051388,
+    "trades": 7483
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp12_three_musketeers": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.766,
+    "indicatorSec": 0.147068616,
+    "signalSec": 0.090882652,
+    "netProfit": 63180.22331,
+    "trades": 390295
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.751,
+    "indicatorSec": 0.126750248,
+    "signalSec": 0.090652862,
+    "netProfit": 63180.22331,
+    "trades": 390295
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.733,
+    "indicatorSec": 0.15155017,
+    "signalSec": 0.090962338,
+    "netProfit": 63180.22331,
+    "trades": 390295
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp13_dma_range_leaders": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.739,
+    "indicatorSec": 0.141497948,
+    "signalSec": 0.097862918,
+    "netProfit": 145355.7084,
+    "trades": 123689
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.735,
+    "indicatorSec": 0.132505274,
+    "signalSec": 0.103524444,
+    "netProfit": 145355.7084,
+    "trades": 123689
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.659,
+    "indicatorSec": 0.099530471,
+    "signalSec": 0.102772738,
+    "netProfit": 145355.7084,
+    "trades": 123689
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp13_linreg_momentum": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.703,
+    "indicatorSec": 0.142252999,
+    "signalSec": 0.066581042,
+    "netProfit": 25134.78991,
+    "trades": 31280
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.693,
+    "indicatorSec": 0.130517453,
+    "signalSec": 0.071289954,
+    "netProfit": 25134.78991,
+    "trades": 31280
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.653,
+    "indicatorSec": 0.139045844,
+    "signalSec": 0.071100695,
+    "netProfit": 25134.78991,
+    "trades": 31280
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp13_mom_retrace": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.972,
+    "indicatorSec": 0.302412896,
+    "signalSec": 0.167373791,
+    "netProfit": 85016.13235,
+    "trades": 66979
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.974,
+    "indicatorSec": 0.30098378,
+    "signalSec": 0.167456715,
+    "netProfit": 85016.13235,
+    "trades": 66979
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.966,
+    "indicatorSec": 0.345185678,
+    "signalSec": 0.166110105,
+    "netProfit": 85016.13235,
+    "trades": 66979
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp13_oc_histogram": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.784,
+    "indicatorSec": 0.160533731,
+    "signalSec": 0.082976937,
+    "netProfit": 88923.60153,
+    "trades": 384114
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.763,
+    "indicatorSec": 0.13999742,
+    "signalSec": 0.087348787,
+    "netProfit": 88923.60153,
+    "trades": 384114
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.688,
+    "indicatorSec": 0.11864263,
+    "signalSec": 0.086452736,
+    "netProfit": 88923.6148,
+    "trades": 384114
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp13_vol_clusters": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.784,
+    "indicatorSec": 0.116774842,
+    "signalSec": 0.166871173,
+    "netProfit": -7447.645256,
+    "trades": 157654
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.771,
+    "indicatorSec": 0.100220893,
+    "signalSec": 0.16709389,
+    "netProfit": -7447.645256,
+    "trades": 157654
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.706,
+    "indicatorSec": 0.066859434,
+    "signalSec": 0.184194274,
+    "netProfit": -7447.645256,
+    "trades": 157654
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  },
+  "exp13_volex": {
+   "tacuda": {
+    "rc": 0,
+    "wallSec": 0.804,
+    "indicatorSec": 0.137691443,
+    "signalSec": 0.09250399,
+    "netProfit": -30237.65671,
+    "trades": 744266
+   },
+   "tacuda-device": {
+    "rc": 0,
+    "wallSec": 0.792,
+    "indicatorSec": 0.126951701,
+    "signalSec": 0.091301674,
+    "netProfit": -30237.65671,
+    "trades": 744266
+   },
+   "talib": {
+    "rc": 0,
+    "wallSec": 0.746,
+    "indicatorSec": 0.12593987,
+    "signalSec": 0.091647988,
+    "netProfit": -30237.65671,
+    "trades": 744266
+   },
+   "parity": {
+    "gpuClose": true,
+    "talibClose": true
+   }
+  }
+ }
+}

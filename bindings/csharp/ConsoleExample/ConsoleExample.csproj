@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Tacuda.Generated.cs" Link="Tacuda.Generated.cs" />
+    <Compile Include="..\NativeMethods.Manual.cs" Link="NativeMethods.Manual.cs" />
+    <Compile Include="..\OhlcvSeries.cs" Link="OhlcvSeries.cs" />
+    <Compile Include="..\OhlcvSeriesExtensions.cs" Link="OhlcvSeriesExtensions.cs" />
+    <Compile Include="..\TacudaBatch.cs" Link="TacudaBatch.cs" />
+    <Compile Include="..\TacudaBatch.Generated.cs" Link="TacudaBatch.Generated.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Ensure the native library is next to the managed executable for DllImport() resolution. -->
+    <None Include="..\..\..\build\$(Configuration)\tacuda.dll"
+          CopyToOutputDirectory="PreserveNewest"
+          Condition="Exists('..\..\..\build\$(Configuration)\tacuda.dll')" />
+    <None Include="..\..\..\build\libtacuda.so"
+          CopyToOutputDirectory="PreserveNewest"
+          Condition="Exists('..\..\..\build\libtacuda.so')" />
+  </ItemGroup>
+</Project>

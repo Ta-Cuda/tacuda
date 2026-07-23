@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <RootNamespace>Tacuda.Bindings</RootNamespace>
+    <AssemblyName>Tacuda.Bindings</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+
+    <!-- NuGet Package Metadata -->
+    <PackageId>Tacuda</PackageId>
+    <Version>0.7.1</Version>
+    <Authors>Paul Deecalov</Authors>
+    <Company>Ta-Cuda</Company>
+    <Description>CUDA-accelerated technical analysis library for .NET. Full TA-Lib coverage (161 functions) incl. MACDEXT and 19 vector math kernels, host/device APIs, structured OhlcvSeries inputs, batched multi-symbol execution (TacudaBatch) and runtime precision profiles (float16 storage, float32, float64).</Description>
+    <PackageTags>cuda;gpu;technical-analysis;trading;finance;indicators;ta-lib;macd;rsi;sma;ema;bollinger-bands;candlestick</PackageTags>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Ta-Cuda/tacuda</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Ta-Cuda/tacuda</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageReleaseNotes>See CHANGELOG.md: https://github.com/Ta-Cuda/tacuda/blob/main/docs/CHANGELOG.md</PackageReleaseNotes>
+    <Copyright>Copyright 2024-2026 Paul Deecalov</Copyright>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Tacuda.Generated.cs" />
+    <Compile Include="NativeMethods.Manual.cs" />
+    <Compile Include="OhlcvSeries.cs" />
+    <Compile Include="OhlcvSeriesExtensions.cs" />
+    <Compile Include="TacudaBatch.cs" />
+    <Compile Include="TacudaBatch.Generated.cs" />
+    <None Include="README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+
+  <!-- 
+    Native library inclusion for NuGet package.
+    Place the built tacuda.dll / libtacuda.so / libtacuda.dylib into
+    the runtimes/ folder before packing:
+    
+      runtimes/win-x64/native/tacuda.dll
+      runtimes/linux-x64/native/libtacuda.so
+      runtimes/osx-x64/native/libtacuda.dylib
+    
+    Then run: dotnet pack -c Release
+  -->
+  <ItemGroup Condition="Exists('runtimes')">
+    <None Include="runtimes/**/*" Pack="true" PackagePath="runtimes" />
+  </ItemGroup>
+
+</Project>

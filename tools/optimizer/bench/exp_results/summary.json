@@ -1,0 +1,4288 @@
+{
+ "bars": "5000",
+ "seed": "42",
+ "backend": "tacuda",
+ "costModel": {
+  "commissionBps": 2,
+  "slippageTicks": 1,
+  "tickSize": 0.01
+ },
+ "totalSec": 44.9,
+ "strategies": {
+  "exp01_channel_breakout": {
+   "params": [
+    {
+     "name": "length",
+     "default": "10",
+     "lo": "4",
+     "hi": "60",
+     "step": "1"
+    },
+    {
+     "name": "brkouts",
+     "default": "2",
+     "lo": "1",
+     "hi": "5",
+     "step": "1"
+    },
+    {
+     "name": "trailstp",
+     "default": "6",
+     "lo": "2",
+     "hi": "30",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp01_ma_crossover": {
+   "params": [
+    {
+     "name": "fast",
+     "default": "9",
+     "lo": "3",
+     "hi": "50",
+     "step": "1"
+    },
+    {
+     "name": "slow",
+     "default": "18",
+     "lo": "6",
+     "hi": "120",
+     "step": "1"
+    },
+    {
+     "name": "chlen",
+     "default": "12",
+     "lo": "4",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "trailbar",
+     "default": "8",
+     "lo": "2",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "rebars",
+     "default": "15",
+     "lo": "0",
+     "hi": "40",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.18
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp01_macd_breakout": {
+   "params": [
+    {
+     "name": "fast",
+     "default": "12",
+     "lo": "4",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "slow",
+     "default": "26",
+     "lo": "10",
+     "hi": "80",
+     "step": "1"
+    },
+    {
+     "name": "sig",
+     "default": "9",
+     "lo": "3",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "ncos",
+     "default": "4",
+     "lo": "2",
+     "hi": "8",
+     "step": "1"
+    },
+    {
+     "name": "nbars",
+     "default": "50",
+     "lo": "10",
+     "hi": "150",
+     "step": "5"
+    },
+    {
+     "name": "trailbar",
+     "default": "6",
+     "lo": "2",
+     "hi": "20",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.28
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.36
+    }
+   }
+  },
+  "exp01_pivot_points": {
+   "params": [
+    {
+     "name": "trailbar",
+     "default": "4",
+     "lo": "2",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "fast",
+     "default": "4",
+     "lo": "2",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "med",
+     "default": "9",
+     "lo": "3",
+     "hi": "60",
+     "step": "1"
+    },
+    {
+     "name": "slow",
+     "default": "18",
+     "lo": "5",
+     "hi": "120",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp01_sr_levels": {
+   "params": [
+    {
+     "name": "strength",
+     "default": "5",
+     "lo": "2",
+     "hi": "10",
+     "step": "1"
+    },
+    {
+     "name": "numswing",
+     "default": "3",
+     "lo": "2",
+     "hi": "6",
+     "step": "1"
+    },
+    {
+     "name": "trailbar",
+     "default": "5",
+     "lo": "2",
+     "hi": "20",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp01_trend_follower": {
+   "params": [
+    {
+     "name": "xmalen",
+     "default": "4",
+     "lo": "2",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "vollen",
+     "default": "8",
+     "lo": "3",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "mult",
+     "default": "2",
+     "lo": "0.5",
+     "hi": "5",
+     "step": "0.25"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.16
+    }
+   }
+  },
+  "exp01_volex": {
+   "params": [
+    {
+     "name": "lmult",
+     "default": "1.2",
+     "lo": "0.4",
+     "hi": "4",
+     "step": "0.1"
+    },
+    {
+     "name": "smult",
+     "default": "1.8",
+     "lo": "0.4",
+     "hi": "4",
+     "step": "0.1"
+    },
+    {
+     "name": "trailbar",
+     "default": "4",
+     "lo": "2",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "maxbars",
+     "default": "4",
+     "lo": "1",
+     "hi": "20",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp02_ad_divergence": {
+   "params": [
+    {
+     "name": "len",
+     "default": "9",
+     "lo": "3",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "lookback",
+     "default": "30",
+     "lo": "10",
+     "hi": "60",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp02_adx_diff": {
+   "params": [
+    {
+     "name": "adxlen",
+     "default": "14",
+     "lo": "5",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "avglen",
+     "default": "4",
+     "lo": "2",
+     "hi": "12",
+     "step": "1"
+    },
+    {
+     "name": "ch",
+     "default": "8",
+     "lo": "2",
+     "hi": "20",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.17
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.19
+    }
+   }
+  },
+  "exp02_bull_beater": {
+   "params": [
+    {
+     "name": "length",
+     "default": "9",
+     "lo": "5",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "sdev",
+     "default": "2",
+     "lo": "1",
+     "hi": "3",
+     "step": "0.25"
+    },
+    {
+     "name": "rsihi",
+     "default": "55",
+     "lo": "45",
+     "hi": "80",
+     "step": "1"
+    },
+    {
+     "name": "rsilo",
+     "default": "45",
+     "lo": "20",
+     "hi": "55",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.17
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp02_cci_bollinger": {
+   "params": [
+    {
+     "name": "bblen",
+     "default": "9",
+     "lo": "5",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "bbdev",
+     "default": "2",
+     "lo": "1",
+     "hi": "3",
+     "step": "0.25"
+    },
+    {
+     "name": "ccilen",
+     "default": "14",
+     "lo": "5",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "cciavg",
+     "default": "2",
+     "lo": "1",
+     "hi": "8",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.18
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.19
+    }
+   }
+  },
+  "exp02_head_shoulders": {
+   "params": [
+    {
+     "name": "stren",
+     "default": "5",
+     "lo": "2",
+     "hi": "8",
+     "step": "1"
+    },
+    {
+     "name": "maxage",
+     "default": "40",
+     "lo": "10",
+     "hi": "100",
+     "step": "5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.02
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.02
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.03
+    }
+   }
+  },
+  "exp02_obv_extremes": {
+   "params": [
+    {
+     "name": "length",
+     "default": "15",
+     "lo": "5",
+     "hi": "50",
+     "step": "1"
+    },
+    {
+     "name": "barsback",
+     "default": "6",
+     "lo": "2",
+     "hi": "12",
+     "step": "1"
+    },
+    {
+     "name": "newhighs",
+     "default": "5",
+     "lo": "1",
+     "hi": "6",
+     "step": "1"
+    },
+    {
+     "name": "newlows",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.18
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.23
+    }
+   }
+  },
+  "exp02_pct_change_channel": {
+   "params": [
+    {
+     "name": "pchng",
+     "default": "5",
+     "lo": "2",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "obought",
+     "default": "102",
+     "lo": "100.5",
+     "hi": "110",
+     "step": "0.5"
+    },
+    {
+     "name": "osold",
+     "default": "98",
+     "lo": "90",
+     "hi": "99.5",
+     "step": "0.5"
+    },
+    {
+     "name": "bands",
+     "default": "3",
+     "lo": "2",
+     "hi": "10",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.16
+    }
+   }
+  },
+  "exp02_stochastics": {
+   "params": [
+    {
+     "name": "length",
+     "default": "14",
+     "lo": "5",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "ob",
+     "default": "75",
+     "lo": "55",
+     "hi": "95",
+     "step": "1"
+    },
+    {
+     "name": "os",
+     "default": "25",
+     "lo": "5",
+     "hi": "45",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp03_bollinger": {
+   "params": [
+    {
+     "name": "bblen",
+     "default": "10",
+     "lo": "5",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "bbdev",
+     "default": "2",
+     "lo": "1",
+     "hi": "3",
+     "step": "0.25"
+    },
+    {
+     "name": "numbars",
+     "default": "2",
+     "lo": "1",
+     "hi": "5",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.17
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.19
+    }
+   }
+  },
+  "exp03_buy_dips": {
+   "params": [
+    {
+     "name": "rsilen",
+     "default": "20",
+     "lo": "5",
+     "hi": "60",
+     "step": "1"
+    },
+    {
+     "name": "rsilevel",
+     "default": "50",
+     "lo": "30",
+     "hi": "70",
+     "step": "1"
+    },
+    {
+     "name": "dmilen",
+     "default": "5",
+     "lo": "2",
+     "hi": "30",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp03_engulfing": {
+   "params": [
+    {
+     "name": "length",
+     "default": "10",
+     "lo": "4",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "bodylen",
+     "default": "10",
+     "lo": "4",
+     "hi": "40",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.17
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.16
+    }
+   }
+  },
+  "exp03_micro_mw": {
+   "params": [
+    {
+     "name": "osclen",
+     "default": "10",
+     "lo": "5",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "strength",
+     "default": "4",
+     "lo": "2",
+     "hi": "8",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.19
+    }
+   }
+  },
+  "exp03_obtr": {
+   "params": [
+    {
+     "name": "bblen",
+     "default": "10",
+     "lo": "5",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "bbdev",
+     "default": "2",
+     "lo": "1",
+     "hi": "3",
+     "step": "0.25"
+    },
+    {
+     "name": "obtrlen",
+     "default": "9",
+     "lo": "3",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "numbars",
+     "default": "2",
+     "lo": "1",
+     "hi": "5",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.19
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp03_oc_histogram": {
+   "params": [
+    {
+     "name": "openlen",
+     "default": "10",
+     "lo": "4",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "closelen",
+     "default": "10",
+     "lo": "4",
+     "hi": "40",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp03_stddev_vol": {
+   "params": [
+    {
+     "name": "length",
+     "default": "9",
+     "lo": "4",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "sdev",
+     "default": "2",
+     "lo": "1",
+     "hi": "3",
+     "step": "0.25"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp03_var_zones": {
+   "params": [
+    {
+     "name": "osclen",
+     "default": "20",
+     "lo": "5",
+     "hi": "60",
+     "step": "1"
+    },
+    {
+     "name": "swings",
+     "default": "4",
+     "lo": "2",
+     "hi": "8",
+     "step": "1"
+    },
+    {
+     "name": "strength",
+     "default": "5",
+     "lo": "2",
+     "hi": "8",
+     "step": "1"
+    },
+    {
+     "name": "factor",
+     "default": "0.75",
+     "lo": "0.25",
+     "hi": "1.5",
+     "step": "0.25"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.18
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.21
+    }
+   }
+  },
+  "exp03_vol_clusters": {
+   "params": [
+    {
+     "name": "length",
+     "default": "18",
+     "lo": "6",
+     "hi": "60",
+     "step": "1"
+    },
+    {
+     "name": "sdev",
+     "default": "2",
+     "lo": "1",
+     "hi": "3",
+     "step": "0.25"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.02
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.03
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.07
+    }
+   }
+  },
+  "exp04_consec_close": {
+   "params": [
+    {
+     "name": "numbar",
+     "default": "3",
+     "lo": "2",
+     "hi": "6",
+     "step": "1"
+    },
+    {
+     "name": "avglen",
+     "default": "8",
+     "lo": "3",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "pcnt",
+     "default": "0.25",
+     "lo": "0.05",
+     "hi": "1",
+     "step": "0.05"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp04_dma_volume": {
+   "params": [
+    {
+     "name": "plen",
+     "default": "7",
+     "lo": "3",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "pdisp",
+     "default": "5",
+     "lo": "1",
+     "hi": "15",
+     "step": "1"
+    },
+    {
+     "name": "vlen",
+     "default": "7",
+     "lo": "3",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "vdisp",
+     "default": "5",
+     "lo": "1",
+     "hi": "15",
+     "step": "1"
+    },
+    {
+     "name": "atrpcnt",
+     "default": "0.2",
+     "lo": "0.05",
+     "hi": "1",
+     "step": "0.05"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.17
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp04_dmi_adx": {
+   "params": [
+    {
+     "name": "dmilen",
+     "default": "7",
+     "lo": "3",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "adxlen",
+     "default": "7",
+     "lo": "3",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "adxexit",
+     "default": "30",
+     "lo": "15",
+     "hi": "60",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.19
+    }
+   }
+  },
+  "exp04_hpi_breakout": {
+   "params": [
+    {
+     "name": "length",
+     "default": "10",
+     "lo": "5",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "factor",
+     "default": "0.1",
+     "lo": "0.02",
+     "hi": "0.5",
+     "step": "0.02"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.17
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.19
+    }
+   }
+  },
+  "exp04_keltner": {
+   "params": [
+    {
+     "name": "length",
+     "default": "10",
+     "lo": "5",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "const",
+     "default": "1.2",
+     "lo": "0.6",
+     "hi": "3",
+     "step": "0.1"
+    },
+    {
+     "name": "chanpcnt",
+     "default": "0.5",
+     "lo": "0.1",
+     "hi": "1",
+     "step": "0.1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.17
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp04_linreg_mom": {
+   "params": [
+    {
+     "name": "lrlen",
+     "default": "20",
+     "lo": "5",
+     "hi": "60",
+     "step": "1"
+    },
+    {
+     "name": "avglen",
+     "default": "15",
+     "lo": "3",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "momlen",
+     "default": "10",
+     "lo": "3",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "pcnt",
+     "default": "0.5",
+     "lo": "0.1",
+     "hi": "1",
+     "step": "0.1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.18
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp04_mom_retrace": {
+   "params": [
+    {
+     "name": "xmalen",
+     "default": "5",
+     "lo": "2",
+     "hi": "15",
+     "step": "1"
+    },
+    {
+     "name": "chanlen",
+     "default": "15",
+     "lo": "5",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "rsith",
+     "default": "70",
+     "lo": "55",
+     "hi": "90",
+     "step": "1"
+    },
+    {
+     "name": "dmith",
+     "default": "15",
+     "lo": "5",
+     "hi": "40",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.18
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.19
+    }
+   }
+  },
+  "exp04_price_dist": {
+   "params": [
+    {
+     "name": "kurtlen",
+     "default": "40",
+     "lo": "10",
+     "hi": "100",
+     "step": "5"
+    },
+    {
+     "name": "skewlen",
+     "default": "15",
+     "lo": "5",
+     "hi": "60",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.02
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.04
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.1
+    }
+   }
+  },
+  "exp04_three_ema": {
+   "params": [
+    {
+     "name": "len1",
+     "default": "6",
+     "lo": "2",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "len2",
+     "default": "12",
+     "lo": "4",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "len3",
+     "default": "28",
+     "lo": "8",
+     "hi": "80",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp05_chan_pullback": {
+   "params": [
+    {
+     "name": "channel",
+     "default": "10",
+     "lo": "5",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "retrbars",
+     "default": "10",
+     "lo": "3",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "newlohi",
+     "default": "4",
+     "lo": "2",
+     "hi": "10",
+     "step": "1"
+    },
+    {
+     "name": "trailstp",
+     "default": "8",
+     "lo": "3",
+     "hi": "20",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp05_currency_4day": {
+   "params": [
+    {
+     "name": "rsilen",
+     "default": "50",
+     "lo": "10",
+     "hi": "100",
+     "step": "2"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.15
+    }
+   }
+  },
+  "exp05_disp_stddev": {
+   "params": [
+    {
+     "name": "avglen",
+     "default": "3",
+     "lo": "2",
+     "hi": "15",
+     "step": "1"
+    },
+    {
+     "name": "disp",
+     "default": "16",
+     "lo": "4",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "sdlen",
+     "default": "12",
+     "lo": "5",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "sdev",
+     "default": "2",
+     "lo": "1",
+     "hi": "3",
+     "step": "0.25"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp05_fib_retrace": {
+   "params": [
+    {
+     "name": "xavglen",
+     "default": "15",
+     "lo": "5",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "hilolen",
+     "default": "50",
+     "lo": "20",
+     "hi": "120",
+     "step": "5"
+    },
+    {
+     "name": "retrace",
+     "default": "0.382",
+     "lo": "0.2",
+     "hi": "0.7",
+     "step": "0.02"
+    },
+    {
+     "name": "setuplen",
+     "default": "24",
+     "lo": "5",
+     "hi": "60",
+     "step": "1"
+    },
+    {
+     "name": "trailpct",
+     "default": "5",
+     "lo": "1",
+     "hi": "15",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.21
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.27
+    }
+   }
+  },
+  "exp05_hilo_osc": {
+   "params": [
+    {
+     "name": "len1",
+     "default": "10",
+     "lo": "3",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "len2",
+     "default": "60",
+     "lo": "20",
+     "hi": "120",
+     "step": "5"
+    },
+    {
+     "name": "trailpct",
+     "default": "3",
+     "lo": "0.5",
+     "hi": "10",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp05_pivot_sr": {
+   "params": [
+    {
+     "name": "hilolen",
+     "default": "8",
+     "lo": "4",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "atrlen",
+     "default": "10",
+     "lo": "5",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "setupint",
+     "default": "4",
+     "lo": "2",
+     "hi": "10",
+     "step": "1"
+    },
+    {
+     "name": "xavglen",
+     "default": "9",
+     "lo": "3",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "setuplen",
+     "default": "24",
+     "lo": "5",
+     "hi": "60",
+     "step": "1"
+    },
+    {
+     "name": "hilostop",
+     "default": "44",
+     "lo": "10",
+     "hi": "100",
+     "step": "2"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.2
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.22
+    }
+   }
+  },
+  "exp05_stoch_obos": {
+   "params": [
+    {
+     "name": "length",
+     "default": "12",
+     "lo": "5",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "obought",
+     "default": "70",
+     "lo": "55",
+     "hi": "90",
+     "step": "1"
+    },
+    {
+     "name": "osold",
+     "default": "30",
+     "lo": "10",
+     "hi": "45",
+     "step": "1"
+    },
+    {
+     "name": "setuplen",
+     "default": "6",
+     "lo": "2",
+     "hi": "15",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp06_asi": {
+   "params": [
+    {
+     "name": "strength",
+     "default": "2",
+     "lo": "1",
+     "hi": "5",
+     "step": "1"
+    },
+    {
+     "name": "setuplen",
+     "default": "5",
+     "lo": "2",
+     "hi": "15",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.02
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.02
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.04
+    }
+   }
+  },
+  "exp06_cci_avg": {
+   "params": [
+    {
+     "name": "ccilen",
+     "default": "30",
+     "lo": "8",
+     "hi": "60",
+     "step": "1"
+    },
+    {
+     "name": "avglen",
+     "default": "5",
+     "lo": "2",
+     "hi": "15",
+     "step": "1"
+    },
+    {
+     "name": "hilolen",
+     "default": "9",
+     "lo": "4",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "entrybar",
+     "default": "4",
+     "lo": "2",
+     "hi": "10",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp06_dma_chan": {
+   "params": [
+    {
+     "name": "avglen",
+     "default": "20",
+     "lo": "5",
+     "hi": "60",
+     "step": "1"
+    },
+    {
+     "name": "disp",
+     "default": "5",
+     "lo": "1",
+     "hi": "15",
+     "step": "1"
+    },
+    {
+     "name": "exitbar",
+     "default": "5",
+     "lo": "2",
+     "hi": "15",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp06_first_pullback": {
+   "params": [
+    {
+     "name": "fast",
+     "default": "4",
+     "lo": "2",
+     "hi": "12",
+     "step": "1"
+    },
+    {
+     "name": "slow",
+     "default": "10",
+     "lo": "5",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "avg",
+     "default": "16",
+     "lo": "5",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "atrlen",
+     "default": "10",
+     "lo": "5",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "eatr",
+     "default": "1.25",
+     "lo": "0.25",
+     "hi": "3",
+     "step": "0.25"
+    },
+    {
+     "name": "xatr",
+     "default": "2",
+     "lo": "0.5",
+     "hi": "4",
+     "step": "0.25"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.26
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.31
+    }
+   }
+  },
+  "exp06_ma_pairs": {
+   "params": [
+    {
+     "name": "lefast",
+     "default": "7",
+     "lo": "2",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "leslow",
+     "default": "23",
+     "lo": "5",
+     "hi": "80",
+     "step": "1"
+    },
+    {
+     "name": "lxfast",
+     "default": "4",
+     "lo": "2",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "lxslow",
+     "default": "8",
+     "lo": "5",
+     "hi": "80",
+     "step": "1"
+    },
+    {
+     "name": "sefast",
+     "default": "6",
+     "lo": "2",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "seslow",
+     "default": "18",
+     "lo": "5",
+     "hi": "80",
+     "step": "1"
+    },
+    {
+     "name": "sxfast",
+     "default": "2",
+     "lo": "2",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "sxslow",
+     "default": "9",
+     "lo": "5",
+     "hi": "80",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp06_mac_adx": {
+   "params": [
+    {
+     "name": "avglen",
+     "default": "30",
+     "lo": "10",
+     "hi": "80",
+     "step": "2"
+    },
+    {
+     "name": "adxlen",
+     "default": "12",
+     "lo": "5",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "entrybar",
+     "default": "2",
+     "lo": "1",
+     "hi": "6",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp06_mrtr": {
+   "params": [
+    {
+     "name": "chanlen",
+     "default": "40",
+     "lo": "10",
+     "hi": "100",
+     "step": "5"
+    },
+    {
+     "name": "reaction",
+     "default": "4",
+     "lo": "2",
+     "hi": "8",
+     "step": "1"
+    },
+    {
+     "name": "tcount",
+     "default": "2",
+     "lo": "1",
+     "hi": "5",
+     "step": "1"
+    },
+    {
+     "name": "setup",
+     "default": "4",
+     "lo": "2",
+     "hi": "10",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.16
+    }
+   }
+  },
+  "exp06_parabolic_vol": {
+   "params": [
+    {
+     "name": "accfact",
+     "default": "0.03",
+     "lo": "0.01",
+     "hi": "0.1",
+     "step": "0.01"
+    },
+    {
+     "name": "volavg",
+     "default": "5",
+     "lo": "2",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "pcntdiff",
+     "default": "0.3",
+     "lo": "0.1",
+     "hi": "1",
+     "step": "0.1"
+    },
+    {
+     "name": "setuplen",
+     "default": "4",
+     "lo": "2",
+     "hi": "10",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp06_vwm": {
+   "params": [
+    {
+     "name": "momlen",
+     "default": "5",
+     "lo": "2",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "avglen",
+     "default": "20",
+     "lo": "5",
+     "hi": "60",
+     "step": "1"
+    },
+    {
+     "name": "atrlen",
+     "default": "5",
+     "lo": "2",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "atrpcnt",
+     "default": "0.25",
+     "lo": "0.05",
+     "hi": "1",
+     "step": "0.05"
+    },
+    {
+     "name": "setuplen",
+     "default": "5",
+     "lo": "2",
+     "hi": "12",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp07_deriv_ma": {
+   "params": [
+    {
+     "name": "length",
+     "default": "9",
+     "lo": "3",
+     "hi": "40",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.16
+    }
+   }
+  },
+  "exp07_ma_suppres": {
+   "params": [
+    {
+     "name": "length",
+     "default": "10",
+     "lo": "4",
+     "hi": "50",
+     "step": "1"
+    },
+    {
+     "name": "p_atrs",
+     "default": "1",
+     "lo": "0.5",
+     "hi": "4",
+     "step": "0.25"
+    },
+    {
+     "name": "t_atrs",
+     "default": "2.5",
+     "lo": "0.5",
+     "hi": "6",
+     "step": "0.25"
+    },
+    {
+     "name": "atrlen",
+     "default": "10",
+     "lo": "3",
+     "hi": "30",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.17
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp07_sr_osc": {
+   "params": [
+    {
+     "name": "buylev",
+     "default": "0.3",
+     "lo": "0.05",
+     "hi": "0.45",
+     "step": "0.05"
+    },
+    {
+     "name": "selllev",
+     "default": "0.7",
+     "lo": "0.55",
+     "hi": "0.95",
+     "step": "0.05"
+    },
+    {
+     "name": "exitlen",
+     "default": "2",
+     "lo": "1",
+     "hi": "6",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.16
+    }
+   }
+  },
+  "exp07_tr_breakout": {
+   "params": [
+    {
+     "name": "rangelen",
+     "default": "7",
+     "lo": "4",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "rngpcnt",
+     "default": "200",
+     "lo": "50",
+     "hi": "400",
+     "step": "25"
+    },
+    {
+     "name": "atrs",
+     "default": "8",
+     "lo": "1",
+     "hi": "12",
+     "step": "1"
+    },
+    {
+     "name": "atrlen",
+     "default": "2",
+     "lo": "2",
+     "hi": "10",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.18
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.2
+    }
+   }
+  },
+  "exp08_escalator": {
+   "params": [
+    {
+     "name": "fastlen",
+     "default": "8",
+     "lo": "3",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "slowlen",
+     "default": "40",
+     "lo": "10",
+     "hi": "100",
+     "step": "5"
+    },
+    {
+     "name": "risklen",
+     "default": "2",
+     "lo": "2",
+     "hi": "6",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp08_jack_in_box": {
+   "params": [
+    {
+     "name": "qbars",
+     "default": "5",
+     "lo": "2",
+     "hi": "12",
+     "step": "1"
+    },
+    {
+     "name": "atrpcnt",
+     "default": "0.5",
+     "lo": "0.1",
+     "hi": "1.5",
+     "step": "0.1"
+    },
+    {
+     "name": "accel",
+     "default": "0.02",
+     "lo": "0.01",
+     "hi": "0.1",
+     "step": "0.01"
+    },
+    {
+     "name": "firstmult",
+     "default": "1.5",
+     "lo": "0.5",
+     "hi": "4",
+     "step": "0.25"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.16
+    }
+   }
+  },
+  "exp08_ryans_hope": {
+   "params": [
+    {
+     "name": "length1",
+     "default": "20",
+     "lo": "5",
+     "hi": "60",
+     "step": "1"
+    },
+    {
+     "name": "length2",
+     "default": "5",
+     "lo": "2",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "protatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "trailatrs",
+     "default": "4",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    },
+    {
+     "name": "volatrs",
+     "default": "2",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "bigatrs",
+     "default": "7",
+     "lo": "3",
+     "hi": "12",
+     "step": "1"
+    },
+    {
+     "name": "exitbars",
+     "default": "3",
+     "lo": "2",
+     "hi": "8",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.19
+    }
+   }
+  },
+  "exp08_stampede": {
+   "params": [
+    {
+     "name": "chanlen",
+     "default": "30",
+     "lo": "10",
+     "hi": "60",
+     "step": "5"
+    },
+    {
+     "name": "protatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "trailatrs",
+     "default": "4",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    },
+    {
+     "name": "volatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "bigatrs",
+     "default": "8",
+     "lo": "3",
+     "hi": "14",
+     "step": "1"
+    },
+    {
+     "name": "exitbars",
+     "default": "5",
+     "lo": "2",
+     "hi": "10",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp09_double_fun": {
+   "params": [
+    {
+     "name": "avglen",
+     "default": "5",
+     "lo": "3",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "disp",
+     "default": "5",
+     "lo": "1",
+     "hi": "15",
+     "step": "1"
+    },
+    {
+     "name": "entrysetup",
+     "default": "4",
+     "lo": "2",
+     "hi": "10",
+     "step": "1"
+    },
+    {
+     "name": "setupq1",
+     "default": "3",
+     "lo": "1",
+     "hi": "10",
+     "step": "1"
+    },
+    {
+     "name": "setupq2",
+     "default": "5",
+     "lo": "2",
+     "hi": "12",
+     "step": "1"
+    },
+    {
+     "name": "traillen",
+     "default": "5",
+     "lo": "2",
+     "hi": "12",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp09_luxor": {
+   "params": [
+    {
+     "name": "fastlen",
+     "default": "5",
+     "lo": "2",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "slowlen",
+     "default": "20",
+     "lo": "5",
+     "hi": "60",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.16
+    }
+   }
+  },
+  "exp09_no_hurry": {
+   "params": [
+    {
+     "name": "chanlen",
+     "default": "20",
+     "lo": "5",
+     "hi": "50",
+     "step": "5"
+    },
+    {
+     "name": "chandelay",
+     "default": "15",
+     "lo": "5",
+     "hi": "30",
+     "step": "5"
+    },
+    {
+     "name": "protatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "breakatrs",
+     "default": "2",
+     "lo": "1",
+     "hi": "5",
+     "step": "0.5"
+    },
+    {
+     "name": "trailatrs",
+     "default": "5",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.16
+    }
+   }
+  },
+  "exp09_obv_revisited": {
+   "params": [
+    {
+     "name": "avglen",
+     "default": "25",
+     "lo": "5",
+     "hi": "60",
+     "step": "1"
+    },
+    {
+     "name": "protatrs",
+     "default": "4",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    },
+    {
+     "name": "breakatrs",
+     "default": "4",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    },
+    {
+     "name": "trailatrs",
+     "default": "4",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp09_red_rover": {
+   "params": [
+    {
+     "name": "targetatrs",
+     "default": "2",
+     "lo": "0.5",
+     "hi": "5",
+     "step": "0.5"
+    },
+    {
+     "name": "atrlen",
+     "default": "10",
+     "lo": "3",
+     "hi": "30",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.16
+    }
+   }
+  },
+  "exp09_skinny_dipper": {
+   "params": [
+    {
+     "name": "longavg",
+     "default": "50",
+     "lo": "20",
+     "hi": "100",
+     "step": "5"
+    },
+    {
+     "name": "shortavg",
+     "default": "15",
+     "lo": "5",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "protatrs",
+     "default": "2",
+     "lo": "1",
+     "hi": "5",
+     "step": "0.5"
+    },
+    {
+     "name": "breakatrs",
+     "default": "2",
+     "lo": "1",
+     "hi": "5",
+     "step": "0.5"
+    },
+    {
+     "name": "targetatrs",
+     "default": "4",
+     "lo": "1",
+     "hi": "10",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp09_swinger": {
+   "params": [
+    {
+     "name": "fastlen",
+     "default": "5",
+     "lo": "2",
+     "hi": "15",
+     "step": "1"
+    },
+    {
+     "name": "slowlen",
+     "default": "20",
+     "lo": "5",
+     "hi": "50",
+     "step": "1"
+    },
+    {
+     "name": "avglen",
+     "default": "50",
+     "lo": "20",
+     "hi": "100",
+     "step": "5"
+    },
+    {
+     "name": "nbars",
+     "default": "3",
+     "lo": "2",
+     "hi": "8",
+     "step": "1"
+    },
+    {
+     "name": "protatrs",
+     "default": "4",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp09_traffic_jam": {
+   "params": [
+    {
+     "name": "adxlen",
+     "default": "14",
+     "lo": "5",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "adxlevel",
+     "default": "25",
+     "lo": "10",
+     "hi": "40",
+     "step": "5"
+    },
+    {
+     "name": "consec",
+     "default": "3",
+     "lo": "2",
+     "hi": "6",
+     "step": "1"
+    },
+    {
+     "name": "exitbars",
+     "default": "3",
+     "lo": "1",
+     "hi": "10",
+     "step": "1"
+    },
+    {
+     "name": "protatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp10_eight_ball": {
+   "params": [
+    {
+     "name": "slowlen",
+     "default": "40",
+     "lo": "10",
+     "hi": "100",
+     "step": "5"
+    },
+    {
+     "name": "fastlen",
+     "default": "8",
+     "lo": "3",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "trigger",
+     "default": "1",
+     "lo": "0.25",
+     "hi": "2.5",
+     "step": "0.25"
+    },
+    {
+     "name": "protatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "trailatrs",
+     "default": "4",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    },
+    {
+     "name": "volatrs",
+     "default": "2",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "bigatrs",
+     "default": "7",
+     "lo": "3",
+     "hi": "12",
+     "step": "1"
+    },
+    {
+     "name": "exitbars",
+     "default": "3",
+     "lo": "2",
+     "hi": "8",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp10_go_in_style": {
+   "params": [
+    {
+     "name": "length",
+     "default": "20",
+     "lo": "5",
+     "hi": "50",
+     "step": "5"
+    },
+    {
+     "name": "trigger",
+     "default": "0.66",
+     "lo": "0.2",
+     "hi": "1.5",
+     "step": "0.1"
+    },
+    {
+     "name": "accel",
+     "default": "0.02",
+     "lo": "0.01",
+     "hi": "0.1",
+     "step": "0.01"
+    },
+    {
+     "name": "firstmult",
+     "default": "1.5",
+     "lo": "0.5",
+     "hi": "4",
+     "step": "0.25"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.16
+    }
+   }
+  },
+  "exp10_monday_trade": {
+   "params": [
+    {
+     "name": "length",
+     "default": "2",
+     "lo": "2",
+     "hi": "10",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.15
+    }
+   }
+  },
+  "exp10_ref_dev": {
+   "params": [
+    {
+     "name": "rmalen",
+     "default": "15",
+     "lo": "5",
+     "hi": "55",
+     "step": "5"
+    },
+    {
+     "name": "threshold",
+     "default": "5",
+     "lo": "0",
+     "hi": "40",
+     "step": "2.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp10_serendipity": {
+   "params": [
+    {
+     "name": "rsilen",
+     "default": "9",
+     "lo": "3",
+     "hi": "25",
+     "step": "1"
+    },
+    {
+     "name": "overbought",
+     "default": "70",
+     "lo": "55",
+     "hi": "90",
+     "step": "5"
+    },
+    {
+     "name": "oversold",
+     "default": "30",
+     "lo": "10",
+     "hi": "45",
+     "step": "5"
+    },
+    {
+     "name": "trigatr",
+     "default": "0.5",
+     "lo": "0.1",
+     "hi": "1.5",
+     "step": "0.1"
+    },
+    {
+     "name": "protatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "breakatrs",
+     "default": "4",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    },
+    {
+     "name": "targetatrs",
+     "default": "4",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp10_store": {
+   "params": [
+    {
+     "name": "oversold",
+     "default": "40",
+     "lo": "10",
+     "hi": "45",
+     "step": "5"
+    },
+    {
+     "name": "overbought",
+     "default": "60",
+     "lo": "55",
+     "hi": "90",
+     "step": "5"
+    },
+    {
+     "name": "newlow",
+     "default": "8",
+     "lo": "4",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "setuplen",
+     "default": "2",
+     "lo": "1",
+     "hi": "6",
+     "step": "1"
+    },
+    {
+     "name": "entrybar_atrs",
+     "default": "1",
+     "lo": "0.5",
+     "hi": "3",
+     "step": "0.5"
+    },
+    {
+     "name": "trailatrs",
+     "default": "4",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    },
+    {
+     "name": "bigatrs",
+     "default": "7",
+     "lo": "3",
+     "hi": "12",
+     "step": "1"
+    },
+    {
+     "name": "exitbars",
+     "default": "3",
+     "lo": "2",
+     "hi": "8",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp10_superman": {
+   "params": [
+    {
+     "name": "length",
+     "default": "5",
+     "lo": "3",
+     "hi": "12",
+     "step": "1"
+    },
+    {
+     "name": "stoplen",
+     "default": "6",
+     "lo": "3",
+     "hi": "15",
+     "step": "1"
+    },
+    {
+     "name": "profitfactor",
+     "default": "1",
+     "lo": "0.5",
+     "hi": "4",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp11_bullseye": {
+   "params": [
+    {
+     "name": "rangelen",
+     "default": "5",
+     "lo": "3",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "xavglen",
+     "default": "50",
+     "lo": "20",
+     "hi": "100",
+     "step": "5"
+    },
+    {
+     "name": "barstoenter",
+     "default": "5",
+     "lo": "2",
+     "hi": "12",
+     "step": "1"
+    },
+    {
+     "name": "factor",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "protatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp11_high_five": {
+   "params": [
+    {
+     "name": "baselen",
+     "default": "5",
+     "lo": "2",
+     "hi": "12",
+     "step": "1"
+    },
+    {
+     "name": "multiplier",
+     "default": "0.2",
+     "lo": "0.1",
+     "hi": "1",
+     "step": "0.1"
+    },
+    {
+     "name": "protatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "breakatrs",
+     "default": "4",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp11_night_train": {
+   "params": [
+    {
+     "name": "protatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.14
+    }
+   }
+  },
+  "exp11_sym_triangle": {
+   "params": [
+    {
+     "name": "evalrange",
+     "default": "40",
+     "lo": "20",
+     "hi": "80",
+     "step": "5"
+    },
+    {
+     "name": "dmilen",
+     "default": "14",
+     "lo": "5",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "strength",
+     "default": "1",
+     "lo": "1",
+     "hi": "3",
+     "step": "1"
+    },
+    {
+     "name": "exitfactor",
+     "default": "0.5",
+     "lo": "0.25",
+     "hi": "2",
+     "step": "0.25"
+    },
+    {
+     "name": "multiplier",
+     "default": "2",
+     "lo": "1",
+     "hi": "4",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.17
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp11_trendscore": {
+   "params": [
+    {
+     "name": "lookback",
+     "default": "10",
+     "lo": "5",
+     "hi": "40",
+     "step": "5"
+    },
+    {
+     "name": "length",
+     "default": "18",
+     "lo": "5",
+     "hi": "50",
+     "step": "1"
+    },
+    {
+     "name": "protatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "breakatrs",
+     "default": "4",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    },
+    {
+     "name": "trailatrs",
+     "default": "4",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp11_triple_play": {
+   "params": [
+    {
+     "name": "patternlen",
+     "default": "25",
+     "lo": "10",
+     "hi": "60",
+     "step": "5"
+    },
+    {
+     "name": "strength",
+     "default": "7",
+     "lo": "2",
+     "hi": "12",
+     "step": "1"
+    },
+    {
+     "name": "barstoenter",
+     "default": "10",
+     "lo": "3",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "bblen",
+     "default": "11",
+     "lo": "5",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "bbdev",
+     "default": "2",
+     "lo": "1",
+     "hi": "3",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.17
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.2
+    }
+   }
+  },
+  "exp11_win_gapper": {
+   "params": [
+    {
+     "name": "length",
+     "default": "14",
+     "lo": "5",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "protatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "breakatrs",
+     "default": "4",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    },
+    {
+     "name": "trailatrs",
+     "default": "4",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    },
+    {
+     "name": "bigatrs",
+     "default": "4",
+     "lo": "2",
+     "hi": "14",
+     "step": "1"
+    },
+    {
+     "name": "exitbars",
+     "default": "3",
+     "lo": "1",
+     "hi": "8",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.17
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp12_first_prize": {
+   "params": [
+    {
+     "name": "xavglen",
+     "default": "60",
+     "lo": "20",
+     "hi": "100",
+     "step": "5"
+    },
+    {
+     "name": "fastma",
+     "default": "3",
+     "lo": "2",
+     "hi": "8",
+     "step": "1"
+    },
+    {
+     "name": "slowma",
+     "default": "10",
+     "lo": "6",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "signal",
+     "default": "16",
+     "lo": "5",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "ips",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "bps",
+     "default": "9",
+     "lo": "4",
+     "hi": "14",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.2
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.28
+    }
+   }
+  },
+  "exp12_in_the_zone": {
+   "params": [
+    {
+     "name": "ipsfactor",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "befactor",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "ptfactor",
+     "default": "5",
+     "lo": "2",
+     "hi": "10",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.16
+    }
+   }
+  },
+  "exp12_jailbreak": {
+   "params": [
+    {
+     "name": "length1",
+     "default": "50",
+     "lo": "10",
+     "hi": "100",
+     "step": "5"
+    },
+    {
+     "name": "length2",
+     "default": "30",
+     "lo": "5",
+     "hi": "80",
+     "step": "5"
+    },
+    {
+     "name": "ips",
+     "default": "4",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.16
+    }
+   }
+  },
+  "exp12_kinda_shifty": {
+   "params": [
+    {
+     "name": "fast",
+     "default": "30",
+     "lo": "5",
+     "hi": "60",
+     "step": "5"
+    },
+    {
+     "name": "slow",
+     "default": "60",
+     "lo": "20",
+     "hi": "120",
+     "step": "5"
+    },
+    {
+     "name": "protatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp12_lr_crossing": {
+   "params": [
+    {
+     "name": "fastlen",
+     "default": "9",
+     "lo": "3",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "slowlen",
+     "default": "18",
+     "lo": "6",
+     "hi": "60",
+     "step": "1"
+    },
+    {
+     "name": "stopatrs",
+     "default": "0",
+     "lo": "0",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "targetatrs",
+     "default": "0",
+     "lo": "0",
+     "hi": "10",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp12_mist2": {
+   "params": [
+    {
+     "name": "mistlen",
+     "default": "3",
+     "lo": "1",
+     "hi": "5",
+     "step": "1"
+    },
+    {
+     "name": "accel",
+     "default": "0.03",
+     "lo": "0.01",
+     "hi": "0.05",
+     "step": "0.01"
+    },
+    {
+     "name": "firstmult",
+     "default": "1",
+     "lo": "0.5",
+     "hi": "2",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.15
+    }
+   }
+  },
+  "exp12_ntw": {
+   "params": [
+    {
+     "name": "strength",
+     "default": "2",
+     "lo": "1",
+     "hi": "4",
+     "step": "1"
+    },
+    {
+     "name": "fast",
+     "default": "3",
+     "lo": "2",
+     "hi": "8",
+     "step": "1"
+    },
+    {
+     "name": "slow",
+     "default": "10",
+     "lo": "6",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "signal",
+     "default": "16",
+     "lo": "5",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "length",
+     "default": "20",
+     "lo": "10",
+     "hi": "40",
+     "step": "2"
+    },
+    {
+     "name": "pctenter",
+     "default": "50",
+     "lo": "10",
+     "hi": "100",
+     "step": "10"
+    },
+    {
+     "name": "pctexit",
+     "default": "50",
+     "lo": "10",
+     "hi": "150",
+     "step": "10"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.22
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.31
+    }
+   }
+  },
+  "exp12_springs": {
+   "params": [
+    {
+     "name": "strength",
+     "default": "5",
+     "lo": "2",
+     "hi": "10",
+     "step": "1"
+    },
+    {
+     "name": "closepct",
+     "default": "25",
+     "lo": "10",
+     "hi": "50",
+     "step": "5"
+    },
+    {
+     "name": "rangepct",
+     "default": "150",
+     "lo": "100",
+     "hi": "250",
+     "step": "25"
+    },
+    {
+     "name": "entrypct",
+     "default": "50",
+     "lo": "10",
+     "hi": "100",
+     "step": "10"
+    },
+    {
+     "name": "accel",
+     "default": "0.02",
+     "lo": "0.01",
+     "hi": "0.1",
+     "step": "0.01"
+    },
+    {
+     "name": "firstmult",
+     "default": "1.5",
+     "lo": "0.5",
+     "hi": "3",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.2
+    }
+   }
+  },
+  "exp12_three_musketeers": {
+   "params": [
+    {
+     "name": "length",
+     "default": "12",
+     "lo": "6",
+     "hi": "18",
+     "step": "2"
+    },
+    {
+     "name": "target",
+     "default": "6",
+     "lo": "2",
+     "hi": "8",
+     "step": "1"
+    },
+    {
+     "name": "breakeven",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "level",
+     "default": "50",
+     "lo": "30",
+     "hi": "70",
+     "step": "5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.16
+    }
+   }
+  },
+  "exp13_dma_range_leaders": {
+   "params": [
+    {
+     "name": "length",
+     "default": "20",
+     "lo": "10",
+     "hi": "50",
+     "step": "2"
+    },
+    {
+     "name": "displace",
+     "default": "5",
+     "lo": "1",
+     "hi": "12",
+     "step": "1"
+    },
+    {
+     "name": "protatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "breakatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    },
+    {
+     "name": "trailatrs",
+     "default": "4",
+     "lo": "1",
+     "hi": "8",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp13_linreg_momentum": {
+   "params": [
+    {
+     "name": "regression",
+     "default": "20",
+     "lo": "10",
+     "hi": "60",
+     "step": "5"
+    },
+    {
+     "name": "xmalen",
+     "default": "15",
+     "lo": "5",
+     "hi": "40",
+     "step": "5"
+    },
+    {
+     "name": "momlen",
+     "default": "10",
+     "lo": "5",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "entrypct",
+     "default": "0.25",
+     "lo": "0.1",
+     "hi": "1",
+     "step": "0.05"
+    },
+    {
+     "name": "protatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    },
+    {
+     "name": "bigatrs",
+     "default": "8",
+     "lo": "4",
+     "hi": "12",
+     "step": "1"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.17
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.18
+    }
+   }
+  },
+  "exp13_mom_retrace": {
+   "params": [
+    {
+     "name": "channellen",
+     "default": "15",
+     "lo": "5",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "closelen",
+     "default": "5",
+     "lo": "3",
+     "hi": "15",
+     "step": "1"
+    },
+    {
+     "name": "rsilen",
+     "default": "5",
+     "lo": "3",
+     "hi": "14",
+     "step": "1"
+    },
+    {
+     "name": "dmilen",
+     "default": "15",
+     "lo": "5",
+     "hi": "30",
+     "step": "1"
+    },
+    {
+     "name": "retracebars",
+     "default": "10",
+     "lo": "5",
+     "hi": "20",
+     "step": "1"
+    },
+    {
+     "name": "protatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.18
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.23
+    }
+   }
+  },
+  "exp13_oc_histogram": {
+   "params": [
+    {
+     "name": "length",
+     "default": "10",
+     "lo": "5",
+     "hi": "40",
+     "step": "1"
+    },
+    {
+     "name": "entryfactor",
+     "default": "0.5",
+     "lo": "0.25",
+     "hi": "1.5",
+     "step": "0.25"
+    },
+    {
+     "name": "exitfactor",
+     "default": "0.5",
+     "lo": "0.25",
+     "hi": "1.5",
+     "step": "0.25"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp13_vol_clusters": {
+   "params": [
+    {
+     "name": "deviations",
+     "default": "2",
+     "lo": "1",
+     "hi": "3",
+     "step": "0.5"
+    },
+    {
+     "name": "length",
+     "default": "15",
+     "lo": "5",
+     "hi": "25",
+     "step": "5"
+    },
+    {
+     "name": "protatrs",
+     "default": "2",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.15
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.17
+    }
+   }
+  },
+  "exp13_volex": {
+   "params": [
+    {
+     "name": "longfactor",
+     "default": "1.2",
+     "lo": "0.6",
+     "hi": "2.4",
+     "step": "0.2"
+    },
+    {
+     "name": "shortfactor",
+     "default": "1.8",
+     "lo": "0.8",
+     "hi": "3",
+     "step": "0.2"
+    },
+    {
+     "name": "stalebars",
+     "default": "4",
+     "lo": "2",
+     "hi": "10",
+     "step": "1"
+    },
+    {
+     "name": "protatrs",
+     "default": "3",
+     "lo": "1",
+     "hi": "6",
+     "step": "0.5"
+    }
+   ],
+   "runs": {
+    "backtest": {
+     "rc": 0,
+     "sec": 0.14
+    },
+    "genetic": {
+     "rc": 0,
+     "sec": 0.16
+    },
+    "wfo": {
+     "rc": 0,
+     "sec": 0.16
+    }
+   }
+  }
+ }
+}

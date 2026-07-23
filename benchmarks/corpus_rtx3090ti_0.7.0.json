@@ -1,0 +1,9242 @@
+{
+ "cells": [
+  {
+   "function": "SMA(14)",
+   "group": "overlap",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.845413708862974e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SMA(14)",
+   "group": "overlap",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.8788488014761554e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SMA(14)",
+   "group": "overlap",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.93992690563547e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SMA(14)",
+   "group": "overlap",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.957646376988424e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SMA(14)",
+   "group": "overlap",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SMA(14)",
+   "group": "overlap",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.9584823673908466e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SMA(14)",
+   "group": "overlap",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 4.921666885226755e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "EMA(12)",
+   "group": "overlap",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.6161370297054343e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "EMA(12)",
+   "group": "overlap",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.76751854969878e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "EMA(12)",
+   "group": "overlap",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.8581877570581615e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "EMA(12)",
+   "group": "overlap",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.751427823971952e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "EMA(12)",
+   "group": "overlap",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "EMA(12)",
+   "group": "overlap",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 6.202378834415649e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "EMA(12)",
+   "group": "overlap",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.720883183516916e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WMA(10)",
+   "group": "overlap",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 8.888513652919428e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WMA(10)",
+   "group": "overlap",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 8.789974931876432e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WMA(10)",
+   "group": "overlap",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 8.912472101545907e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WMA(10)",
+   "group": "overlap",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 9.068198905956056e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WMA(10)",
+   "group": "overlap",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 6.180149631310814e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WMA(10)",
+   "group": "overlap",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 8.902930327204639e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WMA(10)",
+   "group": "overlap",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 8.694242604847069e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DEMA(14)",
+   "group": "overlap",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.5855222394821754e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DEMA(14)",
+   "group": "overlap",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.6409502464001486e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DEMA(14)",
+   "group": "overlap",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.6432619101321227e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DEMA(14)",
+   "group": "overlap",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.8434515886060987e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DEMA(14)",
+   "group": "overlap",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DEMA(14)",
+   "group": "overlap",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.3039579336293627e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DEMA(14)",
+   "group": "overlap",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 1.349896288784515e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TEMA(14)",
+   "group": "overlap",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 4.740462347147285e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TEMA(14)",
+   "group": "overlap",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 4.661464172153168e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TEMA(14)",
+   "group": "overlap",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 4.815980082322231e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TEMA(14)",
+   "group": "overlap",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 4.5188455943994803e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TEMA(14)",
+   "group": "overlap",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 1.2360297734851837e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TEMA(14)",
+   "group": "overlap",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 6.959520852944934e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TEMA(14)",
+   "group": "overlap",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRIMA(14)",
+   "group": "overlap",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 8.721291895840572e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRIMA(14)",
+   "group": "overlap",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 8.381579864514322e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRIMA(14)",
+   "group": "overlap",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 7.555986269161005e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRIMA(14)",
+   "group": "overlap",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 8.34139598767175e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRIMA(14)",
+   "group": "overlap",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRIMA(14)",
+   "group": "overlap",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 2.256461552330169e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRIMA(14)",
+   "group": "overlap",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.917663640117049e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "KAMA(14)",
+   "group": "overlap",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.905708574578069e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "KAMA(14)",
+   "group": "overlap",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.311222807618563e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "KAMA(14)",
+   "group": "overlap",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.264307250020951e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "KAMA(14)",
+   "group": "overlap",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.8390441759119226e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "KAMA(14)",
+   "group": "overlap",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "KAMA(14)",
+   "group": "overlap",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.952681794037403e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "KAMA(14)",
+   "group": "overlap",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 3.054940508113921e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "T3(14)",
+   "group": "overlap",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.2532720306443154e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "T3(14)",
+   "group": "overlap",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.1152765861061941e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "T3(14)",
+   "group": "overlap",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.1860144655655194e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "T3(14)",
+   "group": "overlap",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.2297313007705957e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "T3(14)",
+   "group": "overlap",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 4.3261047465221376e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "T3(14)",
+   "group": "overlap",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.4241927473790383e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "T3(14)",
+   "group": "overlap",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAVP(2..30)",
+   "group": "overlap",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.8628722912789305e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAVP(2..30)",
+   "group": "overlap",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.8242068234948286e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAVP(2..30)",
+   "group": "overlap",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.760271924437001e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAVP(2..30)",
+   "group": "overlap",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.92746366403734e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAVP(2..30)",
+   "group": "overlap",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAVP(2..30)",
+   "group": "overlap",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.882422675223065e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAVP(2..30)",
+   "group": "overlap",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 4.497827082302365e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAMA(0.5,0.05)",
+   "group": "overlap",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.839467749034748e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAMA(0.5,0.05)",
+   "group": "overlap",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.780906062621113e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAMA(0.5,0.05)",
+   "group": "overlap",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.8847542201231065e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAMA(0.5,0.05)",
+   "group": "overlap",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.912081399354281e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAMA(0.5,0.05)",
+   "group": "overlap",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 2.9244583506289024e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAMA(0.5,0.05)",
+   "group": "overlap",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.303144659966034e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAMA(0.5,0.05)",
+   "group": "overlap",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIDPOINT(14)",
+   "group": "overlap",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.577689065252938e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIDPOINT(14)",
+   "group": "overlap",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.520881963101958e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIDPOINT(14)",
+   "group": "overlap",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.651015970731806e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIDPOINT(14)",
+   "group": "overlap",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.956547344514607e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIDPOINT(14)",
+   "group": "overlap",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIDPOINT(14)",
+   "group": "overlap",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.959494034188902e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIDPOINT(14)",
+   "group": "overlap",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.153815361781604e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MA(14,SMA)",
+   "group": "overlap",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.845413708862974e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MA(14,SMA)",
+   "group": "overlap",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.8788488014761554e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MA(14,SMA)",
+   "group": "overlap",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.93992690563547e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MA(14,SMA)",
+   "group": "overlap",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.957646376988424e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MA(14,SMA)",
+   "group": "overlap",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MA(14,SMA)",
+   "group": "overlap",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.9584823673908466e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MA(14,SMA)",
+   "group": "overlap",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 4.921666885226755e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MA(14,EMA)",
+   "group": "overlap",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.7059105588178744e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MA(14,EMA)",
+   "group": "overlap",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 6.742160983800003e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MA(14,EMA)",
+   "group": "overlap",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 6.04856307009778e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MA(14,EMA)",
+   "group": "overlap",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.901020509586326e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MA(14,EMA)",
+   "group": "overlap",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MA(14,EMA)",
+   "group": "overlap",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 6.158692038221775e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MA(14,EMA)",
+   "group": "overlap",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 6.546744331115563e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG(14)",
+   "group": "stat",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.913472765530746e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG(14)",
+   "group": "stat",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.91714960962493e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG(14)",
+   "group": "stat",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.7866174085543895e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG(14)",
+   "group": "stat",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.7856251835501476e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG(14)",
+   "group": "stat",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG(14)",
+   "group": "stat",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.768901611017824e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG(14)",
+   "group": "stat",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.195843553774097e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_SLOPE(14)",
+   "group": "stat",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.860942706845927e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_SLOPE(14)",
+   "group": "stat",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.8209753470227105e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_SLOPE(14)",
+   "group": "stat",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.8378894459084124e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_SLOPE(14)",
+   "group": "stat",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 7.139457441907027e-09,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_SLOPE(14)",
+   "group": "stat",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_SLOPE(14)",
+   "group": "stat",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.905789767920357e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_SLOPE(14)",
+   "group": "stat",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 4.758032894134855e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_INTERCEPT(14)",
+   "group": "stat",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.954871719260193e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_INTERCEPT(14)",
+   "group": "stat",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.904828803660427e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_INTERCEPT(14)",
+   "group": "stat",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.9590508328488624e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_INTERCEPT(14)",
+   "group": "stat",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.9556409567999246e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_INTERCEPT(14)",
+   "group": "stat",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_INTERCEPT(14)",
+   "group": "stat",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.9602182846503696e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_INTERCEPT(14)",
+   "group": "stat",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.598725461346176e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_ANGLE(14)",
+   "group": "stat",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.9162356279419895e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_ANGLE(14)",
+   "group": "stat",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.918953779321121e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_ANGLE(14)",
+   "group": "stat",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.8811938459510726e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_ANGLE(14)",
+   "group": "stat",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.855713399056827e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_ANGLE(14)",
+   "group": "stat",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_ANGLE(14)",
+   "group": "stat",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.867203724614534e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LINEARREG_ANGLE(14)",
+   "group": "stat",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.214704689142321e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TSF(14)",
+   "group": "stat",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.925623587442442e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TSF(14)",
+   "group": "stat",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.9260621814593424e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TSF(14)",
+   "group": "stat",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.853964656102992e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TSF(14)",
+   "group": "stat",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.8430385300571793e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TSF(14)",
+   "group": "stat",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TSF(14)",
+   "group": "stat",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.8560513439946733e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TSF(14)",
+   "group": "stat",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.421930548012307e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "IMI(14)",
+   "group": "momentum",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.907351047506724e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "IMI(14)",
+   "group": "momentum",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.913165987436613e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "IMI(14)",
+   "group": "momentum",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.942775769914684e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "IMI(14)",
+   "group": "momentum",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.883422702446957e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "IMI(14)",
+   "group": "momentum",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "IMI(14)",
+   "group": "momentum",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "IMI(14)",
+   "group": "momentum",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 2.8500789582541116e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIDPRICE(14)",
+   "group": "overlap",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.647954841664104e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIDPRICE(14)",
+   "group": "overlap",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.706045532417414e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIDPRICE(14)",
+   "group": "overlap",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.512580701425179e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIDPRICE(14)",
+   "group": "overlap",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.9555256826387315e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIDPRICE(14)",
+   "group": "overlap",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIDPRICE(14)",
+   "group": "overlap",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.9597650303039156e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIDPRICE(14)",
+   "group": "overlap",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.101901294944179e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "RSI(14)",
+   "group": "momentum",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 2.1773484351277876e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "RSI(14)",
+   "group": "momentum",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 2.650603698607583e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "RSI(14)",
+   "group": "momentum",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 2.265922833386645e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "RSI(14)",
+   "group": "momentum",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.977738541499279e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "RSI(14)",
+   "group": "momentum",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "RSI(14)",
+   "group": "momentum",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.2420609421826444e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "RSI(14)",
+   "group": "momentum",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 1.2835876200845866e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CMO(14)",
+   "group": "momentum",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.568004316077065e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CMO(14)",
+   "group": "momentum",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.4656346000951892e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CMO(14)",
+   "group": "momentum",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.4827861484656424e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CMO(14)",
+   "group": "momentum",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.182508076402744e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CMO(14)",
+   "group": "momentum",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CMO(14)",
+   "group": "momentum",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 3.1245883478914216e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CMO(14)",
+   "group": "momentum",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 6.01737898892063e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRIX(14)",
+   "group": "momentum",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.0734337887896572e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRIX(14)",
+   "group": "momentum",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.0577911293552233e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRIX(14)",
+   "group": "momentum",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.038911309425572e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRIX(14)",
+   "group": "momentum",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.1268847702083917e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRIX(14)",
+   "group": "momentum",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRIX(14)",
+   "group": "momentum",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 6.917958364383026e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRIX(14)",
+   "group": "momentum",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Momentum(10)",
+   "group": "momentum",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Momentum(10)",
+   "group": "momentum",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Momentum(10)",
+   "group": "momentum",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Momentum(10)",
+   "group": "momentum",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Momentum(10)",
+   "group": "momentum",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Momentum(10)",
+   "group": "momentum",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.959266743215434e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Momentum(10)",
+   "group": "momentum",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROC(10)",
+   "group": "momentum",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 9.924179674931647e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROC(10)",
+   "group": "momentum",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 9.639059481068777e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROC(10)",
+   "group": "momentum",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 9.818524537250201e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROC(10)",
+   "group": "momentum",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 7.970634807625338e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROC(10)",
+   "group": "momentum",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROC(10)",
+   "group": "momentum",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.4544025018153276e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROC(10)",
+   "group": "momentum",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 7.606582245161469e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCP(10)",
+   "group": "momentum",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 2.94032752590212e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCP(10)",
+   "group": "momentum",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 2.9782744936923677e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCP(10)",
+   "group": "momentum",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 2.9473233742471905e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCP(10)",
+   "group": "momentum",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 4.636955507064666e-10,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCP(10)",
+   "group": "momentum",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCP(10)",
+   "group": "momentum",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.1128798105942612e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCP(10)",
+   "group": "momentum",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 2.8672264118512203e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCR(10)",
+   "group": "momentum",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.770996342909704e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCR(10)",
+   "group": "momentum",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.898979420432846e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCR(10)",
+   "group": "momentum",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.8560186487612055e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCR(10)",
+   "group": "momentum",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.94826667914135e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCR(10)",
+   "group": "momentum",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCR(10)",
+   "group": "momentum",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.805208126646046e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCR(10)",
+   "group": "momentum",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 4.5328836898338457e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCR100(10)",
+   "group": "momentum",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.0141409228686887e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCR100(10)",
+   "group": "momentum",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.0008371400570235e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCR100(10)",
+   "group": "momentum",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 9.906875187842451e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCR100(10)",
+   "group": "momentum",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 9.682362453764078e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCR100(10)",
+   "group": "momentum",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCR100(10)",
+   "group": "momentum",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 9.600945216379847e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ROCR100(10)",
+   "group": "momentum",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.5028894078569594e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "APO(12,26)",
+   "group": "momentum",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.4997969344676676e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "APO(12,26)",
+   "group": "momentum",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.497392577221035e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "APO(12,26)",
+   "group": "momentum",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.4602938620100758e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "APO(12,26)",
+   "group": "momentum",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 2.9346778831040865e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "APO(12,26)",
+   "group": "momentum",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "APO(12,26)",
+   "group": "momentum",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.9036559493201821e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "APO(12,26)",
+   "group": "momentum",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 2.9360943548980343e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PPO(12,26)",
+   "group": "momentum",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.0097871039338457e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PPO(12,26)",
+   "group": "momentum",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.00930964607171e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PPO(12,26)",
+   "group": "momentum",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.02704780477747e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PPO(12,26)",
+   "group": "momentum",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.1278320512703166e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PPO(12,26)",
+   "group": "momentum",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PPO(12,26)",
+   "group": "momentum",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.00011408647085370236,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PPO(12,26)",
+   "group": "momentum",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 2.84573735917659e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACD(12,26,9)",
+   "group": "macd",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 3.5752662164156845e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACD(12,26,9)",
+   "group": "macd",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 7.927250784689477e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACD(12,26,9)",
+   "group": "macd",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 3.7792328821950605e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACD(12,26,9)",
+   "group": "macd",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 3.0298461239919305e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACD(12,26,9)",
+   "group": "macd",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 7.105427357601002e-14,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACD(12,26,9)",
+   "group": "macd",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.8368387770806294e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACD(12,26,9)",
+   "group": "macd",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACDFIX(9)",
+   "group": "macd",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.92549303131019e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACDFIX(9)",
+   "group": "macd",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.846952235268881e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACDFIX(9)",
+   "group": "macd",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.822875458587395e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACDFIX(9)",
+   "group": "macd",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.4896789524154741e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACDFIX(9)",
+   "group": "macd",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACDFIX(9)",
+   "group": "macd",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.9155582883720594e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACDFIX(9)",
+   "group": "macd",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACD_LINE(12,26)",
+   "group": "macd",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.889014283419469e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACD_LINE(12,26)",
+   "group": "macd",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.90052739547171e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACD_LINE(12,26)",
+   "group": "macd",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.822495680505428e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACD_LINE(12,26)",
+   "group": "macd",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.4900720657351485e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACD_LINE(12,26)",
+   "group": "macd",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 7.105427357601002e-14,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACD_LINE(12,26)",
+   "group": "macd",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.893566381614457e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACD_LINE(12,26)",
+   "group": "macd",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ATR(14)",
+   "group": "volatility",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 7.150939109862182e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ATR(14)",
+   "group": "volatility",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 7.018594798672566e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ATR(14)",
+   "group": "volatility",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 6.645055563632843e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ATR(14)",
+   "group": "volatility",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 6.430273027292118e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ATR(14)",
+   "group": "volatility",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ATR(14)",
+   "group": "volatility",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.596287657443977e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ATR(14)",
+   "group": "volatility",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 3.532898305217927e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "NATR(14)",
+   "group": "volatility",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 7.108663970644465e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "NATR(14)",
+   "group": "volatility",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 7.045540038507253e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "NATR(14)",
+   "group": "volatility",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 6.858238825764079e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "NATR(14)",
+   "group": "volatility",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 6.577156978021619e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "NATR(14)",
+   "group": "volatility",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "NATR(14)",
+   "group": "volatility",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 4.199041343384704e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRANGE",
+   "group": "volatility",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRANGE",
+   "group": "volatility",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRANGE",
+   "group": "volatility",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRANGE",
+   "group": "volatility",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRANGE",
+   "group": "volatility",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRANGE",
+   "group": "volatility",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.813923742715735e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TRANGE",
+   "group": "volatility",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "BBANDS(20,2)",
+   "group": "volatility",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.626466538503261e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "BBANDS(20,2)",
+   "group": "volatility",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.857333511095003e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "BBANDS(20,2)",
+   "group": "volatility",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.7950172587204e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "BBANDS(20,2)",
+   "group": "volatility",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.946980174016966e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "BBANDS(20,2)",
+   "group": "volatility",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "BBANDS(20,2)",
+   "group": "volatility",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.9200226868443015e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "BBANDS(20,2)",
+   "group": "volatility",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 4.536657598306847e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ACCBANDS(20)",
+   "group": "volatility",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 8.133525927006607e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ACCBANDS(20)",
+   "group": "volatility",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 7.571958555319052e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ACCBANDS(20)",
+   "group": "volatility",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 7.338759944628906e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ACCBANDS(20)",
+   "group": "volatility",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 8.715510094238065e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ACCBANDS(20)",
+   "group": "volatility",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ACCBANDS(20)",
+   "group": "volatility",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 7.932518687480429e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ACCBANDS(20)",
+   "group": "volatility",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.108738634523166e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "StdDev(14)",
+   "group": "stat",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.894959974951976e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "StdDev(14)",
+   "group": "stat",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.9281323158375164e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "StdDev(14)",
+   "group": "stat",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.8687330218606896e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "StdDev(14)",
+   "group": "stat",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 2.9152007807731195e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "StdDev(14)",
+   "group": "stat",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 3.104938514297828e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "StdDev(14)",
+   "group": "stat",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.926423975994577e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "StdDev(14)",
+   "group": "stat",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 3.9137849840079645e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Variance(14)",
+   "group": "stat",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.907604300621809e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Variance(14)",
+   "group": "stat",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.888773728037144e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Variance(14)",
+   "group": "stat",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.777169396044215e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Variance(14)",
+   "group": "stat",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.4260876923799515e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Variance(14)",
+   "group": "stat",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Variance(14)",
+   "group": "stat",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.788979575375773e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Variance(14)",
+   "group": "stat",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 4.2482465762777695e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SUM(14)",
+   "group": "math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.946492508965527e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SUM(14)",
+   "group": "math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.9545033074884074e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SUM(14)",
+   "group": "math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.945623821688839e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SUM(14)",
+   "group": "math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.9542150632709775e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SUM(14)",
+   "group": "math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 1.7657570375173753e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SUM(14)",
+   "group": "math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.870921566190443e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SUM(14)",
+   "group": "math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.193305244921506e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "OBV",
+   "group": "volume",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "OBV",
+   "group": "volume",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "OBV",
+   "group": "volume",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "OBV",
+   "group": "volume",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "OBV",
+   "group": "volume",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "OBV",
+   "group": "volume",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "OBV",
+   "group": "volume",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AD",
+   "group": "volume",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AD",
+   "group": "volume",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AD",
+   "group": "volume",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AD",
+   "group": "volume",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AD",
+   "group": "volume",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AD",
+   "group": "volume",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AD",
+   "group": "volume",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADOSC(3,10)",
+   "group": "volume",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADOSC(3,10)",
+   "group": "volume",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADOSC(3,10)",
+   "group": "volume",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADOSC(3,10)",
+   "group": "volume",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADOSC(3,10)",
+   "group": "volume",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADOSC(3,10)",
+   "group": "volume",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADOSC(3,10)",
+   "group": "volume",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MFI(14)",
+   "group": "volume",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.887245446392406e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MFI(14)",
+   "group": "volume",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.832976513242488e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MFI(14)",
+   "group": "volume",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.8563752829652e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MFI(14)",
+   "group": "volume",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.828979477679468e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MFI(14)",
+   "group": "volume",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MFI(14)",
+   "group": "volume",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.78048714372608e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MFI(14)",
+   "group": "volume",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.6685873091936855e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADX(14)",
+   "group": "trend",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 3.801252505418414e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADX(14)",
+   "group": "trend",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 3.604521137182534e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADX(14)",
+   "group": "trend",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 4.009146686411915e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADX(14)",
+   "group": "trend",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 2.5624231243898435e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADX(14)",
+   "group": "trend",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADX(14)",
+   "group": "trend",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 9.333149825600608e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADX(14)",
+   "group": "trend",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 1.8964988626276152e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADXR(14)",
+   "group": "trend",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 3.180322480188346e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADXR(14)",
+   "group": "trend",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 3.104356976691359e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADXR(14)",
+   "group": "trend",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 3.575131747214671e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADXR(14)",
+   "group": "trend",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 2.048722248624653e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADXR(14)",
+   "group": "trend",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADXR(14)",
+   "group": "trend",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.2866695778734288e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADXR(14)",
+   "group": "trend",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DX(14)",
+   "group": "trend",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 7.722835550727503e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DX(14)",
+   "group": "trend",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 9.280064137917599e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DX(14)",
+   "group": "trend",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 8.555273913357642e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DX(14)",
+   "group": "trend",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 9.262099220586073e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DX(14)",
+   "group": "trend",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DX(14)",
+   "group": "trend",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 7.312366006112236e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DX(14)",
+   "group": "trend",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 4.461624440676992e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PlusDI(14)",
+   "group": "trend",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.5596878933094794e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PlusDI(14)",
+   "group": "trend",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.5522096937293098e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PlusDI(14)",
+   "group": "trend",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.6321756302064675e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PlusDI(14)",
+   "group": "trend",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.709897570782373e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PlusDI(14)",
+   "group": "trend",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PlusDI(14)",
+   "group": "trend",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.7803029439111142e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PlusDI(14)",
+   "group": "trend",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 9.921580001842038e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MinusDI(14)",
+   "group": "trend",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.505777673864113e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MinusDI(14)",
+   "group": "trend",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.5652368204152425e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MinusDI(14)",
+   "group": "trend",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.7177974509105953e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MinusDI(14)",
+   "group": "trend",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.59290897597705e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MinusDI(14)",
+   "group": "trend",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MinusDI(14)",
+   "group": "trend",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.6680494284993667e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MinusDI(14)",
+   "group": "trend",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 1.4252155814789854e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PlusDM(14)",
+   "group": "trend",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 7.714946384121317e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PlusDM(14)",
+   "group": "trend",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 7.140799469411002e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PlusDM(14)",
+   "group": "trend",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 8.093230205934584e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PlusDM(14)",
+   "group": "trend",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 8.997616917382437e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PlusDM(14)",
+   "group": "trend",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PlusDM(14)",
+   "group": "trend",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.6656802198901977e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PlusDM(14)",
+   "group": "trend",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 3.5827136574872267e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MinusDM(14)",
+   "group": "trend",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 7.636144121392812e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MinusDM(14)",
+   "group": "trend",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 7.291721680127241e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MinusDM(14)",
+   "group": "trend",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 8.233921665388368e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MinusDM(14)",
+   "group": "trend",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 8.650011912014245e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MinusDM(14)",
+   "group": "trend",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MinusDM(14)",
+   "group": "trend",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.6075753765813654e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MinusDM(14)",
+   "group": "trend",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 4.6361938458464766e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AROON(14)",
+   "group": "trend",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 6.103515625532907e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AROON(14)",
+   "group": "trend",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 6.103515625532907e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AROON(14)",
+   "group": "trend",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 6.103515625532907e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AROON(14)",
+   "group": "trend",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 6.103515625532907e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AROON(14)",
+   "group": "trend",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AROON(14)",
+   "group": "trend",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 6.103515625532907e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AROON(14)",
+   "group": "trend",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 6.103515625532907e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AROONOSC(14)",
+   "group": "trend",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 6.103515625532907e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AROONOSC(14)",
+   "group": "trend",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 6.103515625532907e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AROONOSC(14)",
+   "group": "trend",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 6.103515625532907e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AROONOSC(14)",
+   "group": "trend",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 6.103515625532907e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AROONOSC(14)",
+   "group": "trend",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AROONOSC(14)",
+   "group": "trend",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 6.103515625532907e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AROONOSC(14)",
+   "group": "trend",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 6.103515625532907e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CCI(14)",
+   "group": "trend",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.913637351171849e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CCI(14)",
+   "group": "trend",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.744555737423828e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CCI(14)",
+   "group": "trend",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.843133871234792e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CCI(14)",
+   "group": "trend",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.919993382524554e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CCI(14)",
+   "group": "trend",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CCI(14)",
+   "group": "trend",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.907608709210976e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CCI(14)",
+   "group": "trend",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 4.531950838774822e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ULTOSC(7,14,28)",
+   "group": "trend",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 2.9859201809752715e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ULTOSC(7,14,28)",
+   "group": "trend",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 2.9012666742785386e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ULTOSC(7,14,28)",
+   "group": "trend",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 2.8454093587120815e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ULTOSC(7,14,28)",
+   "group": "trend",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.873661301520112e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ULTOSC(7,14,28)",
+   "group": "trend",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ULTOSC(7,14,28)",
+   "group": "trend",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 3.1615199579349127e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ULTOSC(7,14,28)",
+   "group": "trend",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 7.555874077233767e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WILLR(14)",
+   "group": "trend",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.0192861993114068e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WILLR(14)",
+   "group": "trend",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.0212746980163011e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WILLR(14)",
+   "group": "trend",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 9.708116210939507e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WILLR(14)",
+   "group": "trend",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 9.269370959392157e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WILLR(14)",
+   "group": "trend",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WILLR(14)",
+   "group": "trend",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.4237253065045123e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WILLR(14)",
+   "group": "trend",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 7.882786229530424e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SAR(0.02,0.2)",
+   "group": "trend",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.926630308459888e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SAR(0.02,0.2)",
+   "group": "trend",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 6.234835032172184e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SAR(0.02,0.2)",
+   "group": "trend",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.966448513748316e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SAR(0.02,0.2)",
+   "group": "trend",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.958356736708552e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SAR(0.02,0.2)",
+   "group": "trend",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SAR(0.02,0.2)",
+   "group": "trend",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 6.439489118913666e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SAR(0.02,0.2)",
+   "group": "trend",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 3.349546466826564e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SAREXT",
+   "group": "trend",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.926630308459888e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SAREXT",
+   "group": "trend",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 6.234835032172184e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SAREXT",
+   "group": "trend",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.966448513748316e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SAREXT",
+   "group": "trend",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.958356736708552e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SAREXT",
+   "group": "trend",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SAREXT",
+   "group": "trend",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 6.439489118913666e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SAREXT",
+   "group": "trend",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 3.349546466826564e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCH(5,3)",
+   "group": "oscillators",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.8436006022075404e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCH(5,3)",
+   "group": "oscillators",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.8394563002212345e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCH(5,3)",
+   "group": "oscillators",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.9321028609716217e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCH(5,3)",
+   "group": "oscillators",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.5987644659602294e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCH(5,3)",
+   "group": "oscillators",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCH(5,3)",
+   "group": "oscillators",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.9192991677952062e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCH(5,3)",
+   "group": "oscillators",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 1.3075919410557144e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCHF(5,3)",
+   "group": "oscillators",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.4646733592502534e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCHF(5,3)",
+   "group": "oscillators",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.6824179867677764e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCHF(5,3)",
+   "group": "oscillators",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.5991460476077654e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCHF(5,3)",
+   "group": "oscillators",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.5760356831170511e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCHF(5,3)",
+   "group": "oscillators",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCHF(5,3)",
+   "group": "oscillators",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.7259090691197752e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCHF(5,3)",
+   "group": "oscillators",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 9.772306160540983e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCHRSI(14,5,3)",
+   "group": "oscillators",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.00014775047321251007,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCHRSI(14,5,3)",
+   "group": "oscillators",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.00038683129151016244,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCHRSI(14,5,3)",
+   "group": "oscillators",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.00017240010388637912,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCHRSI(14,5,3)",
+   "group": "oscillators",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.00015804211677280608,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCHRSI(14,5,3)",
+   "group": "oscillators",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCHRSI(14,5,3)",
+   "group": "oscillators",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.00012350359914456297,
+   "nanMismatch": 0
+  },
+  {
+   "function": "STOCHRSI(14,5,3)",
+   "group": "oscillators",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.118447854853162e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIN(14)",
+   "group": "math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIN(14)",
+   "group": "math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIN(14)",
+   "group": "math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIN(14)",
+   "group": "math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIN(14)",
+   "group": "math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIN(14)",
+   "group": "math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MIN(14)",
+   "group": "math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAX(14)",
+   "group": "math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAX(14)",
+   "group": "math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAX(14)",
+   "group": "math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAX(14)",
+   "group": "math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAX(14)",
+   "group": "math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAX(14)",
+   "group": "math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAX(14)",
+   "group": "math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAXINDEX(14)",
+   "group": "math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAXINDEX(14)",
+   "group": "math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAXINDEX(14)",
+   "group": "math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAXINDEX(14)",
+   "group": "math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAXINDEX(14)",
+   "group": "math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAXINDEX(14)",
+   "group": "math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MAXINDEX(14)",
+   "group": "math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MININDEX(14)",
+   "group": "math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MININDEX(14)",
+   "group": "math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MININDEX(14)",
+   "group": "math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MININDEX(14)",
+   "group": "math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MININDEX(14)",
+   "group": "math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MININDEX(14)",
+   "group": "math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MININDEX(14)",
+   "group": "math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MINMAX(14)",
+   "group": "math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MINMAX(14)",
+   "group": "math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MINMAX(14)",
+   "group": "math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MINMAX(14)",
+   "group": "math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MINMAX(14)",
+   "group": "math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MINMAX(14)",
+   "group": "math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MINMAX(14)",
+   "group": "math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MINMAXINDEX(14)",
+   "group": "math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MINMAXINDEX(14)",
+   "group": "math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MINMAXINDEX(14)",
+   "group": "math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MINMAXINDEX(14)",
+   "group": "math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MINMAXINDEX(14)",
+   "group": "math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MINMAXINDEX(14)",
+   "group": "math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MINMAXINDEX(14)",
+   "group": "math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AVGDEV(14)",
+   "group": "math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 7.279493358764141e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AVGDEV(14)",
+   "group": "math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.252684651743211e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AVGDEV(14)",
+   "group": "math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 9.015069435627352e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AVGDEV(14)",
+   "group": "math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.401104488454874e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AVGDEV(14)",
+   "group": "math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 7.62939453125e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AVGDEV(14)",
+   "group": "math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 6.490187721386025e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AVGDEV(14)",
+   "group": "math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 3.2699591997378864e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "BOP",
+   "group": "math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.295157914508147e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "BOP",
+   "group": "math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 4.953224843109181e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "BOP",
+   "group": "math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 4.8461498512901465e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "BOP",
+   "group": "math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.677971029586206e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "BOP",
+   "group": "math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "BOP",
+   "group": "math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 9.673812760813194e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "BOP",
+   "group": "math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 3.556213241088631e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AvgPrice",
+   "group": "price",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.16268308189149e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AvgPrice",
+   "group": "price",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.1607339041900057e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AvgPrice",
+   "group": "price",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.1595100930715561e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AvgPrice",
+   "group": "price",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.1795130380422443e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AvgPrice",
+   "group": "price",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AvgPrice",
+   "group": "price",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.4951891541371062e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "AvgPrice",
+   "group": "price",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 8.097209920086207e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MedPrice",
+   "group": "price",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.95950078215468e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MedPrice",
+   "group": "price",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.956719074873874e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MedPrice",
+   "group": "price",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.9591701498016194e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MedPrice",
+   "group": "price",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.95877351041537e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MedPrice",
+   "group": "price",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MedPrice",
+   "group": "price",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.9581632079132034e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MedPrice",
+   "group": "price",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.895334815223995e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TypPrice",
+   "group": "price",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.1910058696231021e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TypPrice",
+   "group": "price",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.1830325572223664e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TypPrice",
+   "group": "price",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.1899517617354828e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TypPrice",
+   "group": "price",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.1893396631575993e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TypPrice",
+   "group": "price",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 6.180149631310814e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TypPrice",
+   "group": "price",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.5787322668849443e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TypPrice",
+   "group": "price",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 1.1457361820027831e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WclPrice",
+   "group": "price",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 8.919407003334045e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WclPrice",
+   "group": "price",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 8.81468568946356e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WclPrice",
+   "group": "price",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 8.874316866180537e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WclPrice",
+   "group": "price",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 8.907811191340468e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WclPrice",
+   "group": "price",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WclPrice",
+   "group": "price",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 9.5367431640625e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "WclPrice",
+   "group": "price",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 8.572472208688035e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Beta(14)",
+   "group": "stat",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.953578132648437e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Beta(14)",
+   "group": "stat",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.89755174058249e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Beta(14)",
+   "group": "stat",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.960066090091085e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Beta(14)",
+   "group": "stat",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.918789002292654e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Beta(14)",
+   "group": "stat",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Beta(14)",
+   "group": "stat",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.1662573118353947e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Beta(14)",
+   "group": "stat",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 4.673628606207958e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Correl(14)",
+   "group": "stat",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 2.97963390627487e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Correl(14)",
+   "group": "stat",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 2.979567270688932e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Correl(14)",
+   "group": "stat",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 2.9799411382924745e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Correl(14)",
+   "group": "stat",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.258240576289097e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Correl(14)",
+   "group": "stat",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Correl(14)",
+   "group": "stat",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 2.9780805155255052e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "Correl(14)",
+   "group": "stat",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 2.9300377346608286e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACDEXT(12,26,9,SMA)",
+   "group": "macd",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.684552924174909e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACDEXT(12,26,9,SMA)",
+   "group": "macd",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.8050018544157886e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACDEXT(12,26,9,SMA)",
+   "group": "macd",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.5337582675023498e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACDEXT(12,26,9,SMA)",
+   "group": "macd",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 3.575930566690477e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACDEXT(12,26,9,SMA)",
+   "group": "macd",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACDEXT(12,26,9,SMA)",
+   "group": "macd",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 3.496805824454441e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MACDEXT(12,26,9,SMA)",
+   "group": "macd",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "APO(12,26,SMA)",
+   "group": "momentum",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.496535080036665e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "APO(12,26,SMA)",
+   "group": "momentum",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.496535080036665e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "APO(12,26,SMA)",
+   "group": "momentum",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.52587890625e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "APO(12,26,SMA)",
+   "group": "momentum",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 3.0517578125e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "APO(12,26,SMA)",
+   "group": "momentum",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "APO(12,26,SMA)",
+   "group": "momentum",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 3.496805824454441e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "APO(12,26,SMA)",
+   "group": "momentum",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 9.145492157358603e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PPO(12,26,SMA)",
+   "group": "momentum",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.0049593920813393e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PPO(12,26,SMA)",
+   "group": "momentum",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 9.837570677295737e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PPO(12,26,SMA)",
+   "group": "momentum",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.0125430841001481e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PPO(12,26,SMA)",
+   "group": "momentum",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.1900234642703289e-05,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PPO(12,26,SMA)",
+   "group": "momentum",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PPO(12,26,SMA)",
+   "group": "momentum",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 9.727018556771744e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "PPO(12,26,SMA)",
+   "group": "momentum",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 6.355120719281349e-06,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_DCPERIOD",
+   "group": "hilbert",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.8054188509854746e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_DCPERIOD",
+   "group": "hilbert",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.870865402663655e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_DCPERIOD",
+   "group": "hilbert",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.790693002924947e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_DCPERIOD",
+   "group": "hilbert",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.917004753420381e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_DCPERIOD",
+   "group": "hilbert",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 5.8307000645164966e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_DCPERIOD",
+   "group": "hilbert",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.762382928362952e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_DCPERIOD",
+   "group": "hilbert",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_DCPHASE",
+   "group": "hilbert",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.9314716568279534e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_DCPHASE",
+   "group": "hilbert",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.920055540208201e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_DCPHASE",
+   "group": "hilbert",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.8763107732585355e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_DCPHASE",
+   "group": "hilbert",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.5067337987971604e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_DCPHASE",
+   "group": "hilbert",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 5.4334356730166425e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_DCPHASE",
+   "group": "hilbert",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.886236210081707e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_DCPHASE",
+   "group": "hilbert",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_PHASOR",
+   "group": "hilbert",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.867501015810894e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_PHASOR",
+   "group": "hilbert",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.8460986917017237e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_PHASOR",
+   "group": "hilbert",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.8521395081685424e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_PHASOR",
+   "group": "hilbert",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.6171752953153095e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_PHASOR",
+   "group": "hilbert",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_PHASOR",
+   "group": "hilbert",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.935189087112741e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_PHASOR",
+   "group": "hilbert",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_SINE",
+   "group": "hilbert",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 2.9801208500934706e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_SINE",
+   "group": "hilbert",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 2.980171587285696e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_SINE",
+   "group": "hilbert",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 2.9791736966267024e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_SINE",
+   "group": "hilbert",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 2.979901625455028e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_SINE",
+   "group": "hilbert",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 2.9518899768987694e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_SINE",
+   "group": "hilbert",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 2.9795097722384867e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_SINE",
+   "group": "hilbert",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_TRENDLINE",
+   "group": "hilbert",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.787908982743292e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_TRENDLINE",
+   "group": "hilbert",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.652967730554257e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_TRENDLINE",
+   "group": "hilbert",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.72550334750132e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_TRENDLINE",
+   "group": "hilbert",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.894712395108608e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_TRENDLINE",
+   "group": "hilbert",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_TRENDLINE",
+   "group": "hilbert",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.893076954620177e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_TRENDLINE",
+   "group": "hilbert",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_TRENDMODE",
+   "group": "hilbert",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_TRENDMODE",
+   "group": "hilbert",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_TRENDMODE",
+   "group": "hilbert",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_TRENDMODE",
+   "group": "hilbert",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_TRENDMODE",
+   "group": "hilbert",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_TRENDMODE",
+   "group": "hilbert",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "HT_TRENDMODE",
+   "group": "hilbert",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLABANDONEDBABY",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLABANDONEDBABY",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLABANDONEDBABY",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLABANDONEDBABY",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLABANDONEDBABY",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLABANDONEDBABY",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLABANDONEDBABY",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLADVANCEBLOCK",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLADVANCEBLOCK",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLADVANCEBLOCK",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLADVANCEBLOCK",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLADVANCEBLOCK",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLADVANCEBLOCK",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLADVANCEBLOCK",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLBELTHOLD",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLBELTHOLD",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLBELTHOLD",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLBELTHOLD",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLBELTHOLD",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLBELTHOLD",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLBELTHOLD",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLBREAKAWAY",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLBREAKAWAY",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLBREAKAWAY",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLBREAKAWAY",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLBREAKAWAY",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLBREAKAWAY",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLBREAKAWAY",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCLOSINGMARUBOZU",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCLOSINGMARUBOZU",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCLOSINGMARUBOZU",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCLOSINGMARUBOZU",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCLOSINGMARUBOZU",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCLOSINGMARUBOZU",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCLOSINGMARUBOZU",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCONCEALBABYSWALL",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCONCEALBABYSWALL",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCONCEALBABYSWALL",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCONCEALBABYSWALL",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCONCEALBABYSWALL",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCONCEALBABYSWALL",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCONCEALBABYSWALL",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCOUNTERATTACK",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCOUNTERATTACK",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCOUNTERATTACK",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCOUNTERATTACK",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCOUNTERATTACK",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCOUNTERATTACK",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLCOUNTERATTACK",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDARKCLOUDCOVER",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDARKCLOUDCOVER",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDARKCLOUDCOVER",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDARKCLOUDCOVER",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDARKCLOUDCOVER",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDARKCLOUDCOVER",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDARKCLOUDCOVER",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDOJI",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDOJI",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDOJI",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDOJI",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDOJI",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDOJI",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDOJI",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDOJISTAR",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDOJISTAR",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDOJISTAR",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDOJISTAR",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDOJISTAR",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDOJISTAR",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDOJISTAR",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDRAGONFLYDOJI",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDRAGONFLYDOJI",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDRAGONFLYDOJI",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDRAGONFLYDOJI",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDRAGONFLYDOJI",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDRAGONFLYDOJI",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLDRAGONFLYDOJI",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLENGULFING",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLENGULFING",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLENGULFING",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLENGULFING",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLENGULFING",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLENGULFING",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLENGULFING",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLEVENINGDOJISTAR",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLEVENINGDOJISTAR",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLEVENINGDOJISTAR",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLEVENINGDOJISTAR",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLEVENINGDOJISTAR",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLEVENINGDOJISTAR",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLEVENINGDOJISTAR",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLEVENINGSTAR",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLEVENINGSTAR",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLEVENINGSTAR",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLEVENINGSTAR",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLEVENINGSTAR",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLEVENINGSTAR",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLEVENINGSTAR",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLGAPSIDESIDEWHITE",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLGAPSIDESIDEWHITE",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLGAPSIDESIDEWHITE",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLGAPSIDESIDEWHITE",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLGAPSIDESIDEWHITE",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLGAPSIDESIDEWHITE",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLGAPSIDESIDEWHITE",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLGRAVESTONEDOJI",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLGRAVESTONEDOJI",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLGRAVESTONEDOJI",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLGRAVESTONEDOJI",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLGRAVESTONEDOJI",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLGRAVESTONEDOJI",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLGRAVESTONEDOJI",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHAMMER",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHAMMER",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHAMMER",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHAMMER",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHAMMER",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHAMMER",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHAMMER",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHANGINGMAN",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHANGINGMAN",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHANGINGMAN",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHANGINGMAN",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHANGINGMAN",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHANGINGMAN",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHANGINGMAN",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHARAMI",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHARAMI",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHARAMI",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHARAMI",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHARAMI",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHARAMI",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHARAMI",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHARAMICROSS",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHARAMICROSS",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHARAMICROSS",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHARAMICROSS",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHARAMICROSS",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHARAMICROSS",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHARAMICROSS",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIGHWAVE",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIGHWAVE",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIGHWAVE",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIGHWAVE",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIGHWAVE",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIGHWAVE",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIGHWAVE",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIKKAKE",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIKKAKE",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIKKAKE",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIKKAKE",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIKKAKE",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIKKAKE",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIKKAKE",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIKKAKEMOD",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIKKAKEMOD",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIKKAKEMOD",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIKKAKEMOD",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIKKAKEMOD",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIKKAKEMOD",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHIKKAKEMOD",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHOMINGPIGEON",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHOMINGPIGEON",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHOMINGPIGEON",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHOMINGPIGEON",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHOMINGPIGEON",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHOMINGPIGEON",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLHOMINGPIGEON",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLIDENTICAL3CROWS",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLIDENTICAL3CROWS",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLIDENTICAL3CROWS",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLIDENTICAL3CROWS",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLIDENTICAL3CROWS",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLIDENTICAL3CROWS",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLIDENTICAL3CROWS",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLINNECK",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLINNECK",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLINNECK",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLINNECK",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLINNECK",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLINNECK",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLINNECK",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLINVERTEDHAMMER",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLINVERTEDHAMMER",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLINVERTEDHAMMER",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLINVERTEDHAMMER",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLINVERTEDHAMMER",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLINVERTEDHAMMER",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLINVERTEDHAMMER",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLKICKING",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLKICKING",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLKICKING",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLKICKING",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLKICKING",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLKICKING",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLKICKING",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLKICKINGBYLENGTH",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLKICKINGBYLENGTH",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLKICKINGBYLENGTH",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLKICKINGBYLENGTH",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLKICKINGBYLENGTH",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLKICKINGBYLENGTH",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLKICKINGBYLENGTH",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLADDERBOTTOM",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLADDERBOTTOM",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLADDERBOTTOM",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLADDERBOTTOM",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLADDERBOTTOM",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLADDERBOTTOM",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLADDERBOTTOM",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLONGLEGGEDDOJI",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLONGLEGGEDDOJI",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLONGLEGGEDDOJI",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLONGLEGGEDDOJI",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLONGLEGGEDDOJI",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLONGLEGGEDDOJI",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLONGLEGGEDDOJI",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLONGLINE",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLONGLINE",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLONGLINE",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLONGLINE",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLONGLINE",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLONGLINE",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLLONGLINE",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMARUBOZU",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMARUBOZU",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMARUBOZU",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMARUBOZU",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMARUBOZU",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMARUBOZU",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMARUBOZU",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMATHOLD",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMATHOLD",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMATHOLD",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMATHOLD",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMATHOLD",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMATHOLD",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMATHOLD",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMATCHINGLOW",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMATCHINGLOW",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMATCHINGLOW",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMATCHINGLOW",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMATCHINGLOW",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMATCHINGLOW",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMATCHINGLOW",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMORNINGDOJISTAR",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMORNINGDOJISTAR",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMORNINGDOJISTAR",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMORNINGDOJISTAR",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMORNINGDOJISTAR",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMORNINGDOJISTAR",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMORNINGDOJISTAR",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMORNINGSTAR",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMORNINGSTAR",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMORNINGSTAR",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMORNINGSTAR",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMORNINGSTAR",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMORNINGSTAR",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLMORNINGSTAR",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLONNECK",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLONNECK",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLONNECK",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLONNECK",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLONNECK",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLONNECK",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLONNECK",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLPIERCING",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLPIERCING",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLPIERCING",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLPIERCING",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLPIERCING",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLPIERCING",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLPIERCING",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLRICKSHAWMAN",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLRICKSHAWMAN",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLRICKSHAWMAN",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLRICKSHAWMAN",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLRICKSHAWMAN",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLRICKSHAWMAN",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLRICKSHAWMAN",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLRISEFALL3METHODS",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLRISEFALL3METHODS",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLRISEFALL3METHODS",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLRISEFALL3METHODS",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLRISEFALL3METHODS",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLRISEFALL3METHODS",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLRISEFALL3METHODS",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSEPARATINGLINES",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSEPARATINGLINES",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSEPARATINGLINES",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSEPARATINGLINES",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSEPARATINGLINES",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSEPARATINGLINES",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSEPARATINGLINES",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSHOOTINGSTAR",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSHOOTINGSTAR",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSHOOTINGSTAR",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSHOOTINGSTAR",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSHOOTINGSTAR",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSHOOTINGSTAR",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSHOOTINGSTAR",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSHORTLINE",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSHORTLINE",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSHORTLINE",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSHORTLINE",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSHORTLINE",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSHORTLINE",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSHORTLINE",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSPINNINGTOP",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSPINNINGTOP",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSPINNINGTOP",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSPINNINGTOP",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSPINNINGTOP",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSPINNINGTOP",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSPINNINGTOP",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSTALLEDPATTERN",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSTALLEDPATTERN",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSTALLEDPATTERN",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSTALLEDPATTERN",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSTALLEDPATTERN",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSTALLEDPATTERN",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSTALLEDPATTERN",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSTICKSANDWICH",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSTICKSANDWICH",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSTICKSANDWICH",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSTICKSANDWICH",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSTICKSANDWICH",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSTICKSANDWICH",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLSTICKSANDWICH",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTAKURI",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTAKURI",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTAKURI",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTAKURI",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTAKURI",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTAKURI",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTAKURI",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTASUKIGAP",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTASUKIGAP",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTASUKIGAP",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTASUKIGAP",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTASUKIGAP",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTASUKIGAP",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTASUKIGAP",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3BLACKCROWS",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3BLACKCROWS",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3BLACKCROWS",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3BLACKCROWS",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3BLACKCROWS",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3BLACKCROWS",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3BLACKCROWS",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3INSIDE",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3INSIDE",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3INSIDE",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3INSIDE",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3INSIDE",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3INSIDE",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3INSIDE",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3LINESTRIKE",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3LINESTRIKE",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3LINESTRIKE",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3LINESTRIKE",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3LINESTRIKE",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3LINESTRIKE",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3LINESTRIKE",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3OUTSIDE",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3OUTSIDE",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3OUTSIDE",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3OUTSIDE",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3OUTSIDE",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3OUTSIDE",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3OUTSIDE",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3STARSINSOUTH",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3STARSINSOUTH",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3STARSINSOUTH",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3STARSINSOUTH",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3STARSINSOUTH",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3STARSINSOUTH",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3STARSINSOUTH",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3WHITESOLDIERS",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3WHITESOLDIERS",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3WHITESOLDIERS",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3WHITESOLDIERS",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3WHITESOLDIERS",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3WHITESOLDIERS",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL3WHITESOLDIERS",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTHRUSTING",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTHRUSTING",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTHRUSTING",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTHRUSTING",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTHRUSTING",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTHRUSTING",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTHRUSTING",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTRISTAR",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTRISTAR",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTRISTAR",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTRISTAR",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTRISTAR",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTRISTAR",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLTRISTAR",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL2CROWS",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL2CROWS",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL2CROWS",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL2CROWS",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL2CROWS",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL2CROWS",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDL2CROWS",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLUNIQUE3RIVER",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLUNIQUE3RIVER",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLUNIQUE3RIVER",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLUNIQUE3RIVER",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLUNIQUE3RIVER",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLUNIQUE3RIVER",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLUNIQUE3RIVER",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLUPSIDEGAP2CROWS",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLUPSIDEGAP2CROWS",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLUPSIDEGAP2CROWS",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLUPSIDEGAP2CROWS",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLUPSIDEGAP2CROWS",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLUPSIDEGAP2CROWS",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLUPSIDEGAP2CROWS",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLXSIDEGAP3METHODS",
+   "group": "candle",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLXSIDEGAP3METHODS",
+   "group": "candle",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLXSIDEGAP3METHODS",
+   "group": "candle",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLXSIDEGAP3METHODS",
+   "group": "candle",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLXSIDEGAP3METHODS",
+   "group": "candle",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLXSIDEGAP3METHODS",
+   "group": "candle",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CDLXSIDEGAP3METHODS",
+   "group": "candle",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SIN",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 7.857397787969234e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SIN",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 8.654202865443494e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SIN",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 7.368242449512508e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SIN",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 7.67765940823395e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SIN",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 6.101153138260429e-09,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SIN",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 7.041570693200327e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SIN",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.86671974334152e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "COS",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 6.959625065139363e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "COS",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 7.127786738614361e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "COS",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 7.732357187872907e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "COS",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 6.951758224627014e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "COS",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 2.1933808769247776e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "COS",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 6.59440693162594e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "COS",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.717385753722937e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TAN",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.6971040106316772e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TAN",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.853115892040272e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TAN",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.8694888288263711e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TAN",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.8156653916127105e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TAN",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 1.666220783569372e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TAN",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.3897906160605178e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TAN",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 9.371214904246516e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ASIN",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 9.760720349862986e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ASIN",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.0198889164608177e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ASIN",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.1160417332017833e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ASIN",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 9.455862050848389e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ASIN",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 2.920784480942018e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ASIN",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ASIN",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 7.182441261924296e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ACOS",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 7.087105501516332e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ACOS",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 6.926528173245572e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ACOS",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 7.095452103644817e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ACOS",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 7.081482555904017e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ACOS",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 6.249289421959678e-09,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ACOS",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ACOS",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.196256899568617e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ATAN",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 3.8387366168226986e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ATAN",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 3.849591531224016e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ATAN",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 3.827111533349026e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ATAN",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 3.863368553111758e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ATAN",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 2.6263517057899676e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ATAN",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 6.621473787627762e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ATAN",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 3.6586417951156284e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SINH",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 6.77631787088673e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SINH",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 6.768910321437707e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SINH",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 7.066459066634315e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SINH",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.4681482939086168e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SINH",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 3.5577453205704046e-09,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SINH",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.6800653717217987e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SINH",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 4.520704110383101e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "COSH",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.1605724897441488e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "COSH",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.0545595905668753e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "COSH",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.1756238100408775e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "COSH",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.5554432809739664e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "COSH",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 3.234014744064081e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "COSH",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.5412448557890808e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "COSH",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 7.592796037130175e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TANH",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 8.82844639615854e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TANH",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 9.082861596176883e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TANH",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 9.38170050535092e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TANH",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 9.407747170175895e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TANH",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 2.0323692728752007e-10,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TANH",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 3.562681605284723e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "TANH",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 4.538883441318475e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "EXP",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.2371075434187536e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "EXP",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.2043221013472056e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "EXP",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.212139635233139e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "EXP",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.2228251793019105e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "EXP",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 1.9039278931209935e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "EXP",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.5407219305929587e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "EXP",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 9.078328588830841e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LN",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.484188777361658e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LN",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.4959838629504184e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LN",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.4597842902894836e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LN",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.528381951573972e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LN",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 4.9529372578663296e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LN",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 7.22724900981943e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LN",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 3.971956544945021e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LOG10",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 1.327848916715634e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LOG10",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 1.3195922418223802e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LOG10",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 1.3085164018740663e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LOG10",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 1.2523105062787163e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LOG10",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 6.63878761374034e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LOG10",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 1.210326431800455e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "LOG10",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 1.0862515133238765e-07,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SQRT",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 4.720384798198702e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SQRT",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 4.7264862321840573e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SQRT",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 4.739956916262934e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SQRT",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.948731569793922e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SQRT",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 8.771050597482176e-09,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SQRT",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.840783176903033e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SQRT",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 4.5340607302170156e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CEIL",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CEIL",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CEIL",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CEIL",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CEIL",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CEIL",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "CEIL",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "FLOOR",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "FLOOR",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "FLOOR",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "FLOOR",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "FLOOR",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "FLOOR",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "FLOOR",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADD",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.95950078215468e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADD",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.956719074873874e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADD",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.9591701498016194e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADD",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.95877351041537e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADD",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADD",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.9581632079132034e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "ADD",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.895334815223995e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SUB",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SUB",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SUB",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SUB",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SUB",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SUB",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "SUB",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MULT",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.847563836034079e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MULT",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.933457342719315e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MULT",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.8907838046513373e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MULT",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.896384519565071e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MULT",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 2.489081043410078e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MULT",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.72680826095481e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "MULT",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.450495198025679e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DIV",
+   "group": "vector_math",
+   "dataset": "rw-42",
+   "ok": true,
+   "maxDiff": 5.923751369355494e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DIV",
+   "group": "vector_math",
+   "dataset": "rw-1337",
+   "ok": true,
+   "maxDiff": 5.8975963237871227e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DIV",
+   "group": "vector_math",
+   "dataset": "rw-2026",
+   "ok": true,
+   "maxDiff": 5.897922287588982e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DIV",
+   "group": "vector_math",
+   "dataset": "trend",
+   "ok": true,
+   "maxDiff": 5.9329649708084425e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DIV",
+   "group": "vector_math",
+   "dataset": "flat",
+   "ok": true,
+   "maxDiff": 0.0,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DIV",
+   "group": "vector_math",
+   "dataset": "zeros",
+   "ok": true,
+   "maxDiff": 5.920055525868584e-08,
+   "nanMismatch": 0
+  },
+  {
+   "function": "DIV",
+   "group": "vector_math",
+   "dataset": "short",
+   "ok": true,
+   "maxDiff": 5.8182617285867875e-08,
+   "nanMismatch": 0
+  }
+ ],
+ "summary": {
+  "passed": 1154,
+  "total": 1154,
+  "functionsGreen": 165,
+  "functions": 165
+ }
+}

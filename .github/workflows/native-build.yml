@@ -1,0 +1,147 @@
+# Builds the native tacuda library for linux-x64 and win-x64 on every push /
+# PR touching native sources, and uploads the binaries as artifacts so the
+# packaging workflow (release-packages.yml) never ships stale runtimes/.
+#
+# GPU execution is NOT required to compile: both jobs only need the CUDA
+# toolkit. Runtime tests run separately on a self-hosted GPU runner when one
+# with the `gpu` label is registered.
+
+name: native-build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "include/**"
+      - "cmake/**"
+      - "CMakeLists.txt"
+      - ".github/workflows/native-build.yml"
+  pull_request:
+    paths:
+      - "src/**"
+      - "include/**"
+      - "cmake/**"
+      - "CMakeLists.txt"
+  workflow_dispatch: {}
+  workflow_call: {}
+
+env:
+  CUDA_VERSION: "12.9"
+
+jobs:
+  linux-x64:
+    runs-on: ubuntu-22.04
+    container: nvidia/cuda:12.9.0-devel-ubuntu22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          apt-get update
+          apt-get install -y --no-install-recommends cmake ninja-build python3 git
+          cmake --version && nvcc --version
+
+      - name: Configure
+        run: >
+          cmake -S . -B build -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_CUDA_ARCHITECTURES="75;80;86;89;90"
+          -DBUILD_TESTING=OFF
+
+      # All targets (library + optimizer + example_app), not just the .so.
+      - name: Build (all targets)
+        run: cmake --build build -j "$(nproc)"
+
+      - name: Export smoke check
+        run: python3 scripts/check_dll_exports.py build/libtacuda.so
+
+      # Static coverage gate: every header symbol must be reachable from
+      # Python, Node.js and C# (exits non-zero on any gap or stale decl).
+      - name: Bindings coverage audit
+        run: python3 bindings/audit_bindings.py
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-linux-x64
+          path: build/libtacuda.so
+          if-no-files-found: error
+
+  windows-x64:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+
+      # Mirrors scripts/build_win_dll.bat (MSVC + Ninja + CUDA toolkit),
+      # with the toolkit provisioned by the action instead of E:\cuda129.
+      - name: Install CUDA toolkit
+        uses: Jimver/cuda-toolkit@v0.2.19
+        with:
+          cuda: "12.9.0"
+          sub-packages: '["nvcc", "cudart", "thrust", "visual_studio_integration"]'
+          method: network
+
+      - name: Configure (MSVC + Ninja)
+        shell: cmd
+        run: >
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" &&
+          cmake -S . -B build-win -G Ninja
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_CUDA_ARCHITECTURES="75;80;86;89;90"
+          -DBUILD_TESTING=OFF
+
+      # All targets: catches MSVC-only breakage in the optimizer and
+      # example_app, not just the DLL.
+      - name: Build (all targets)
+        shell: cmd
+        run: >
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat" &&
+          cmake --build build-win -j 4
+
+      - name: Export smoke check
+        run: python scripts/check_dll_exports.py build-win/tacuda.dll
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-win-x64
+          path: build-win/tacuda.dll
+          if-no-files-found: error
+
+  # Correctness gate on a self-hosted GPU runner (label: gpu).
+  # MANDATORY for version tags: release-packages.yml consumes this workflow
+  # via workflow_call, and its packaging jobs wait for the whole workflow —
+  # a tag release cannot ship if the GPU suite fails (or if no GPU runner
+  # is registered, which is intentional: no GPU proof, no release).
+  gpu-tests:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
+    runs-on: [self-hosted, gpu]
+    needs: [linux-x64]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure with tests
+        run: >
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_CUDA_ARCHITECTURES=native -DBUILD_TESTING=ON
+
+      - name: Build
+        run: cmake --build build -j "$(nproc)"
+
+      - name: C++ test suite
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Python binding pipeline
+        run: |
+          python3 -m pip install --user numpy
+          cd bindings/python && python3 test_pipeline.py
+
+      - name: Differential corpus vs TA-Lib (strict oracle)
+        run: |
+          python3 -m pip install --user TA-Lib numpy || true
+          export TACUDA_LIBRARY="$PWD/build/libtacuda.so"
+          export PYTHONPATH="$PWD/bindings/python"
+          cd benchmarks && python3 differential_corpus.py --json corpus.json
+
+      - name: Node.js binding pipeline
+        run: |
+          cd bindings/nodejs && npm install --no-audit --no-fund && node test_pipeline.js

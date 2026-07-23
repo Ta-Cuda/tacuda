@@ -1,0 +1,1 @@
+{"strategy":"exp02_bull_beater","params":{"length":9,"sdev":2,"rsihi":55,"rsilo":45},"valid":true,"metrics":{"netProfit":0,"grossProfit":0,"grossLoss":0,"profitFactor":0,"maxDrawdown":0,"maxDrawdownPct":0,"sharpe":0,"sortino":0,"winRate":0,"avgTrade":0,"exposure":0,"numTrades":0},"initialCapital":10000,"finalEquity":10000,"trades":[]}

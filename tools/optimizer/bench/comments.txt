@@ -1,0 +1,188 @@
+@@exp01_ma_crossover
+SMA(fast) x SMA(slow) crossover arms a breakout stop 3% above the recent high (long) / 3% below the recent low (short) for `chlen` bars; trailing exits at the `trailbar` extreme; after a stop-out the trade re-arms at the 10-bar extreme for `rebars` bars.
+@@exp01_macd_breakout
+Channel built from the highs/lows of the last `ncos` zero-crossings of the MACD histogram; when all of them happened within `nbars` bars, breakout stops go half an average true range beyond the channel. Trailing exits at the `trailbar` extreme.
+@@exp01_trend_follower
+Ratcheting volatility bands: EMA(xmalen) closing beyond the active band in the direction of the 4/9/18 SMA stack enters and shifts the bands by mult * Average(TrueRange, vollen). Protective stop at the opposite band.
+@@exp01_sr_levels
+Support/resistance from the average of the last `numswing` swing highs and lows (strength-bar pivots). Inside a wide-enough range, EMA(Low,4) crossing back above support buys, EMA(High,4) crossing under resistance sells short. Trailing exits only once the position shows a profit.
+@@exp01_pivot_points
+Classic floor-trader pivots from the previous bar; in a 4/9/18 SMA bull stack a breakout through R2 buys, in a bear stack a break through S2 sells. Exits: first profitable open, else the `trailbar` extreme.
+@@exp01_channel_breakout
+Donchian-style channel; the `brkouts`-th same-side breakout (with no opposite breakout in between) enters at the close. Trailing exits at the `trailstp` extreme.
+@@exp01_volex
+Volatility expansion: breakout stops at today's open +/- mult * 4-bar average range. Exits: first profitable open, `trailbar` extreme, or a stale-position exit after 4 bars.
+@@exp02_adx_diff
+A weighted average of the 1-bar ADX differential below zero (or crossing back above it) marks a dying trend; breakout stops go half an average range above/below that close for `ch` bars. Exits: 6-bar channel on the entry bar, then the STAD converging trail.
+@@exp02_head_shoulders
+Swing-based Head & Shoulders detection: three swing highs where the middle one towers over both shoulders arm a short at the neckline drawn through the two swing lows between them (mirrored for bottoms). Exits use the STAD converging trail.
+@@exp02_obv_extremes
+Long-only: buy when On Balance Volume printed `newhighs` window-highs (or `newlows` window-lows, the contrarian double-size entry of the original) within the last `barsback` bars. Exits use the STAD converging trail.
+@@exp02_ad_divergence
+Volume-flow divergence: a new `lookback`-bar price low taken without (or against) a matching low in the smoothed volume-move line buys; the mirror image sells. Exits use the STAD converging trail.
+@@exp02_stochastics
+SlowK pinned beyond the overbought/oversold band for 3 straight bars puts on a with-trend position; the converging reversal stop flips it to a double-size fade, and the fade leg exits on a 5-bar channel break.
+@@exp02_cci_bollinger
+Prices poking outside the Bollinger Bands set the hunting mode; a smoothed CCI hooking back from beyond +/-100 arms a 3-bar-extreme entry stop that stays live for five bars. Exits use a tightened converging trail.
+@@exp02_pct_change_channel
+A move of more than ~2% over `pchng` bars arms a fade-the-extreme stop at the recent 3-bar extreme for three bars. Exits: first profitable open or a 5-bar channel break.
+@@exp02_bull_beater
+Bollinger squeeze (band width under 1.5 average ranges) plus a fast RSI tilt arms 5-bar-extreme breakout stops for five bars. Exits use the STAD converging trail. The intraday session filter is dropped on daily bars.
+@@exp03_buy_dips
+RSI above/below 50 defines the trend; a DMI spread on the wrong side of zero flags the countertrend dip/rally and latches a stop at that bar's extreme until the opposite setup replaces it. Exits: STAD trail.
+@@exp03_engulfing
+Bullish/bearish engulfing candles against the EMA trend arm an entry stop at the pattern bar's extreme for three bars. Exits trail at the best close since entry -/+ half the 4-bar average range.
+@@exp03_oc_histogram
+Histogram = EMA(close) - EMA(open). A zero-line cross arms a breakout stop half an average true range beyond the crossing bar for ten bars (while the histogram keeps its sign); the opposite cross exits at the close, with a protective stop from the pre-cross bar.
+@@exp03_bollinger
+Mean reversion: two consecutive closes beyond a Bollinger band enter against the move at the next open (the original's scale-in limit orders are dropped in this single-position engine). Exits: STAD trail.
+@@exp03_obtr
+The Bollinger dip-buy gated by quiet volatility: only when the on-balance true range sits under its own EMA. Long-only; exits with the STAD trail.
+@@exp03_micro_mw
+Micro-M tops / Micro-W bottoms: a price/oscillator swing divergence (RSI oscillator) followed within a few bars by the two-bar close hook arms a 4-bar-extreme entry stop. Exits: STAD trail.
+@@exp03_var_zones
+Overbought/oversold zones rebuilt from the oscillator's own swing history: the RSI crossing up out of the adaptive bottom band buys, crossing down out of the top band sells. Exits: STAD trail.
+@@exp03_stddev_vol
+Always-armed volatility stops: entry levels sit a band-width fraction away from the close on both sides, every bar. Exits at the first profitable open (position flips are the only other way out).
+@@exp03_vol_clusters
+A close-to-close jump or bar range beyond mean + k standard deviations flags a volatility cluster; both breakout stops go an average-range away from that close for the next bar. Exits at the first profitable open.
+@@exp04_dmi_adx
+ADX crossing above the opposite DI line while DI+ leads DI- arms a stop at the setup bar's extreme (cancelled when ADX drops back). Exits: setup-bar protective stop, an ADX peak-and-turn close-out, and a DI-cross close-out.
+@@exp04_keltner
+A close outside the Keltner Channel arms a stop half a channel-width past the setup bar's extreme for five bars. Exits: a close back through the midline (at that close) or the 4-bar extreme trail.
+@@exp04_linreg_mom
+A rising smoothed linear-regression line plus momentum curling up from below zero arms a stop halfway between the setup high and the line (four bars). Exits: initial ATR stop, then a market exit when the line turns and the 4-bar extreme breaks.
+@@exp04_hpi_breakout
+Channel breakout on close confirmed by a Herrick-Payoff-style money-flow line (mid-price change x volume, smoothed; open interest is unavailable on OHLCV data). Entry stops sit at the setup bar's extreme for five bars. Exits: 4-bar extreme trail plus a flat-out when the flow line flips sign.
+@@exp04_consec_close
+Three consecutive up closes followed by a down close arm a next-open breakout stop a quarter-ATR above the open. Exits: 10-bar extreme trail plus a two-strike scale-out once price clears the pattern extreme.
+@@exp04_mom_retrace
+The volume's flagship: a strong uptrend (EMA channel + MACD signal + RSI + DMI spread) followed by a three-way retracement arms a stop a third of the way back into the prior swing. Exits: ATR protective stop, swing/EMA trail, and a momentum-death close-out. Fully symmetric.
+@@exp04_three_ema
+Fast EMA crossing the medium EMA with the slow EMA confirming enters at the next open; losing the fast/medium alignment exits, with a quarter-step converging trail as backstop.
+@@exp04_dma_volume
+Close crossing a displaced moving average with volume above its own displaced average arms a next-open breakout stop 20% of ATR beyond the open. Exits: 5-bar extreme trail plus a market exit on the reverse cross.
+@@exp04_price_dist
+Distribution shift: kurtosis of closes crossing under zero (choppy -> directional) enters in the direction of the skew. Exits: STAD converging trail at full range.
+@@exp05_fib_retrace
+A 38.2% retracement of the 50-bar range against the prior trend opens a 24-bar window; a hook (swing low) in the 15-bar EMA or a close back across it resumes the trend at the next open. Exits: percent trailing stop from the best close (the original used dollar-risk stops).
+@@exp05_hilo_osc
+Trend filter from a slow close EMA; entries when the high/low oscillator (extreme minus its own EMA) curls back toward the trend. Exits: percent trailing stop off the close plus oscillator zero-cross timing exits.
+@@exp05_stoch_obos
+SlowK hooking through SlowD inside the oversold/overbought band arms a two-bar-extreme entry stop for six bars, with the setup bar's far extreme as the protective stop. Opposite hooks outside the bands exit at the open.
+@@exp05_pivot_sr
+A pivot low that is also the channel low, undercut and then reclaimed by a wide-range reversal bar, arms a stop above the reversal bar (EMA-filtered, 24-bar window). Initial stop under the reversal low, breakeven after twice the risk, profit-taking at the 44-bar extreme.
+@@exp05_currency_4day
+Weekend momentum: on Friday's close, a 50-bar RSI above/below 50 buys/ sells the Monday open; the trade is closed into Tuesday's open (Monday's touch of Friday's extreme takes profit at the same exit bar).
+@@exp05_chan_pullback
+Close-channel breakout followed by a pullback to a fresh 4-bar extreme within ten bars enters with the trend at the next open. Exits on a snap to the opposite 8-bar extreme.
+@@exp05_disp_stddev
+Stop-and-reverse: both entry stops always live at a 3-bar moving average displaced 16 bars forward, +/- two current standard deviations.
+@@exp06_asi
+A fresh price swing high whose Accumulation Swing Index beats the previous swing's reading arms a two-bar-high breakout stop for five bars (mirrored for swing lows). Initial stop at the two-bar extreme; trail at the most recent strength-1 swing.
+@@exp06_mac_adx
+Close beyond the EMA high/low channel with a rising ADX arms a stop half a channel-height beyond that close for two bars. Exits when the close falls back through the opposite channel line.
+@@exp06_dma_chan
+A Range Leader bar (midpoint beyond the prior bar's extreme on expanding range) closing outside the displaced MA channel enters at that close. The exit trails the displaced median-price average early, then hugs the channel's own side.
+@@exp06_ma_pairs
+Four independently tuned SMA pairs: one pair arms the long entry stop at the bar high, another exits the long on its own crossover; two more do the same for shorts.
+@@exp06_cci_avg
+Smoothed CCI escaping the +/-100 band arms a 9-bar channel breakout stop for four bars. The trail is a channel stop whose lookback shrinks by one every time the trade makes a new extreme.
+@@exp06_mrtr
+Schwager's Minor Reaction/Trend Resumption: a channel breakout defines the trend, four nested reaction bars define the pullback, two thrust bars re-arm with the trend; the reaction extreme is the protective stop.
+@@exp06_first_pullback
+Raschke-style first pullback: the MACD signal line's zero cross sets the trend; the first MACD/signal cross against it arms a volatility stop entry above the close. Exits at the pullback extreme, a volatility stop, or the trend flipping back.
+@@exp06_parabolic_vol
+Parabolic SAR flips confirmed by above-average volume arm an entry stop a fraction of the old-to-new SAR distance beyond the flip close (four bars). The SAR itself is the trailing stop.
+@@exp06_vwm
+Volume-weighted momentum (EMA of volume x momentum) crossing zero arms a quarter-ATR breakout above the crossing close for five bars, with an ATR stop under the setup bar; the opposite cross exits at the next open.
+@@exp07_deriv_ma
+First/second discrete derivatives of an SMA: the second derivative's zero cross arms the setup, the first derivative's zero cross in the same direction fires a stop entry one tick beyond the close. Stop-and-reverse.
+@@exp07_sr_osc
+Art Putt's intra-bar oscillator ((TrueHigh-Open)+(Close-TrueLow))/(2*TR): dipping under the buy level arms a long, re-crossing it enters at the next open; symmetric on the sell side. Exits when the oscillator breaks its pre-entry extreme or via a 2-bar extreme stop once it reaches the far band.
+@@exp07_ma_suppres
+Ratcheting support/resistance: each close-through-SMA flip freezes the last tracked extreme as the order level; a close through that level enters with a stop at the bar extreme. Exits combine an entry-anchored protective ATR stop and a position-extreme ATR trail.
+@@exp07_tr_breakout
+A dense trading range (large accumulated "no-trade" area) plus a true-range expansion bar closing beyond the range enters on that close. Protective stop at the opposite range edge; ATR trail off the position extreme.
+@@exp08_escalator
+Weak-close/strong-close two-bar reversal in the direction of both moving averages; entry one tick beyond the two-bar extreme on the very next bar only. Bracket exit: stop at the pattern's other extreme, limit at twice the risk.
+@@exp08_jack_in_box
+A low popping above the high of the downtrend's lowest bar (or the mirror) arms an ATR-offset breakout entry for five bars. The exit is a modified parabolic seeded a multiple of ATR(3) beyond the entry bar.
+@@exp08_ryans_hope
+Rising SMA plus a pullback (close under the close of Length2 bars ago) with the longer trend intact enters at the next open; managed by the four common ATR exits.
+@@exp08_stampede
+Price-channel breakout (one tick beyond the n-bar extreme) managed by the four common ATR exits. The original pyramids up to nine entries; this adaptation trades a single unit per side.
+@@exp09_double_fun
+DiNapoli-style double penetration of a displaced moving average: cross above, quick cross back, second cross above completes the setup; entry one tick above the second-cross bar within four bars. Exit trails the n-bar extreme.
+@@exp09_luxor
+Triangular MA crossover: while the fast TMA is above the slow one, a stop order rides one tick above each bar's high; the slow TMA itself is the trailing exit. The original pyramids up to three units on ADX-confirmed pullbacks; this adaptation trades one unit.
+@@exp09_no_hurry
+Channel breakout delayed by n bars: entries alternate long/short (no re-entry on the same side), managed by protective, breakeven and trailing ATR stops.
+@@exp09_obv_revisited
+Weighted OBV (volume scaled by close-to-open position within the range) crossing its SMA arms a one-tick breakout of the crossover bar; the opposite cross exits at the close. Protective, breakeven and trailing ATR stops manage the trade.
+@@exp09_red_rover
+Pivot-style support/resistance from the weighted close (2*WC-Low resists, 2*WC-High supports): stop-and-reverse breakouts with an ATR profit target and the opposite line as the protective stop.
+@@exp09_skinny_dipper
+Naked close against a double-EMA trend arms a one-bar-only stop entry beyond the naked-close bar; protective and breakeven ATR stops plus an ATR profit target manage the trade.
+@@exp09_swinger
+Price-oscillator momentum in the direction of an SMA trend filter: rising oscillator below zero buys the next open in an uptrend (mirror for shorts). When momentum fades, an n-bar extreme trailing stop activates; a protective ATR stop is always live.
+@@exp09_traffic_jam
+Congestion fade: with ADX below its level and falling, three consecutive down closes buy this close (up closes sell short); exit on the close a fixed number of bars later or at a protective ATR stop.
+@@exp10_monday_trade
+Joe Krutsinger's Monday We Trade: on Friday's close, buy Monday's open if the close beats its 2-bar SMA, sell short otherwise; flat again a bar later. The dollar money-management stop and the exit-on-close collapse into a one-bar hold under the next-open execution model.
+@@exp10_serendipity
+LeBeau's Serendipity trigger: with RSI overbought, buy on a stop a fraction of ATR above the SETUP bar's open (not the entry bar's), so the setup day's own move already counts toward the trigger. Bracket exits: protective ATR stop, breakeven stop, ATR profit target.
+@@exp10_eight_ball
+Slow EMA rising while the fast EMA dips (a pullback within the trend) arms an ATR-trigger breakout entry; four ATR stops manage the trade (protective, trailing, volatility, big-profit n-bar trail).
+@@exp10_go_in_style
+Channel breakout with style: a fresh n-bar extreme arms a stop at the close +/- trigger*ATR for the next bar; a modified parabolic (seeded off the entry bar by an ATR(3) multiple) trails the trade.
+@@exp10_store
+Who's Minding the Store: a bullish Key Reversal (new n-bar low, up close) with slow stochastic oversold arms a 4-bar-high breakout for a few bars; initial stop at the n-bar extreme, then trailing and big-profit ATR stops.
+@@exp10_ref_dev
+Brower's Reference Deviation: RDV = 100 * sum(C-SMA) / sum(|C-SMA|) over the same window. Above +threshold buy, below -threshold sell short; the zero cross exits. Nearly always in the market.
+@@exp10_superman
+MarketStrength (net n-bar close change scaled by same-signed movement) pinned at +/-95 with decelerating older momentum arms an n-bar extreme breakout; trail at the m-bar extreme with a risk-multiple profit target.
+@@exp11_high_five
+Five stacked SMAs (base length doubling each step) all rising arm a stop at the close plus a fraction of the bar's range; the position exits when three or more averages turn against it, plus protective/breakeven ATR stops.
+@@exp11_bullseye
+Buy the dip in an uptrend: a fresh n-bar high closing above the high two bars back with a rising EMA arms a limit buy at the midpoint of that earlier bar; profit target a multiple of the setup-bar excursion, plus a protective ATR stop.
+@@exp11_night_train
+Krutsinger's Night Train: a close under the close two bars back arms a stop at the bar's high; exit at the first profitable open (Williams' Bailout), with a protective ATR stop.
+@@exp11_sym_triangle
+Four alternating strength-1 swings squeezing into a symmetrical triangle during a DMI-confirmed trend; entry on the breakout through the resistance (support) trendline, stop past the last pivot, breakeven at a risk multiple and a measured-move profit target.
+@@exp11_trendscore
+Chande's TrendScore: +/-1 for each comparison of the close against closes lookback+1..lookback+10 bars back. Above its SMA with the close above its own SMA buys the next open; either falling back exits. Protective, breakeven and trailing ATR stops manage the risk.
+@@exp11_triple_play
+Lindsay's Trident with Bollinger confirmation: swing low (outside band), swing high (outside band), retracement swing low (inside bands, 38-62%) arm a stop entry a quarter-swing above point 3; stop past point 3, breakeven after target 1, trailing quarter-drop stop after price reaches point 2, and a measured target 2. Single unit (the original trades two).
+@@exp11_win_gapper
+Williams' "Oops" gap fade in the trend direction: with ADX above 25 and rising and DMI+ over DMI-, a gap-down open recovering to the previous bar's low buys (mirror for shorts); the four common ATR stops manage the trade.
+@@exp12_first_prize
+Buys the first MACD pullback of a new up leg (Signal line above zero, MACD dipping under it once) above a rising EMA, entering on a return to the setup bar's high. Seven stops manage the trade: protective, breakeven, trailing, volatility, big-profit, countertrend and trend-reversal.
+@@exp12_in_the_zone
+Stowell's zone trade: after a thrust close above the high of bar 3, a close back inside the support zone (below the previous close) arms a stop at the setup bar's high; protective stop below the setup bar, breakeven at a risk multiple and an ATR profit target above the thrust bar.
+@@exp12_jailbreak
+Channel breakout with decoupled lengths: enter on a Length1-bar extreme, exit on the shorter of the two channel lengths or an ATR protective stop.
+@@exp12_lr_crossing
+Zayas' linear-regression crossover: reverse when the fast LR endpoint crosses the slow one. The dollar-based stop/target of the original are exposed as optional ATR multiples (0 disables, matching the EL defaults).
+@@exp12_ntw
+"Not That Way, The Other Way": reverse divergence. Short side: price puts in a lower swing high while the MACD makes a higher high; a MACD cross below its signal then arms a stop below the setup close scaled by the pivot spread. Long side is the mirror image. Includes the pivot-scaled protective stop, breakeven shift and measured profit target.
+@@exp12_kinda_shifty
+Dual-SMA system whose exit shifts between the averages: crossings under the fast SMA at successively lower levels exit at the fast average, while higher-level crossings push the exit back to a close through the slow average.
+@@exp12_springs
+Wyckoff springs and upthrusts: a wide-range bar violates a swing low but closes back above it near the top of its range — buy a push beyond a fraction of that bar's range; stop under the swing, modified parabolic trail. Upthrusts mirror the logic for shorts.
+@@exp12_three_musketeers
+Slow %D above 50 plus a dip under the low of bar 3 arms a stop at the setup bar's high; stop under the setup bar, breakeven after an ATR move and a profit target at a multiple of the initial risk.
+@@exp12_mist2
+Walt Downs' Tigers in the Mist, pattern #2: after an n-bar breakout bar, the next bar gaps beyond that bar's extreme but closes back through it; enter on a return to the failed bar's extreme. Protective stop at the signal bar's opposite extreme plus a modified parabolic trail.
+@@exp13_oc_histogram
+EMA(close) minus EMA(open) as a trend histogram. A zero-line upcross arms a stop at that bar's high plus a fraction of ATR for ten bars; the protective stop sits below the crossover bar, and an opposite zero-cross exits at that close.
+@@exp13_dma_range_leaders
+Displaced moving-average channel plus the Range Leader bar: a wide-range bar whose midpoint clears the previous high closing above the displaced high average buys at that bar's high. Dollar stops of the original are replaced by ATR protective/breakeven/trailing stops.
+@@exp13_linreg_momentum
+Smoothed linear-regression trend plus a momentum pullback: EMA of the LR endpoint rising, close above it, momentum negative but turning up arms an ATR-offset stop above the setup bar for a few bars. The common five-stop ATR suite manages the position.
+@@exp13_mom_retrace
+Momentum-Retracement (MRTS): EMA channel + MACD signal define the trend, RSI/DMI-spread momentum arms a retracement check; a decline into the channel, a MACD downcross and an RSI drop within the window of the trend extreme arm a two-bar-high stop entry. ATR stop suite plus a trend-failure market exit.
+@@exp13_volex
+Cruz/Williams/Wright volatility expansion: every bar arms stops at the open plus/minus a factor of the four-bar average range (short factor wider). Exits: first profitable open, four-bar extreme trail, stale-trade market exit and a protective ATR stop.
+@@exp13_vol_clusters
+Volatility clusters: a close-to-close move or range beyond mean plus N standard deviations arms breakout stops at the close plus/minus the prior three-bar average range. Exit at the first profitable open or a protective ATR stop; entries can reverse the position.

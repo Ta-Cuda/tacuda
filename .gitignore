@@ -1,0 +1,36 @@
+# Build outputs
+/build/
+/build-win/
+CMakeUserPresets.json
+
+# IDE state
+/.vs/
+/.vscode/
+/.idea/
+
+# Native binaries are NOT tracked: CI (.github/workflows/native-build.yml)
+# builds them and release-packages.yml places them here before packing.
+# For local packaging see scripts/build_win_dll.bat.
+bindings/csharp/runtimes/win-x64/native/*.dll
+bindings/csharp/runtimes/linux-x64/native/*.so
+
+# Package inspection scratch
+/bindings/csharp/nupkg-check/
+
+# Language/tooling build artifacts - never track (release artifacts are
+# produced by CI from source, see .github/workflows/release-packages.yml)
+node_modules/
+__pycache__/
+*.pyc
+[Bb]in/
+[Oo]bj/
+*.pdb
+*.nupkg
+*.tgz
+*.whl
+bindings/python/dist/
+bindings/python/build/
+bindings/nodejs/dist/
+bindings/csharp/dist/
+bindings/python/tacuda/*.so
+bindings/python/tacuda/*.dll
