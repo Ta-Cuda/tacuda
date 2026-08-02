@@ -639,6 +639,105 @@ function runAllTests() {
         return count > 0 && maxDiff < 1e-4;
     });
 
+    // ---- Streaming API ----
+    console.log();
+    console.log('--- Streaming (incremental update) ---');
+
+    let streamed = null;
+    test('RsiStream reproduces the full-series result', () => {
+        const s = new tacuda.RsiStream(14);
+        try {
+            if (s.lookback !== 14 || s.outputs !== 1) return false;
+            const half = N >> 1;
+            const warm = s.append(close.subarray(0, half));
+            const out = new Float32Array(N);
+            out.set(warm, 0);
+            for (let i = half; i < N; ++i) out[i] = s.append(close.subarray(i, i + 1))[0];
+            if (s.bars !== N) return false;
+            streamed = out;
+        } finally {
+            s.destroy();
+        }
+        const full = tacuda.rsi(close, 14);
+        let maxDiff = 0;
+        for (let i = 0; i < N; ++i) {
+            const a = streamed[i], b = full[i];
+            if (Number.isNaN(a) !== Number.isNaN(b)) return false;
+            if (!Number.isNaN(a)) maxDiff = Math.max(maxDiff, Math.abs(a - b));
+        }
+        return maxDiff < 1e-3;
+    });
+
+    test('RsiStream bulk append == bar-by-bar', () => {
+        const s = new tacuda.RsiStream(14);
+        try {
+            const bulk = s.append(close);
+            for (let i = 0; i < N; ++i) {
+                const a = bulk[i], b = streamed[i];
+                if (Number.isNaN(a) !== Number.isNaN(b)) return false;
+                if (!Number.isNaN(a) && a !== b) return false;
+            }
+            return true;
+        } finally {
+            s.destroy();
+        }
+    });
+
+    test('MacdStream returns three lines', () => {
+        const s = new tacuda.MacdStream(12, 26, 9);
+        try {
+            const lines = s.append(close);
+            return Array.isArray(lines) && lines.length === 3 && s.lookback === 33;
+        } finally {
+            s.destroy();
+        }
+    });
+
+    test('RsiStreamBatch(GPU) rows == single stream', () => {
+        const series = 4;
+        const b = new tacuda.RsiStreamBatch(14, series);
+        try {
+            b.setExec(tacuda.stream.EXEC_GPU);
+            const mat = new Float32Array(series * N);
+            for (let r = 0; r < series; ++r) mat.set(close, r * N);
+            const out = b.append(mat);
+            if (b.numSeries !== series) return false;
+            for (let r = 0; r < series; ++r) {
+                for (let i = 0; i < N; ++i) {
+                    const a = out[r * N + i], c = streamed[i];
+                    if (Number.isNaN(a) !== Number.isNaN(c)) return false;
+                    if (!Number.isNaN(a) && a !== c) return false;
+                }
+            }
+            return true;
+        } finally {
+            b.destroy();
+        }
+    });
+
+    test('destroyed stream handle is rejected', () => {
+        const s = new tacuda.SmaStream(10);
+        s.destroy();
+        try {
+            s.append(close.subarray(0, 1));
+            return false;
+        } catch (e) {
+            return true;
+        }
+    });
+
+    test('stream append rejects mismatched input lengths', () => {
+        const s = new tacuda.AtrStream(14);
+        try {
+            s.append(high, low.subarray(0, N - 1), close);
+            return false;
+        } catch (e) {
+            return e instanceof RangeError;
+        } finally {
+            s.destroy();
+        }
+    });
+
     // ---- Results ----
     console.log();
     console.log('='.repeat(70));

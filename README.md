@@ -524,8 +524,8 @@ Adding a new indicator touches four places (see
 
 Current priorities live in **[docs/ROADMAP.md](docs/ROADMAP.md)**:
 
-- parallelize the remaining sequential single-series indicators (Wilder family, KAMA, OBV, HT) so no function is slower than TA-Lib through the host API;
-- incremental (streaming) updates, persistent batch plans, multi-GPU dispatch;
+- finish the streaming line: site section, live-trading guide, 0.8.0 release;
+- persistent batch plans (deferred on measurement — see the roadmap) and multi-GPU dispatch;
 - Conda/Docker/Jetson distribution;
 - **v1.0.0** — ABI freeze, signed releases, GPU test matrix in CI, LTS branch.
 

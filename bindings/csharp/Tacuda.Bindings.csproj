@@ -35,6 +35,8 @@
     <Compile Include="OhlcvSeriesExtensions.cs" />
     <Compile Include="TacudaBatch.cs" />
     <Compile Include="TacudaBatch.Generated.cs" />
+    <Compile Include="Stream.cs" />
+    <Compile Include="Stream.Families.cs" />
     <None Include="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 

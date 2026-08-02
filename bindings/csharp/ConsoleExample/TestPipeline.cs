@@ -275,6 +275,87 @@ public static class TestPipeline
                    smaMatchesBBMiddle && validCount > 0, ref passed, ref failed);
         
         // ====================================================================
+        // Streaming API: appending must reproduce the full-series result
+        // ====================================================================
+        var streamed = new float[N];
+        bool streamOk;
+        using (var rsiStream = new RsiStream(14))
+        {
+            TestResult("RsiStream lookback == 14", rsiStream.Lookback == 14, ref passed, ref failed);
+
+            int half = N / 2;
+            var head = new float[half];
+            Array.Copy(close, head, half);
+            var warm = rsiStream.Append(head);
+            Array.Copy(warm, streamed, half);
+            for (int i = half; i < N; ++i)
+            {
+                streamed[i] = rsiStream.Append(new[] { close[i] })[0];
+            }
+            TestResult($"RsiStream bars == {N}", rsiStream.Bars == N, ref passed, ref failed);
+        }
+
+        var rsiFull = new float[N];
+        NativeMethods.ct_rsi(close, rsiFull, N, period: 14);
+        streamOk = true;
+        float streamMaxDiff = 0.0f;
+        for (int i = 0; i < N; ++i)
+        {
+            bool a = float.IsNaN(streamed[i]);
+            bool b = float.IsNaN(rsiFull[i]);
+            if (a != b) { streamOk = false; break; }
+            if (!a) streamMaxDiff = Math.Max(streamMaxDiff, Math.Abs(streamed[i] - rsiFull[i]));
+        }
+        TestResult("RsiStream NaN mask == full-series", streamOk, ref passed, ref failed);
+        TestResult($"RsiStream values == full-series (maxdiff={streamMaxDiff:E2})",
+                   streamOk && streamMaxDiff < 1e-3f, ref passed, ref failed);
+
+        using (var macdStream = new MacdStream(12, 26, 9))
+        {
+            var (macdLine, signalLine, histLine) = macdStream.Append(close);
+            TestResult("MacdStream returns three lines",
+                       macdLine.Length == N && signalLine.Length == N && histLine.Length == N
+                       && macdStream.Lookback == 33, ref passed, ref failed);
+        }
+
+        using (var rsiBatchStream = new RsiStreamBatch(14, 4))
+        {
+            rsiBatchStream.SetExec(StreamExec.Gpu);
+            var matrix = new float[4 * N];
+            for (int r = 0; r < 4; ++r) Array.Copy(close, 0, matrix, r * N, N);
+            var batchOut = rsiBatchStream.Append(matrix);
+            bool rowsOk = rsiBatchStream.SeriesCount == 4;
+            for (int r = 0; r < 4 && rowsOk; ++r)
+            {
+                for (int i = 0; i < N; ++i)
+                {
+                    float a = batchOut[r * N + i];
+                    float c = streamed[i];
+                    if (float.IsNaN(a) != float.IsNaN(c) || (!float.IsNaN(a) && a != c))
+                    {
+                        rowsOk = false;
+                        break;
+                    }
+                }
+            }
+            TestResult("RsiStreamBatch(4, GPU) rows == single stream", rowsOk, ref passed, ref failed);
+        }
+
+        var disposedStream = new SmaStream(10);
+        disposedStream.Dispose();
+        bool rejected;
+        try
+        {
+            disposedStream.Append(new[] { close[0] });
+            rejected = false;
+        }
+        catch (ObjectDisposedException)
+        {
+            rejected = true;
+        }
+        TestResult("Disposed stream handle is rejected", rejected, ref passed, ref failed);
+
+        // ====================================================================
         // Results
         // ====================================================================
         Console.WriteLine();

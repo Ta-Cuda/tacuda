@@ -200,6 +200,8 @@ add_library(tacuda SHARED
     src/api/api_device.cu
     src/api/api_vector_math.cu
     src/api/api_batch.cu
+    src/api/api_stream.cpp
+    src/api/api_stream_batch.cu
     src/utils/DeviceBufferPool.cu
     src/utils/TacudaConfig.cpp
     src/utils/ErrorState.cpp
@@ -266,6 +268,20 @@ if (BUILD_TESTING)
   add_test(
     NAME bindings_up_to_date
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/bindings/generate_bindings.py --check
+  )
+
+  # The streaming surface is handle-based, so it has its own emitter for the
+  # repetitive C# wrappers; the same staleness gate applies.
+  add_test(
+    NAME stream_bindings_up_to_date
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/bindings/generate_stream_bindings.py --check
+  )
+
+  # Coverage gate: every symbol in the public headers, streaming included,
+  # must be reachable from Python, Node.js and C#.
+  add_test(
+    NAME bindings_coverage
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/bindings/audit_bindings.py
   )
 endif()
 

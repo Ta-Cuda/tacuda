@@ -1,6 +1,117 @@
 Changelog
 =========
 
+Unreleased (0.8.0 development)
+------------------------------
+Streaming (incremental update) API, milestones M1, M2 and M3 — single-series
+streams, batch (portfolio) streams, and language bindings with corpus-level
+parity verification. User guide: `docs/STREAMING_API.md`, rationale:
+`docs/DESIGN_STREAMING_API.md`.
+
+M3 — bindings and the streaming corpus:
+
+- Python (`tacuda.stream`), Node.js (`tacuda.RsiStream`, ...) and C#
+  (`RsiStream`, ...) wrappers for all 20 stream types. Hand-written rather
+  than generated: the binding generator models array-in/array-out calls and
+  cannot express a handle with a lifetime. Idiomatic per language — context
+  managers in Python, `destroy()`/`Symbol.dispose` in Node, `IDisposable`
+  with tuple returns in C#; a released handle is rejected everywhere instead
+  of reaching freed native state.
+- `bindings/audit_bindings.py` grew a streaming bucket: all 52 streaming
+  symbols must be reachable from every language, expanding the family tables
+  the Python and Node wrappers are built from rather than trusting a literal
+  name scan. Verified to actually fail (exit 1, 4 gaps) when a family is
+  removed. Wired into ctest as `bindings_coverage`.
+- `bindings/generate_stream_bindings.py` emits the repetitive C# per-family
+  wrappers with a `--check` staleness gate, wired into ctest as
+  `stream_bindings_up_to_date`.
+- New `benchmarks/streaming_corpus.py`: all ten families over the seven
+  differential-corpus datasets under the same strict oracle, asserting that
+  chunked appends (1/3/16/all) reproduce the full-series tacuda call, that
+  the chunkings are bit-identical to each other, that the result matches the
+  installed **TA-Lib**, and that batch rows equal single streams on both
+  execution paths. **699/699 cells pass.** The single exclusion is NATR on
+  the zero-crossing dataset, where TA-Lib's own ta_NATR.c corrupts its first
+  output bar — the same exclusion the differential corpus already makes.
+- Streaming cases added to all three binding pipelines: Python 34/34,
+  Node 201/201, C# 36/36. C++ suite plus binding gates: 419/419.
+
+M2 — batch (portfolio) streams:
+
+- 27 more appended C ABI symbols: `ctStreamBatch_t` carries `numSeries`
+  independent series of one indicator, one append advances all of them
+  (`ct_<family>_stream_batch_create/append` for the same ten families, plus
+  `ct_stream_batch_{destroy,reset,lookback,series,outputs,bars,set_exec}`).
+  Matrices are series-major like the batch API.
+- The state machines moved to `include/utils/StreamStates.h` as POD structs
+  with `__host__ __device__` step functions, so the single-series path, the
+  CPU batch path and the CUDA kernel run *the same* recurrence. A batch of N
+  series is therefore bit-identical to N separate streams — asserted per
+  family, per execution path, in `tests/cpp/test_stream_batch.cpp` (8 cases,
+  including reset invalidating resident device state and policy changes
+  mid-stream migrating state rather than restarting it).
+- `ctStreamExec_t` selects CPU or GPU; `CT_STREAM_EXEC_AUTO` switches at the
+  measured crossover of 2048 series. 7-indicator pipeline, one bar per tick,
+  i3-12100F + RTX 3090 Ti (`benchmarks/bench_stream_portfolio.cpp`):
+  **256 symbols p99 19.5 µs** against the 1 ms acceptance target; CPU wins to
+  1024 symbols (67.6 µs vs 124 µs), the paths meet at 2048 (141 vs 139 µs),
+  and the GPU wins above (65 536 symbols: 764 µs vs 4 721 µs). AUTO keeps p99
+  under 1 ms through 65 536 symbols.
+- Dropped before shipping: a library-managed CPU thread pool. Spawning
+  workers per append measured 595 µs at *every* portfolio size — thread
+  creation swamped the work. Series are independent, so callers who want CPU
+  parallelism shard across several handles with their own threads.
+- Persistent batch plans are deliberately not built yet. Batch streams
+  already keep device state and I/O buffers resident, so what a plan would
+  still buy is one OHLCV upload per tick instead of one per indicator; that
+  is worth much of the GPU tick cost at tens of thousands of symbols, but the
+  acceptance target is met without it. Rationale recorded in
+  DESIGN_STREAMING_API.md D3.
+
+M1 — single-series streams:
+
+- New public header `include/tacuda_stream.h` and 25 appended C ABI
+  symbols: an opaque `ctStream_t` handle with shared lifetime calls
+  (`ct_stream_destroy`/`reset`/`lookback`/`bars`/`outputs`) plus
+  `create`/`append` pairs for ten families — SMA, EMA, WMA, RSI, ATR,
+  NATR, OBV, AD, MACD (3 lines) and BBANDS (3 lines). Append-only, so the
+  existing ABI is untouched.
+- Streams carry their state on the host in double precision. Measured on
+  the RTX 3090 Ti (RSI(14), `benchmarks/bench_stream_latency.cpp`): an
+  append costs p50 0.04 µs regardless of history length, against p50
+  142 µs (100K bars) and 1 234 µs (1M bars) for a full `ct_rsi`
+  recompute — roughly 3 500x and 31 000x per tick. History replay runs at
+  ~55 M bars/s. This measurement is what settled the CPU-vs-GPU choice for
+  single-series updates; portfolio-wide appends stay the GPU's job and are
+  the next milestone.
+- Each state machine mirrors the exact recurrence of its full-series
+  counterpart, including the load-bearing details: TA-Lib's flat-window
+  RSI convention and NaN poisoning, the ATR seed as the mean of
+  TR[1..period] landing at index `period`, NATR's `TA_IS_ZERO` close
+  guard, MACD's two EMA seeds taken at `slowPeriod-1` (the fast one is the
+  fast-length SMA *ending* there) with the signal EMA consuming the
+  float-rounded MACD line and all three lines sharing one `outBegIdx`, and
+  BBANDS' population variance clamped at zero.
+- Parity is verified against the full-series host API, not asserted:
+  `tests/cpp/test_stream_api.cpp` (18 cases) compares every family at four
+  chunk sizes (1, 3, 16, whole series) under the corpus oracle. NaN masks
+  match exactly; MACD, OBV, AD and SMA are bit-identical, the rest agree
+  within 1.2e-07 (EMA/WMA/BBANDS) to 7.4e-07 (NATR) relative — streams are
+  double where some full-series kernels recurse in float, so they are at
+  least as accurate, not bit-equal.
+- Lifetime and error contract match the host API: `api_guard` equivalent
+  on every entry point, thread-local `ct_get_last_error()`, NULL-safe
+  destroy, use-after-destroy rejected with `CT_STATUS_INVALID_ARGUMENT`
+  instead of undefined behavior, and an append through the wrong family's
+  function rejected rather than silently misread.
+- Window families (SMA/WMA/BBANDS) re-sum their ring buffer per bar
+  (O(period), independent of history) rather than keeping a rolling
+  accumulator, which would drift away from the full-series kernels.
+
+Not yet: batch/portfolio streams, persistent batch plans, `_ex` dtype
+variants, state serialization, and language bindings (the C ABI is stable
+and FFI-callable today).
+
 0.7.1 — 2026-07-13
 ------------------
 Third-round audit fixes: the last lifetime hole, full device error

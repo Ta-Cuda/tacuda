@@ -61,6 +61,11 @@ jobs:
       - name: Bindings coverage audit
         run: python3 bindings/audit_bindings.py
 
+      # The streaming C# wrappers are emitted from a table; a stale checked-in
+      # file would silently drift from the header.
+      - name: Streaming bindings up to date
+        run: python3 bindings/generate_stream_bindings.py --check
+
       - uses: actions/upload-artifact@v4
         with:
           name: native-linux-x64
@@ -142,6 +147,23 @@ jobs:
           export PYTHONPATH="$PWD/bindings/python"
           cd benchmarks && python3 differential_corpus.py --json corpus.json
 
+      # Same oracle, different claim: appending bars must reproduce the
+      # full-series result and TA-Lib, and a batch must equal N single
+      # streams on both execution paths.
+      - name: Streaming corpus (incremental vs full recompute vs TA-Lib)
+        run: |
+          export TACUDA_LIBRARY="$PWD/build/libtacuda.so"
+          export PYTHONPATH="$PWD/bindings/python"
+          cd benchmarks && python3 streaming_corpus.py --json streaming_corpus.json
+
       - name: Node.js binding pipeline
         run: |
           cd bindings/nodejs && npm install --no-audit --no-fund && node test_pipeline.js
+
+      # The C# surface was previously only smoke-tested at packaging time, so
+      # binding-level regressions could reach a release unnoticed.
+      - name: C# binding pipeline
+        run: |
+          export LD_LIBRARY_PATH="$PWD/build:$LD_LIBRARY_PATH"
+          cd bindings/csharp/ConsoleExample
+          dotnet run -c Release -f net8.0 -- --pipeline

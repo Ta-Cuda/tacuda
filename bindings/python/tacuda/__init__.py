@@ -1027,6 +1027,9 @@ class OHLCV:
     def __repr__(self) -> str:  # pragma: no cover - debugging helper
         return f"OHLCV(size={self.size})"
 
+# Imported last: stream.py needs the loaded `_lib` from this module.
+from . import stream  # noqa: E402
+
 __all_list = sorted(_SPEC)
-__all_list.extend(("OHLCV", "version"))
+__all_list.extend(("OHLCV", "version", "stream"))
 __all__ = tuple(__all_list)

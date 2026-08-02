@@ -494,6 +494,68 @@ def run_pipeline_test():
         print(f"  [ERROR] Cross-check: {e}")
         results["failed"] += 1
     
+
+    # ====================================================================
+    # Streaming API: appending must reproduce the full-series result
+    # ====================================================================
+    try:
+        n = len(close)
+        with tacuda.stream.Rsi(14) as st:
+            test_result(f"stream.Rsi lookback == 14", st.lookback == 14, results)
+            warm = st.append(close[: n // 2])
+            tail = np.concatenate(
+                [st.append(close[i : i + 1]) for i in range(n // 2, n)]
+            )
+            streamed = np.concatenate([warm, tail])
+            test_result(f"stream.Rsi bars == {n}", st.bars == n, results)
+
+        full = tacuda.rsi(close, 14)
+        mask_ok = np.array_equal(np.isnan(streamed), np.isnan(full))
+        test_result("stream.Rsi NaN mask == full-series", mask_ok, results)
+        both = ~np.isnan(streamed) & ~np.isnan(full)
+        diff = np.max(np.abs(streamed[both] - full[both])) if both.any() else 0.0
+        test_result(f"stream.Rsi values == full-series (maxdiff={diff:.2e})",
+                    diff < 1e-3, results)
+
+        # Chunking must not change the result.
+        with tacuda.stream.Rsi(14) as st:
+            bulk = st.append(close)
+        test_result("stream.Rsi chunked == bulk",
+                    np.array_equal(np.nan_to_num(bulk, nan=-1.0),
+                                   np.nan_to_num(streamed, nan=-1.0)),
+                    results)
+
+        # Multi-output family returns one array per line.
+        with tacuda.stream.Macd(12, 26, 9) as st:
+            lines = st.append(close)
+        test_result("stream.Macd returns 3 lines", len(lines) == 3, results)
+
+        # Batch: every row equals the single-series stream.
+        series = 4
+        with tacuda.stream.RsiBatch(14, num_series=series) as bt:
+            bt.set_exec(tacuda.stream.EXEC_GPU)
+            mat = np.repeat(close[None, :], series, axis=0)
+            out = bt.append(mat)
+        rows_ok = all(
+            np.array_equal(np.nan_to_num(out[r], nan=-1.0),
+                           np.nan_to_num(streamed, nan=-1.0))
+            for r in range(series)
+        )
+        test_result(f"stream.RsiBatch({series}, GPU) rows == single stream",
+                    rows_ok, results)
+
+        # A destroyed handle must be rejected, not dereferenced.
+        dead = tacuda.stream.Sma(10)
+        dead.close()
+        try:
+            dead.append(close[:1])
+            test_result("stream: use-after-close rejected", False, results)
+        except Exception:
+            test_result("stream: use-after-close rejected", True, results)
+    except Exception as e:
+        print(f"  [ERROR] streaming: {e}")
+        results["failed"] += 1
+
     # ====================================================================
     # Results
     # ====================================================================

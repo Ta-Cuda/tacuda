@@ -1640,7 +1640,234 @@ const OHLCV_COLUMNS = {
 // Module Exports
 // ============================================================================
 
+// ============================================================================
+// Streaming (incremental update) API — docs/STREAMING_API.md
+//
+// A stream carries indicator state across calls, so a newly closed bar costs
+// a state update instead of a full-series recompute. Handle-based, so these
+// are classes rather than the plain array-in/array-out functions above.
+// ============================================================================
+
+const EXEC_AUTO = 0;
+const EXEC_CPU = 1;
+const EXEC_GPU = 2;
+
+const ct_get_last_error_str = lib.func('const char *ct_get_last_error()');
+
+function streamCheck(status, fnName) {
+    if (status !== 0) {
+        let detail = '';
+        try { detail = ct_get_last_error_str() || ''; } catch (e) { /* best effort */ }
+        throw new Error(`${fnName} failed with status ${status}${detail ? ': ' + detail : ''}`);
+    }
+}
+
+// Shared lifetime / introspection entry points.
+const ct_stream_destroy  = lib.func('int ct_stream_destroy(void *stream)');
+const ct_stream_reset    = lib.func('int ct_stream_reset(void *stream)');
+const ct_stream_lookback = lib.func('int ct_stream_lookback(void *stream, _Out_ int *out)');
+const ct_stream_bars     = lib.func('int ct_stream_bars(void *stream, _Out_ int64_t *out)');
+const ct_stream_outputs  = lib.func('int ct_stream_outputs(void *stream, _Out_ int *out)');
+
+const ct_stream_batch_destroy  = lib.func('int ct_stream_batch_destroy(void *batch)');
+const ct_stream_batch_reset    = lib.func('int ct_stream_batch_reset(void *batch)');
+const ct_stream_batch_lookback = lib.func('int ct_stream_batch_lookback(void *batch, _Out_ int *out)');
+const ct_stream_batch_bars     = lib.func('int ct_stream_batch_bars(void *batch, _Out_ int64_t *out)');
+const ct_stream_batch_outputs  = lib.func('int ct_stream_batch_outputs(void *batch, _Out_ int *out)');
+const ct_stream_batch_series   = lib.func('int ct_stream_batch_series(void *batch, _Out_ int *out)');
+const ct_stream_batch_set_exec = lib.func('int ct_stream_batch_set_exec(void *batch, int exec)');
+
+// Per family: class name, C stem, input components, output lines, create params.
+const STREAM_FAMILIES = [
+    { cls: 'Sma',    stem: 'sma',    inputs: ['close'],                          outputs: 1, params: [['int', 'period']] },
+    { cls: 'Ema',    stem: 'ema',    inputs: ['close'],                          outputs: 1, params: [['int', 'period']] },
+    { cls: 'Wma',    stem: 'wma',    inputs: ['close'],                          outputs: 1, params: [['int', 'period']] },
+    { cls: 'Rsi',    stem: 'rsi',    inputs: ['close'],                          outputs: 1, params: [['int', 'period']] },
+    { cls: 'Atr',    stem: 'atr',    inputs: ['high', 'low', 'close'],           outputs: 1, params: [['int', 'period']] },
+    { cls: 'Natr',   stem: 'natr',   inputs: ['high', 'low', 'close'],           outputs: 1, params: [['int', 'period']] },
+    { cls: 'Obv',    stem: 'obv',    inputs: ['close', 'volume'],                outputs: 1, params: [] },
+    { cls: 'Ad',     stem: 'ad',     inputs: ['high', 'low', 'close', 'volume'], outputs: 1, params: [] },
+    { cls: 'Macd',   stem: 'macd',   inputs: ['close'],                          outputs: 3, params: [['int', 'fastPeriod'], ['int', 'slowPeriod'], ['int', 'signalPeriod']] },
+    { cls: 'Bbands', stem: 'bbands', inputs: ['close'],                          outputs: 3, params: [['int', 'period'], ['float', 'upperMul'], ['float', 'lowerMul']] },
+];
+
+function streamProtoArgs(fam, batch) {
+    const create = fam.params.map(([t, n]) => `${t} ${n}`);
+    if (batch) create.push('int numSeries');
+    create.push('_Out_ void **out');
+    const append = ['void *handle'];
+    for (const name of fam.inputs) append.push(`const float *${name}`);
+    append.push('int n');
+    for (let k = 0; k < fam.outputs; ++k) append.push(`float *out${k}`);
+    return { create: create.join(', '), append: append.join(', ') };
+}
+
+/** Common handle plumbing; the generated subclasses only add construction. */
+class StreamHandleBase {
+    constructor(handle, isBatch) {
+        this._handle = handle;
+        this._isBatch = isBatch;
+    }
+
+    _require() {
+        if (!this._handle) throw new Error('stream: handle already destroyed');
+        return this._handle;
+    }
+
+    /** Release the native handle. Safe to call more than once. */
+    destroy() {
+        if (this._handle) {
+            (this._isBatch ? ct_stream_batch_destroy : ct_stream_destroy)(this._handle);
+            this._handle = null;
+        }
+    }
+
+    /** Drop state, keep parameters — equivalent to a fresh stream. */
+    reset() {
+        const fn = this._isBatch ? ct_stream_batch_reset : ct_stream_reset;
+        streamCheck(fn(this._require()), 'ct_stream_reset');
+    }
+
+    /** Bars needed before the first non-NaN output. */
+    get lookback() {
+        const out = [0];
+        const fn = this._isBatch ? ct_stream_batch_lookback : ct_stream_lookback;
+        streamCheck(fn(this._require(), out), 'ct_stream_lookback');
+        return out[0];
+    }
+
+    /** Bars appended since creation or the last reset. */
+    get bars() {
+        const out = [0];
+        const fn = this._isBatch ? ct_stream_batch_bars : ct_stream_bars;
+        streamCheck(fn(this._require(), out), 'ct_stream_bars');
+        return Number(out[0]);
+    }
+
+    /** Number of output lines the matching append returns. */
+    get outputs() {
+        const out = [0];
+        const fn = this._isBatch ? ct_stream_batch_outputs : ct_stream_outputs;
+        streamCheck(fn(this._require(), out), 'ct_stream_outputs');
+        return out[0];
+    }
+}
+
+// `using` support where the runtime has explicit resource management.
+if (typeof Symbol !== 'undefined' && Symbol.dispose) {
+    StreamHandleBase.prototype[Symbol.dispose] = function () { this.destroy(); };
+}
+
+const streamClasses = {};
+
+for (const fam of STREAM_FAMILIES) {
+    const proto = streamProtoArgs(fam, false);
+    const protoBatch = streamProtoArgs(fam, true);
+    const createFn = lib.func(`int ct_${fam.stem}_stream_create(${proto.create})`);
+    const appendFn = lib.func(`int ct_${fam.stem}_stream_append(${proto.append})`);
+    const createBatchFn = lib.func(`int ct_${fam.stem}_stream_batch_create(${protoBatch.create})`);
+    const appendBatchFn = lib.func(`int ct_${fam.stem}_stream_batch_append(${protoBatch.append})`);
+
+    const single = class extends StreamHandleBase {
+        constructor(...params) {
+            if (params.length !== fam.params.length) {
+                throw new TypeError(`${fam.cls}Stream expects ${fam.params.length} argument(s) ` +
+                    `(${fam.params.map(p => p[1]).join(', ')}), got ${params.length}`);
+            }
+            const out = [null];
+            streamCheck(createFn(...params, out), `ct_${fam.stem}_stream_create`);
+            super(out[0], false);
+        }
+
+        /**
+         * Append bars; one TypedArray per input component. Returns a
+         * Float32Array, or an array of them for multi-line families.
+         */
+        append(...arrays) {
+            const handle = this._require();
+            if (arrays.length !== fam.inputs.length) {
+                throw new TypeError(`${fam.cls}Stream.append expects ${fam.inputs.length} ` +
+                    `array(s) (${fam.inputs.join(', ')}), got ${arrays.length}`);
+            }
+            const cols = arrays.map(toFloat32Array);
+            assertSameLength(cols, `${fam.cls}Stream.append`);
+            const n = cols[0].length;
+            if (n === 0) throw new RangeError(`${fam.cls}Stream.append: need at least one bar`);
+            const outs = [];
+            for (let k = 0; k < fam.outputs; ++k) outs.push(new Float32Array(n));
+            streamCheck(appendFn(handle, ...cols, n, ...outs),
+                        `ct_${fam.stem}_stream_append`);
+            return fam.outputs === 1 ? outs[0] : outs;
+        }
+    };
+
+    const batch = class extends StreamHandleBase {
+        constructor(...params) {
+            const numSeries = params.pop();
+            if (params.length !== fam.params.length) {
+                throw new TypeError(`${fam.cls}StreamBatch expects ` +
+                    `${fam.params.length + 1} argument(s) ` +
+                    `(${[...fam.params.map(p => p[1]), 'numSeries'].join(', ')})`);
+            }
+            if (!Number.isInteger(numSeries) || numSeries <= 0) {
+                throw new RangeError(`${fam.cls}StreamBatch: numSeries must be a positive integer`);
+            }
+            const out = [null];
+            streamCheck(createBatchFn(...params, numSeries, out),
+                        `ct_${fam.stem}_stream_batch_create`);
+            super(out[0], true);
+            this._numSeries = numSeries;
+        }
+
+        /** Series carried by this handle. */
+        get numSeries() { return this._numSeries; }
+
+        /** Pick where appends run: EXEC_AUTO (default), EXEC_CPU or EXEC_GPU. */
+        setExec(exec) {
+            streamCheck(ct_stream_batch_set_exec(this._require(), exec),
+                        'ct_stream_batch_set_exec');
+        }
+
+        /**
+         * Append `n` bars to every series. Matrices are series-major and flat:
+         * series s occupies [s * n, s * n + n).
+         */
+        append(...matrices) {
+            const handle = this._require();
+            if (matrices.length !== fam.inputs.length) {
+                throw new TypeError(`${fam.cls}StreamBatch.append expects ` +
+                    `${fam.inputs.length} matrix/matrices (${fam.inputs.join(', ')}), ` +
+                    `got ${matrices.length}`);
+            }
+            const cols = matrices.map(toFloat32Array);
+            assertSameLength(cols, `${fam.cls}StreamBatch.append`);
+            const total = cols[0].length;
+            if (total % this._numSeries !== 0) {
+                throw new RangeError(`${fam.cls}StreamBatch.append: input length ${total} ` +
+                    `is not a multiple of numSeries ${this._numSeries}`);
+            }
+            const n = total / this._numSeries;
+            if (n === 0) throw new RangeError(`${fam.cls}StreamBatch.append: need at least one bar`);
+            const outs = [];
+            for (let k = 0; k < fam.outputs; ++k) outs.push(new Float32Array(total));
+            streamCheck(appendBatchFn(handle, ...cols, n, ...outs),
+                        `ct_${fam.stem}_stream_batch_append`);
+            return fam.outputs === 1 ? outs[0] : outs;
+        }
+    };
+
+    Object.defineProperty(single, 'name', { value: `${fam.cls}Stream` });
+    Object.defineProperty(batch, 'name', { value: `${fam.cls}StreamBatch` });
+    streamClasses[`${fam.cls}Stream`] = single;
+    streamClasses[`${fam.cls}StreamBatch`] = batch;
+}
+
+const stream = Object.assign({ EXEC_AUTO, EXEC_CPU, EXEC_GPU }, streamClasses);
+
 module.exports = {
+    // Streaming (incremental update) API: handle-based, one state per series
+    stream,
+    ...streamClasses,
     // Moving Averages
     sma, ema, wma, dema, tema, trima, t3, kama, ma, mavp,
     // Momentum
