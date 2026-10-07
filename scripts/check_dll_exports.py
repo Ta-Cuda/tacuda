@@ -1,72 +1,75 @@
 #!/usr/bin/env python3
-# ============================================================================
-#  TaCuda | GPU-accelerated technical analysis | https://tacuda.com
-#  Copyright (c) 2024-2026 Paul Deecalov <paul@deecalov.com>
-#  SPDX-License-Identifier: Apache-2.0
-# ============================================================================
-"""Smoke-check native tacuda binaries for required export symbols.
-
-Usage:
-    python scripts/check_dll_exports.py [path ...]
-
-Without arguments checks the default local build outputs. Exits non-zero if
-any listed binary is missing or lacks a required export, so it can gate CI
-release jobs (see .github/workflows/native-build.yml).
-"""
+"""Check every public C declaration against PE/ELF exports, without loading CUDA."""
+import os
 import pathlib
+import re
+import shutil
+import subprocess
 import sys
 
-DEFAULT_TARGETS = [
-    r"E:\TaCuda\build-win\tacuda.dll",
-    "build/libtacuda.so",
-]
-
-# One representative symbol per API generation; extend when the ABI grows.
-REQUIRED_EXPORTS = [
-    b"ct_sma",                # core host API
-    b"ct_macdext",            # 0.1.2 MA-type MACD
-    b"ct_sin_d",              # 0.1.2 vector math (device)
-    b"ct_add",                # 0.1.2 vector math (host)
-    b"ct_device_alloc_ex",    # dtype-aware device allocations
-    b"ct_sma_ex_d",           # dtype-aware kernels
-    b"ct_version",            # 0.2.0 version introspection
-    b"ct_sma_batch",          # 0.2.0 batched host API
-    b"ct_stochastic_batch_d", # 0.2.0 batched device API
-    b"ct_wma_batch",          # 0.3.0 generated batch families (host)
-    b"ct_macdext_batch",      # 0.3.0 multi-output generated batch
-    b"ct_aroon_batch_d",      # 0.3.0 generated batch families (device)
-    b"ct_mfi_batch",          # 0.3.0 HLCV-input generated batch
-]
+ROOT = pathlib.Path(__file__).resolve().parents[1]
+HEADERS = ('tacuda.h', 'tacuda_device.h', 'tacuda_stream.h')
 
 
-def check(path: pathlib.Path) -> bool:
-    if not path.exists():
-        print(f"{path} -> MISSING FILE")
+def required_exports():
+    names = set()
+    for name in HEADERS:
+        text = (ROOT / 'include' / name).read_text(encoding='utf-8')
+        text = re.sub(r'/\*.*?\*/|//[^\n]*', '', text, flags=re.S)
+        names.update(re.findall(r'CTAPI_EXPORT\s+[^;{}]*?\b(ct_\w+)\s*\(', text))
+    if not names:
+        raise ValueError('no public declarations found')
+    return names
+
+
+def dumpbin_path():
+    tool = shutil.which('dumpbin')
+    if tool:
+        return tool
+    vswhere = pathlib.Path(os.environ.get('ProgramFiles(x86)', 'C:/Program Files (x86)')) / 'Microsoft Visual Studio/Installer/vswhere.exe'
+    install = subprocess.check_output(
+        [str(vswhere), '-latest', '-products', '*', '-requires',
+         'Microsoft.VisualStudio.Component.VC.Tools.x86.x64', '-property', 'installationPath'],
+        text=True).strip()
+    candidates = sorted((pathlib.Path(install) / 'VC/Tools/MSVC').glob('*/bin/Hostx64/x64/dumpbin.exe'))
+    if not candidates:
+        raise FileNotFoundError('dumpbin not found; initialize the MSVC environment')
+    return str(candidates[-1])
+
+
+def exported_symbols(path):
+    with path.open('rb') as fh:
+        magic = fh.read(4)
+    if magic[:2] == b'MZ':
+        output = subprocess.check_output([dumpbin_path(), '/nologo', '/exports', str(path)], text=True, errors='replace')
+        return set(re.findall(r'^\s+\d+\s+[\da-fA-F]+\s+[\da-fA-F]+\s+(ct_\w+)(?=\s|$)', output, re.M))
+    if magic == b'\x7fELF':
+        output = subprocess.check_output(['nm', '-D', '--defined-only', str(path)], text=True, errors='replace')
+        return set(re.findall(r'^\S+\s+\S\s+(ct_\w+)(?:@\S+)?$', output, re.M))
+    raise ValueError('expected a PE or ELF native library')
+
+
+def check(path, required=None):
+    try:
+        required = required if required is not None else required_exports()
+        exported = exported_symbols(path)
+        missing = sorted(required - exported)
+        if missing:
+            print(f'FAIL {path}: {len(missing)} missing exports: ' + ', '.join(missing))
+            return False
+        print(f'PASS {path}: all {len(required)} public declarations exported')
+        return True
+    except (OSError, ValueError, subprocess.SubprocessError) as exc:
+        print(f'FAIL {path}: {exc}')
         return False
-    blob = path.read_bytes()
-    ok = True
-    print(path)
-    for name in REQUIRED_EXPORTS:
-        present = name in blob
-        ok &= present
-        print(f"    {name.decode():<24} {'OK' if present else 'ABSENT'}")
-    return ok
 
 
-def main() -> int:
-    targets = [pathlib.Path(a) for a in sys.argv[1:]] or [
-        pathlib.Path(t) for t in DEFAULT_TARGETS
-    ]
-    results = [check(t) for t in targets]
-    if not any(results):
-        print("FAIL: no target binary passed the export check")
-        return 1
-    if not all(results):
-        print("FAIL: at least one target binary failed the export check")
-        return 1
-    print("PASS: all export checks succeeded")
-    return 0
+def main():
+    targets = [pathlib.Path(p) for p in sys.argv[1:]]
+    if not targets:
+        targets = [ROOT / ('build-win/tacuda.dll' if os.name == 'nt' else 'build/libtacuda.so')]
+    return 0 if all([check(path) for path in targets]) else 1
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     sys.exit(main())

@@ -498,3 +498,38 @@ TEST(TacudaStreamBatch, DestroyIsNullSafeAndRejectsReuse) {
   EXPECT_EQ(ct_stream_batch_lookback(raw, &lb), CT_STATUS_INVALID_ARGUMENT);
   EXPECT_EQ(ct_stream_batch_destroy(raw), CT_STATUS_INVALID_ARGUMENT);
 }
+
+TEST(TacudaStreamBatch, RetiredHandleCannotAliasNewBatch) {
+  ctStreamBatch_t *retired = nullptr;
+  ASSERT_EQ(ct_sma_stream_batch_create(3, 2, &retired), CT_STATUS_SUCCESS);
+  ASSERT_EQ(ct_stream_batch_destroy(retired), CT_STATUS_SUCCESS);
+  for (int i = 0; i < 256; ++i) {
+    BatchHandle live;
+    ASSERT_EQ(ct_sma_stream_batch_create(3, 2, live.out()), CT_STATUS_SUCCESS);
+    ASSERT_NE(live.get(), retired);
+    float in[] = {1, 2, 3, 4, 5, 6}, out[6] = {};
+    ASSERT_EQ(ct_sma_stream_batch_append(live.get(), in, 3, out), CT_STATUS_SUCCESS);
+    EXPECT_FLOAT_EQ(out[2], 2);
+    EXPECT_FLOAT_EQ(out[5], 5);
+    long long bars = -1;
+    int count = -1;
+    EXPECT_EQ(ct_stream_batch_bars(retired, &bars), CT_STATUS_INVALID_ARGUMENT);
+    EXPECT_EQ(ct_stream_batch_series(retired, &count), CT_STATUS_INVALID_ARGUMENT);
+    EXPECT_EQ(ct_stream_batch_outputs(retired, &count), CT_STATUS_INVALID_ARGUMENT);
+    EXPECT_EQ(ct_stream_batch_set_exec(retired, CT_STREAM_EXEC_CPU), CT_STATUS_INVALID_ARGUMENT);
+    EXPECT_EQ(ct_stream_batch_destroy(retired), CT_STATUS_INVALID_ARGUMENT);
+    EXPECT_EQ(bars, -1);
+    EXPECT_EQ(count, -1);
+    ASSERT_EQ(ct_stream_batch_bars(live.get(), &bars), CT_STATUS_SUCCESS);
+    EXPECT_EQ(bars, 3);
+  }
+}
+
+TEST(TacudaStreamBatch, RejectsWrongHandleKindWithoutDereference) {
+  SingleHandle single;
+  ASSERT_EQ(ct_sma_stream_create(3, single.out()), CT_STATUS_SUCCESS);
+  auto *wrong = reinterpret_cast<ctStreamBatch_t *>(single.get());
+  EXPECT_EQ(ct_stream_batch_reset(wrong), CT_STATUS_INVALID_ARGUMENT);
+  EXPECT_EQ(ct_stream_batch_destroy(wrong), CT_STATUS_INVALID_ARGUMENT);
+  EXPECT_EQ(ct_stream_reset(single.get()), CT_STATUS_SUCCESS);
+}

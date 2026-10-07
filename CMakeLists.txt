@@ -11,6 +11,7 @@ set(CMAKE_CUDA_STANDARD 17)
 set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 
 option(BUILD_TESTING "Enable tests" ON)
+option(TACUDA_ENABLE_ASAN_TEST "Build CPU-only streaming lifetime regression with AddressSanitizer" OFF)
 
 # -----------------------------------------------------------------------------
 # CUDA architecture selection
@@ -228,6 +229,23 @@ target_include_directories(tacuda
 find_package(CUDAToolkit REQUIRED)
 target_link_libraries(tacuda PRIVATE CUDA::cudart)
 
+# Instrument the implementation, not just a consumer of an uninstrumented DLL.
+# No GPU is needed to run this target; CUDA headers only supply ABI types.
+if (TACUDA_ENABLE_ASAN_TEST)
+  find_package(Threads REQUIRED)
+  add_executable(stream_lifetime_sanitizer tests/stream_lifetime_sanitizer.cpp
+      src/api/api_stream.cpp src/utils/ErrorState.cpp)
+  target_include_directories(stream_lifetime_sanitizer PRIVATE include ${CUDAToolkit_INCLUDE_DIRS})
+  target_link_libraries(stream_lifetime_sanitizer PRIVATE Threads::Threads)
+  if (MSVC)
+    target_compile_options(stream_lifetime_sanitizer PRIVATE /fsanitize=address /Zi)
+    target_link_options(stream_lifetime_sanitizer PRIVATE /INCREMENTAL:NO)
+  else()
+    target_compile_options(stream_lifetime_sanitizer PRIVATE -fsanitize=address -fno-omit-frame-pointer -g)
+    target_link_options(stream_lifetime_sanitizer PRIVATE -fsanitize=address)
+  endif()
+endif()
+
 # Включаем C++17 features для CUDA
 target_compile_features(tacuda PRIVATE cxx_std_17)
 
@@ -283,6 +301,12 @@ if (BUILD_TESTING)
     NAME bindings_coverage
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/bindings/audit_bindings.py
   )
+
+  add_test(NAME release_versions
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/check_release.py)
+  if (TACUDA_ENABLE_ASAN_TEST)
+    add_test(NAME stream_lifetime_sanitizer COMMAND stream_lifetime_sanitizer)
+  endif()
 endif()
 
 # Strategy optimizer tool (tools/optimizer, target: tacuda-opt)

@@ -4,13 +4,18 @@ Measured baselines: RTX 3090 Ti, CUDA 12.8, float32, host API timings
 include PCIe transfers (headline tables in the [project README](../README.md#-performance-benchmarks);
 reproduce with the scripts in `benchmarks/`).
 
+Historical timings below were recorded before the 0.8.0 handle-registry fix.
+Use dated validation results to assess current streaming latency. Vector-math
+speedups must name the CPU baseline; `benchmark_vector_math.py --json report.json`
+records both baselines, versions, sizes and timing policy.
+
 ## What is fast where
 
 | Workload | Recommended path | Typical gain vs TA-Lib (CPU) |
 |----------|------------------|------------------------------|
 | Single indicator, single series | host API | 0.4–6.2x depending on the indicator (see below) |
 | Multi-indicator pipeline, one upload | device API (`ct_*_d`) | 10–15x+ |
-| Element-wise math on big arrays | device vector math | 43–1167x on 10M elements |
+| Element-wise math on big arrays | device vector math | separate NumPy/TA-Lib ratios in the README table |
 | Portfolio (many symbols, same indicator) | batch API | linear in symbols vs loop, stream overlap on top |
 | SAR/SAREXT single long series | automatic hybrid CPU path | parity with TA-Lib |
 | Live tick updates (one closed bar) | streaming API | p50 0.04 µs vs 142 µs–1.2 ms for a recompute |

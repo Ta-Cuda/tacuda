@@ -485,6 +485,39 @@ TEST(TacudaStream, RejectsWrongFamilyAppend) {
             std::string::npos);
 }
 
+TEST(TacudaStream, RetiredHandleCannotAliasNewStream) {
+  ctStream_t *retired = nullptr;
+  ASSERT_EQ(ct_sma_stream_create(3, &retired), CT_STATUS_SUCCESS);
+  ASSERT_EQ(ct_stream_destroy(retired), CT_STATUS_SUCCESS);
+  for (int i = 0; i < 256; ++i) {
+    StreamHandle live;
+    ASSERT_EQ(ct_sma_stream_create(3, live.out()), CT_STATUS_SUCCESS);
+    ASSERT_NE(live.get(), retired);
+    float in[] = {1, 2, 3}, out[3] = {};
+    ASSERT_EQ(ct_sma_stream_append(live.get(), in, 3, out), CT_STATUS_SUCCESS);
+    EXPECT_FLOAT_EQ(out[2], 2);
+    long long bars = -1;
+    int outputs = -1;
+    EXPECT_EQ(ct_stream_bars(retired, &bars), CT_STATUS_INVALID_ARGUMENT);
+    EXPECT_EQ(ct_stream_outputs(retired, &outputs), CT_STATUS_INVALID_ARGUMENT);
+    EXPECT_EQ(ct_stream_reset(retired), CT_STATUS_INVALID_ARGUMENT);
+    EXPECT_EQ(ct_stream_destroy(retired), CT_STATUS_INVALID_ARGUMENT);
+    EXPECT_EQ(bars, -1);
+    EXPECT_EQ(outputs, -1);
+    ASSERT_EQ(ct_stream_bars(live.get(), &bars), CT_STATUS_SUCCESS);
+    EXPECT_EQ(bars, 3);
+  }
+}
+
+TEST(TacudaStream, RejectsWrongHandleKindWithoutDereference) {
+  ctStreamBatch_t *batch = nullptr;
+  ASSERT_EQ(ct_sma_stream_batch_create(3, 2, &batch), CT_STATUS_SUCCESS);
+  auto *wrong = reinterpret_cast<ctStream_t *>(batch);
+  EXPECT_EQ(ct_stream_reset(wrong), CT_STATUS_INVALID_ARGUMENT);
+  EXPECT_EQ(ct_stream_destroy(wrong), CT_STATUS_INVALID_ARGUMENT);
+  EXPECT_EQ(ct_stream_batch_destroy(batch), CT_STATUS_SUCCESS);
+}
+
 TEST(TacudaStream, RejectsInvalidArguments) {
   ctStream_t *h = nullptr;
   EXPECT_EQ(ct_sma_stream_create(1, &h), CT_STATUS_INVALID_ARGUMENT);

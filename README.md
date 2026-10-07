@@ -5,22 +5,29 @@
 [![C++](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-yellow.svg)](https://www.python.org/)
 [![.NET](https://img.shields.io/badge/.NET-8.0%2B-purple.svg)](https://dotnet.microsoft.com/)
-[![Functions](https://img.shields.io/badge/TA--Lib_API-161%2F161_functions-orange.svg)](#-comprehensive-indicator-suite-all-161-ta-lib-functions-implemented)
+[![Functions](https://img.shields.io/badge/TA--Lib_API-161%2F161_functions-orange.svg)](#-comprehensive-indicator-suite-161-functions-from-ta-lib-071)
 [![Website](https://img.shields.io/badge/Website-tacuda.com-blue.svg)](https://tacuda.com)
 
 > **High-Performance CUDA-Accelerated Technical Analysis Library**
 >
-> **⚡ Up to 15.4x faster pipelines than TA-Lib** | **📊 all 161 TA-Lib functions implemented** | **🔧 Host / Device / Batch APIs** | 🌐 [tacuda.com](https://tacuda.com)
+> **⚡ Up to 15.4x faster pipelines than TA-Lib** | **📊 161 functions from TA-Lib 0.7.1** | **🔧 Host / Device / Batch APIs** | 🌐 [tacuda.com](https://tacuda.com)
 >
 > Numerical compatibility with TA-Lib is verified per function by a strict
 > differential corpus — identical NaN/Inf masks plus tolerance-bounded
 > values over random walks, trend, flat, zero-crossing and short inputs
 > (`benchmarks/differential_corpus.py`, **165/165 specs green as of 0.7.1**,
-> covering all 161 installed TA-Lib functions with exact-name coverage
+> covering the 161 functions in native TA-Lib 0.7.1 (Python wrapper 0.7.0) with exact-name coverage
 > enforcement; all 61 candlestick patterns match TA-Lib signal-for-signal
 > with no mask and no flip budget, and the report records how many signals
 > each pattern actually produced). The few remaining corner-case notes live
 > in [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md).
+
+**Release status:** this checkout prepares TACUDA **0.8.0**; public registries
+currently carry **0.7.1**. Streaming requires bindings and a native library
+built from the same 0.8.0 source. The 161-function compatibility baseline is
+pinned in `tests/requirements-reference.txt`. TA-Lib 0.8.1 has 201 functions;
+its 40 missing corpus specs and IMI/WILLR edge cases remain migration work,
+not part of the full-coverage claim ([validation](docs/OPERATIONS.md#validation-snapshot--2026-10-07)).
 
 TACUDA delivers lightning-fast technical analysis indicators powered by NVIDIA CUDA GPUs. Built for quantitative traders, researchers, and financial analysts who demand maximum performance from their computational workflows.
 
@@ -30,7 +37,7 @@ TACUDA delivers lightning-fast technical analysis indicators powered by NVIDIA C
 |--------|-------|-------|
 | **vs TA-Lib** | **15.4x faster** | Device API, 1M bars, 7-indicator pipeline |
 | **Peak indicator speedup** | **84.4x** | AVGDEV(100), 500K bars, host API |
-| **Vector math** | **up to 1167x** | SINH, 10M elements, device API |
+| **Vector math** | **GPU-resident execution** | Separate NumPy and TA-Lib comparisons below |
 | **Throughput** | **2M bars in 3.4ms** | Multi-indicator pipeline |
 
 Implementation semantics (EMA seeding, warmup NaNs, indexing conventions) are documented in [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md).
@@ -46,7 +53,7 @@ Implementation semantics (EMA seeding, warmup NaNs, indexing conventions) are do
 - **Batch API** (`ct_*_batch[_d]`, 166 families) for multi-symbol portfolios
 - **Pipelined workloads** with optional `cudaStream_t` support and an internal device buffer pool
 
-### 📊 **Comprehensive Indicator Suite (all 161 TA-Lib functions implemented)**
+### 📊 **Comprehensive Indicator Suite (161 functions from TA-Lib 0.7.1)**
 - **Moving Averages**: SMA, EMA, WMA, DEMA, TEMA, TRIMA, KAMA, T3, MAMA
 - **Momentum**: RSI, MACD, MACDEXT (independent MA types), Stochastic, CCI, CMO, MOM, ROC, ROCP, ROCR, WILLR
 - **Volatility**: ATR, NATR, TRANGE, Bollinger Bands, ACCBANDS
@@ -55,7 +62,7 @@ Implementation semantics (EMA seeding, warmup NaNs, indexing conventions) are do
 - **Statistical**: STDDEV, VAR, CORREL, LINEARREG, TSF, BETA
 - **Price Transforms**: AVGPRICE, MEDPRICE, TYPPRICE, WCLPRICE
 - **Oscillators**: ULTOSC, APO, PPO, PVO, BOP, STOCHRSI
-- **Vector Math** (element-wise, up to 1167x vs TA-Lib on GPU): SIN, COS, TAN, ASIN, ACOS, ATAN, SINH, COSH, TANH, EXP, LN, LOG10, SQRT, CEIL, FLOOR, ADD, SUB, MULT, DIV
+- **Vector Math** (element-wise, GPU-resident inputs): SIN, COS, TAN, ASIN, ACOS, ATAN, SINH, COSH, TANH, EXP, LN, LOG10, SQRT, CEIL, FLOOR, ADD, SUB, MULT, DIV
 
 ### 🕯️ **Candlestick Pattern Recognition (63 patterns)**
 TA-Lib compatible pattern detection — all 61 TA-Lib patterns match signal-for-signal:
@@ -70,7 +77,7 @@ TA-Lib compatible pattern detection — all 61 TA-Lib patterns match signal-for-
 - **Node.js**: `koffi`-based bindings with TypedArray support, `Ohlcv` containers, `*Batch` + `device.*Batch` wrappers
 - **C#**: Native .NET bindings — public `NativeMethods`, `OhlcvSeries` extension methods, `TacudaBatch` helpers
 
-All bindings cover the full native surface (756 entry points: 556 host + 200 device,
+All bindings cover the full native surface (811 entry points: 559 host + 200 device + 52 streaming,
 including the batch API and `_ex` precision variants) — verified by
 `bindings/audit_bindings.py`, see [docs/API.md](docs/API.md#bindings).
 
@@ -80,8 +87,21 @@ processes a whole portfolio (series-major matrix), overlapping transfers and ker
 across an internal CUDA stream pool with per-call `maxConcurrency` control —
 [docs/BATCH_API.md](docs/BATCH_API.md).
 
-### ✅ **Production Ready**
-- **Warm-up markers** via trailing `NaN` values for incomplete windows
+### Incremental updates (0.8.0)
+
+SMA, EMA, WMA, RSI, ATR, NATR, OBV, AD, MACD and BBANDS support append-only
+streams, with wrappers for Python, Node.js and C#. Single-series updates run
+on the CPU; portfolio streams can use CPU or GPU. See
+[STREAMING_API.md](docs/STREAMING_API.md) for lifetime, warm-up and execution policy.
+
+```python
+with tacuda.stream.Rsi(14) as rsi:
+    rsi.append(history)
+    latest = rsi.append([new_close])[-1]
+```
+
+### Validation and resource management
+- **Warm-up markers** via leading `NaN` values for incomplete windows
 - **Comprehensive test suite** with GoogleTest
 - **Memory-safe** RAII patterns
 - **Thread-safe** indicator registry
@@ -96,7 +116,7 @@ across an internal CUDA stream pool with per-call `maxConcurrency` control —
 |-----------|---------|-------|
 | **NVIDIA GPU** | Compute ≥ 7.5 for prebuilt binaries | Turing or newer; older GPUs (CC 6.0–7.0) work when building from source with `-DCMAKE_CUDA_ARCHITECTURES=<arch>` |
 | **CUDA Toolkit** | 11.x / 12.x | 12.x recommended |
-| **CMake** | ≥ 3.21 | |
+| **CMake** | ≥ 3.22 | |
 | **Compiler** | C++17 | GCC, Clang, or MSVC |
 | **Python** | ≥ 3.8 | *Optional for bindings* |
 | **Node.js** | ≥ 18 | *Optional for JS binding* |
@@ -226,8 +246,10 @@ See [`src/main.cpp`](src/main.cpp) (built as `example_app`) and
 [`examples/pipeline_example.cpp`](examples/pipeline_example.cpp) for complete
 programs.
 
-The first `period-1` outputs of every indicator are `NaN` (the warm-up
-region), exactly like TA-Lib's begIdx contract.
+Warm-up depends on the indicator: SMA/EMA use `period-1` bars, RSI/ATR use
+`period`, and MACD uses its combined slow/signal lookback. Most warm-up
+outputs are leading `NaN`; integer signal functions use zero. See
+[alignment conventions](docs/API.md#output-alignment-warmup-nan).
 
 ### C API (for FFI/P-Invoke)
 
@@ -346,15 +368,19 @@ Computing 7 indicators (SMA, EMA×2, RSI, MOM, ROC, STDDEV) on the same dataset:
 
 Element-wise TA-Lib math functions on the Device API (data already on GPU):
 
-| Function | tacuda device | NumPy f32 | TA-Lib f64 | Device vs TA-Lib |
-|----------|--------------:|----------:|-----------:|-----------------:|
-| SIN | **0.110ms** | 12.70ms | 62.21ms | **116x** |
-| ASIN | **0.111ms** | 83.49ms | 133.73ms | **751x** |
-| SINH | **0.110ms** | 128.66ms | 141.42ms | **1167x** |
-| EXP | **0.111ms** | 10.34ms | 35.00ms | **93x** |
-| SQRT | **0.110ms** | 6.99ms | 21.18ms | **63x** |
-| ADD | **0.163ms** | 7.08ms | 14.59ms | **43x** |
-| DIV | **0.160ms** | 7.18ms | 14.52ms | **45x** |
+| Function | tacuda device | NumPy f32 | TA-Lib f64 | Device vs NumPy | Device vs TA-Lib |
+|----------|--------------:|----------:|-----------:|----------------:|-----------------:|
+| SIN | **0.110ms** | 12.70ms | 62.21ms | 115.5x | 565.5x |
+| ASIN | **0.111ms** | 83.49ms | 133.73ms | 752.2x | 1204.8x |
+| SINH | **0.110ms** | 128.66ms | 141.42ms | 1169.6x | 1285.6x |
+| EXP | **0.111ms** | 10.34ms | 35.00ms | 93.2x | 315.3x |
+| SQRT | **0.110ms** | 6.99ms | 21.18ms | 63.5x | 192.5x |
+| ADD | **0.163ms** | 7.08ms | 14.59ms | 43.4x | 89.5x |
+| DIV | **0.160ms** | 7.18ms | 14.52ms | 44.9x | 90.8x |
+
+These are historical timings; ratios are recomputed from the displayed
+rounded values. Device timings exclude transfers. The two CPU baselines
+have different precision and are reported separately.
 
 Reproduce the full 19-function table with `python benchmarks/benchmark_vector_math.py`.
 
@@ -373,7 +399,8 @@ Savings:    7x less PCIe bandwidth!
 ### 🚀 Device API - Zero-Copy Pipelines
 
 For maximum performance when computing multiple indicators on the same data.
-No CUDA headers needed — memory management is part of the C ABI:
+Memory management is part of the C ABI; native callers need CUDA headers
+for `cudaStream_t`:
 
 ```c
 #include "tacuda.h"
@@ -434,7 +461,7 @@ python benchmarks/benchmark_ema_vs_talib.py
 ```
 ┌───────────────────────┐    ┌──────────────────────┐    ┌──────────────────┐
 │  Language bindings    │    │   Flat C ABI         │    │  CUDA kernels    │
-│  Python / Node / C#   │───▶│   tacuda.h (556)     │───▶│  one indicator = │
+│  Python / Node / C#   │───▶│   tacuda.h (559)     │───▶│  one indicator = │
 │  (thin, generated)    │    │   tacuda_device.h    │    │  one .cu class   │
 └───────────────────────┘    │   (200 ct_*_d)       │    └──────────────────┘
                              └──────────────────────┘             │
@@ -451,7 +478,7 @@ python benchmarks/benchmark_ema_vs_talib.py
 - **C ABI** (`src/api/*.cu`): thin `extern "C"` wrappers with a uniform error contract (`ctStatus_t` + `ct_get_last_error()`); the batch/device surface is generated from one family table (`scripts/generate_batch_api.py`)
 - **Context / DeviceBuffer** (`include/tacuda/Context.h`): RAII C++ pipeline API; buffers may safely outlive the Context, cross-Context use is rejected
 - **DeviceBufferPool**: allocation cache with stream-ordered release (capped via `ct_device_buffer_pool_set_max_cache_bytes`)
-- **Bindings** (`bindings/`): Python (ctypes) and C# (P/Invoke) generated from the headers; Node.js (koffi) hand-written plus a generated batch/device layer — all audited for 756/756 coverage
+- **Bindings** (`bindings/`): Python (ctypes) and C# (P/Invoke) generated from the headers; Node.js (koffi) hand-written plus a generated batch/device layer — all audited for 811/811 coverage
 
 ---
 
@@ -508,14 +535,14 @@ Adding a new indicator touches four places (see
 
 ## ✅ Status & TODO
 
-### ✅ Completed (v0.7.1)
+### ✅ Implemented in the 0.8.0 working tree
 
-- [x] **All 161 TA-Lib functions implemented** (incl. MACDEXT with independent MA types and 19 element-wise vector math functions); numerical parity is verified per function by the strict differential corpus — 165/165 specs green, remaining corner-case notes in [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md)
+- [x] **All 161 functions from TA-Lib 0.7.1 implemented** (incl. MACDEXT with independent MA types and 19 element-wise vector math functions); numerical parity is verified per function by the strict differential corpus — 165/165 specs green, remaining corner-case notes in [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md)
 - [x] **All 61 candlestick patterns** match TA-Lib signal-for-signal (double-precision literal ports, exact-equality oracle with hand-crafted activation fixtures for the rare patterns)
 - [x] **Device API** (`ct_*_d`, 200 functions) for zero-copy multi-indicator pipelines, with `_ex_d` float16/32/64 precision variants
 - [x] **Batch API**: 166 indicator families over a stream pool (`maxConcurrency` control)
-- [x] Python (ctypes), Node.js (koffi) and .NET 8/9 bindings covering the full 756-symbol C ABI (audited in CI)
-- [x] Packages for PyPI (platform wheels with natives), npm (tgz) and NuGet (nupkg with win-x64 + linux-x64 natives), GPU-gated release workflow
+- [x] Python (ctypes), Node.js (koffi) and .NET 8/9 bindings covering the full 811-symbol C ABI (audited in CI)
+- [x] Packaging workflow for PyPI (platform wheels with natives), npm (tgz) and NuGet (nupkg with win-x64 + linux-x64 natives), GPU-gated publishing (0.8.0 not yet released)
 - [x] **SAREXT** bit-for-bit TA-Lib semantics; SAR/SAREXT host API uses a fast CPU path
 - [x] Memory-safety contracts: stream-ordered buffer pool, buffers may outlive their Context, cross-Context rejection — all covered by lifetime tests
 - [x] `tacuda-opt` strategy optimizer (grid / genetic / walk-forward / portfolio / Monte-Carlo) with the 94-system EXPERIMENTS pack
@@ -535,6 +562,7 @@ Current priorities live in **[docs/ROADMAP.md](docs/ROADMAP.md)**:
 
 - **[tacuda.com](https://tacuda.com)** - Project website: live benchmark tables and a page for each of the 94 [EXPERIMENTS](https://tacuda.com/experiments.html) systems
 - **[API Reference](docs/API.md)** - Conventions (statuses, NaN warm-up, dtypes, streams), function catalog, binding surface, OHLCV containers
+- **[Streaming API](docs/STREAMING_API.md)** - Incremental single-series and portfolio updates
 - **[Device API](docs/DEVICE_API.md)** - Zero-copy GPU pipelines (`ct_*_d`, `_ex_d`, buffer pool)
 - **[Batch API](docs/BATCH_API.md)** - Multi-symbol/portfolio execution (166 families)
 - **[Implementation Notes](docs/IMPLEMENTATION_NOTES.md)** - TA-Lib parity semantics and corner cases

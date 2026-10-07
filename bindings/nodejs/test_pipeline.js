@@ -738,6 +738,18 @@ function runAllTests() {
         }
     });
 
+    test('diagnostics: native status text', () =>
+        tacuda.statusString(4) === 'invalid argument');
+    test('diagnostics: native last error', () => {
+        try {
+            new tacuda.SmaStream(1);
+            return false;
+        } catch (e) {
+            return String(e.message).includes('period must be') &&
+                tacuda.getLastError().includes('period must be');
+        }
+    });
+
     // ---- Results ----
     console.log();
     console.log('='.repeat(70));

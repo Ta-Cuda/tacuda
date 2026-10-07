@@ -60,9 +60,9 @@ CTAPI_EXPORT const char* ct_get_last_error(void);
  * docs/CONTRIBUTING.md.
  */
 #define CT_VERSION_MAJOR 0
-#define CT_VERSION_MINOR 7
-#define CT_VERSION_PATCH 1
-#define CT_VERSION_STRING "0.7.1"
+#define CT_VERSION_MINOR 8
+#define CT_VERSION_PATCH 0
+#define CT_VERSION_STRING "0.8.0"
 
 /**
  * @brief Return the library version as "MAJOR.MINOR.PATCH".

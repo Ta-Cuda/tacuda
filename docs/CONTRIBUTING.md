@@ -90,7 +90,8 @@ bindings are stale.
 ## ABI stability policy
 
 Applies to the native C ABI exported by `tacuda.dll` / `libtacuda.so` and
-declared in `include/tacuda.h` + `include/tacuda_device.h`. Semantic
+declared in `include/tacuda.h`, `include/tacuda_device.h` and
+`include/tacuda_stream.h`. Semantic
 versioning is surfaced in three places which must always agree: the
 `CT_VERSION_*` macros (compile-time), `ct_version()` (run-time) and the
 package versions of the Python/Node.js/.NET bindings.
@@ -120,8 +121,8 @@ naming the replacement + changelog entry; the symbol stays functional until
 the next MAJOR).
 
 Enforcement: `bindings/audit_bindings.py` (bindings must track ABI growth in
-the same release), `scripts/check_dll_exports.py` (representative symbols
-present in both natives), the `bindings_up_to_date` CMake test (no drift
+the same release), `scripts/check_dll_exports.py` (all public declarations
+present in real PE/ELF export tables), the `bindings_up_to_date` CMake test (no drift
 between headers and generated wrappers) and the release criteria below.
 
 ## Release criteria
@@ -133,8 +134,8 @@ Nothing is pushed to a registry until all gates pass — the
 
 1. **Version consistency (blocking).** `CT_VERSION_STRING` in
    `include/tacuda.h`, `project.version` (pyproject.toml), `version`
-   (package.json), `<Version>` (Tacuda.Bindings.csproj) and the top
-   [CHANGELOG.md](CHANGELOG.md) heading must all equal the tag;
+   (package.json), `<Version>` (Tacuda.Bindings.csproj) and a numbered
+   [CHANGELOG.md](CHANGELOG.md) release heading must all equal the tag;
    `ct_version()` of the built binaries must match.
 2. **Native artifact validation (blocking).** Both binaries pass
    `python scripts/check_dll_exports.py <dll> <so>`; binaries link the
@@ -155,3 +156,31 @@ Nothing is pushed to a registry until all gates pass — the
 [CHANGELOG.md](CHANGELOG.md) is the single source of release notes
 (one section per version); CI publishes the top section as the GitHub
 release body.
+
+### Preparing 0.8.0
+
+Run `python scripts/check_release.py` while developing. Before creating a
+release tag, finalize the `Unreleased (0.8.0 development)` heading as
+`0.8.0 — YYYY-MM-DD` and run `python scripts/check_release.py --tag v0.8.0`.
+An Unreleased heading intentionally blocks publication; extraction never
+falls back to 0.7.1 notes. Manual dry-run packaging may keep Unreleased.
+
+The blocking numerical baseline is pinned in `tests/requirements-reference.txt`:
+Python TA-Lib 0.7.0 / native TA-Lib 0.7.1, 161 functions. Install it in the
+interpreter on PATH **before** CTest, whose native reference helpers invoke
+Python. TA-Lib 0.8.1 exposes 201 functions and still has 40 missing corpus
+specs plus IMI/WILLR differences; migrating that reference is separate work.
+Do not weaken tolerances or disable exact-name coverage to make it pass.
+
+Hosted native builds run `stream_lifetime_sanitizer`, compiled together with
+the actual single-series implementation using AddressSanitizer. Enable it
+locally with `-DTACUDA_ENABLE_ASAN_TEST=ON`; it needs CUDA headers to build,
+but no GPU to execute. Normal GPU tests also exercise batch handle reuse.
+For export validation, run the checker on each build host: Windows requires
+MSVC dumpbin (auto-discovered), Linux requires binutils nm. Runtime binding
+pipelines on a GPU remain necessary after this static check.
+
+A release still needs green hosted Windows/Linux builds, GPU reports,
+installation from the packaged artifacts, and the public tag/release.
+The website is maintained separately and must receive the version, streaming
+section, reference-version qualification and corrected benchmark baselines.

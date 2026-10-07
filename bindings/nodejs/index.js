@@ -214,6 +214,7 @@ const ct_device_buffer_pool_set_max_cache_bytes = lib.func('uint64_t ct_device_b
 
 // --- Library metadata ---
 const ct_version = lib.func('const char* ct_version()');
+const ct_status_string = lib.func('const char* ct_status_string(int status)');
 
 // --- Batched (multi-symbol) API: series-major matrices numSeries x seriesLen ---
 const ct_sma_batch = lib.func('int ct_sma_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
@@ -1917,6 +1918,8 @@ module.exports = {
     smaBatch, emaBatch, rsiBatch, atrBatch, macdBatch, bbandsBatch, stochasticBatch,
     // Metadata / enums
     version,
+    statusString: (status) => ct_status_string(status),
+    getLastError: () => ct_get_last_error_str(),
     CDL_NAMES,
     MA_TYPE,
     DTYPE,

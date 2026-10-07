@@ -3,6 +3,22 @@ Changelog
 
 Unreleased (0.8.0 development)
 ------------------------------
+Release preparation, 2026-10-07:
+
+- Replace dereferenced raw stream handles with non-reused registry tokens;
+  destroyed handles cannot alias new allocations. Covers single and batch
+  APIs, with regression checks for allocation churn and wrong handle kinds.
+- Include string-returning introspection in the binding audit: 811 declared
+  symbols, not 808. Fix Python error-message return types and expose native
+  status/last-error helpers in Python and Node.
+- Align native/package versions to 0.8.0. Publication remains gated on a
+  numbered release section, an exact matching tag and GPU correctness.
+- Refresh CUDA installation, binding/test workflow triggers and the pinned
+  TA-Lib reference. Validate actual PE/ELF exports instead of binary strings.
+- Correct documentation counts, per-indicator warm-up, and benchmark baselines.
+  Coverage means native TA-Lib 0.7.1 (161 functions); 0.8.1 migration remains
+  open (40 missing corpus specs and IMI/WILLR edge semantics).
+
 Streaming (incremental update) API, milestones M1, M2 and M3 — single-series
 streams, batch (portfolio) streams, and language bindings with corpus-level
 parity verification. User guide: `docs/STREAMING_API.md`, rationale:
@@ -108,9 +124,7 @@ M1 — single-series streams:
   (O(period), independent of history) rather than keeping a rolling
   accumulator, which would drift away from the full-series kernels.
 
-Not yet: batch/portfolio streams, persistent batch plans, `_ex` dtype
-variants, state serialization, and language bindings (the C ABI is stable
-and FFI-callable today).
+Not yet: persistent batch plans, `_ex` dtype variants, and state serialization.
 
 0.7.1 — 2026-07-13
 ------------------

@@ -1,7 +1,7 @@
 {
   "name": "tacuda",
-  "version": "0.7.1",
-  "description": "Node.js bindings for tacuda: full TA-Lib coverage (161 functions) on CUDA incl. MACDEXT and vector math, host + zero-copy device API, structured OHLCV inputs, batched multi-symbol execution for 52 indicator families, and generated candlestick pattern wrappers",
+  "version": "0.8.0",
+  "description": "Node.js bindings for tacuda: TA-Lib 0.7.1 baseline coverage (161 functions) on CUDA incl. MACDEXT and vector math, host + zero-copy device API, structured OHLCV inputs, batched multi-symbol execution for 166 indicator families, and generated candlestick pattern wrappers",
   "main": "index.js",
   "scripts": {
     "test": "node test_pipeline.js"

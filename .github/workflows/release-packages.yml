@@ -22,27 +22,47 @@ on:
         type: boolean
         default: false
 
+permissions:
+  contents: read
+
 jobs:
+  release-metadata:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - name: Version consistency
+        run: python scripts/check_release.py
+      - name: Tag and finalized release notes
+        if: startsWith(github.ref, 'refs/tags/')
+        run: python scripts/check_release.py --tag "$GITHUB_REF_NAME"
+      - name: Manual publication requires finalized notes
+        if: inputs.publish
+        run: python scripts/check_release.py --release
+
   natives:
+    needs: [release-metadata]
     uses: ./.github/workflows/native-build.yml
 
   python-package:
     runs-on: ubuntu-22.04
     needs: [natives]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
       - name: Download linux native
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: native-linux-x64
           path: natives/linux/
 
       - name: Download windows native
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: native-win-x64
           path: natives/windows/
@@ -109,7 +129,7 @@ jobs:
               print("native found, load fails only due to missing CUDA runtime (expected on CPU runner)")
           PY
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: pypi-dist
           path: bindings/python/dist/*
@@ -128,10 +148,10 @@ jobs:
     # on tags) as the other packages — npm must not publish if the gate fails.
     needs: [natives]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "22"
           registry-url: "https://registry.npmjs.org"
 
       - name: Pack
@@ -162,7 +182,7 @@ jobs:
           }
           JS
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: npm-dist
           path: bindings/nodejs/*.tgz
@@ -178,8 +198,8 @@ jobs:
     runs-on: ubuntu-22.04
     needs: [natives]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
         with:
           # The csproj multi-targets net8.0 + net9.0: both SDKs are required.
           dotnet-version: |
@@ -187,13 +207,13 @@ jobs:
             9.0.x
 
       - name: Download linux native into runtimes/
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: native-linux-x64
           path: bindings/csharp/runtimes/linux-x64/native/
 
       - name: Download windows native into runtimes/
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: native-win-x64
           path: bindings/csharp/runtimes/win-x64/native/
@@ -242,7 +262,7 @@ jobs:
           CS
           dotnet run -c Release
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: nuget-dist
           path: bindings/csharp/dist/*.nupkg
@@ -257,7 +277,7 @@ jobs:
           --skip-duplicate
 
   # Changelog automation: the GitHub release body is the top section of
-  # docs/CHANGELOG.md (see docs/ABI_POLICY.md), natives attached with
+  # docs/CHANGELOG.md (see docs/CONTRIBUTING.md), natives attached with
   # checksums for provenance.
   github-release:
     if: startsWith(github.ref, 'refs/tags/')
@@ -266,16 +286,13 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - name: Extract top changelog section
-        run: |
-          awk '/^[0-9]+\.[0-9]+\.[0-9]+/{ if (found) exit; found=1 } found' \
-            docs/CHANGELOG.md > release_notes.md
-          cat release_notes.md
+      - name: Extract notes for the exact release tag
+        run: python3 scripts/check_release.py --tag "$GITHUB_REF_NAME" --notes release_notes.md
 
       - name: Download natives
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: native-*
           path: natives/

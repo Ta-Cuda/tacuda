@@ -5,7 +5,11 @@ them, and the **known deviations** that remain. The rules below are enforced
 by the strict differential corpus (`benchmarks/differential_corpus.py`):
 identical NaN/Inf masks and a mixed absolute/relative tolerance per function
 across random walks, a trend, a flat series, zero-crossing data and a short
-input. Any claim of TA-Lib compatibility refers to this corpus.
+input. Compatibility here is scoped to native TA-Lib 0.7.1 (Python wrapper
+0.7.0), pinned in `tests/requirements-reference.txt`. A run against TA-Lib
+0.8.1 has 40 missing corpus specifications and differences on IMI/flat and
+WILLR/zero-crossing inputs. These are migration gaps, not tolerance exceptions;
+see [OPERATIONS.md](OPERATIONS.md) for the dated evidence.
 
 ## EMA seeding and warmup (TA-Lib compatibility)
 
@@ -25,9 +29,11 @@ input. Any claim of TA-Lib compatibility refers to this corpus.
   warm-up of `period-1` NaNs. (Before 0.5.0, SUM and MINMAX were
   start-of-window aligned — that deviation is gone.)
 - `TRANGE` has a lookback of 1: bar 0 is NaN (no previous close).
-- Wilder family (ATR/NATR/DI/DX/ADX/ADXR): initial average is the arithmetic
-  mean of the first `period` values; the first output index is `period-1`
-  (`2*period-1` for ADX). Subsequent values use Wilder's smoothing.
+- Wilder lookbacks depend on the family: RSI, ATR/NATR and DI/DX first
+  output at `period` for ordinary periods; ADX at `2*period-1`, ADXR at
+  `3*period-2`. Directional movement (PLUS_DM/MINUS_DM) uses `period-1`.
+  Period-one special cases follow their individual TA-Lib contracts.
+  Subsequent values use Wilder's smoothing.
 - MACD/APO/PPO: EMAs computed with warmup NaNs; the published MACD outputs
   are aligned to `slowPeriod-1 + signalPeriod-1` like TA-Lib.
   (`ct_macd_line` is a tacuda extension and exposes the raw line from
