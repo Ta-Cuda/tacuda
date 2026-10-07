@@ -1,18 +1,53 @@
 # Build outputs
 /build/
-/build-win/
+/build-*/
+/build_*/
+/cmake-build-*/
+/out/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+Testing/
+build.ninja
+.ninja_deps
+.ninja_log
+compile_commands.json
 CMakeUserPresets.json
 
 # IDE state
 /.vs/
 /.vscode/
 /.idea/
+*.suo
+*.user
+.DS_Store
+Thumbs.db
 
 # Native binaries are NOT tracked: CI (.github/workflows/native-build.yml)
 # builds them and release-packages.yml places them here before packing.
 # For local packaging see scripts/build_win_dll.bat.
-bindings/csharp/runtimes/win-x64/native/*.dll
-bindings/csharp/runtimes/linux-x64/native/*.so
+*.o
+*.obj
+*.a
+*.lib
+*.exp
+*.ilk
+*.exe
+*.dll
+*.so
+*.so.*
+*.dylib
+*.pyd
+*.cubin
+*.fatbin
+/natives/
+
+# CUDA profiler captures
+*.nvvp
+*.nsys-rep
+*.qdrep
+*.ncu-rep
 
 # Package inspection scratch
 /bindings/csharp/nupkg-check/
@@ -21,16 +56,45 @@ bindings/csharp/runtimes/linux-x64/native/*.so
 # produced by CI from source, see .github/workflows/release-packages.yml)
 node_modules/
 __pycache__/
-*.pyc
+*.py[cod]
+*.egg-info/
+.eggs/
+.venv/
+.venv-*/
+venv/
+venv-*/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+coverage/
 [Bb]in/
 [Oo]bj/
 *.pdb
 *.nupkg
+*.snupkg
 *.tgz
 *.whl
 bindings/python/dist/
 bindings/python/build/
 bindings/nodejs/dist/
 bindings/csharp/dist/
-bindings/python/tacuda/*.so
-bindings/python/tacuda/*.dll
+
+# Local test outputs; reviewed evidence under docs/validation stays tracked.
+/ctest.xml
+/benchmarks/corpus.json
+/benchmarks/streaming_corpus.json
+npm-debug.log*
+
+# Local credentials/configuration; sanitized examples may be committed.
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+.npmrc
+.pypirc

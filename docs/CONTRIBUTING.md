@@ -79,6 +79,13 @@ bindings are stale.
 
 ## Submitting
 
+- Keep local build outputs, virtual environments, package metadata and
+  credentials out of commits; `.gitignore` covers the standard paths.
+  Use `git status --short --ignored` and `git check-ignore -v <path>` to
+  inspect unexpected files. Sanitized `.env.example` files are allowed.
+  Generated binding sources and reviewed evidence in `docs/validation/`
+  remain versioned. Git ignore rules do not control wheel/npm/NuGet contents:
+  package manifests must still include the native artifacts supplied by CI.
 - Keep PRs focused; include tests for behavior changes.
 - Make sure `ctest`, the corpus (GPU), the binding pipelines and
   `audit_bindings.py` are green.
