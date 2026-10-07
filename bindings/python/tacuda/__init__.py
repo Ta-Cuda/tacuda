@@ -97,6 +97,21 @@ def _load_lib() -> ctypes.CDLL:
 
 _lib = _load_lib()
 
+# String-returning introspection is outside the array binding generator.
+_lib.ct_status_string.argtypes = [ctypes.c_int]
+_lib.ct_status_string.restype = ctypes.c_char_p
+_lib.ct_get_last_error.argtypes = []
+_lib.ct_get_last_error.restype = ctypes.c_char_p
+
+
+def status_string(status: int) -> str:
+    return _lib.ct_status_string(status).decode("utf-8", "replace")
+
+
+def get_last_error() -> str:
+    return _lib.ct_get_last_error().decode("utf-8", "replace")
+
+
 CT_DTYPE_F16 = 0
 CT_DTYPE_F32 = 1
 CT_DTYPE_F64 = 2
@@ -469,7 +484,7 @@ def _bind_function(name: str, spec: _generated.FunctionSpec) -> None:
         # Handle return value
         if hasattr(spec, 'return_type') and spec.return_type == "ctStatus_t":
             if rc != 0:
-                raise RuntimeError(f"{spec.c_name} failed with code {rc}")
+                _call_status(rc, spec.c_name)
             
             if outputs_to_return:
                 if len(outputs_to_return) == 1:
@@ -527,7 +542,7 @@ _bbands_f32 = bbands
 
 def _call_status(rc: int, func_name: str) -> None:
     if rc != 0:
-        raise RuntimeError(f"{func_name} failed with code {rc}")
+        raise RuntimeError(f"{func_name} failed with code {rc} ({status_string(rc)}): {get_last_error()}")
 
 
 def sma(input: Any, period: int, stream: Any = None, dtype: str = "float32") -> np.ndarray:
@@ -1031,5 +1046,5 @@ class OHLCV:
 from . import stream  # noqa: E402
 
 __all_list = sorted(_SPEC)
-__all_list.extend(("OHLCV", "version", "stream"))
+__all_list.extend(("OHLCV", "version", "status_string", "get_last_error", "stream"))
 __all__ = tuple(__all_list)

@@ -18,13 +18,16 @@
  * Single-series streams run on the CPU with double-precision state. A
  * one-bar update is a handful of floating-point operations; a GPU roundtrip
  * would pay two PCIe latencies plus a kernel launch to do the same work.
- * The GPU pays off for whole-portfolio appends (batch streams, planned for
- * the next milestone). Because the state is double while the full-series
+ * The GPU pays off for whole-portfolio appends (batch streams below).
+ * Because the state is double while the full-series
  * kernels accumulate some recursions in float, stream values are at least
  * as accurate as the full-series API — they are not bit-identical to it.
  *
  * Handles are NOT thread-safe: use one stream per producer thread, or
- * synchronize externally. Distinct handles are fully independent.
+ * synchronize externally, including destruction. Distinct handles are fully
+ * independent. Handles are opaque tokens, never dereference them or perform
+ * pointer arithmetic. Destroyed tokens are not reused during a library load;
+ * they are not valid across process restarts or library unload/reload.
  */
 
 #include "tacuda.h"

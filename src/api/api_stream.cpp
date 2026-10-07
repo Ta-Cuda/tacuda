@@ -25,11 +25,9 @@
 #include "tacuda_stream.h"
 #include <utils/ErrorState.h>
 #include <utils/StreamStates.h>
+#include <utils/StreamHandleRegistry.h>
 
 namespace {
-
-constexpr std::uint32_t kStreamMagic = 0x54435331u;  // 'TCS1'
-constexpr std::uint32_t kStreamDead = 0xDEADBEEFu;
 
 enum class Family {
   SMA, EMA, WMA, RSI, ATR, NATR, OBV, AD, MACD, BBANDS
@@ -96,13 +94,14 @@ using BbandsStream = PodStream<st::BbandsState, Family::BBANDS>;
 // Handle plumbing
 // ---------------------------------------------------------------------------
 
-struct ctStream {
-  std::uint32_t magic;
+struct StreamEntry {
   std::unique_ptr<StreamState> impl;
   long long bars;
 };
 
 namespace {
+
+tacuda::detail::StreamHandleRegistry<ctStream_t, StreamEntry, 1> streams;
 
 // Same contract as api.cpp's api_guard: clear the thread-local error on
 // entry, never let an exception cross the C boundary.
@@ -126,10 +125,6 @@ ctStatus_t stream_guard(const char *what, Fn &&fn) noexcept {
   }
 }
 
-bool valid_handle(const ctStream *s) {
-  return s != nullptr && s->magic == kStreamMagic && s->impl != nullptr;
-}
-
 ctStatus_t reject(const std::string &msg) {
   tacuda::detail::set_last_error(msg);
   return CT_STATUS_INVALID_ARGUMENT;
@@ -149,7 +144,7 @@ ctStatus_t check_period(const char *what, int period, int minPeriod = 2) {
 ctStatus_t make_stream(std::unique_ptr<StreamState> impl, ctStream **outStream) {
   if (!outStream) return reject("stream create: null out parameter");
   *outStream = nullptr;
-  *outStream = new ctStream{kStreamMagic, std::move(impl), 0};
+  *outStream = streams.insert(std::make_unique<StreamEntry>(StreamEntry{std::move(impl), 0}));
   return CT_STATUS_SUCCESS;
 }
 
@@ -159,15 +154,16 @@ template <typename MakeBar>
 ctStatus_t run_append(const char *what, ctStream *stream, Family family,
                       int n, float *o0, float *o1, float *o2,
                       MakeBar &&makeBar) {
-  if (!valid_handle(stream)) {
+  auto *state = streams.find(stream);
+  if (!state) {
     return reject(std::string(what) + ": invalid or destroyed stream handle");
   }
-  if (stream->impl->family() != family) {
+  if (state->impl->family() != family) {
     return reject(std::string(what) + ": stream was created for a different indicator");
   }
   if (n <= 0) return reject(std::string(what) + ": n must be > 0");
 
-  const int outCount = stream->impl->outputs();
+  const int outCount = state->impl->outputs();
   float *outs[3] = {o0, o1, o2};
   for (int k = 0; k < outCount; ++k) {
     if (!outs[k]) return reject(std::string(what) + ": null output pointer");
@@ -175,10 +171,10 @@ ctStatus_t run_append(const char *what, ctStream *stream, Family family,
 
   float scratch[3];
   for (int j = 0; j < n; ++j) {
-    stream->impl->step(makeBar(j), scratch);
+    state->impl->step(makeBar(j), scratch);
     for (int k = 0; k < outCount; ++k) outs[k][j] = scratch[k];
   }
-  stream->bars += n;
+  state->bars += n;
   return CT_STATUS_SUCCESS;
 }
 
@@ -193,56 +189,58 @@ extern "C" {
 ctStatus_t ct_stream_destroy(ctStream_t *stream) {
   return stream_guard("ct_stream_destroy", [&]() -> ctStatus_t {
     if (!stream) return CT_STATUS_SUCCESS;  // NULL-safe by contract
-    if (stream->magic != kStreamMagic) {
+    auto state = streams.remove(stream);
+    if (!state) {
       return reject("ct_stream_destroy: invalid or already destroyed handle");
     }
-    stream->magic = kStreamDead;
-    stream->impl.reset();
-    delete stream;
     return CT_STATUS_SUCCESS;
   });
 }
 
 ctStatus_t ct_stream_reset(ctStream_t *stream) {
   return stream_guard("ct_stream_reset", [&]() -> ctStatus_t {
-    if (!valid_handle(stream)) {
+    auto *state = streams.find(stream);
+    if (!state) {
       return reject("ct_stream_reset: invalid or destroyed stream handle");
     }
-    stream->impl->reset();
-    stream->bars = 0;
+    state->impl->reset();
+    state->bars = 0;
     return CT_STATUS_SUCCESS;
   });
 }
 
 ctStatus_t ct_stream_lookback(const ctStream_t *stream, int *outLookback) {
   return stream_guard("ct_stream_lookback", [&]() -> ctStatus_t {
-    if (!valid_handle(stream)) {
+    auto *state = streams.find(stream);
+    if (!state) {
       return reject("ct_stream_lookback: invalid or destroyed stream handle");
     }
     if (!outLookback) return reject("ct_stream_lookback: null out parameter");
-    *outLookback = stream->impl->lookback();
+    *outLookback = state->impl->lookback();
     return CT_STATUS_SUCCESS;
   });
 }
 
 ctStatus_t ct_stream_bars(const ctStream_t *stream, long long *outBars) {
   return stream_guard("ct_stream_bars", [&]() -> ctStatus_t {
-    if (!valid_handle(stream)) {
+    auto *state = streams.find(stream);
+    if (!state) {
       return reject("ct_stream_bars: invalid or destroyed stream handle");
     }
     if (!outBars) return reject("ct_stream_bars: null out parameter");
-    *outBars = stream->bars;
+    *outBars = state->bars;
     return CT_STATUS_SUCCESS;
   });
 }
 
 ctStatus_t ct_stream_outputs(const ctStream_t *stream, int *outCount) {
   return stream_guard("ct_stream_outputs", [&]() -> ctStatus_t {
-    if (!valid_handle(stream)) {
+    auto *state = streams.find(stream);
+    if (!state) {
       return reject("ct_stream_outputs: invalid or destroyed stream handle");
     }
     if (!outCount) return reject("ct_stream_outputs: null out parameter");
-    *outCount = stream->impl->outputs();
+    *outCount = state->impl->outputs();
     return CT_STATUS_SUCCESS;
   });
 }

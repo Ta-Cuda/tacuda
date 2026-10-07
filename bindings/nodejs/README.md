@@ -1,7 +1,7 @@
 # TaCuda — Node.js Bindings
 
 Node.js package for the native `tacuda` CUDA library.
-Full TA-Lib coverage (161 functions): indicators, candlestick patterns, MACDEXT,
+TA-Lib 0.7.1 baseline coverage (161 functions): indicators, candlestick patterns, MACDEXT,
 19 vector math kernels, precision (`_ex`) variants, and the zero-copy device API.
 
 ## Prerequisites
@@ -13,7 +13,7 @@ Full TA-Lib coverage (161 functions): indicators, candlestick patterns, MACDEXT,
 
 ## Package Scope
 
-- JavaScript wrappers for the complete 395-function native surface (host + device + batch API)
+- JavaScript wrappers for the complete 811-function native surface (host + device + batch API)
 - Structured OHLCV inputs (`Ohlcv` class or plain `{open, high, low, close, volume}` objects)
 - Batched multi-symbol execution: `rsiBatch`, `smaBatch`, `macdBatch`, ..., `device.*Batch`
 - Full candlestick registry via `cdlPattern()` and `CDL_NAMES`
@@ -92,7 +92,7 @@ const sma64 = tacuda.smaEx(close64, 20);   // float64 storage + compute
 const { macd } = tacuda.macdEx(close64, 12, 26, 9, tacuda.MA_TYPE.EMA);
 ```
 
-## Available Indicators (full TA-Lib coverage)
+## Available Indicators (TA-Lib 0.7.1 baseline coverage)
 
 ### Moving Averages
 `sma`, `ema`, `wma`, `dema`, `tema`, `trima`, `kama`, `t3`, `mama`, `mavp`, `ma`
@@ -165,3 +165,11 @@ Canonical release history is maintained in [`CHANGELOG.md`](../../docs/CHANGELOG
 ## License
 
 Apache License 2.0 — see [LICENSE](../../LICENSE).
+
+## Streaming and version pairing
+
+The 0.8.0 bindings add incremental single-series and portfolio updates for
+10 indicator families. Use a matching 0.8.0 native library; an older binary
+does not export the streaming functions. See the
+[Streaming API guide](https://github.com/Ta-Cuda/tacuda/blob/main/docs/STREAMING_API.md).
+The 161-function compatibility baseline is native TA-Lib 0.7.1, not TA-Lib 0.8.1.

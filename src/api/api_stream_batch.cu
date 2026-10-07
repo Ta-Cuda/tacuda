@@ -32,13 +32,11 @@
 #include "tacuda_stream.h"
 #include <utils/ErrorState.h>
 #include <utils/StreamStates.h>
+#include <utils/StreamHandleRegistry.h>
 
 namespace st = tacuda::streaming;
 
 namespace {
-
-constexpr std::uint32_t kBatchMagic = 0x54434231u;  // 'TCB1'
-constexpr std::uint32_t kBatchDead = 0xDEADBEEFu;
 
 // Measured on an i3-12100F + RTX 3090 Ti (benchmarks/bench_stream_portfolio,
 // 7-indicator pipeline, one bar per tick): CPU p50 is 71.9 us at 1024 series
@@ -300,8 +298,7 @@ private:
 
 }  // namespace
 
-struct ctStreamBatch {
-  std::uint32_t magic;
+struct BatchEntry {
   Family family;
   int numSeries;
   long long bars;
@@ -310,6 +307,8 @@ struct ctStreamBatch {
 };
 
 namespace {
+
+tacuda::detail::StreamHandleRegistry<ctStreamBatch_t, BatchEntry, 2> batches;
 
 template <typename Fn>
 ctStatus_t batch_guard(const char *what, Fn &&fn) noexcept {
@@ -329,10 +328,6 @@ ctStatus_t batch_guard(const char *what, Fn &&fn) noexcept {
     tacuda::detail::set_last_error(what ? what : "unknown error");
     return CT_STATUS_KERNEL_FAILED;
   }
-}
-
-bool valid_batch(const ctStreamBatch *b) {
-  return b != nullptr && b->magic == kBatchMagic && b->engine != nullptr;
 }
 
 ctStatus_t reject(const std::string &msg) {
@@ -360,40 +355,41 @@ ctStatus_t make_batch(Family family, int numSeries, std::function<void(Pod &)> s
   *out = nullptr;
   auto engine = std::unique_ptr<BatchEngine>(
       new BatchEngineT<Pod>(numSeries, std::move(seed)));
-  *out = new ctStreamBatch{kBatchMagic, family, numSeries, 0,
-                           CT_STREAM_EXEC_AUTO, std::move(engine)};
+  *out = batches.insert(std::make_unique<BatchEntry>(BatchEntry{family, numSeries, 0,
+                           CT_STREAM_EXEC_AUTO, std::move(engine)}));
   return CT_STATUS_SUCCESS;
 }
 
 ctStatus_t run_batch_append(const char *what, ctStreamBatch *batch, Family family,
                             const Inputs &in, int n, float *o0, float *o1,
                             float *o2) {
-  if (!valid_batch(batch)) {
+  auto *state = batches.find(batch);
+  if (!state) {
     return reject(std::string(what) + ": invalid or destroyed batch handle");
   }
-  if (batch->family != family) {
+  if (state->family != family) {
     return reject(std::string(what) + ": batch was created for a different indicator");
   }
   if (n <= 0) return reject(std::string(what) + ": n must be > 0");
 
-  const int outCount = batch->engine->numOutputs();
+  const int outCount = state->engine->numOutputs();
   float *outs[3] = {o0, o1, o2};
   for (int k = 0; k < outCount; ++k) {
     if (!outs[k]) return reject(std::string(what) + ": null output pointer");
   }
 
-  ctStreamExec_t exec = batch->exec;
+  ctStreamExec_t exec = state->exec;
   if (exec == CT_STREAM_EXEC_AUTO) {
-    exec = batch->numSeries >= kGpuThreshold ? CT_STREAM_EXEC_GPU : CT_STREAM_EXEC_CPU;
+    exec = state->numSeries >= kGpuThreshold ? CT_STREAM_EXEC_GPU : CT_STREAM_EXEC_CPU;
   }
 
   ctStatus_t status = CT_STATUS_SUCCESS;
   if (exec == CT_STREAM_EXEC_GPU) {
-    status = batch->engine->appendGpu(in, n, outs);
+    status = state->engine->appendGpu(in, n, outs);
   } else {
-    batch->engine->appendCpu(in, n, outs, 0, batch->numSeries);
+    state->engine->appendCpu(in, n, outs, 0, state->numSeries);
   }
-  if (status == CT_STATUS_SUCCESS) batch->bars += n;
+  if (status == CT_STATUS_SUCCESS) state->bars += n;
   return status;
 }
 
@@ -408,80 +404,84 @@ extern "C" {
 ctStatus_t ct_stream_batch_destroy(ctStreamBatch_t *batch) {
   return batch_guard("ct_stream_batch_destroy", [&]() -> ctStatus_t {
     if (!batch) return CT_STATUS_SUCCESS;
-    if (batch->magic != kBatchMagic) {
+    auto state = batches.remove(batch);
+    if (!state) {
       return reject("ct_stream_batch_destroy: invalid or already destroyed handle");
     }
-    batch->magic = kBatchDead;
-    batch->engine.reset();
-    delete batch;
     return CT_STATUS_SUCCESS;
   });
 }
 
 ctStatus_t ct_stream_batch_reset(ctStreamBatch_t *batch) {
   return batch_guard("ct_stream_batch_reset", [&]() -> ctStatus_t {
-    if (!valid_batch(batch)) {
+    auto *state = batches.find(batch);
+    if (!state) {
       return reject("ct_stream_batch_reset: invalid or destroyed batch handle");
     }
-    batch->engine->resetAll();
-    batch->bars = 0;
+    state->engine->resetAll();
+    state->bars = 0;
     return CT_STATUS_SUCCESS;
   });
 }
 
 ctStatus_t ct_stream_batch_lookback(const ctStreamBatch_t *batch, int *outLookback) {
   return batch_guard("ct_stream_batch_lookback", [&]() -> ctStatus_t {
-    if (!valid_batch(batch)) {
+    auto *state = batches.find(batch);
+    if (!state) {
       return reject("ct_stream_batch_lookback: invalid or destroyed batch handle");
     }
     if (!outLookback) return reject("ct_stream_batch_lookback: null out parameter");
-    *outLookback = batch->engine->lookback();
+    *outLookback = state->engine->lookback();
     return CT_STATUS_SUCCESS;
   });
 }
 
 ctStatus_t ct_stream_batch_series(const ctStreamBatch_t *batch, int *outSeries) {
   return batch_guard("ct_stream_batch_series", [&]() -> ctStatus_t {
-    if (!valid_batch(batch)) {
+    auto *state = batches.find(batch);
+    if (!state) {
       return reject("ct_stream_batch_series: invalid or destroyed batch handle");
     }
     if (!outSeries) return reject("ct_stream_batch_series: null out parameter");
-    *outSeries = batch->numSeries;
+    *outSeries = state->numSeries;
     return CT_STATUS_SUCCESS;
   });
 }
 
 ctStatus_t ct_stream_batch_outputs(const ctStreamBatch_t *batch, int *outCount) {
   return batch_guard("ct_stream_batch_outputs", [&]() -> ctStatus_t {
-    if (!valid_batch(batch)) {
+    auto *state = batches.find(batch);
+    if (!state) {
       return reject("ct_stream_batch_outputs: invalid or destroyed batch handle");
     }
     if (!outCount) return reject("ct_stream_batch_outputs: null out parameter");
-    *outCount = batch->engine->numOutputs();
+    *outCount = state->engine->numOutputs();
     return CT_STATUS_SUCCESS;
   });
 }
 
 ctStatus_t ct_stream_batch_bars(const ctStreamBatch_t *batch, long long *outBars) {
   return batch_guard("ct_stream_batch_bars", [&]() -> ctStatus_t {
-    if (!valid_batch(batch)) {
+    auto *state = batches.find(batch);
+    if (!state) {
       return reject("ct_stream_batch_bars: invalid or destroyed batch handle");
     }
     if (!outBars) return reject("ct_stream_batch_bars: null out parameter");
-    *outBars = batch->bars;
+    *outBars = state->bars;
     return CT_STATUS_SUCCESS;
   });
 }
 
 ctStatus_t ct_stream_batch_set_exec(ctStreamBatch_t *batch, ctStreamExec_t exec) {
   return batch_guard("ct_stream_batch_set_exec", [&]() -> ctStatus_t {
-    if (!valid_batch(batch)) {
+    auto *state = batches.find(batch);
+    if (!state) {
       return reject("ct_stream_batch_set_exec: invalid or destroyed batch handle");
     }
     if (exec < CT_STREAM_EXEC_AUTO || exec > CT_STREAM_EXEC_GPU) {
       return reject("ct_stream_batch_set_exec: unknown execution policy");
     }
-    batch->exec = exec;
+    state->exec = exec;
     return CT_STATUS_SUCCESS;
   });
 }

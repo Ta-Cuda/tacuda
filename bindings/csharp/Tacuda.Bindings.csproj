@@ -11,10 +11,10 @@
 
     <!-- NuGet Package Metadata -->
     <PackageId>Tacuda</PackageId>
-    <Version>0.7.1</Version>
+    <Version>0.8.0</Version>
     <Authors>Paul Deecalov</Authors>
     <Company>Ta-Cuda</Company>
-    <Description>CUDA-accelerated technical analysis library for .NET. Full TA-Lib coverage (161 functions) incl. MACDEXT and 19 vector math kernels, host/device APIs, structured OhlcvSeries inputs, batched multi-symbol execution (TacudaBatch) and runtime precision profiles (float16 storage, float32, float64).</Description>
+    <Description>CUDA-accelerated technical analysis library for .NET. TA-Lib 0.7.1 baseline coverage (161 functions) incl. MACDEXT and 19 vector math kernels, host/device APIs, structured OhlcvSeries inputs, batched multi-symbol execution (TacudaBatch) and runtime precision profiles (float16 storage, float32, float64).</Description>
     <PackageTags>cuda;gpu;technical-analysis;trading;finance;indicators;ta-lib;macd;rsi;sma;ema;bollinger-bands;candlestick</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Ta-Cuda/tacuda</PackageProjectUrl>

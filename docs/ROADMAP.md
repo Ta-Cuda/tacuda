@@ -1,25 +1,28 @@
 # TaCuda Roadmap
 
-Last reviewed: 2026-08-02 (streaming API M1-M3 on the 0.8.0 line).
+Last reviewed: 2026-10-07 (0.8.0 release preparation; public packages remain 0.7.1).
 This document tracks where the project stands and what ships next.
 Order inside a milestone is priority order; items move, versions don't slip silently.
 
-## Where the project stands (v0.7.1)
+## Working tree (0.8.0, unreleased)
 
 | Area | State |
 |------|-------|
-| TA-Lib coverage | 161/161 functions; strict differential corpus 165/165 specs green (exact-name coverage enforcement, exact candlestick parity incl. activation fixtures for the rare patterns) |
-| Native ABI | 808 `extern "C"` entrypoints: 556 host (incl. `_ex` precision and `_batch`) + 200 `_d` device + 52 streaming; append-only policy ([CONTRIBUTING.md](CONTRIBUTING.md#abi-stability-policy)) |
+| TA-Lib coverage | 161/161 functions of native TA-Lib 0.7.1; strict differential corpus 165/165 specs green (exact-name coverage enforcement, exact candlestick parity incl. activation fixtures for the rare patterns) |
+| Native ABI | 811 `extern "C"` entrypoints: 559 host, including three introspection functions (incl. `_ex` precision and `_batch`) + 200 `_d` device + 52 streaming; append-only policy ([CONTRIBUTING.md](CONTRIBUTING.md#abi-stability-policy)) |
 | Batch API | 166 indicator families (incl. all candlestick patterns and the STAD club pack), stream-pool scheduling, host + device variants ([BATCH_API.md](BATCH_API.md)) |
-| Bindings | Python (ctypes), Node.js (koffi), C#/.NET (P/Invoke) — full 808-symbol surface incl. streaming handles, audited in CI (`bindings/audit_bindings.py`) |
+| Bindings | Python (ctypes), Node.js (koffi), C#/.NET (P/Invoke) — full 811-symbol surface incl. streaming handles, audited in CI (`bindings/audit_bindings.py`) |
 | Streaming | Incremental append for 10 families, single-series and portfolio-wide ([STREAMING_API.md](STREAMING_API.md)); parity swept by `benchmarks/streaming_corpus.py` |
 | Memory safety | Stream-ordered buffer pool; buffers may outlive their Context; cross-Context use rejected; lifetime tests in ctest |
 | Packages | PyPI platform wheels, npm tgz, NuGet nupkg (win-x64 + linux-x64) built by the `release-packages` workflow with GPU-gated publishing |
 | CI | `native-build` (Linux + Windows, all targets), GPU test job (ctest + corpus + binding pipelines) mandatory for version tags |
 | Docs | User guide / API / performance / operations tree, implementation notes, changelog, release criteria, adoption checklist |
 | Site | https://tacuda.com (maintained separately; EXPERIMENTS pages generated from this repo) |
-| Benchmarks | Pipeline 15.4x vs TA-Lib @1M bars, vector math up to 1167x, batch up to 7.5x vs loops (RTX 3090 Ti) |
+| Benchmarks | Pipeline 15.4x vs TA-Lib @1M bars, separate NumPy/TA-Lib vector-math baselines, batch up to 7.5x vs loops (RTX 3090 Ti) |
 | Tools | `tacuda-opt` strategy optimizer (M0–M4 shipped) with the 94-system EXPERIMENTS pack |
+
+Historical timings below predate the handle-registry fix; release benchmarks
+need an explicit source and environment.
 
 Known weak spots, remeasured 2026-08-02 on the RTX 3090 Ti + i3-12100F
 (`benchmarks/bench_host_vs_talib.py`, 500K bars, median of 7). The scan
@@ -50,15 +53,15 @@ Details in [PERFORMANCE.md](PERFORMANCE.md).
       removed; `docs/` holds only current user/developer documentation.
 - [x] Legacy `ct_*_device` aliases hidden from the documented surface
       (still exported for ABI compatibility).
-- [ ] Publish 0.7.x packages to the public registries (PyPI, npm, NuGet)
-      via `release-packages` with `publish=true`; verify install-from-registry
-      on a clean machine (gates in [CONTRIBUTING.md](CONTRIBUTING.md#release-criteria)).
+- [x] 0.7.1 packages exist in PyPI, npm and NuGet (checked 2026-10-07).
+- [ ] Verify clean installations and provenance; existing publication is not
+      proof of a green public release workflow.
 - [ ] Tag the release on GitHub with notes from [CHANGELOG.md](CHANGELOG.md);
       attach native binaries with checksums (automated by the workflow).
 - [ ] Register a self-hosted GPU runner (`gpu` label) on the public repo —
       tagged releases are intentionally blocked without it.
 
-## Shipped: performance milestone (sequential indicators)
+## Completed measurements: performance milestone (sequential indicators)
 
 Goal was "no indicator slower than TA-Lib through the host API at ≥500K
 bars". Met for the algorithmic cases it targeted; closed 2026-08-02 with the
@@ -96,20 +99,30 @@ measurements behind each decision: [DESIGN_STREAMING_API.md](DESIGN_STREAMING_AP
       the state machines are shared with the single-series path, so a batch
       of N is bit-identical to N separate streams. 256 symbols × 7
       indicators, one bar per tick: **p99 19.5 µs**. `CT_STREAM_EXEC_AUTO`
-      switches CPU→GPU at the measured crossover of 2048 series and holds
-      p99 under 1 ms through 65 536 symbols.
+      switches CPU→GPU at the measured crossover of 2048 series and held
+      p99 under 1 ms through 65 536 symbols in the historical run. The
+      2026-10-07 Windows run meets the 256-symbol target but exceeds 1 ms
+      at 2048 and above; see [STREAMING_API.md](STREAMING_API.md).
 - [x] **M3 — bindings and corpus.** Python, Node.js and C# wrappers for all
       20 stream types, gated by `bindings/audit_bindings.py`;
       `benchmarks/streaming_corpus.py` sweeps 10 families × 7 datasets
       (699/699 cells) checking chunked appends against both the full-series
       call and the installed TA-Lib.
-- [ ] **M4 — release.** Site section, a live-trading article, and the 0.8.0
-      release itself.
+- [x] Release preparation: non-reused streaming handle tokens, 811-symbol
+      binding/export coverage, version consistency and exact-tag release notes.
+- [ ] **M4 — release.** Green public Windows/Linux builds and GPU gates,
+      installation tests, site section, a live-trading article and 0.8.0 itself.
+      `Unreleased` intentionally blocks the publishing workflow.
+- [ ] TA-Lib 0.8.1 migration: add the 40 missing corpus specs, determine which
+      are existing TACUDA extras, resolve IMI/WILLR edge semantics, then run
+      strict parity without widening tolerances. Current coverage names 0.7.1.
 - [ ] Persistent batch plans — deferred on measurement, not dropped. Batch
       streams already keep device state and I/O buffers resident, so what a
       plan would still buy is one OHLCV upload per tick instead of one per
       indicator. Worth much of the GPU tick cost at tens of thousands of
       symbols; no current target needs it.
+- [ ] Profile AUTO crossover and large-portfolio p99 on controlled Windows
+      and Linux hosts; do not generalize the historical latency ceiling.
 - [ ] Remaining families: ADX group, STOCH/STOCHF.
 
 ## v0.9.0 — scale & distribution

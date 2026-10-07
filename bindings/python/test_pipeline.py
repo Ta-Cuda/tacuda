@@ -550,8 +550,19 @@ def run_pipeline_test():
         try:
             dead.append(close[:1])
             test_result("stream: use-after-close rejected", False, results)
-        except Exception:
-            test_result("stream: use-after-close rejected", True, results)
+        except tacuda.stream.TacudaStreamError as exc:
+            test_result("stream: use-after-close rejected", exc.status == 4, results)
+
+        test_result("diagnostics: native status text",
+                    tacuda.status_string(4) == "invalid argument", results)
+        try:
+            tacuda.stream.Sma(1)
+            test_result("stream: invalid period has native detail", False, results)
+        except tacuda.stream.TacudaStreamError as exc:
+            test_result("stream: invalid period has native detail",
+                        exc.status == 4 and "period must be" in str(exc), results)
+            test_result("diagnostics: last error text",
+                        "period must be" in tacuda.get_last_error(), results)
     except Exception as e:
         print(f"  [ERROR] streaming: {e}")
         results["failed"] += 1
@@ -569,4 +580,3 @@ def run_pipeline_test():
 
 if __name__ == "__main__":
     sys.exit(run_pipeline_test())
-

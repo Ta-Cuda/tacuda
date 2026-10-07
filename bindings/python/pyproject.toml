@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tacuda"
-version = "0.7.1"
-description = "Python bindings for tacuda: full TA-Lib coverage (161 functions) on CUDA, incl. MACDEXT and 19 vector math kernels, device pipeline support, structured OHLCV inputs, batched multi-symbol execution, and runtime dtype selection (float16/float32/float64)"
+version = "0.8.0"
+description = "Python bindings for tacuda: TA-Lib 0.7.1 baseline coverage (161 functions) on CUDA, incl. MACDEXT and 19 vector math kernels, device pipeline support, structured OHLCV inputs, batched multi-symbol execution, and runtime dtype selection (float16/float32/float64)"
 readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.8"

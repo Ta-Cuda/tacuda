@@ -137,6 +137,33 @@ down, up = tacuda.aroon_batch(highs, lows, 14)
 tr    = tacuda.trange_batch(highs, lows, closes)
 ```
 
+### Python with device-resident PyTorch tensors
+
+The low-level `tacuda.sma_batch_d` wrapper accepts integer GPU addresses;
+it does not copy or allocate outputs. Keep contiguous CUDA float32 tensors
+alive until the supplied stream has completed. Use the same CUDA device
+and stream as the tensor producer:
+
+```python
+import torch
+import tacuda
+
+with torch.cuda.device(0):
+    x = torch.arange(30, dtype=torch.float32, device="cuda:0").reshape(3, 10)
+    y = torch.empty_like(x)
+    stream = torch.cuda.current_stream()
+    tacuda.sma_batch_d(x.data_ptr(), y.data_ptr(), 10, 3, 5, 4,
+                       stream.cuda_stream)
+    stream.synchronize()
+    print(y.cpu())  # first 4 columns NaN; first row then 2, 3, 4, 5, 6, 7
+```
+
+Python returns `None` on success and raises on failure. `period=20` with
+only 10 bars correctly produces all NaNs: there is no complete window.
+Passing a non-null stream ignores `maxConcurrency`, as described above.
+This is the Python equivalent of Node's `device.smaBatch`, not the host
+array helper `sma_batch`. The example requires PyTorch with CUDA installed.
+
 ## Node.js
 
 ```js

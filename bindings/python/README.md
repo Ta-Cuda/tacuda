@@ -1,7 +1,7 @@
 # TaCuda — Python Bindings
 
 Python package for the native `tacuda` CUDA library.
-Full TA-Lib coverage (161 functions): indicators, MACDEXT, 19 vector math kernels,
+TA-Lib 0.7.1 baseline coverage (161 functions): indicators, MACDEXT, 19 vector math kernels,
 candlestick patterns, plus typed core APIs with runtime dtype selection and the
 zero-copy device API.
 
@@ -85,7 +85,7 @@ finally:
     tacuda.device_free(d_out)
 ```
 
-## Available Indicators (full TA-Lib coverage)
+## Available Indicators (TA-Lib 0.7.1 baseline coverage)
 
 | Category | Indicators |
 |----------|-----------|
@@ -134,3 +134,11 @@ Canonical release history is maintained in [`CHANGELOG.md`](../../docs/CHANGELOG
 ## License
 
 Apache License 2.0 — see [LICENSE](../../LICENSE).
+
+## Streaming and version pairing
+
+The 0.8.0 bindings add incremental single-series and portfolio updates for
+10 indicator families. Use a matching 0.8.0 native library; an older binary
+does not export the streaming functions. See the
+[Streaming API guide](https://github.com/Ta-Cuda/tacuda/blob/main/docs/STREAMING_API.md).
+The 161-function compatibility baseline is native TA-Lib 0.7.1, not TA-Lib 0.8.1.

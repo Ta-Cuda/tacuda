@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import ctypes
+import json
 import sys
 import time
 from pathlib import Path
@@ -51,6 +52,7 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--size", type=int, default=10_000_000)
     parser.add_argument("--repeats", type=int, default=5)
+    parser.add_argument("--json", type=Path, help="Save timings and explicit CPU baselines")
     args = parser.parse_args()
 
     n = args.size
@@ -113,7 +115,7 @@ def main() -> None:
         return run
 
     print(f"# Vector math benchmark: {n:,} elements, best of {args.repeats}")
-    header = f"{'func':8} {'tacuda host':>12} {'tacuda dev':>12} {'numpy f32':>12} {'talib f64':>12} {'dev speedup':>12}"
+    header = f"{'func':8} {'tacuda host':>12} {'tacuda dev':>12} {'numpy f32':>12} {'talib f64':>12} {'vs numpy':>12} {'vs talib':>12}"
     print(header)
     print("-" * len(header))
 
@@ -123,19 +125,27 @@ def main() -> None:
         t_dev = bench(device_call(f"ct_{dev_name}", 1), args.repeats)
         t_np = bench(lambda: np_fn(a32), args.repeats)
         t_talib = bench(lambda: getattr(talib, talib_name)(a64), args.repeats) if talib else float("nan")
-        base = min(t_np, t_talib) if talib else t_np
-        rows.append((name, t_host, t_dev, t_np, t_talib, base / t_dev))
+        rows.append((name, t_host, t_dev, t_np, t_talib, t_np / t_dev, t_talib / t_dev))
 
     for name, host_fn, dev_name, np_fn, talib_name in binary_cases:
         t_host = bench(lambda: host_fn(x32, y32), args.repeats)
         t_dev = bench(device_call(f"ct_{dev_name}", 2), args.repeats)
         t_np = bench(lambda: np_fn(x32, y32), args.repeats)
         t_talib = bench(lambda: getattr(talib, talib_name)(x64, y64), args.repeats) if talib else float("nan")
-        base = min(t_np, t_talib) if talib else t_np
-        rows.append((name, t_host, t_dev, t_np, t_talib, base / t_dev))
+        rows.append((name, t_host, t_dev, t_np, t_talib, t_np / t_dev, t_talib / t_dev))
 
-    for name, t_host, t_dev, t_np, t_talib, speedup in rows:
-        print(f"{name:8} {t_host:10.2f}ms {t_dev:10.3f}ms {t_np:10.2f}ms {t_talib:10.2f}ms {speedup:11.1f}x")
+    for name, t_host, t_dev, t_np, t_talib, speedup_np, speedup_talib in rows:
+        print(f"{name:8} {t_host:10.2f}ms {t_dev:10.3f}ms {t_np:10.2f}ms {t_talib:10.2f}ms {speedup_np:11.1f}x {speedup_talib:11.1f}x")
+
+    if args.json:
+        keys = ("function", "host_ms", "device_ms", "numpy_ms", "talib_ms", "speedup_numpy", "speedup_talib")
+        report = {"tacuda": tacuda.version(), "numpy": np.__version__,
+                  "talib": talib.__version__ if talib else None,
+                  "elements": n, "repeats": args.repeats, "statistic": "best",
+                  "device_includes_transfers": False,
+                  "rows": [{k: (None if isinstance(v, float) and not np.isfinite(v) else v)
+                            for k, v in zip(keys, row)} for row in rows]}
+        args.json.write_text(json.dumps(report, indent=2, allow_nan=False), encoding="utf-8")
 
     tacuda.device_free(d_x)
     tacuda.device_free(d_y)

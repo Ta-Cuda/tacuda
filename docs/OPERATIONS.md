@@ -138,3 +138,123 @@ to bottom.
       (GitHub releases / [CHANGELOG.md](CHANGELOG.md)).
 - [ ] ABI expectations understood: MINOR = drop-in, MAJOR = review
       ([ABI policy](CONTRIBUTING.md#abi-stability-policy)).
+
+## Validation snapshot — 2026-10-07
+
+The Windows GPU run tested the unchanged source snapshot at
+`263f99bde46d3c93ad1734240ebc1cf7115c4b64`, including the unreleased streaming
+API. This is validation evidence, not a release or a Linux acceptance result.
+Logs, corpus JSON, CTest JUnit files and the isolated test harness are in
+[windows-logs.zip](validation/2026-10-07/windows-logs.zip).
+
+Every evidence archive under `validation/` is redacted before publication:
+host addresses, SSH details, workstation paths and account names are removed
+or replaced, and the evidence checksums in this document are those of the
+redacted archives.
+
+Environment: a Windows GPU workstation, Windows 11 Enterprise build 26300, RTX 3090 Ti,
+driver 610.88, CUDA 12.9.41, MSVC 19.44.35228, CMake 4.1.0-rc2,
+Release/Ninja targeting SM 86. Python 3.12.8 and NumPy 2.2.6 ran in isolated
+virtual environments. No tracked source files changed on the remote host.
+
+| Check | Result |
+|-------|--------|
+| Native build, including optimizer and examples | Passed |
+| CTest, sequential | 418 passed, 1 skipped; the skipped `Backends.TalibMatchesReference` passed on a focused rerun after supplying the official TA-Lib 0.8.1 DLL via `TACUDA_OPT_TALIB` |
+| Python pipeline | 34 passed, 0 failed |
+| Node.js pipeline | 201 passed, 0 failed |
+| C# pipeline / binding tests | 36 / 100 passed, 0 failed; net8.0 and net9.0 bindings built |
+| Differential corpus, Python TA-Lib 0.7.0 / native TA-Lib 0.7.1 | 165/165 specs, 1319/1319 evaluated cells passed; one documented NATR cell excluded |
+| Differential corpus, Python/native TA-Lib 0.8.1 | Failed: 40 reference functions lack corpus specs; IMI(14)/flat and WILLR(14)/zeros differ; 163/165 specs and 1317/1319 evaluated cells passed |
+| Streaming corpus, TA-Lib 0.8.1 | 699/699 cells passed |
+| Batch quick/stress check | Passed; outputs stable, allocation count 52 to 53 over three stress rounds |
+| Native export resolution | All 811 declarations in the three public headers resolved; the existing 808-symbol audit excludes the three string-returning introspection functions |
+| Streaming handle lifetime, AddressSanitizer | Failed as expected for the reported defect: `create -> destroy -> reset` reads freed memory in `src/api/api_stream.cpp:130`; normal create/append/destroy control passed |
+
+The current TA-Lib 0.8.1 exposes 201 functions, whereas the earlier reference
+exposes 161. Therefore the full-coverage claim must name its reference version.
+The 40 missing corpus specifications are a coverage gap, not proof that all 40
+implementations are absent: some functions already exist as TACUDA extras.
+Do not loosen numerical tolerances to hide the IMI/WILLR differences; review
+the reference-version semantics first. The Windows GPU result also confirms
+that passing the existing suite does not establish the promised rejection of
+destroyed raw C streaming handles.
+
+Two initial inline Python preflight commands failed because Windows
+PowerShell removed embedded quotes. File-based verification subsequently
+passed (`verification-talib081.json` and `verification-talib070.json`); the
+original harness errors remain in `results.json` for traceability.
+
+Artifact provenance:
+
+- Source archive SHA-256:
+  `5a7e4b2738b92f93190ca540397b3ce1e1fe6c5ca5db595b004a651ee3cf0c83`.
+- Built `tacuda.dll` SHA-256:
+  `11e3fb5731eee931c8df32952c6b55eaf15001c24229a6b8ed7de48b427299b2`.
+- Evidence ZIP SHA-256 (redacted archive):
+  `48bdd580042459a4edf6372cc258a71ea015d9fe76a5f65ec766aa1010b562ff`.
+- The run used an isolated directory on the workstation; the temporary
+  scheduled task was removed after completion and existing host services
+  were left running.
+
+Linux remained unverified in this run: the Linux GPU host was unreachable
+at the time.
+
+
+## Fix validation — 2026-10-07, 0.8.0 working tree
+
+The corrections were built in a separate isolated directory on the same
+Windows GPU workstation (RTX 3090 Ti, i5-13500, CUDA 12.9, MSVC 19.44). The
+previous audit directory
+and its evidence above were preserved. This is Windows validation of the
+working tree based on `263f99b`, not a published release.
+
+[fixes-windows-logs.zip](validation/2026-10-07/fixes-windows-logs.zip) contains
+CTest JUnit, corpus JSON, binding logs, benchmarks, runner scripts and
+`tested-source-manifest.json`. All 543 native/binding/test/build-tool input
+hashes in that manifest matched the local working tree when collected.
+
+| Check | Result |
+| --- | --- |
+| Release native build, optimizer and examples | Passed |
+| Full CTest after handle correction | 423/423 passed |
+| Focused CTest after adding ASan/version gates | 35/35 passed; overlaps the full run, not 35 additional tests |
+| AddressSanitizer implementation test | Passed; retired handles, allocation churn and independent threads |
+| Python pipeline including diagnostic error paths | 37/37 passed |
+| Node.js pipeline including diagnostic helpers | 203/203 passed |
+| C# pipeline / binding tests | 36/36 and 100/100 passed |
+| Baseline differential corpus | 165/165 specs, 1319/1319 evaluated cells; one documented NATR exclusion |
+| Streaming corpus | 699/699 cells passed |
+| Actual PE export table | All 811 public declarations exported |
+| Local release-tool regression suite | 7/7 passed, including malformed binaries and wrong/stale release notes |
+| Local workflow validation | actionlint passed with the explicit custom `gpu` label |
+
+The numerical reference was Python TA-Lib 0.7.0 / native TA-Lib 0.7.1,
+NumPy 2.2.6. The optimizer reference used the existing official TA-Lib 0.8.1
+DLL. No tolerances were widened. The TA-Lib 0.8.1 full-surface migration
+remains open as recorded in the earlier snapshot.
+
+Fresh Windows measurements: RSI append p50/p99 0.10/0.10 microseconds,
+independent of 100K/1M history length at the timer's resolution. The portfolio
+AUTO path at 256 symbols measured p50 34.9 and p99 57.1 microseconds. The
+previous p99 < 1 ms claim through 65536 symbols did not reproduce: AUTO p99
+was 1263.6 microseconds at 2048 and 3194.6 at 65536. These timings do not
+isolate the registry change from OS, CPU and scheduling differences.
+Vector math was rerun with separate NumPy and TA-Lib ratios in
+`vector-math.json`; it is a best-of-five Windows run, not a general guarantee.
+
+The initial run stopped at npm installation in its PowerShell harness.
+Installation succeeded when run directly in the package directory, and the
+second harness completed every remaining check. Both result logs are kept.
+The temporary scheduled tasks were removed after completion.
+
+Artifact SHA-256:
+
+- Native DLL: `4f2ef88ae3efef4788f6127d7ebfb24d5e7e6cf858429022dea20b570de5d874`.
+- Evidence ZIP (redacted archive): `9dcf3e868add6a1d1c89e7c60deb373ec999458cda3662c71941fc11fe0d47e6`.
+
+Still required before publishing: hosted Windows/Linux CI, Linux GPU parity,
+clean installation of the final packaged artifacts, finalized release notes,
+and public tag/release. Registry publication and the separately maintained
+website were not changed. Keep the changelog Unreleased until these gates
+are satisfied; rollback remains the pinned public 0.7.1 packages.

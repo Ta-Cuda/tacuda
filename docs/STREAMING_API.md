@@ -1,6 +1,6 @@
 # Streaming (Incremental Update) API
 
-Added in v0.8.0. A stream carries indicator state across calls, so a newly
+Prepared for v0.8.0 (not yet published). A stream carries indicator state across calls, so a newly
 closed bar costs a state update instead of a full-series recompute. This is
 the API for live and paper trading; the host, device and batch APIs remain
 the right choice for research over whole histories.
@@ -8,6 +8,9 @@ the right choice for research over whole histories.
 Design rationale and the plan for batch streams: [DESIGN_STREAMING_API.md](DESIGN_STREAMING_API.md).
 
 ## Why it exists
+
+The tables in this section are historical 2026-08-02 measurements, before
+the handle-registry fix. Current Windows results are reported below.
 
 Recomputing the whole history on every tick is O(n) per bar, and on the GPU
 it also pays a PCIe roundtrip and a kernel launch. Measured on the RTX
@@ -91,7 +94,9 @@ one closed bar per symbol, i3-12100F + RTX 3090 Ti
 The shape is the same one that drove the single-series design: the GPU has a
 fixed floor per append (two transfers, a launch, a sync) that a small
 portfolio never earns back, and a throughput advantage that a large one does.
-AUTO keeps p99 under 1 ms all the way to 65 536 symbols.
+That historical run kept AUTO p99 under 1 ms through 65 536 symbols.
+This is not a cross-platform latency guarantee; the Windows run below does
+not reproduce it.
 
 There is deliberately **no library-managed thread pool**. A first cut spawned
 worker threads per append and measured 595 µs at *every* portfolio size —
@@ -103,6 +108,27 @@ library making that decision for them.
 Policy may change between appends; state migrates with it (asserted by a test
 that runs one series through CPU, then GPU, then CPU again and compares
 against a single-series reference).
+
+### Windows validation after the handle fix (2026-10-07)
+
+RTX 3090 Ti, i5-13500, Windows 11, CUDA 12.9, TACUDA 0.8.0 working tree.
+RSI one-bar append measured p50/p99 **0.10/0.10 microseconds** at both 100K
+and 1M history sizes; the corresponding full-recompute p50 was 249.5 and
+2697.1 microseconds. Sub-microsecond timings are limited by timer resolution.
+
+| Portfolio size | AUTO p50 / p99, microseconds |
+| --- | --- |
+| 256 | 34.9 / 57.1 |
+| 1024 | 137.8 / 164.6 |
+| 2048 | 368.3 / 1263.6 |
+| 4096 | 546.5 / 1667.8 |
+| 16384 | 1113.7 / 2282.9 |
+| 65536 | 2063.9 / 3194.6 |
+
+The 256-symbol target passes; the larger-portfolio tail-latency claim remains
+unverified across platforms. The fixed AUTO crossover at 2048 is retained
+pending controlled CPU/GPU profiling, rather than retuned to one Windows run.
+Raw logs and the source manifest are linked in [OPERATIONS.md](OPERATIONS.md).
 
 ## Usage
 
@@ -269,8 +295,22 @@ in C#, an error in Python and Node) instead of reaching freed native state.
   poll; the rest is additive work behind the same handle contract.
 - No state serialization: a process restart replays history. Replay runs at
   ~55 M bars/s, so a 1M-bar warm-up costs ~18 ms.
-- Language bindings (Python, Node, C#) are not generated yet — the C ABI is
-  stable and callable through FFI today.
+- Python and Node wrappers are maintained by hand; C# family wrappers are
+  generated. All three binding surfaces are covered by the ABI audit.
+
+## Handle lifetime
+
+A C handle is an opaque, pointer-sized token. A registry resolves it to live
+state before any access. Destroy removes the entry and releases the state;
+tokens are never reused during a library load, including after allocation
+churn. Single-series and batch tokens occupy separate namespaces. This
+avoids both freed-memory reads and stale handles silently addressing a new
+stream. Registry storage scales with peak live handles, not lifetime create count.
+Token-space exhaustion returns `CT_STATUS_ALLOC_FAILED` instead of wrapping.
+
+Serialize operations **and destruction** on the same handle. Independent
+handles may be used by independent threads. Handles must not be dereferenced,
+persisted across restarts, or retained across unloading/reloading the library.
 
 ## Testing
 
@@ -285,12 +325,12 @@ exclusion is NATR on the zero-crossing dataset, where TA-Lib's own
 `ta_NATR.c` corrupts its first output bar — the same exclusion the
 differential corpus makes, for the same reason.
 
-`tests/cpp/test_stream_batch.cpp` (8 cases) asserts that a batch equals N
+`tests/cpp/test_stream_batch.cpp` asserts that a batch equals N
 single streams bit for bit — per family, per execution path, at chunk sizes
 1/7/whole — plus introspection, reset (including invalidation of resident
 device state), policy changes mid-stream, and the error contract.
 
-`tests/cpp/test_stream_api.cpp` (18 cases) asserts, for every family:
+`tests/cpp/test_stream_api.cpp` asserts, for every family:
 stream-vs-full-series parity under the corpus oracle at four chunk sizes,
 exact NaN-mask equality, lookback correctness, reset-equals-fresh,
 warm-up-replay-then-tick-by-tick equivalence, handle independence, NaN
@@ -302,5 +342,6 @@ Run them with the rest of the suite:
 ctest --output-on-failure -R TacudaStream
 ```
 
-Both suites are part of the standard run; the full suite is green at 417/417
-on the RTX 3090 Ti.
+Both suites are part of the standard run. Historical corpus/latency numbers
+above predate the handle-registry correction; see the dated validation
+sections in [OPERATIONS.md](OPERATIONS.md) for the tested source and environment.

@@ -1,7 +1,7 @@
 # TaCuda — .NET/C# Bindings
 
 Managed bindings for the native `tacuda` CUDA library.
-Full TA-Lib coverage (161 functions, 395 native entrypoints incl. the batch API): generated P/Invoke
+TA-Lib 0.7.1 baseline coverage (161 functions, 811 native entrypoints incl. the batch API): generated P/Invoke
 signatures for host API, device API, MACDEXT, 19 vector math kernels, and typed
 `_ex` entrypoints. The `DllImport` name is platform-neutral (`tacuda`), so the same
 assembly loads `tacuda.dll`, `libtacuda.so`, or `libtacuda.dylib` automatically.
@@ -89,7 +89,7 @@ NativeMethods.ct_device_free(dIn);
 NativeMethods.ct_device_free(dOut);
 ```
 
-## Available Indicators (full TA-Lib coverage)
+## Available Indicators (TA-Lib 0.7.1 baseline coverage)
 
 All indicators are available as static `NativeMethods.ct_*` methods:
 
@@ -153,3 +153,11 @@ Canonical release history is maintained in [`CHANGELOG.md`](../../docs/CHANGELOG
 ## License
 
 Apache License 2.0 — see [LICENSE](../../LICENSE).
+
+## Streaming and version pairing
+
+The 0.8.0 bindings add incremental single-series and portfolio updates for
+10 indicator families. Use a matching 0.8.0 native library; an older binary
+does not export the streaming functions. See the
+[Streaming API guide](https://github.com/Ta-Cuda/tacuda/blob/main/docs/STREAMING_API.md).
+The 161-function compatibility baseline is native TA-Lib 0.7.1, not TA-Lib 0.8.1.

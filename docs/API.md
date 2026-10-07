@@ -1,12 +1,15 @@
 # API Reference
 
-tacuda exposes one flat C ABI: `include/tacuda.h` (556 host entry points)
+tacuda exposes one flat C ABI: `include/tacuda.h` (559 host entry points)
 plus a device-pointer header `include/tacuda_device.h` (200 `ct_*_d`
-functions) — 756 exported symbols in total. All language bindings are thin
+functions), plus `include/tacuda_stream.h` (52 handle-based functions) —
+811 exported symbols in total, including the three string-returning
+introspection functions previously omitted by the audit. All language bindings are thin
 wrappers over this surface, so the conventions below apply to C++, Python,
 Node.js, and .NET alike.
 
-Related: [DEVICE_API.md](DEVICE_API.md) (zero-copy pipelines),
+Related: [STREAMING_API.md](STREAMING_API.md) (incremental updates),
+[DEVICE_API.md](DEVICE_API.md) (zero-copy pipelines),
 [BATCH_API.md](BATCH_API.md) (multi-symbol execution),
 [IMPLEMENTATION_NOTES.md](IMPLEMENTATION_NOTES.md) (TA-Lib parity corner
 cases), [CONTRIBUTING.md](CONTRIBUTING.md#abi-stability-policy) (ABI
@@ -16,7 +19,8 @@ stability guarantees).
 
 ### Status codes and errors
 
-Every `ct_*` function returns `ctStatus_t`:
+Indicator calls return `ctStatus_t`. Introspection/string and allocation
+helpers have their declared return types; they are not status-returning calls:
 
 | Code | Meaning |
 |------|---------|
@@ -126,7 +130,7 @@ design (SAR hybrid path still exposes `ct_sar_d`).
 
 | Metric | Python | Node.js | C# (.NET) |
 |--------|--------|---------|-----------|
-| Native entry points (audited) | 756 / 756 | 756 / 756 | 756 / 756 |
+| Native entry points (audited) | 811 / 811 | 811 / 811 | 811 / 811 |
 | FFI mechanism | `ctypes` (generated) | `koffi` (hand-written + generated) | P/Invoke (generated, public) |
 | Return style | numpy arrays; multi-output → tuple | `Float32Array`; multi-output → object | status code; caller allocates outputs |
 | Errors | `RuntimeError` | `Error` | `ctStatus_t` (+ `TacudaException` in helpers) |
