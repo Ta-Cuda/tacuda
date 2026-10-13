@@ -7,6 +7,11 @@
 # manual dispatch performs a dry run (pack + validate + upload artifacts,
 # no registry push) unless `publish` is set to true.
 #
+# The package jobs only build and validate. A single `publish` job pushes to
+# all three registries after every package has passed, so one broken package
+# cannot leave the others released on their own. Its pushes skip versions
+# that are already published: rerun the workflow after fixing a failed push.
+#
 # Required repository secrets for publishing:
 #   PYPI_API_TOKEN, NPM_TOKEN, NUGET_API_KEY
 
@@ -69,38 +74,54 @@ jobs:
 
       # One wheel per platform, each with exactly its own native (never a
       # py3-none-any wheel with a DLL and an SO mixed together), plus a
-      # source-only sdist.
+      # source-only sdist. setuptools stages package files in build/lib and
+      # never prunes it, so without the wipe before each wheel the win_amd64
+      # wheel would also carry the libtacuda.so staged for the Linux one.
       - name: Build sdist + platform wheels
         working-directory: bindings/python
         run: |
           python -m pip install --upgrade build twine
+          rm -rf build dist ./*.egg-info
           python -m build --sdist
 
+          rm -rf build ./*.egg-info
           cp "$GITHUB_WORKSPACE/natives/linux/libtacuda.so" tacuda/
           printf '[bdist_wheel]\nplat_name = manylinux_2_35_x86_64\npython_tag = py3\n' > setup.cfg
           python -m build --wheel
           rm tacuda/libtacuda.so
 
+          rm -rf build ./*.egg-info
           cp "$GITHUB_WORKSPACE/natives/windows/tacuda.dll" tacuda/
           printf '[bdist_wheel]\nplat_name = win_amd64\npython_tag = py3\n' > setup.cfg
           python -m build --wheel
-          rm tacuda/tacuda.dll setup.cfg
+          rm -rf tacuda/tacuda.dll setup.cfg build ./*.egg-info
 
           python -m twine check dist/*
 
-      - name: Validate wheel contents (one native per platform wheel)
+      # Exact expectations rather than grep: under `set -e` bash ignores a
+      # failing `! cmd`, so the earlier negated checks could never fail.
+      - name: Validate dist contents (one native per platform wheel)
         working-directory: bindings/python
+        shell: python
         run: |
-          set -e
-          for whl in dist/*manylinux*.whl; do
-            unzip -l "$whl" | grep "tacuda/libtacuda.so"
-            ! unzip -l "$whl" | grep -q "tacuda/tacuda.dll"
-          done
-          for whl in dist/*win_amd64*.whl; do
-            unzip -l "$whl" | grep "tacuda/tacuda.dll"
-            ! unzip -l "$whl" | grep -q "tacuda/libtacuda.so"
-          done
-          ! ls dist/*py3-none-any.whl 2>/dev/null
+          import pathlib, tarfile, zipfile
+          natives = (".so", ".dll", ".dylib", ".pyd")
+          expected = {"manylinux_2_35_x86_64": {"tacuda/libtacuda.so"},
+                      "win_amd64": {"tacuda/tacuda.dll"}}
+          wheels = sorted(pathlib.Path("dist").glob("*.whl"))
+          plats = sorted(w.name[:-len(".whl")].rsplit("-", 1)[1] for w in wheels)
+          assert plats == sorted(expected), f"expected one wheel per {sorted(expected)}, got {[w.name for w in wheels]}"
+          for wheel in wheels:
+              plat = wheel.name[:-len(".whl")].rsplit("-", 1)[1]
+              found = {n for n in zipfile.ZipFile(wheel).namelist() if n.endswith(natives)}
+              assert found == expected[plat], f"{wheel.name}: natives {sorted(found)}, expected {sorted(expected[plat])}"
+              print(f"{wheel.name}: {sorted(found)}")
+          sdists = sorted(pathlib.Path("dist").glob("*.tar.gz"))
+          assert len(sdists) == 1, f"expected one sdist, got {[s.name for s in sdists]}"
+          with tarfile.open(sdists[0]) as sdist:
+              found = [n for n in sdist.getnames() if n.endswith(natives)]
+          assert not found, f"{sdists[0].name} must be source-only, contains {found}"
+          print(f"{sdists[0].name}: source-only")
 
       - name: Smoke-test wheel installs
         # Run from an empty directory so the import resolves the INSTALLED
@@ -133,26 +154,18 @@ jobs:
         with:
           name: pypi-dist
           path: bindings/python/dist/*
-
-      - name: Publish to PyPI
-        if: startsWith(github.ref, 'refs/tags/') || inputs.publish
-        working-directory: bindings/python
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: python -m twine upload --non-interactive dist/*
+          if-no-files-found: error
 
   npm-package:
     runs-on: ubuntu-22.04
     # Gate on the same native-build workflow (incl. the mandatory GPU tests
-    # on tags) as the other packages — npm must not publish if the gate fails.
+    # on tags) as the other packages.
     needs: [natives]
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version: "22"
-          registry-url: "https://registry.npmjs.org"
 
       - name: Pack
         working-directory: bindings/nodejs
@@ -186,13 +199,7 @@ jobs:
         with:
           name: npm-dist
           path: bindings/nodejs/*.tgz
-
-      - name: Publish to npm
-        if: startsWith(github.ref, 'refs/tags/') || inputs.publish
-        working-directory: bindings/nodejs
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish *.tgz --access public
+          if-no-files-found: error
 
   nuget-package:
     runs-on: ubuntu-22.04
@@ -266,15 +273,86 @@ jobs:
         with:
           name: nuget-dist
           path: bindings/csharp/dist/*.nupkg
+          if-no-files-found: error
+
+  # The only job that pushes to registries, and only after all three package
+  # jobs validated. Registries cannot be updated atomically, so every push is
+  # idempotent: a rerun after a failed push (expired token, outage) completes
+  # the remaining registries instead of failing on those that already have
+  # this version.
+  publish:
+    if: startsWith(github.ref, 'refs/tags/') || inputs.publish
+    runs-on: ubuntu-24.04
+    needs: [python-package, npm-package, nuget-package]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Download validated packages
+        uses: actions/download-artifact@v8
+        with:
+          pattern: "*-dist"
+          path: dist/
+
+      # Fail before the first push rather than after a partial release.
+      - name: Preflight (secrets, npm token, expected files)
+        env:
+          PYPI_API_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          missing=""
+          [ -n "$PYPI_API_TOKEN" ] || missing="$missing PYPI_API_TOKEN"
+          [ -n "$NODE_AUTH_TOKEN" ] || missing="$missing NPM_TOKEN"
+          [ -n "$NUGET_API_KEY" ] || missing="$missing NUGET_API_KEY"
+          if [ -n "$missing" ]; then
+            echo "::error::missing repository secrets:$missing"
+            exit 1
+          fi
+          npm whoami
+          VERSION=$(node -p "require('./bindings/nodejs/package.json').version")
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+          ls -l dist/*/
+          test "$(ls dist/pypi-dist/*.whl | wc -l)" -eq 2
+          test -f "dist/pypi-dist/tacuda-$VERSION.tar.gz"
+          test -f "dist/npm-dist/tacuda-$VERSION.tgz"
+          test -f "dist/nuget-dist/Tacuda.$VERSION.nupkg"
+
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          python -m pip install --upgrade twine
+          python -m twine upload --non-interactive --skip-existing dist/pypi-dist/*
 
       - name: Publish to NuGet
-        if: startsWith(github.ref, 'refs/tags/') || inputs.publish
-        working-directory: bindings/csharp
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
         run: >
-          dotnet nuget push dist/*.nupkg
-          --api-key ${{ secrets.NUGET_API_KEY }}
+          dotnet nuget push "dist/nuget-dist/Tacuda.$VERSION.nupkg"
+          --api-key "$NUGET_API_KEY"
           --source https://api.nuget.org/v3/index.json
           --skip-duplicate
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ "$(npm view "tacuda@$VERSION" version 2>/dev/null)" = "$VERSION" ]; then
+            echo "tacuda@$VERSION is already on npm, skipping"
+          else
+            npm publish "dist/npm-dist/tacuda-$VERSION.tgz" --access public
+          fi
 
   # Changelog automation: the GitHub release body is the top section of
   # docs/CHANGELOG.md (see docs/CONTRIBUTING.md), natives attached with
@@ -282,7 +360,7 @@ jobs:
   github-release:
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-22.04
-    needs: [python-package, npm-package, nuget-package]
+    needs: [publish]
     permissions:
       contents: write
     steps:
