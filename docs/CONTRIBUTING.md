@@ -137,7 +137,10 @@ between headers and generated wrappers) and the release criteria below.
 Every tagged release (`vMAJOR.MINOR.PATCH`) ships native libraries
 (win-x64 DLL, linux-x64 .so), PyPI wheel/sdist, npm tgz and NuGet nupkg.
 Nothing is pushed to a registry until all gates pass — the
-`release-packages` workflow enforces them:
+`release-packages` workflow enforces them. Its package jobs only build and
+validate; a single `publish` job pushes to PyPI, NuGet and npm after all
+three packages have passed, so a broken package cannot leave the others
+released alone:
 
 1. **Version consistency (blocking).** `CT_VERSION_STRING` in
    `include/tacuda.h`, `project.version` (pyproject.toml), `version`
@@ -151,14 +154,20 @@ Nothing is pushed to a registry until all gates pass — the
 3. **Test gates (blocking, GPU required).** `ctest` 100% pass, the three
    binding pipelines report `0 failed`, the differential corpus is green,
    `benchmark_batch_api.py --quick` passes (no pool growth explosion).
-4. **Package validation (blocking).** Wheel installs into a clean venv and
-   imports from site-packages; npm tarball installs and loads; nupkg
-   contains both natives and a consumer app resolves P/Invoke.
+4. **Package validation (blocking).** Each platform wheel contains exactly
+   its own native and the sdist none; the wheel installs into a clean venv
+   and imports from site-packages; npm tarball installs and loads; nupkg
+   contains both natives and a consumer app resolves P/Invoke. Before the
+   first push, `publish` checks that all three secrets are set, that the npm
+   token authenticates and that every expected file is present.
 5. **Signing & provenance.** Annotated signed tag; registry-scoped secrets
    (`PYPI_API_TOKEN`, `NPM_TOKEN`, `NUGET_API_KEY`); SHA-256 checksums of
    both natives in the release notes (automated by the workflow).
 6. **Rollback.** Registries are immutable: ship `X.Y.(Z+1)` with the fix,
-   yank/deprecate/unlist the broken version.
+   yank/deprecate/unlist the broken version. Registries cannot be updated
+   atomically, so a push can still fail midway (expired token, outage):
+   fix the cause and rerun the failed `publish` job — every push skips a
+   version the registry already has.
 
 [CHANGELOG.md](CHANGELOG.md) is the single source of release notes
 (one section per version); CI publishes the top section as the GitHub

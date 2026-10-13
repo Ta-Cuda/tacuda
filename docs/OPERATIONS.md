@@ -198,7 +198,7 @@ Artifact provenance:
   were left running.
 
 Linux remained unverified in this run: the Linux GPU host was unreachable
-at the time.
+at the time. The 2026-10-14 run below closes that gap.
 
 
 ## Fix validation — 2026-10-07, 0.8.0 working tree
@@ -258,3 +258,68 @@ clean installation of the final packaged artifacts, finalized release notes,
 and public tag/release. Registry publication and the separately maintained
 website were not changed. Keep the changelog Unreleased until these gates
 are satisfied; rollback remains the pinned public 0.7.1 packages.
+
+
+## Linux GPU validation — 2026-10-14, source `4e8edd1`
+
+This closes the Linux GPU parity gap left open above. The run used the exact
+committed tree `4e8edd17576982cf17cf886f82906abb8818f1c3`, exported with
+`git -c core.autocrlf=false archive` so the files have the LF endings a Linux CI
+checkout would have. It is validation evidence, not a release: no tag, package
+or registry changed.
+
+[linux-logs.zip](validation/2026-10-14/linux-logs.zip) contains the gate script,
+per-step logs, CTest JUnit, both corpus reports, `provenance.txt` and the logs
+of two aborted attempts (described below).
+
+Environment: the Linux GPU host, Ubuntu 24.04.4, RTX 3090 Ti,
+driver 590.48.01, CUDA 12.8.93, GCC 13.3, CMake 3.29.6, Ninja, Release, SM 86.
+Python 3.12.3 with the pinned reference (`tests/requirements-reference.txt`),
+Node.js 22.23.3, .NET SDK 8.0.426 only (as in the CI `gpu-tests` job).
+Two vLLM services held 21.2 of 23 GB VRAM throughout and were left running.
+
+| Check | Result |
+| --- | --- |
+| Release build, all targets incl. optimizer and examples | Passed, 389/389 steps |
+| Streaming lifetime under AddressSanitizer | Passed |
+| ELF export table | All 811 public declarations exported |
+| CTest, sequential, reference venv first on `PATH` | 425 tests, 0 failed; `Backends.TalibMatchesReference` skipped (needs `TACUDA_OPT_TALIB`) |
+| Python pipeline | 37/37 passed |
+| Differential corpus | 165/165 specs, 1319/1319 cells; one documented NATR exclusion |
+| Streaming corpus | 699/699 cells |
+| Batch quick/stress | Passed; outputs stable, allocation count 41 to 41 |
+| Node.js pipeline | 203/203 passed |
+| C# pipeline / binding tests | 36/36 and 100/100 passed (net8.0 with SDK 8 only) |
+
+Deviations from the CI job, all environmental:
+
+- The host has no system CUDA. The user-local toolkit lacks
+  `libcudart_static`, so the build used `--cudart=shared` with
+  `CMAKE_CUDA_RUNTIME_LIBRARY=Shared` and `LIBRARY_PATH` pointing at it.
+  The first attempt failed at CMake compiler detection and the second at
+  linking `libtacuda.so` for exactly these reasons; no source change was made.
+- System Node 18 ships without npm; a checksum-verified Node 22 tarball was
+  unpacked into the run directory instead, matching `setup-node`.
+
+Reference version caveat: the same pinned wheel `TA-Lib==0.7.0` reports
+native `__ta_version__` 0.6.4 on Linux, while on Windows (2026-10-07) it
+reported 0.7.1. Both expose the same 161 functions and both pass the strict
+corpus. Statements naming "native TA-Lib 0.7.1" are therefore exact for the
+Windows reference only; the oracle that matters is the pinned wheel.
+
+Artifact SHA-256:
+
+- Source archive: `2529aafe422ec30860d7e387f894b38b7b83926ea32396fa899a536d295cad50`.
+- Built `libtacuda.so`: `8539db5507672b387457b3f10eb884a28c1b7f2afb3b117a30046645396b53d2`.
+- Evidence ZIP (redacted archive): `de406f56a30c4c4bed067d12b0ba99929f202669bacc0aa0f1cd8b1e70b9d871`.
+
+Remote run directory: `~/work/tacuda-v080-gate-20261014`; nothing outside it
+was modified, and the .NET build servers were shut down afterwards.
+
+Still required before publishing: a registered `gpu` runner so the tagged
+workflow can run this gate itself, a dry run of `release-packages` (it has
+never run end to end), clean installation of the final artifacts on a GPU
+host, finalized release notes and the public tag/release. The packaging
+defects found during this review (both natives in the Windows wheel, a
+validation step that could not fail, per-registry publishing) are fixed in
+the workflow; see [CHANGELOG.md](CHANGELOG.md).

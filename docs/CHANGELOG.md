@@ -3,6 +3,21 @@ Changelog
 
 Unreleased (0.8.0 development)
 ------------------------------
+Release preparation, 2026-10-14:
+
+- Packaging: the Windows wheel no longer inherits the Linux `libtacuda.so`.
+  setuptools never prunes `build/lib`, so the second platform wheel carried
+  both natives. The validation step missed it because bash `set -e` ignores
+  a failing `! cmd`; it now checks the exact native set of every wheel and a
+  source-only sdist.
+- Publishing moved from the three package jobs into one `publish` job that
+  runs after all packages validate, checks secrets and the npm token first,
+  and skips versions a registry already has, so a failed push is completed
+  by a rerun instead of leaving a partial release.
+- Linux GPU validation of `4e8edd1` (RTX 3090 Ti, CUDA 12.8): CTest 425/425,
+  corpus 165/165, streaming corpus 699/699, Python/Node/C# pipelines green.
+  Evidence in `docs/validation/2026-10-14/`, details in OPERATIONS.md.
+
 Release preparation, 2026-10-07:
 
 - Replace dereferenced raw stream handles with non-reused registry tokens;

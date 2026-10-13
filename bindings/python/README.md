@@ -120,11 +120,18 @@ python bindings/generate_bindings.py
 
 ## Build & Publish (PyPI)
 
+Releases are built and published only by the `release-packages` workflow
+(see [CONTRIBUTING.md](../../docs/CONTRIBUTING.md#release-criteria)): one
+platform wheel per native plus a source-only sdist. For a local wheel, put
+exactly one native into `tacuda/` and wipe the setuptools cache first —
+`build/lib` is never pruned, so a second wheel would otherwise also carry
+the previous build's native:
+
 ```bash
 cd bindings/python
+rm -rf build dist ./*.egg-info
 python -m build
 python -m twine check dist/*
-python -m twine upload dist/*
 ```
 
 ## Changelog
