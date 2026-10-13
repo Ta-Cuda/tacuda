@@ -1,7 +1,7 @@
 # Design: Streaming (Incremental Update) API
 
 Status: **M1 and the batch-stream half of M2 implemented** (2026-08-02);
-persistent batch plans are still design-only. Target release 0.8.0 — see
+persistent batch plans are still design-only. Shipped in 0.8.0 — see
 [ROADMAP.md](ROADMAP.md). The shipped user-facing contract is documented in
 [STREAMING_API.md](STREAMING_API.md); this file keeps the reasoning and the
 open questions.

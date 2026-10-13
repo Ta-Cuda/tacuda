@@ -1,6 +1,6 @@
 # Streaming (Incremental Update) API
 
-Prepared for v0.8.0 (not yet published). A stream carries indicator state across calls, so a newly
+Shipped in v0.8.0. A stream carries indicator state across calls, so a newly
 closed bar costs a state update instead of a full-series recompute. This is
 the API for live and paper trading; the host, device and batch APIs remain
 the right choice for research over whole histories.

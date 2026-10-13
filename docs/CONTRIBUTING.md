@@ -173,13 +173,14 @@ released alone:
 (one section per version); CI publishes the top section as the GitHub
 release body.
 
-### Preparing 0.8.0
+### Preparing a release
 
-Run `python scripts/check_release.py` while developing. Before creating a
-release tag, finalize the `Unreleased (0.8.0 development)` heading as
-`0.8.0 — YYYY-MM-DD` and run `python scripts/check_release.py --tag v0.8.0`.
-An Unreleased heading intentionally blocks publication; extraction never
-falls back to 0.7.1 notes. Manual dry-run packaging may keep Unreleased.
+Run `python scripts/check_release.py` while developing and collect notes
+under an `Unreleased (X.Y.Z development)` heading. Before creating a release
+tag, finalize it as `X.Y.Z — YYYY-MM-DD` and run
+`python scripts/check_release.py --tag vX.Y.Z`. An Unreleased heading
+intentionally blocks publication; extraction never falls back to the
+previous version's notes. Manual dry-run packaging may keep Unreleased.
 
 The blocking numerical baseline is pinned in `tests/requirements-reference.txt`:
 Python TA-Lib 0.7.0 / native TA-Lib 0.7.1, 161 functions. Install it in the

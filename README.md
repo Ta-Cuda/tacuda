@@ -22,10 +22,12 @@
 > each pattern actually produced). The few remaining corner-case notes live
 > in [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md).
 
-**Release status:** this checkout prepares TACUDA **0.8.0**; public registries
-currently carry **0.7.1**. Streaming requires bindings and a native library
-built from the same 0.8.0 source. The 161-function compatibility baseline is
-pinned in `tests/requirements-reference.txt`. TA-Lib 0.8.1 has 201 functions;
+**Release status:** **0.8.0** is the current release on PyPI, npm and NuGet;
+it adds the streaming API. Streaming requires a native library and bindings
+from the same 0.8.0 release. The 161-function compatibility baseline is
+pinned in `tests/requirements-reference.txt` (Python TA-Lib 0.7.0, whose
+bundled native library reports 0.7.1 on Windows and 0.6.4 on Linux; both
+pass the same strict corpus). TA-Lib 0.8.1 has 201 functions;
 its 40 missing corpus specs and IMI/WILLR edge cases remain migration work,
 not part of the full-coverage claim ([validation](docs/OPERATIONS.md#validation-snapshot--2026-10-07)).
 
@@ -535,14 +537,14 @@ Adding a new indicator touches four places (see
 
 ## ✅ Status & TODO
 
-### ✅ Implemented in the 0.8.0 working tree
+### ✅ Implemented as of 0.8.0
 
 - [x] **All 161 functions from TA-Lib 0.7.1 implemented** (incl. MACDEXT with independent MA types and 19 element-wise vector math functions); numerical parity is verified per function by the strict differential corpus — 165/165 specs green, remaining corner-case notes in [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md)
 - [x] **All 61 candlestick patterns** match TA-Lib signal-for-signal (double-precision literal ports, exact-equality oracle with hand-crafted activation fixtures for the rare patterns)
 - [x] **Device API** (`ct_*_d`, 200 functions) for zero-copy multi-indicator pipelines, with `_ex_d` float16/32/64 precision variants
 - [x] **Batch API**: 166 indicator families over a stream pool (`maxConcurrency` control)
 - [x] Python (ctypes), Node.js (koffi) and .NET 8/9 bindings covering the full 811-symbol C ABI (audited in CI)
-- [x] Packaging workflow for PyPI (platform wheels with natives), npm (tgz) and NuGet (nupkg with win-x64 + linux-x64 natives), GPU-gated publishing (0.8.0 not yet released)
+- [x] Packaging workflow for PyPI (platform wheels with natives), npm (tgz) and NuGet (nupkg with win-x64 + linux-x64 natives), GPU-gated publishing
 - [x] **SAREXT** bit-for-bit TA-Lib semantics; SAR/SAREXT host API uses a fast CPU path
 - [x] Memory-safety contracts: stream-ordered buffer pool, buffers may outlive their Context, cross-Context rejection — all covered by lifetime tests
 - [x] `tacuda-opt` strategy optimizer (grid / genetic / walk-forward / portfolio / Monte-Carlo) with the 94-system EXPERIMENTS pack
@@ -551,7 +553,8 @@ Adding a new indicator touches four places (see
 
 Current priorities live in **[docs/ROADMAP.md](docs/ROADMAP.md)**:
 
-- finish the streaming line: site section, live-trading guide, 0.8.0 release;
+- finish the streaming line: site section, live-trading guide, the ADX group and STOCH/STOCHF as stream families;
+- TA-Lib 0.8.1 coverage (40 missing corpus specs, IMI/WILLR edge semantics);
 - persistent batch plans (deferred on measurement — see the roadmap) and multi-GPU dispatch;
 - Conda/Docker/Jetson distribution;
 - **v1.0.0** — ABI freeze, signed releases, GPU test matrix in CI, LTS branch.

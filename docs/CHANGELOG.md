@@ -1,8 +1,19 @@
 Changelog
 =========
 
-Unreleased (0.8.0 development)
-------------------------------
+0.8.0 — 2026-10-14
+------------------
+Streaming (incremental update) API for live and paper trading: append a newly
+closed bar and get updated values without recomputing the series. Ten
+families (SMA, EMA, WMA, RSI, ATR, NATR, OBV, AD, MACD, BBANDS), single-series
+and portfolio-wide on CPU or GPU, with Python, Node.js and C# wrappers. The 52
+new C ABI symbols are appended only, so code built against 0.7.x keeps
+working; streaming needs a 0.8.0 native library and 0.8.0 bindings together.
+
+Known limits: the compatibility baseline is still TA-Lib 0.7.1 (161
+functions), not 0.8.1. In the 2026-10-07 Windows run the AUTO portfolio path
+exceeded 1 ms p99 from 2048 symbols (see `docs/STREAMING_API.md`).
+
 Release preparation, 2026-10-14:
 
 - Packaging: the Windows wheel no longer inherits the Linux `libtacuda.so`.

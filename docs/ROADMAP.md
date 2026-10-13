@@ -1,10 +1,10 @@
 # TaCuda Roadmap
 
-Last reviewed: 2026-10-07 (0.8.0 release preparation; public packages remain 0.7.1).
+Last reviewed: 2026-10-14 (0.8.0 released).
 This document tracks where the project stands and what ships next.
 Order inside a milestone is priority order; items move, versions don't slip silently.
 
-## Working tree (0.8.0, unreleased)
+## Current release (0.8.0)
 
 | Area | State |
 |------|-------|
@@ -15,7 +15,7 @@ Order inside a milestone is priority order; items move, versions don't slip sile
 | Streaming | Incremental append for 10 families, single-series and portfolio-wide ([STREAMING_API.md](STREAMING_API.md)); parity swept by `benchmarks/streaming_corpus.py` |
 | Memory safety | Stream-ordered buffer pool; buffers may outlive their Context; cross-Context use rejected; lifetime tests in ctest |
 | Packages | PyPI platform wheels, npm tgz, NuGet nupkg (win-x64 + linux-x64) built by the `release-packages` workflow with GPU-gated publishing |
-| CI | `native-build` (Linux + Windows, all targets), GPU test job (ctest + corpus + binding pipelines) mandatory for version tags |
+| CI | `native-build` (Linux + Windows, all targets), GPU test job on a self-hosted RTX 3090 Ti runner (ctest + corpus + binding pipelines) mandatory for version tags |
 | Docs | User guide / API / performance / operations tree, implementation notes, changelog, release criteria, adoption checklist |
 | Site | https://tacuda.com (maintained separately; EXPERIMENTS pages generated from this repo) |
 | Benchmarks | Pipeline 15.4x vs TA-Lib @1M bars, separate NumPy/TA-Lib vector-math baselines, batch up to 7.5x vs loops (RTX 3090 Ti) |
@@ -58,8 +58,9 @@ Details in [PERFORMANCE.md](PERFORMANCE.md).
       proof of a green public release workflow.
 - [ ] Tag the release on GitHub with notes from [CHANGELOG.md](CHANGELOG.md);
       attach native binaries with checksums (automated by the workflow).
-- [ ] Register a self-hosted GPU runner (`gpu` label) on the public repo —
-      tagged releases are intentionally blocked without it.
+- [x] Register a self-hosted GPU runner (`gpu` label) on the public repo —
+      tagged releases are intentionally blocked without it. Done 2026-10-14:
+      RTX 3090 Ti host, dedicated unprivileged runner user.
 
 ## Completed measurements: performance milestone (sequential indicators)
 
@@ -110,9 +111,16 @@ measurements behind each decision: [DESIGN_STREAMING_API.md](DESIGN_STREAMING_AP
       call and the installed TA-Lib.
 - [x] Release preparation: non-reused streaming handle tokens, 811-symbol
       binding/export coverage, version consistency and exact-tag release notes.
-- [ ] **M4 — release.** Green public Windows/Linux builds and GPU gates,
-      installation tests, site section, a live-trading article and 0.8.0 itself.
-      `Unreleased` intentionally blocks the publishing workflow.
+- [x] **M4 — release.** Green public Windows/Linux builds and GPU gates,
+      a `release-packages` dry run with clean installation of its artifacts,
+      and 0.8.0 itself (2026-10-14). The site section and the live-trading
+      article did not gate the release and moved to v0.8.x below.
+
+## v0.8.x — streaming follow-ups
+
+Moved here from v0.8.0 on release (2026-10-14), not dropped.
+
+- [ ] Site section for streaming and a live-trading article.
 - [ ] TA-Lib 0.8.1 migration: add the 40 missing corpus specs, determine which
       are existing TACUDA extras, resolve IMI/WILLR edge semantics, then run
       strict parity without widening tolerances. Current coverage names 0.7.1.
