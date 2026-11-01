@@ -132,6 +132,12 @@ Moved here from v0.8.0 on release (2026-10-14), not dropped.
 - [ ] Profile AUTO crossover and large-portfolio p99 on controlled Windows
       and Linux hosts; do not generalize the historical latency ceiling.
 - [ ] Remaining families: ADX group, STOCH/STOCHF.
+- [ ] Differential corpus for the device and batch API. The corpus calls
+      the host API only, which hid both the `*_batch_d` stream-0 race and
+      the GPU Hilbert deviation below until 0.8.0 release checks.
+- [ ] GPU Hilbert parity on constant input (IMPLEMENTATION_NOTES.md, known
+      deviations): sin/cos table computed on the host, no FMA in the phase
+      sums — or keep the deviation documented.
 
 ## v0.9.0 — scale & distribution
 

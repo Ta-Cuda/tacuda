@@ -13,6 +13,9 @@ working; streaming needs a 0.8.0 native library and 0.8.0 bindings together.
 Known limits: the compatibility baseline is still TA-Lib 0.7.1 (161
 functions), not 0.8.1. In the 2026-10-07 Windows run the AUTO portfolio path
 exceeded 1 ms p99 from 2048 symbols (see `docs/STREAMING_API.md`).
+HT_DCPHASE, HT_SINE and HT_TRENDMODE through the device and batch API
+disagree with TA-Lib on constant input, where the phase is rounding noise;
+the host API matches (see `docs/IMPLEMENTATION_NOTES.md`).
 
 Release preparation, 2026-11-01:
 

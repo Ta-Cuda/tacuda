@@ -94,6 +94,16 @@ see [OPERATIONS.md](OPERATIONS.md) for the dated evidence.
 - **`matype` beyond APO/PPO/MACDEXT**: BBANDS/STOCH/STOCHF/STOCHRSI expose
   TA-Lib's default MA types only (SMA smoothing); the selectable-matype
   variants of those functions are a planned API extension.
+- **Hilbert phase on constant input, device and batch API only**:
+  HT_DCPHASE, HT_SINE and HT_TRENDMODE through `ct_ht_*_d` and
+  `*_batch_d` disagree with TA-Lib on a constant series and on near-flat
+  stretches (corpus datasets `flat` and `candles`; HT_TRENDMODE flips its
+  flag). There the DC phase is `atan(realPart / imagPart)` of two sums that
+  are analytically zero — rounding noise of about 1e-14 — so TA-Lib's
+  value is glibc's noise. The host API runs the CPU port
+  (`include/utils/HilbertCPU.h`) and reproduces it bit-exactly; the GPU
+  kernel has the same logic but different noise (FMA contraction, libdevice
+  `sin`/`cos`). On every other corpus dataset both paths agree with TA-Lib.
 
 Closed in 0.7.1:
 - Buffer/Context lifetime contract, all buffer types: `DeviceBuffer` AND
