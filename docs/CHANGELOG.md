@@ -48,6 +48,11 @@ Release preparation, 2026-11-01:
   corpus 165/165, streaming corpus 699/699, Python/Node/C# pipelines green,
   plus the batch-path sweep above. Evidence in `docs/validation/2026-11-01/`,
   details in OPERATIONS.md.
+- Repository history rewritten on 2026-11-01 to remove infrastructure
+  details (host addresses, SSH ports, account and workstation paths) from the
+  operations log and the evidence archives; code is unchanged. Commit ids
+  quoted in this section are pre-rewrite ids — the mapping is in
+  OPERATIONS.md, "History rewrite".
 
 Release preparation, 2026-10-14:
 

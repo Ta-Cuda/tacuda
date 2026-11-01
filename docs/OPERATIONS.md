@@ -395,3 +395,31 @@ Still required before publishing, unchanged since 2026-10-14:
   history has no run of that workflow yet.
 - Clean installation of the final artifacts on a GPU host, the release branch
   merged into `main`, and the signed tag.
+
+## History rewrite — 2026-11-01
+
+The repository history was rewritten with `git filter-repo` to remove
+infrastructure details that had been committed with the validation records:
+the Linux GPU host's addresses and SSH ports, host aliases, workstation paths
+and the account the Linux gate ran under, in this document and inside the
+evidence archives (one reachability probe file was dropped). Code, tests and
+every other file are untouched, so the rewritten commits have the same trees
+there; only commit ids changed. Commit ids quoted above, in CHANGELOG.md and
+in the `provenance.txt` of the archives are the ids before the rewrite:
+
+| Before | After | Commit |
+| --- | --- | --- |
+| `0a2c7a6` | `dc1ea23` | Fix streaming handle lifetime and prepare 0.8.0 release gates |
+| `4e8edd1` | `7578336` | Ignore local build, packaging and credential artifacts |
+| `61d8436` | `7fe9096` | Fix release packaging: one native per wheel, single gated publish job |
+| `cf3a09f` | `26b7160` | Build the local sdist before adding a native |
+| `29719e1` | `4c456af` | Release 0.8.0 |
+| `a23d4b7` | `11dbb17` | Stamp the source signature on files added for 0.8.0 |
+| `6540d9e` | `b84bdc1` | Fix `*_batch_d` racing the legacy default stream on stream 0 |
+| `a5c8f35` | `253b57c` | Document the GPU Hilbert deviation on constant input |
+| `ca0e196` | `70a4cec` | Record the Linux GPU validation of a5c8f35 |
+
+The source-archive checksums in the validation sections were taken from the
+pre-rewrite trees and therefore do not match an archive of the new ids; the
+native-library checksums are unaffected because the sources that build it
+are identical. The commits `c932a2b` and `292d2bf` were not changed.
