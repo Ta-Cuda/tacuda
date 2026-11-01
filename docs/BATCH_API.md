@@ -91,6 +91,9 @@ Device-matrix variants (`*_batch_d`) take GPU pointers of
 - `maxConcurrency = 0` — auto: `min(numSeries, 4)` internal non-blocking
   streams (process-wide pool, reused across calls).
 - `maxConcurrency = N` — cap the pool at N streams.
+- `stream == NULL` is the legacy default stream, as everywhere in CUDA:
+  `*_batch_d` makes the pool wait for work already queued there, then
+  blocks until the batch is done.
 - `stream != NULL` — everything runs ordered on the caller's stream;
   `maxConcurrency` is ignored and `*_batch_d` variants stay asynchronous
   (host variants still synchronize before returning, matching host-API
@@ -160,9 +163,29 @@ with torch.cuda.device(0):
 
 Python returns `None` on success and raises on failure. `period=20` with
 only 10 bars correctly produces all NaNs: there is no complete window.
-Passing a non-null stream ignores `maxConcurrency`, as described above.
 This is the Python equivalent of Node's `device.smaBatch`, not the host
 array helper `sma_batch`. The example requires PyTorch with CUDA installed.
+
+Which stream handle to pass:
+
+- PyTorch's default stream *is* the legacy default stream, so on it
+  `cuda_stream == 0` (CuPy's null stream likewise). That is the example
+  above: the batch waits for the default stream, overlaps series across
+  the pool (`maxConcurrency` applies) and returns when done.
+- On a side stream (`torch.cuda.Stream()`) pass its handle: the batch is
+  ordered on it, `maxConcurrency` is ignored and the call returns
+  immediately. Passing `0` from inside `with torch.cuda.stream(side):` is a
+  race — PyTorch side streams are non-blocking, the legacy stream does not
+  wait for them.
+- Tensors must be contiguous `float32`; `data_ptr()` is only the address of
+  the first element, nothing checks dtype or strides.
+- 0.7.x did **not** make the pool wait for the legacy stream, so with
+  stream `0` a producer kernel still in flight raced the batch: stale rows,
+  and all-NaN rows for indicators that NaN-fill their output before
+  computing it (SUM, SMA). Depending on the family only the first series
+  or every series was hit. Workaround on 0.7.x:
+  `torch.cuda.current_stream().synchronize()` before every `*_batch_d` call
+  with stream `0`.
 
 ## Node.js
 

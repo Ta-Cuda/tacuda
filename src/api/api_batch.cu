@@ -17,8 +17,8 @@
  *      synchronize before returning (host-API semantics).
  *
  * Device variants (_batch_d) skip steps 1 and 3: matrices are already
- * GPU-resident. Inputs must be ready before the call (synchronize the
- * producing stream first) unless a user stream orders everything.
+ * GPU-resident. With stream == 0 the pool first waits for the legacy default
+ * stream, where the caller (PyTorch, CuPy, plain CUDA) usually produced them.
  */
 
 #include <algorithm>
@@ -206,6 +206,29 @@ ctStatus_t fan_in(const BatchStreams& bs) {
     return st;
 }
 
+/// stream == 0 is the legacy default stream — the default of PyTorch
+/// (`torch.cuda.current_stream().cuda_stream == 0`), CuPy and plain CUDA —
+/// so callers expect the batch to run after the work they queued there. The
+/// pool streams are non-blocking and never order against it implicitly:
+/// without this join a kernel still writing the inputs (or reading the
+/// outputs) on that stream races the batch. Kernels that NaN-fill their
+/// output before computing it then leave a whole row of NaN.
+ctStatus_t join_legacy_stream(const BatchStreams& bs) {
+    cudaEvent_t ev = nullptr;
+    if (cudaEventCreateWithFlags(&ev, cudaEventDisableTiming) != cudaSuccess) {
+        return CT_STATUS_DEVICE_ERROR;
+    }
+    ctStatus_t st = CT_STATUS_SUCCESS;
+    if (cudaEventRecord(ev, cudaStreamLegacy) != cudaSuccess) st = CT_STATUS_DEVICE_ERROR;
+    for (size_t i = 0; st == CT_STATUS_SUCCESS && i < bs.streams.size(); ++i) {
+        if (cudaStreamWaitEvent(bs.streams[i], ev, 0) != cudaSuccess) {
+            st = CT_STATUS_DEVICE_ERROR;
+        }
+    }
+    cudaEventDestroy(ev);
+    return st;
+}
+
 /// Drains every dispatch stream and reports the first synchronization
 /// failure: an async kernel fault must never turn into CT_STATUS_SUCCESS.
 ctStatus_t sync_all(const BatchStreams& bs) {
@@ -312,6 +335,7 @@ ctStatus_t run_device_batch(const float* const* dIns, int nIn,
 
     BatchStreams bs = resolve_streams(numSeries, maxConcurrency, userStream);
     ctStatus_t st = CT_STATUS_SUCCESS;
+    if (userStream == nullptr) st = join_legacy_stream(bs);
 
     for (int i = 0; st == CT_STATUS_SUCCESS && i < numSeries; ++i) {
         const float* in[kMaxIo];

@@ -885,6 +885,9 @@ CTAPI_EXPORT ctStatus_t ct_stochastic_batch(const float *host_highs,
  * Device-pointer batch variants: matrices already resident on the GPU
  * (numSeries * seriesLen floats). No host transfers are performed; series
  * are dispatched across the internal stream pool for concurrent execution.
+ * stream == 0 is the legacy default stream (also PyTorch's and CuPy's): the
+ * pool first waits for work already queued on it and the call returns once
+ * the batch is done. A non-null stream orders the batch on it, asynchronously.
  */
 CTAPI_EXPORT ctStatus_t ct_sma_batch_d(const float *d_inputs,
                                        float *d_outputs, int seriesLen,

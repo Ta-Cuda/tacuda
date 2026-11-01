@@ -7,10 +7,12 @@
 #include <tacuda_device.h>
 #include "test_utils.hpp"
 
+#include <chrono>
 #include <cmath>
 #include <cuda_runtime.h>
 #include <functional>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace {
@@ -38,6 +40,11 @@ std::vector<float> make_matrix(int seriesLen, int numSeries, int seedBase) {
 std::vector<float> row(const std::vector<float>& m, int seriesLen, int s) {
   auto begin = m.begin() + static_cast<size_t>(s) * seriesLen;
   return {begin, begin + seriesLen};
+}
+
+// Stream host function: keeps everything queued behind it pending.
+void CUDART_CB hold_stream(void*) {
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 }  // namespace
@@ -197,6 +204,47 @@ TEST(BatchAPI, DeviceBatchMatchesHostBatch) {
   ASSERT_EQ(ct_device_download(deviceOut.data(), dOut, total, 0),
             CT_STATUS_SUCCESS);
 
+  ct_device_free(dIn);
+  ct_device_free(dOut);
+
+  expect_approx_equal(deviceOut, hostOut);
+}
+
+// stream == 0 is the legacy default stream, which is also PyTorch's default:
+// a *_batch_d call must see inputs a producer still has in flight there.
+// SUM NaN-fills its output first, so the race returned row 0 all NaN.
+TEST(BatchAPI, DeviceBatchOnStreamZeroWaitsForLegacyStream) {
+  const int seriesLen = 403, numSeries = 8, period = 20;
+  auto inputs = make_matrix(seriesLen, numSeries, 13);
+  const int total = seriesLen * numSeries;
+  const size_t bytes = static_cast<size_t>(total) * sizeof(float);
+
+  std::vector<float> hostOut(inputs.size(), 0.0f);
+  ASSERT_EQ(ct_sum_batch(inputs.data(), hostOut.data(), seriesLen, numSeries,
+                         period, 0),
+            CT_STATUS_SUCCESS);
+
+  float* dSrc = ct_device_alloc(total);
+  float* dIn = ct_device_alloc(total);
+  float* dOut = ct_device_alloc(total);
+  ASSERT_TRUE(dSrc && dIn && dOut);
+  ASSERT_EQ(ct_device_upload(dSrc, inputs.data(), total, 0), CT_STATUS_SUCCESS);
+  // Stale input contents, as in a block recycled by a caching allocator.
+  ASSERT_EQ(cudaMemset(dIn, 0xFF, bytes), cudaSuccess);
+  ASSERT_EQ(cudaDeviceSynchronize(), cudaSuccess);
+
+  ASSERT_EQ(cudaLaunchHostFunc(cudaStreamLegacy, hold_stream, nullptr),
+            cudaSuccess);
+  ASSERT_EQ(cudaMemcpyAsync(dIn, dSrc, bytes, cudaMemcpyDeviceToDevice,
+                            cudaStreamLegacy),
+            cudaSuccess);
+  ASSERT_EQ(ct_sum_batch_d(dIn, dOut, seriesLen, numSeries, period, 4, 0),
+            CT_STATUS_SUCCESS);
+
+  std::vector<float> deviceOut(inputs.size(), 0.0f);
+  ASSERT_EQ(ct_device_download(deviceOut.data(), dOut, total, 0),
+            CT_STATUS_SUCCESS);
+  ct_device_free(dSrc);
   ct_device_free(dIn);
   ct_device_free(dOut);
 

@@ -76,7 +76,9 @@ stream:
   results.
 - Batch API: passing a non-null stream serializes the whole batch on it;
   passing null lets the internal stream pool overlap series
-  (`maxConcurrency` caps the pool).
+  (`maxConcurrency` caps the pool). Null means the legacy default stream:
+  `*_batch_d` waits for work already queued there and returns when done —
+  see [BATCH_API.md](BATCH_API.md#python-with-device-resident-pytorch-tensors).
 
 ### Data types
 

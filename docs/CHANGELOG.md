@@ -14,6 +14,34 @@ Known limits: the compatibility baseline is still TA-Lib 0.7.1 (161
 functions), not 0.8.1. In the 2026-10-07 Windows run the AUTO portfolio path
 exceeded 1 ms p99 from 2048 symbols (see `docs/STREAMING_API.md`).
 
+Release preparation, 2026-11-01:
+
+- Fixed: `*_batch_d` with stream 0 raced the caller's default stream.
+  Stream 0 dispatches to the internal pool, whose streams are
+  `cudaStreamNonBlocking`, and nothing ordered them after the legacy
+  default stream. That stream is PyTorch's and CuPy's default
+  (`torch.cuda.current_stream().cuda_stream == 0`, the BATCH_API.md
+  example), so a producer kernel still in flight there raced the batch.
+  Reported from PyTorch as an intermittent all-NaN row 0 of `sum_batch_d`
+  (SUM NaN-fills its output before computing it); stale but finite rows are
+  the more frequent outcome. Reproduced with the reporter's code under a
+  random GPU backlog: 60 of 200 iterations returned a wrong row 0 (7
+  all-NaN, 53 stale); with the fix 0 of 400 (two seeds), with no
+  synchronization on the caller's side.
+- Not only SUM: with the producer held on the legacy stream, every one of
+  the 143 differential-corpus specs reachable through a `*_batch_d` family
+  failed the TA-Lib oracle without the fix — in the first series for
+  families whose kernels happen to synchronize the device, in every series
+  for the rest. With the fix 140/143 pass in every row; the three
+  exceptions are a pre-existing device-path deviation, not the batch path
+  (see Known limits).
+- The pool now waits on an event recorded on `cudaStreamLegacy` before any
+  series is dispatched — explicitly the legacy stream, so a
+  `--default-stream per-thread` build behaves the same. Non-null streams
+  and the host `*_batch` variants are unchanged. Regression test
+  `BatchAPI.DeviceBatchOnStreamZeroWaitsForLegacyStream` holds the legacy
+  stream with a host function so the race is deterministic.
+
 Release preparation, 2026-10-14:
 
 - Packaging: the Windows wheel no longer inherits the Linux `libtacuda.so`.
