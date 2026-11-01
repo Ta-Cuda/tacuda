@@ -1,3 +1,8 @@
+# ============================================================================
+#  TaCuda | GPU-accelerated technical analysis | https://tacuda.com
+#  Copyright (c) 2024-2026 Paul Deecalov <paul@deecalov.com>
+#  SPDX-License-Identifier: Apache-2.0
+# ============================================================================
 """Release gates must fail for mismatched versions and non-exported strings."""
 import importlib.util
 import pathlib

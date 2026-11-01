@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+# ============================================================================
+#  TaCuda | GPU-accelerated technical analysis | https://tacuda.com
+#  Copyright (c) 2024-2026 Paul Deecalov <paul@deecalov.com>
+#  SPDX-License-Identifier: Apache-2.0
+# ============================================================================
 """Check package/native versions and select release notes for the exact tag."""
 import argparse
 import json

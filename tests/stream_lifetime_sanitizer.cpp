@@ -1,3 +1,8 @@
+/* ======================================================================== */
+/*  TaCuda | GPU-accelerated technical analysis | https://tacuda.com        */
+/*  Copyright (c) 2024-2026 Paul Deecalov <paul@deecalov.com>               */
+/*  SPDX-License-Identifier: Apache-2.0                                     */
+/* ======================================================================== */
 // CPU-only regression over the real single-series C API. Compile its source
 // with AddressSanitizer too; instrumenting just a consumer misses DLL reads.
 #include "tacuda_stream.h"
