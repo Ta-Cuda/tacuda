@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.8.0 — 2026-10-14
+0.8.0 — 2026-11-01
 ------------------
 Streaming (incremental update) API for live and paper trading: append a newly
 closed bar and get updated values without recomputing the series. Ten
@@ -44,6 +44,10 @@ Release preparation, 2026-11-01:
   and the host `*_batch` variants are unchanged. Regression test
   `BatchAPI.DeviceBatchOnStreamZeroWaitsForLegacyStream` holds the legacy
   stream with a host function so the race is deterministic.
+- Linux GPU validation of `a5c8f35` (RTX 3090 Ti, CUDA 12.8): CTest 426/426,
+  corpus 165/165, streaming corpus 699/699, Python/Node/C# pipelines green,
+  plus the batch-path sweep above. Evidence in `docs/validation/2026-11-01/`,
+  details in OPERATIONS.md.
 
 Release preparation, 2026-10-14:
 

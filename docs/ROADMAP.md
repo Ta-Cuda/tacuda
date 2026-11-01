@@ -1,6 +1,6 @@
 # TaCuda Roadmap
 
-Last reviewed: 2026-10-14 (0.8.0 released).
+Last reviewed: 2026-11-01 (0.8.0 released).
 This document tracks where the project stands and what ships next.
 Order inside a milestone is priority order; items move, versions don't slip silently.
 
@@ -113,12 +113,12 @@ measurements behind each decision: [DESIGN_STREAMING_API.md](DESIGN_STREAMING_AP
       binding/export coverage, version consistency and exact-tag release notes.
 - [x] **M4 — release.** Green public Windows/Linux builds and GPU gates,
       a `release-packages` dry run with clean installation of its artifacts,
-      and 0.8.0 itself (2026-10-14). The site section and the live-trading
+      and 0.8.0 itself (2026-11-01). The site section and the live-trading
       article did not gate the release and moved to v0.8.x below.
 
 ## v0.8.x — streaming follow-ups
 
-Moved here from v0.8.0 on release (2026-10-14), not dropped.
+Moved here from v0.8.0 during release preparation (2026-10-14), not dropped.
 
 - [ ] Site section for streaming and a live-trading article.
 - [ ] TA-Lib 0.8.1 migration: add the 40 missing corpus specs, determine which

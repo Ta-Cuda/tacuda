@@ -323,3 +323,75 @@ host, finalized release notes and the public tag/release. The packaging
 defects found during this review (both natives in the Windows wheel, a
 validation step that could not fail, per-registry publishing) are fixed in
 the workflow; see [CHANGELOG.md](CHANGELOG.md).
+
+## Linux GPU validation — 2026-11-01, source `a5c8f35`
+
+Revalidation after the `*_batch_d` stream-0 fix (`6540d9e`), the only
+behavioral source change since `4e8edd1`; the rest is documentation and SPDX
+headers. Same gate as on 2026-10-14, on the exact committed tree
+`a5c8f35f4acc7eb995d9f667d848d24315d81f69`, exported with
+`git -c core.autocrlf=false -c core.eol=lf archive` — on Windows
+`core.autocrlf=false` alone still writes CRLF for `text=auto` files. It is
+validation evidence, not a release: no tag, package or registry changed.
+
+[linux-logs.zip](validation/2026-11-01/linux-logs.zip) contains the gate
+script, per-step logs, CTest JUnit, both corpus reports, the batch-path sweep
+script and `provenance.txt`.
+
+Environment as on 2026-10-14: the same Linux GPU host, RTX 3090 Ti, driver 590.48.01,
+CUDA 12.8.93 (shared cudart, for the reasons given above), GCC 13.3, CMake
+3.29.6, Ninja, Release, SM 86; Python 3.12.3 with the pinned reference;
+Node.js 22.23.3 and .NET SDK 8.0.426 reused from the previous run directory.
+Two vLLM services again held 21.2 of 23 GB VRAM throughout.
+
+| Check | Result |
+| --- | --- |
+| Release build, all targets incl. optimizer and examples | Passed, 389/389 steps |
+| Streaming lifetime under AddressSanitizer | Passed |
+| ELF export table | All 811 public declarations exported |
+| CTest, sequential, reference venv first on `PATH` | 426 tests, 0 failed (new: `BatchAPI.DeviceBatchOnStreamZeroWaitsForLegacyStream`); `Backends.TalibMatchesReference` skipped |
+| Python pipeline | 37/37 passed |
+| Differential corpus | 165/165 specs, 1319/1319 cells; one documented NATR exclusion |
+| Streaming corpus | 699/699 cells |
+| Batch quick/stress | Passed; outputs stable, buffer pool allocations 42 to 42 |
+| Node.js pipeline | 203/203 passed |
+| C# pipeline / binding tests | 36/36 and 100/100 passed |
+
+Batch-path sweep, not a CI gate: the differential corpus calls the host API
+only. `batch_corpus_vs_talib.py` runs every corpus spec whose TaCuda side is
+one host call with a `*_batch_d` family (143 of 165) through that family on
+stream 0 while the input is still being produced on the legacy stream — a
+20 ms host-function hold, then a device copy over a NaN-filled buffer — and
+judges every batch row with the corpus oracle against TA-Lib:
+
+| Build | Batch rows passing | Specs green |
+| --- | --- | --- |
+| `a5c8f35` | 3972/4002 | 140/143 |
+| Control: `a23d4b7`, the parent without the fix | 2114/4002 | 0/143 |
+
+The three remaining failures are HT_DCPHASE, HT_SINE and HT_TRENDMODE on the
+`flat` and `candles` datasets: the device-path deviation listed in
+[IMPLEMENTATION_NOTES.md](IMPLEMENTATION_NOTES.md#known-deviations-from-ta-lib-tracked).
+The single-series `ct_ht_*_d` fails the same cells; the host API passes.
+
+Artifact SHA-256:
+
+- Source archive: `3c4a0489033b4319c6c500208abeea448b2e0ceaa2a7b6b5633d6956b0d55ae1`.
+- Control archive: `5e1f740ddb642bad22e5b33070c2ea41c96a63f67bdf345dd98483587b455f63`.
+- Built `libtacuda.so`: `a96d00312641a33d35c45d31dd0cf23e0bf8dfd851943636d9b8668ffc41a5c8`.
+- Evidence ZIP (redacted archive): `9390de6e10be5632fadd2741ae3280d6e586cd66da28c4a64ec6c14a5b2d7ee0`.
+
+Remote run directory: `~/work/tacuda-v080-gate-20261101`; nothing outside it
+and the reused toolchains was modified, and the .NET build servers were shut
+down afterwards.
+
+Still required before publishing, unchanged since 2026-10-14:
+
+- A runner labelled `[self-hosted, Linux, gpu]`. A tag push runs
+  `native-build` through `workflow_call`; its `gpu-tests` job needs that
+  runner and every package job waits for it, so without one the tag run stays
+  queued and nothing is published. No runner is installed on that host.
+- A `release-packages` dry run (`workflow_dispatch`, publish off). The Actions
+  history has no run of that workflow yet.
+- Clean installation of the final artifacts on a GPU host, the release branch
+  merged into `main`, and the signed tag.
