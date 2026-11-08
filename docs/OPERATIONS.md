@@ -487,3 +487,55 @@ An account's admin role does not give its restricted PAT those permissions
 automatically. In a repository owned by a personal account, collaborators
 have write access; the owner retains administration. Use an appropriately
 scoped owner credential for these operations.
+
+## Tagged 0.8.0 validation — 2026-11-08
+
+The annotated SSH-signed `v0.8.0` tag points to `3eb7a2c`. Local signature
+verification passed. GitHub currently reports `unknown_key` because the
+public key has not been registered as a signing key on the profile; a
+GitHub Verified badge is not claimed.
+
+The complete dry run
+[42508861563](https://github.com/Ta-Cuda/tacuda/actions/runs/42508861563)
+passed. The tagged run
+[42511232741](https://github.com/Ta-Cuda/tacuda/actions/runs/42511232741)
+also passed Windows, Linux, source checks, the mandatory GPU suite and all
+three package jobs. GPU CTest registered 425 tests: 424 passed and the
+optional `Backends.TalibMatchesReference` was skipped without
+`TACUDA_OPT_TALIB`. The separate hosted ASan checks passed. The extra ASan
+CTest in the earlier isolated gate explains its total of 426.
+
+The tagged artifacts passed 1319/1319 differential cells (165/165 specs)
+and 699/699 streaming cells. Clean installation of the actual tagged wheel,
+npm tarball and nupkg on the GPU host passed native version `0.8.0`, GPU
+SMA(20) and incremental SMA checks; both calculations returned `54.5` for
+input `1..64`. Package/native hashes and scoped results are in
+[tag-validation.json](validation/2026-11-08/tag-validation.json).
+
+Publication completed on 2026-11-08:
+
+| Target | Published version | Verification |
+| --- | --- | --- |
+| [PyPI](https://pypi.org/project/tacuda/0.8.0/) | 0.8.0 | Both wheels and the source archive SHA-256 match the tagged artifacts |
+| [npm](https://www.npmjs.com/package/tacuda/v/0.8.0) | 0.8.0 | Published tarball integrity and shasum match CI |
+| [NuGet](https://www.nuget.org/packages/Tacuda/0.8.0) | 0.8.0 | Package is available through the public feed; both native payloads match CI |
+| [GitHub Release](https://github.com/Ta-Cuda/tacuda/releases/tag/v0.8.0) | v0.8.0 | Native downloads, asset digests, checksums and the annotated tag target match CI |
+
+The first publish attempt uploaded PyPI and NuGet, then npm rejected the
+operation with `EOTP`. A replacement granular write token with Bypass 2FA
+was installed as `NPM_TOKEN`; retrying only failed jobs of the same run
+completed npm and GitHub Release. The validated artifacts and signed tag
+were retained. NuGet indexing completed before the final feed/download
+check. Results are recorded in
+[publication-verification.json](validation/2026-11-08/publication-verification.json).
+
+For future releases, `npm whoami` confirms a token's identity, but not its
+ability to publish without a second factor. Non-interactive publication
+needs a granular write token with Bypass 2FA enabled at creation. On a
+partial upload failure, replace only the affected credential and retry
+failed jobs of the same run. The publish job skips versions already
+uploaded to PyPI/NuGet/npm; keep the original tag and validated artifacts.
+
+The owner's cached-history cleanup request was submitted to GitHub Support
+on 2026-11-08. Actual removal of old references and cached views awaits
+Support review.

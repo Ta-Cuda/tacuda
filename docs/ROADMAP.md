@@ -1,10 +1,10 @@
 # TaCuda Roadmap
 
-Last reviewed: 2026-11-08 (0.8.0 release candidate; publication pending).
+Last reviewed: 2026-11-08 (0.8.0 released).
 This document tracks where the project stands and what ships next.
 Order inside a milestone is priority order; items move, versions don't slip silently.
 
-## Prepared release (0.8.0)
+## Current release (0.8.0)
 
 | Area | State |
 |------|-------|
@@ -111,10 +111,10 @@ measurements behind each decision: [DESIGN_STREAMING_API.md](DESIGN_STREAMING_AP
       call and the installed TA-Lib.
 - [x] Release preparation: non-reused streaming handle tokens, 811-symbol
       binding/export coverage, version consistency and exact-tag release notes.
-- [ ] **M4 — release.** Public Windows/Linux builds and the isolated GPU
-      validation are green. A new `release-packages` dry run started on
-      2026-11-08; its self-hosted GPU gate, clean installation of the packed
-      artifacts and the signed public tag are still required. See
+- [x] **M4 — release.** Released 2026-11-08: the full dry run, tagged
+      Windows/Linux/GPU gates, package jobs and clean GPU-host installs
+      passed. Signed `v0.8.0`, PyPI, npm, NuGet and GitHub Release are
+      published; public payloads and checksums match the tagged CI. See
       [OPERATIONS.md](OPERATIONS.md). The site section and the live-trading
       article moved to v0.8.x below.
 

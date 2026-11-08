@@ -1,0 +1,157 @@
+{
+  "run_id": 42511232741,
+  "source": "3eb7a2c7e20eaaf11d3e4bb91ef63279ae949436",
+  "url": "https://github.com/Ta-Cuda/tacuda/actions/runs/42511232741",
+  "packages": {
+    "tacuda-0.8.0-py3-none-manylinux_2_35_x86_64.whl": {
+      "size": 24378136,
+      "sha256": "41cd138293acaa9b010acbaedbd6796d89e1a3bf391b364b8f228398ac2a3487",
+      "sha1": "1f2da140873dc0428a9d20b386c4420c0ae1a94e",
+      "integrity": "sha512-c8/2swbIcVnykrR2ljYPFgLim/g24ttnBG1lPauTII5AYXL1g4P2h4FARB+iYliQOZaKp0CvkREOvMjW9TZzgw==",
+      "natives": {
+        "tacuda/libtacuda.so": "88582742c248f91a128a0a7cc77413e3b116e71347bac8fc3df457340811d171"
+      }
+    },
+    "tacuda-0.8.0-py3-none-win_amd64.whl": {
+      "size": 24111232,
+      "sha256": "f933754ee5b11d4574d2f7b47b59b4ce266984a7512cbf80a025284d6b66db11",
+      "sha1": "970ece195aeae4c673ea1d3d3eb3d12776f570e1",
+      "integrity": "sha512-67nifmPHjuxSd6G/nfpsODrzSJwKNBFPBebGGWHWhEqMZridg4rxrECb9pA2xKt37j1caa5uGRIpIe2qqWyU2w==",
+      "natives": {
+        "tacuda/tacuda.dll": "ee9797e7fdeb2e31f4c27ffa193da26dfc119803f92280ca50c707a5acbaa6dc"
+      }
+    },
+    "tacuda-0.8.0.tar.gz": {
+      "size": 37350,
+      "sha256": "2772b45f6457652a9b1be015528c882463d58e4fe4e982fb9b4be9cffa1fb07e",
+      "sha1": "76bd7bb96b8ca20d863c7e87deaed04cce887eee",
+      "integrity": "sha512-oGCCqQD0+PPEVni2GglEgrOxpszU9KEGfIPujmkclUT/onw7RpXuk05xVMzdkNKRz6H7JEJtmeuO0l0rXu2X4A==",
+      "source_only": true
+    },
+    "tacuda-0.8.0.tgz": {
+      "size": 42271,
+      "sha256": "a8dc2ec2574d33916650f9c4323e4490a648bc223dee16d3c292f8c68ce423df",
+      "sha1": "542436e2f51e3a619e4c379308897cde094e76eb",
+      "integrity": "sha512-kVv5Re75vdpJDqly/t1Kz9Q9tBg+YCW65GNKAlaivpmJAaSlJG6NfkSf+5JLVdsPVDD9/XnmeNs/ecE9mpyPjA=="
+    },
+    "Tacuda.0.8.0.nupkg": {
+      "size": 48707947,
+      "sha256": "3a7a95989e63e77c0279b9a991949e39143d585f7acb18c2e4f7b33c061ae408",
+      "sha1": "66fb55fa2aeb08b0c92fec7a324a734f2d797761",
+      "integrity": "sha512-xrgkhZQg/SUJWhF4P8+KX0zfJbW7L8weMVBm9B4ZprSnPREl26yd5yOj8+SVcQU6W8IgtaK4Kve6BXw+ci46xA==",
+      "natives": {
+        "runtimes/linux-x64/native/libtacuda.so": "88582742c248f91a128a0a7cc77413e3b116e71347bac8fc3df457340811d171",
+        "runtimes/win-x64/native/tacuda.dll": "ee9797e7fdeb2e31f4c27ffa193da26dfc119803f92280ca50c707a5acbaa6dc"
+      }
+    }
+  },
+  "natives": {
+    "libtacuda.so": {
+      "sha256": "88582742c248f91a128a0a7cc77413e3b116e71347bac8fc3df457340811d171",
+      "size": 65000912
+    },
+    "tacuda.dll": {
+      "sha256": "ee9797e7fdeb2e31f4c27ffa193da26dfc119803f92280ca50c707a5acbaa6dc",
+      "size": 63056896
+    }
+  },
+  "ctest": {
+    "tests": 425,
+    "failures": 0,
+    "skipped": 1,
+    "passed": 424,
+    "skipped_names": [
+      "Backends.TalibMatchesReference"
+    ]
+  },
+  "corpus": {
+    "passed": 1319,
+    "total": 1319,
+    "specsGreen": 165,
+    "specs": 165
+  },
+  "streaming": {
+    "passed": 699,
+    "total": 699
+  },
+  "publication": {
+    "version": "0.8.0",
+    "source": "3eb7a2c7e20eaaf11d3e4bb91ef63279ae949436",
+    "run_id": 42511232741,
+    "pypi": {
+      "status": "PASS",
+      "files": [
+        "tacuda-0.8.0-py3-none-manylinux_2_35_x86_64.whl",
+        "tacuda-0.8.0-py3-none-win_amd64.whl",
+        "tacuda-0.8.0.tar.gz"
+      ],
+      "url": "https://pypi.org/project/tacuda/0.8.0/"
+    },
+    "npm": {
+      "status": "PASS",
+      "integrity": "sha512-kVv5Re75vdpJDqly/t1Kz9Q9tBg+YCW65GNKAlaivpmJAaSlJG6NfkSf+5JLVdsPVDD9/XnmeNs/ecE9mpyPjA==",
+      "url": "https://www.npmjs.com/package/tacuda/v/0.8.0"
+    },
+    "nuget": {
+      "status": "PASS",
+      "native_payloads_match_ci": true,
+      "url": "https://www.nuget.org/packages/Tacuda/0.8.0"
+    },
+    "github_release": {
+      "status": "PASS",
+      "url": "https://github.com/Ta-Cuda/tacuda/releases/tag/v0.8.0",
+      "tag_object": "7a294a12697dbf8e4b764bc933e6253043d8d23a",
+      "assets": [
+        "checksums.txt",
+        "libtacuda.so",
+        "tacuda.dll"
+      ],
+      "tag_signature": "SSH signature present; cryptographic verification performed locally"
+    }
+  },
+  "gpu_package_installation": {
+    "run_id": 42511232741,
+    "source": "3eb7a2c7e20eaaf11d3e4bb91ef63279ae949436",
+    "archives": [
+      {
+        "name": "npm-dist",
+        "sha256": "6c709fe040e3b4c48d43098eec9864b9a96632e98b711ee1bee9cd417e09699d"
+      },
+      {
+        "name": "nuget-dist",
+        "sha256": "3971e87291c3bb4e71baa784eda897408a5c14b546ea64752d64763f39b68e99"
+      },
+      {
+        "name": "pypi-dist",
+        "sha256": "009373ea7a17e1de160974d384f8652c38caed9ad2bf6aeac01605fdb4fd9c34"
+      }
+    ],
+    "checks": {
+      "python": "PASS",
+      "npm": "PASS",
+      "nuget": "PASS",
+      "native_version": "0.8.0",
+      "gpu_sma": 54.5,
+      "incremental_sma": 54.5
+    },
+    "environment": {
+      "os": "Linux-6.8.0-142-generic-x86_64-with-glibc2.39",
+      "python": "3.12.3",
+      "numpy": "2.5.4",
+      "node": "v22.23.3",
+      "dotnet_sdk": "8.0.427"
+    },
+    "packages_sha256": {
+      "tacuda-0.8.0-py3-none-manylinux_2_35_x86_64.whl": "41cd138293acaa9b010acbaedbd6796d89e1a3bf391b364b8f228398ac2a3487",
+      "tacuda-0.8.0-py3-none-win_amd64.whl": "f933754ee5b11d4574d2f7b47b59b4ce266984a7512cbf80a025284d6b66db11",
+      "tacuda-0.8.0.tar.gz": "2772b45f6457652a9b1be015528c882463d58e4fe4e982fb9b4be9cffa1fb07e",
+      "tacuda-0.8.0.tgz": "a8dc2ec2574d33916650f9c4323e4490a648bc223dee16d3c292f8c68ce423df",
+      "Tacuda.0.8.0.nupkg": "3a7a95989e63e77c0279b9a991949e39143d585f7acb18c2e4f7b33c061ae408"
+    }
+  },
+  "workflow": {
+    "conclusion": "success",
+    "initial_publish_failure": "npm EOTP after PyPI/NuGet uploads",
+    "recovery": "Replaced NPM_TOKEN with a granular write token supporting Bypass 2FA; retried failed jobs only; reused the same validated artifacts"
+  }
+}

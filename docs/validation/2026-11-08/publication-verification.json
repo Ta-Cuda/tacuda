@@ -1,0 +1,35 @@
+{
+  "version": "0.8.0",
+  "source": "3eb7a2c7e20eaaf11d3e4bb91ef63279ae949436",
+  "run_id": 42511232741,
+  "pypi": {
+    "status": "PASS",
+    "files": [
+      "tacuda-0.8.0-py3-none-manylinux_2_35_x86_64.whl",
+      "tacuda-0.8.0-py3-none-win_amd64.whl",
+      "tacuda-0.8.0.tar.gz"
+    ],
+    "url": "https://pypi.org/project/tacuda/0.8.0/"
+  },
+  "npm": {
+    "status": "PASS",
+    "integrity": "sha512-kVv5Re75vdpJDqly/t1Kz9Q9tBg+YCW65GNKAlaivpmJAaSlJG6NfkSf+5JLVdsPVDD9/XnmeNs/ecE9mpyPjA==",
+    "url": "https://www.npmjs.com/package/tacuda/v/0.8.0"
+  },
+  "nuget": {
+    "status": "PASS",
+    "native_payloads_match_ci": true,
+    "url": "https://www.nuget.org/packages/Tacuda/0.8.0"
+  },
+  "github_release": {
+    "status": "PASS",
+    "url": "https://github.com/Ta-Cuda/tacuda/releases/tag/v0.8.0",
+    "tag_object": "7a294a12697dbf8e4b764bc933e6253043d8d23a",
+    "assets": [
+      "checksums.txt",
+      "libtacuda.so",
+      "tacuda.dll"
+    ],
+    "tag_signature": "SSH signature present; cryptographic verification performed locally"
+  }
+}
