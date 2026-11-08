@@ -1,0 +1,42 @@
+{
+  "date": "2026-11-02",
+  "source_commit": "274177515ff743b2247640a481a2ecdca8a65a01",
+  "native_workflow": "https://github.com/Ta-Cuda/tacuda/actions/runs/41342310649",
+  "scope": "Independent local packaging and clean package installation; not completion of the Actions release-packages dry run",
+  "environments": {
+    "windows": {
+      "os": "Windows Server 2022 Datacenter 10.0.20348",
+      "python": "3.13.7",
+      "node": "22.23.0",
+      "dotnet_sdk": "11.0.100-rc.3.26522.148",
+      "validation": "Package structure and clean Python/npm/NuGet native loading; ct_version=0.8.0; no Windows GPU computation tested"
+    },
+    "linux": {
+      "os": "Ubuntu 24.04.4",
+      "gpu": "RTX 3090 Ti",
+      "driver": "590.48.01",
+      "cuda_runtime": "12.8.90",
+      "python": "3.12.3",
+      "numpy": "2.5.4",
+      "node": "22.23.3",
+      "dotnet_sdk": "8.0.426",
+      "validation": "Clean Python/npm/NuGet installs; version=0.8.0 and GPU SMA(period=20, input=1..64) returns 54.5 in all three bindings"
+    }
+  },
+  "checks": {
+    "wheel_payloads": "PASS: exactly one correct native in each platform wheel",
+    "sdist": "PASS: source only",
+    "twine": "PASS: two wheels and sdist",
+    "nuget_payloads": "PASS: win-x64 and linux-x64 natives",
+    "windows_clean_installs": "PASS: Python, npm, NuGet",
+    "linux_gpu_clean_installs": "PASS: Python, npm, NuGet",
+    "full_gpu_suite_in_actions": "PENDING: no registered runner"
+  },
+  "artifacts_sha256": {
+    "tacuda-0.8.0-py3-none-manylinux_2_35_x86_64.whl": "8470361bd628f92e504942da4a88cad5d409e8bddf8e26436595671644d8f093",
+    "tacuda-0.8.0-py3-none-win_amd64.whl": "7da6a2094a9cc5b45a9b087fe0637f3edcaef2ae8ac70a9ac26470345f9d6e92",
+    "tacuda-0.8.0.tar.gz": "f7be50d5ca44b57d62b85842dd745f5cad6ea34541b85281d93bdeecbc0a55aa",
+    "tacuda-0.8.0.tgz": "a8dc2ec2574d33916650f9c4323e4490a648bc223dee16d3c292f8c68ce423df",
+    "Tacuda.0.8.0.nupkg": "9fe35749ffeab3812ffbe2ca7f7c5355f9d54b767ba9dc2daa310b96fe04764a"
+  }
+}

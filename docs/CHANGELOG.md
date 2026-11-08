@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.8.0 — 2026-11-01
+0.8.0 — 2026-11-08
 ------------------
 Streaming (incremental update) API for live and paper trading: append a newly
 closed bar and get updated values without recomputing the series. Ten

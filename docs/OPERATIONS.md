@@ -423,3 +423,67 @@ The source-archive checksums in the validation sections were taken from the
 pre-rewrite trees and therefore do not match an archive of the new ids; the
 native-library checksums are unaffected because the sources that build it
 are identical. The commits `c932a2b` and `292d2bf` were not changed.
+
+## Release staging — 2026-11-02
+
+The rewritten `main` (`2741775`) passed hosted `native-build`
+[run 41342310649](https://github.com/Ta-Cuda/tacuda/actions/runs/41342310649):
+Windows, Linux and source checks succeeded; the GPU job was skipped by the
+push-event condition. This confirms the hosted build after the rewrite,
+not a completed package release.
+
+The first `release-packages` dry run was dispatched on that commit with
+`publish=false`:
+[run 41416984666](https://github.com/Ta-Cuda/tacuda/actions/runs/41416984666).
+Its manual-dispatch event enables the mandatory GPU job. Packaging waits
+for the entire native workflow, so a successful Linux/Windows build alone
+does not unblock the package jobs while the GPU runner is unavailable.
+The publish and GitHub-release jobs are disabled in this dry run.
+
+A Linux GPU runner installation has been prepared under a dedicated system
+account without sudo membership, using a separate CUDA 12.8 toolkit. The
+runner download and matching CUDA runtime-development package were checked
+against their published SHA-256 values. CMake compiler detection, compile,
+link and GPU enumeration succeeded under that account. Registration still
+requires a repository administrator. Use an ephemeral runner for each
+approved release job and keep it disabled between runs; this shared host
+must not execute arbitrary public pull-request code.
+
+Independent packaging checks using the natives from run 41342310649 passed:
+one native per platform wheel, a source-only sdist, `twine check`, both
+NuGet runtime payloads, and clean Python/npm/NuGet installation on Windows
+with native `ct_version()` returning `0.8.0`. These are supplemental local
+checks; they do not replace the pending end-to-end Actions dry run. Clean
+installation of the same wheel/tarball/nupkg on the Linux GPU host also
+passed: all three bindings reported `0.8.0` and computed SMA(20) of `1..64`
+as `54.5`. Environments, scope and package hashes are recorded in
+[package-installation.json](validation/2026-11-02/package-installation.json).
+
+At this checkpoint the public repository has no Actions secrets. Before
+tagging, configure `PYPI_API_TOKEN`, `NPM_TOKEN` and `NUGET_API_KEY`, confirm
+their registry permissions, and make a usable signing key available. PyPI,
+npm and NuGet still publish `0.7.1`; no `v0.8.0` tag has been pushed.
+The Support cached-commit assistant also requires repository admin access;
+the cleanup request remains pending that access.
+
+## Release continuation — 2026-11-08
+
+The 2026-11-02 dry run expired while its GPU job waited for a runner and is
+now cancelled. A new dry run on the same source commit is
+[run 42508861563](https://github.com/Ta-Cuda/tacuda/actions/runs/42508861563),
+again with `publish=false`.
+
+The repository now has all three registry secrets. The dedicated Linux
+GPU runner has been registered as `tacuda-gpu-release` with the `gpu` label
+and is listening for its one permitted job. Its registration is ephemeral:
+register it again for the tagged release after the dry run completes.
+The release signing key is available through the operator's SSH agent;
+signing and verification of a Git-namespace preflight payload succeeded.
+
+Runner registration through a fine-grained PAT requires the repository's
+`Administration: write` permission. Managing the registry secrets requires
+`Secrets: write`, and dispatch/retry operations require `Actions: write`.
+An account's admin role does not give its restricted PAT those permissions
+automatically. In a repository owned by a personal account, collaborators
+have write access; the owner retains administration. Use an appropriately
+scoped owner credential for these operations.
