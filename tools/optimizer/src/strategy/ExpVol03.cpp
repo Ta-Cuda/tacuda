@@ -16,6 +16,7 @@
 #include <cmath>
 #include <deque>
 #include <limits>
+#include <stdexcept>
 #include <vector>
 
 #include "strategy/ExpHelpers.h"
@@ -556,11 +557,23 @@ public:
   }
 
   std::vector<IndicatorRequest> indicators(const ParamSet& ps) const override {
-    return {{Family::RSI, Column::Close, {ps.get("osclen")}}};
+    return {{Family::RSI, Column::Close,
+             {static_cast<double>(ps.get_int("osclen"))}}};
+  }
+
+  bool validate(const ParamSet& ps) const override {
+    const double factor = ps.get("factor");
+    return positive_int_param(ps, "osclen") &&
+           positive_int_param(ps, "strength") &&
+           positive_int_param(ps, "swings") && std::isfinite(factor) &&
+           std::fabs(factor) <= std::numeric_limits<float>::max();
   }
 
   void signals(const Series& bars, const ParamSet& ps, const IndicatorView& ind,
                Signal* out) const override {
+    if (!validate(ps)) {
+      throw std::invalid_argument("exp03_var_zones: invalid parameters");
+    }
     const float* osc = ind.line(0);
     const int n = bars.size();
     const int s = ps.get_int("strength");
@@ -600,16 +613,16 @@ public:
           swingLows.push_back(osc[b]);
           if (static_cast<int>(swingLows.size()) > swings) swingLows.pop_front();
         }
-        if (static_cast<int>(swingHighs.size()) == swings) {
+        if (!swingHighs.empty() && static_cast<int>(swingHighs.size()) == swings) {
           float sum = 0.f, mx = swingHighs.front();
           for (float v : swingHighs) { sum += v; mx = std::max(mx, v); }
-          const float avg = sum / swings;
+          const float avg = sum / static_cast<float>(swingHighs.size());
           topBand = avg + factor * (mx - avg);
         }
-        if (static_cast<int>(swingLows.size()) == swings) {
+        if (!swingLows.empty() && static_cast<int>(swingLows.size()) == swings) {
           float sum = 0.f, mn = swingLows.front();
           for (float v : swingLows) { sum += v; mn = std::min(mn, v); }
-          const float avg = sum / swings;
+          const float avg = sum / static_cast<float>(swingLows.size());
           botBand = avg - factor * (avg - mn);
         }
       }

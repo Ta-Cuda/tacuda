@@ -7,6 +7,8 @@
 
 #include <cmath>
 #include <stdexcept>
+#include <string>
+#include <utility>
 
 namespace topt {
 
@@ -75,12 +77,29 @@ void execute(ExecState& st, int bar, double basePx, double targetUnits) {
 
 } // namespace
 
+void validate_exec_config(const ExecConfig& cfg) {
+  const std::pair<const char*, double> scalars[] = {
+      {"commissionBps", cfg.commissionBps}, {"commissionFixed", cfg.commissionFixed},
+      {"slippageTicks", cfg.slippageTicks}, {"tickSize", cfg.tickSize},
+      {"qty", cfg.qty},                     {"capital", cfg.capital},
+  };
+  for (const auto& [name, value] : scalars) {
+    if (!std::isfinite(value)) {
+      throw std::invalid_argument(std::string("simulate: ") + name + " must be finite");
+    }
+  }
+  if (cfg.qty <= 0.0) throw std::invalid_argument("simulate: qty must be positive");
+  if (cfg.barsPerYear <= 0) {
+    throw std::invalid_argument("simulate: barsPerYear must be positive");
+  }
+}
+
 SimResult simulate(const Series& bars, const Signal* desired, const ExecConfig& cfg,
                    SimRange range) {
   const int n = bars.size();
   if (n <= 0) throw std::invalid_argument("simulate: empty series");
   if (!desired) throw std::invalid_argument("simulate: null signals");
-  if (cfg.qty <= 0.0) throw std::invalid_argument("simulate: qty must be positive");
+  validate_exec_config(cfg);
 
   const int begin = range.begin;
   const int end = range.end < 0 ? n : range.end;
@@ -120,6 +139,9 @@ SimResult simulate(const Series& bars, const Signal* desired, const ExecConfig& 
   }
 
   res.finalEquity = res.equity.back();
+  if (!std::isfinite(res.finalEquity)) {
+    throw std::runtime_error("simulate: equity is not finite; check input prices and costs");
+  }
   return res;
 }
 

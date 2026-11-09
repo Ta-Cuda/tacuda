@@ -130,7 +130,7 @@ void ema_calculate_impl(int period, const T* input, T* output, int size, cudaStr
     if (period > size) {
         // TA-Lib succeeds with zero output elements when the input is
         // shorter than the lookback; the whole line is warm-up NaNs.
-        CUDA_CHECK(cudaMemsetAsync(output, 0xFF, static_cast<size_t>(size) * sizeof(float), stream));
+        CUDA_CHECK(cudaMemsetAsync(output, 0xFF, static_cast<size_t>(size) * sizeof(T), stream));
         return;
     }
 

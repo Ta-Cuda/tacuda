@@ -261,3 +261,27 @@ TEST(Portfolio, MonteCarloOverPortfolioTrades) {
   EXPECT_NEAR(mc.originalNetProfit, res.metrics.netProfit, 1e-6);
   EXPECT_LE(mc.maxDrawdown.p5, mc.maxDrawdown.p95);
 }
+
+TEST(PortfolioAlign, ReversedTimestampsAreNotMatchedByPosition) {
+  std::vector<Series> series = make_series(2, 3);
+  series[0].ts = {1, 2, 3};
+  series[1].ts = {3, 2, 1};
+  std::string log;
+  EXPECT_THROW(align_portfolio(series, log), std::invalid_argument);
+}
+
+TEST(PortfolioAlign, DuplicateTimestampsAreRejected) {
+  std::vector<Series> series = make_series(2, 3);
+  series[0].ts = {1, 2, 3};
+  series[1].ts = {1, 2, 2};
+  std::string log;
+  EXPECT_THROW(align_portfolio(series, log), std::invalid_argument);
+}
+
+TEST(PortfolioAlign, MixedTimeAxesAreRejected) {
+  std::vector<Series> series = make_series(2, 3);
+  series[0].ts = {1, 2, 3};
+  series[1].ts = {0, 0, 0};
+  std::string log;
+  EXPECT_THROW(align_portfolio(series, log), std::invalid_argument);
+}

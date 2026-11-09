@@ -12,6 +12,7 @@ set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
 
 option(BUILD_TESTING "Enable tests" ON)
 option(TACUDA_ENABLE_ASAN_TEST "Build CPU-only streaming lifetime regression with AddressSanitizer" OFF)
+option(TACUDA_STREAM_FAULT_INJECTION "Test builds only: expose injected GPU failures for batch streams" OFF)
 
 # -----------------------------------------------------------------------------
 # CUDA architecture selection
@@ -229,6 +230,10 @@ target_include_directories(tacuda
 find_package(CUDAToolkit REQUIRED)
 target_link_libraries(tacuda PRIVATE CUDA::cudart)
 
+if (TACUDA_STREAM_FAULT_INJECTION)
+  target_compile_definitions(tacuda PRIVATE TACUDA_STREAM_FAULT_INJECTION)
+endif()
+
 # Instrument the implementation, not just a consumer of an uninstrumented DLL.
 # No GPU is needed to run this target; CUDA headers only supply ABI types.
 if (TACUDA_ENABLE_ASAN_TEST)
@@ -280,8 +285,18 @@ if (BUILD_TESTING)
   target_include_directories(test_basic PRIVATE
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
   target_link_libraries(test_basic PRIVATE tacuda GTest::gtest_main CUDA::cudart)
+  if (TACUDA_STREAM_FAULT_INJECTION)
+    target_compile_definitions(test_basic PRIVATE TACUDA_STREAM_FAULT_INJECTION)
+  endif()
+
+  # The templated C++ indicators are not exported from the shared library, so
+  # this target links its objects directly.
+  add_executable(test_typed_outputs tests/internal/typed_short_outputs.cpp $<TARGET_OBJECTS:tacuda>)
+  target_include_directories(test_typed_outputs PRIVATE include)
+  target_link_libraries(test_typed_outputs PRIVATE GTest::gtest_main CUDA::cudart)
   include(GoogleTest)
   gtest_discover_tests(test_basic)
+  gtest_discover_tests(test_typed_outputs)
 
   add_test(
     NAME bindings_up_to_date
@@ -304,6 +319,8 @@ if (BUILD_TESTING)
 
   add_test(NAME release_versions
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/check_release.py)
+  add_test(NAME python_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/test_python_contract.py)
   if (TACUDA_ENABLE_ASAN_TEST)
     add_test(NAME stream_lifetime_sanitizer COMMAND stream_lifetime_sanitizer)
   endif()

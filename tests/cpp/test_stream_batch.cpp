@@ -533,3 +533,70 @@ TEST(TacudaStreamBatch, RejectsWrongHandleKindWithoutDereference) {
   EXPECT_EQ(ct_stream_batch_destroy(wrong), CT_STATUS_INVALID_ARGUMENT);
   EXPECT_EQ(ct_stream_reset(single.get()), CT_STATUS_SUCCESS);
 }
+
+TEST(TacudaStreamBatch, ResetThenCpuDoesNotRestoreDeviceState) {
+  // EMA(3) over 1..5: the audited sequence GPU append -> reset -> CPU append.
+  const float in[] = {1, 2, 3, 4, 5};
+  float out[5];
+  BatchHandle b;
+  ASSERT_EQ(ct_ema_stream_batch_create(3, 1, b.out()), CT_STATUS_SUCCESS);
+  ASSERT_EQ(ct_stream_batch_set_exec(b.get(), CT_STREAM_EXEC_GPU), CT_STATUS_SUCCESS);
+  ASSERT_EQ(ct_ema_stream_batch_append(b.get(), in, 5, out), CT_STATUS_SUCCESS);
+  ASSERT_EQ(ct_stream_batch_reset(b.get()), CT_STATUS_SUCCESS);
+  ASSERT_EQ(ct_stream_batch_set_exec(b.get(), CT_STREAM_EXEC_CPU), CT_STATUS_SUCCESS);
+  ASSERT_EQ(ct_ema_stream_batch_append(b.get(), in, 5, out), CT_STATUS_SUCCESS);
+  EXPECT_TRUE(std::isnan(out[0]));
+  EXPECT_TRUE(std::isnan(out[1]));
+  EXPECT_FLOAT_EQ(out[2], 2.0f);
+  EXPECT_FLOAT_EQ(out[3], 3.0f);
+  EXPECT_FLOAT_EQ(out[4], 4.0f);
+}
+
+TEST(TacudaStreamBatch, EveryResetTransitionEqualsFreshHandle) {
+  const auto &m = matrix();
+  const std::size_t total = static_cast<std::size_t>(kSeries) * kBars;
+  const struct {
+    ctStreamExec_t before, after;
+    const char *name;
+  } transitions[] = {
+      {CT_STREAM_EXEC_CPU, CT_STREAM_EXEC_CPU, "cpu-cpu"},
+      {CT_STREAM_EXEC_GPU, CT_STREAM_EXEC_GPU, "gpu-gpu"},
+      {CT_STREAM_EXEC_GPU, CT_STREAM_EXEC_CPU, "gpu-cpu"},
+      {CT_STREAM_EXEC_CPU, CT_STREAM_EXEC_GPU, "cpu-gpu"},
+  };
+
+  for (const auto &t : transitions) {
+    BatchHandle fresh;
+    ASSERT_EQ(ct_rsi_stream_batch_create(14, kSeries, fresh.out()), CT_STATUS_SUCCESS);
+    ASSERT_EQ(ct_stream_batch_set_exec(fresh.get(), t.after), CT_STATUS_SUCCESS);
+    std::vector<float> expected(total);
+    ASSERT_EQ(ct_rsi_stream_batch_append(fresh.get(), m.close.data(), kBars, expected.data()),
+              CT_STATUS_SUCCESS);
+
+    // 3 bars is inside the warm-up, kBars well past it.
+    for (int warmed : {3, kBars}) {
+      BatchHandle b;
+      ASSERT_EQ(ct_rsi_stream_batch_create(14, kSeries, b.out()), CT_STATUS_SUCCESS);
+      ASSERT_EQ(ct_stream_batch_set_exec(b.get(), t.before), CT_STATUS_SUCCESS);
+      std::vector<float> scratch(static_cast<std::size_t>(kSeries) * warmed);
+      std::vector<float> head(static_cast<std::size_t>(kSeries) * warmed);
+      for (int s = 0; s < kSeries; ++s) {
+        std::copy_n(m.close.begin() + static_cast<std::ptrdiff_t>(s) * kBars, warmed,
+                    head.begin() + static_cast<std::ptrdiff_t>(s) * warmed);
+      }
+      ASSERT_EQ(ct_rsi_stream_batch_append(b.get(), head.data(), warmed, scratch.data()),
+                CT_STATUS_SUCCESS);
+
+      ASSERT_EQ(ct_stream_batch_reset(b.get()), CT_STATUS_SUCCESS);
+      ASSERT_EQ(ct_stream_batch_set_exec(b.get(), t.after), CT_STATUS_SUCCESS);
+      std::vector<float> got(total);
+      ASSERT_EQ(ct_rsi_stream_batch_append(b.get(), m.close.data(), kBars, got.data()),
+                CT_STATUS_SUCCESS);
+      expect_identical(t.name, got, expected);
+
+      long long bars = -1;
+      ASSERT_EQ(ct_stream_batch_bars(b.get(), &bars), CT_STATUS_SUCCESS);
+      EXPECT_EQ(bars, kBars) << t.name;
+    }
+  }
+}

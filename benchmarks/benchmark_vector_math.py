@@ -94,23 +94,45 @@ def main() -> None:
     d_out = tacuda.device_alloc(n)
     if not (d_x and d_y and d_out):
         raise RuntimeError("device_alloc failed")
-    tacuda.device_upload(x32, d_x, n)
     tacuda.device_upload(y32, d_y, n)
     tacuda.device_sync()
 
     lib = tacuda._lib
 
+    def upload_input(a32: np.ndarray) -> None:
+        """Give the device the same case-specific input as the other backends.
+
+        Done per case but outside the timed region: the device column measures
+        the GPU-resident scenario, it just has to measure the same problem.
+        """
+        tacuda.device_upload(a32, d_x, n)
+        tacuda.device_sync()
+
+    def assert_same_result(name: str, host_out: np.ndarray) -> None:
+        """Refuse to time a case whose device path computes something else."""
+        device_out = tacuda.device_download(d_out, n)
+        if not np.array_equal(np.isnan(host_out), np.isnan(device_out)):
+            raise RuntimeError(f"{name}: host and device NaN masks differ")
+        if not np.allclose(host_out, device_out, rtol=1e-4, atol=1e-5, equal_nan=True):
+            raise RuntimeError(f"{name}: host and device values differ")
+
     def device_call(c_name: str, nargs: int):
         cfunc = getattr(lib, c_name)
+        cfunc.restype = ctypes.c_int
+
+        def checked(rc: int) -> None:
+            if rc != 0:
+                raise RuntimeError(f"{c_name}: {tacuda.status_string(rc)}: {tacuda.get_last_error()}")
+
         if nargs == 1:
             def run():
-                cfunc(ctypes.c_void_p(d_x), ctypes.c_void_p(d_out),
-                      ctypes.c_int(n), ctypes.c_void_p(0))
+                checked(cfunc(ctypes.c_void_p(d_x), ctypes.c_void_p(d_out),
+                              ctypes.c_int(n), ctypes.c_void_p(0)))
                 tacuda.device_sync()
         else:
             def run():
-                cfunc(ctypes.c_void_p(d_x), ctypes.c_void_p(d_y),
-                      ctypes.c_void_p(d_out), ctypes.c_int(n), ctypes.c_void_p(0))
+                checked(cfunc(ctypes.c_void_p(d_x), ctypes.c_void_p(d_y),
+                              ctypes.c_void_p(d_out), ctypes.c_int(n), ctypes.c_void_p(0)))
                 tacuda.device_sync()
         return run
 
@@ -121,15 +143,23 @@ def main() -> None:
 
     rows = []
     for name, host_fn, dev_name, np_fn, talib_name, a32, a64 in unary_cases:
+        upload_input(a32)
+        run_device = device_call(f"ct_{dev_name}", 1)
+        run_device()
+        assert_same_result(name, host_fn(a32))
         t_host = bench(lambda: host_fn(a32), args.repeats)
-        t_dev = bench(device_call(f"ct_{dev_name}", 1), args.repeats)
+        t_dev = bench(run_device, args.repeats)
         t_np = bench(lambda: np_fn(a32), args.repeats)
         t_talib = bench(lambda: getattr(talib, talib_name)(a64), args.repeats) if talib else float("nan")
         rows.append((name, t_host, t_dev, t_np, t_talib, t_np / t_dev, t_talib / t_dev))
 
+    upload_input(x32)
     for name, host_fn, dev_name, np_fn, talib_name in binary_cases:
+        run_device = device_call(f"ct_{dev_name}", 2)
+        run_device()
+        assert_same_result(name, host_fn(x32, y32))
         t_host = bench(lambda: host_fn(x32, y32), args.repeats)
-        t_dev = bench(device_call(f"ct_{dev_name}", 2), args.repeats)
+        t_dev = bench(run_device, args.repeats)
         t_np = bench(lambda: np_fn(x32, y32), args.repeats)
         t_talib = bench(lambda: getattr(talib, talib_name)(x64, y64), args.repeats) if talib else float("nan")
         rows.append((name, t_host, t_dev, t_np, t_talib, t_np / t_dev, t_talib / t_dev))
@@ -143,6 +173,7 @@ def main() -> None:
                   "talib": talib.__version__ if talib else None,
                   "elements": n, "repeats": args.repeats, "statistic": "best",
                   "device_includes_transfers": False,
+                  "inputs_identical_across_backends": True,
                   "rows": [{k: (None if isinstance(v, float) and not np.isfinite(v) else v)
                             for k, v in zip(keys, row)} for row in rows]}
         args.json.write_text(json.dumps(report, indent=2, allow_nan=False), encoding="utf-8")

@@ -5,6 +5,7 @@
 # ============================================================================
 """Release gates must fail for mismatched versions and non-exported strings."""
 import importlib.util
+import json
 import pathlib
 import tempfile
 import unittest
@@ -29,7 +30,7 @@ class ReleaseTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = pathlib.Path(self.temp.name)
-        for name in ("include/tacuda.h", "bindings/python/pyproject.toml", "bindings/nodejs/package.json", "bindings/csharp/Tacuda.Bindings.csproj", "docs/CHANGELOG.md"):
+        for name in ("include/tacuda.h", "bindings/python/pyproject.toml", "bindings/nodejs/package.json", "bindings/nodejs/package-lock.json", "bindings/csharp/Tacuda.Bindings.csproj", "docs/CHANGELOG.md"):
             path = self.root / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text((ROOT / name).read_text(encoding="utf-8"), encoding="utf-8")
@@ -43,6 +44,22 @@ class ReleaseTests(unittest.TestCase):
     def test_rejects_mismatched_tag(self):
         with self.assertRaisesRegex(ValueError, "tag"):
             release.release_state(self.root, tag="v99.0.0")
+
+    def test_rejects_mismatched_lockfile(self):
+        path = self.root / "bindings/nodejs/package-lock.json"
+        lock = json.loads(path.read_text())
+        lock["version"] = "99.0.0"
+        path.write_text(json.dumps(lock))
+        with self.assertRaisesRegex(ValueError, "version mismatch"):
+            release.release_state(self.root)
+
+    def test_rejects_mismatched_lockfile_root_package(self):
+        path = self.root / "bindings/nodejs/package-lock.json"
+        lock = json.loads(path.read_text())
+        lock["packages"][""]["version"] = "99.0.0"
+        path.write_text(json.dumps(lock))
+        with self.assertRaisesRegex(ValueError, "version mismatch"):
+            release.release_state(self.root)
 
     def test_unreleased_cannot_fall_back_to_old_notes(self):
         (self.root / "docs/CHANGELOG.md").write_text("Unreleased\n----------\nnew\n\n0.7.1 - old\n------------\nold\n")

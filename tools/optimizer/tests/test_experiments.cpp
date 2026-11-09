@@ -11,6 +11,7 @@
 
 #include <cmath>
 #include <cstdio>
+#include <limits>
 #include <memory>
 #include <set>
 #include <string>
@@ -99,6 +100,144 @@ TEST(Experiments, FastSlowValidationRejectsDegenerateGrids) {
     ps.set(fastKey, slow + 1.0);
     EXPECT_FALSE(s->validate(ps)) << name << ": fast > slow must be invalid";
   }
+}
+
+TEST(Experiments, VarZonesRejectsInvalidCounts) {
+  auto strategy = make_strategy("exp03_var_zones");
+  for (const char* field : {"osclen", "strength", "swings"}) {
+    for (double value : {0.0, -1.0, 0.49,
+                         std::numeric_limits<double>::quiet_NaN(),
+                         std::numeric_limits<double>::infinity(),
+                         static_cast<double>(std::numeric_limits<int>::max()) + 0.5}) {
+      ParamSet ps = params_of(*strategy);
+      ps.set(field, value);
+      EXPECT_FALSE(strategy->validate(ps)) << field << "=" << value;
+    }
+  }
+  for (double factor : {std::numeric_limits<double>::quiet_NaN(),
+                        std::numeric_limits<double>::infinity(),
+                        std::numeric_limits<double>::max()}) {
+    ParamSet ps = params_of(*strategy);
+    ps.set("factor", factor);
+    EXPECT_FALSE(strategy->validate(ps)) << "factor=" << factor;
+  }
+}
+
+TEST(Experiments, VarZonesAllowsValidValuesOutsideSearchGrid) {
+  auto strategy = make_strategy("exp03_var_zones");
+  ParamSet ps = params_of(*strategy);
+  ps.set("osclen", 80);
+  ps.set("strength", 1);
+  ps.set("swings", 20);
+  ps.set("factor", 0);
+  EXPECT_TRUE(strategy->validate(ps));
+  ps.set("swings", 0.5); // Integer parameters keep nearest-integer rounding.
+  EXPECT_TRUE(strategy->validate(ps));
+}
+
+TEST(Experiments, VarZonesRejectsInvalidVariantBeforeSimulation) {
+  const Series bars = generate_synthetic(100, 42);
+  auto strategy = make_strategy("exp03_var_zones");
+  ParamSet ps = params_of(*strategy);
+  ps.set("swings", 0);
+  TestBackend backend(bars);
+  IndicatorCache cache(bars, backend);
+  VariantResult result = run_variant(bars, *strategy, ps, cache, ExecConfig{}, nullptr);
+  EXPECT_FALSE(result.valid);
+  EXPECT_EQ(result.error, "invalid parameter combination");
+
+  std::vector<std::unique_ptr<IIndicatorBackend>> per;
+  per.push_back(std::make_unique<TestBackend>(bars));
+  PerSymbolBatchBackend batch(std::move(per), "test-per-symbol");
+  EXPECT_THROW(run_portfolio({bars}, {"one"}, *strategy, ps, batch,
+                             PortfolioConfig{}, nullptr), std::invalid_argument);
+}
+
+TEST(Experiments, VarZonesDirectSignalsRejectInvalidParameters) {
+  const Series bars = generate_synthetic(64, 42);
+  auto strategy = make_strategy("exp03_var_zones");
+  std::vector<float> oscillator(64, 50.f);
+  IndicatorView indicators({{oscillator.data()}});
+  std::vector<Signal> out(64, 7);
+  for (double swings : {0.0, -1.0, std::numeric_limits<double>::infinity()}) {
+    ParamSet ps = params_of(*strategy);
+    ps.set("swings", swings);
+    EXPECT_THROW(strategy->signals(bars, ps, indicators, out.data()),
+                 std::invalid_argument);
+    for (Signal value : out) EXPECT_EQ(value, 7);
+  }
+}
+
+TEST(Experiments, SupportResistanceRejectsInvalidCounts) {
+  auto strategy = make_strategy("exp01_sr_levels");
+  for (const char* field : {"strength", "numswing", "trailbar"}) {
+    for (double value : {0.0, -1.0, 0.49,
+                         std::numeric_limits<double>::quiet_NaN(),
+                         std::numeric_limits<double>::infinity(),
+                         static_cast<double>(std::numeric_limits<int>::max()) + 0.5}) {
+      ParamSet ps = params_of(*strategy);
+      ps.set(field, value);
+      EXPECT_FALSE(strategy->validate(ps)) << field << "=" << value;
+    }
+  }
+}
+
+TEST(Experiments, SupportResistanceAllowsValidValuesOutsideSearchGrid) {
+  auto strategy = make_strategy("exp01_sr_levels");
+  ParamSet ps = params_of(*strategy);
+  ps.set("strength", 1);
+  ps.set("numswing", 1);
+  ps.set("trailbar", 40);
+  EXPECT_TRUE(strategy->validate(ps));
+}
+
+TEST(Experiments, SupportResistanceLargeStrengthProducesNoPivots) {
+  const Series bars = generate_synthetic(64, 42);
+  auto strategy = make_strategy("exp01_sr_levels");
+  std::vector<float> line(64, 50.f);
+  IndicatorView indicators({{line.data()}, {line.data()}, {line.data()},
+                             {line.data()}, {line.data()}});
+  for (int strength : {64, std::numeric_limits<int>::max() / 2 + 1,
+                       std::numeric_limits<int>::max()}) {
+    ParamSet ps = params_of(*strategy);
+    ps.set("strength", strength);
+    ASSERT_TRUE(strategy->validate(ps));
+    std::vector<Signal> out(64, 7);
+    strategy->signals(bars, ps, indicators, out.data());
+    for (Signal value : out) EXPECT_EQ(value, 0);
+  }
+}
+
+TEST(Experiments, SupportResistanceDirectSignalsRejectInvalidParameters) {
+  const Series bars = generate_synthetic(64, 42);
+  auto strategy = make_strategy("exp01_sr_levels");
+  std::vector<float> line(64, 50.f);
+  IndicatorView indicators({{line.data()}, {line.data()}, {line.data()},
+                             {line.data()}, {line.data()}});
+  std::vector<Signal> out(64, 7);
+  for (const char* field : {"strength", "numswing", "trailbar"}) {
+    ParamSet ps = params_of(*strategy);
+    ps.set(field, 0);
+    EXPECT_THROW(strategy->signals(bars, ps, indicators, out.data()),
+                 std::invalid_argument);
+    for (Signal value : out) EXPECT_EQ(value, 7);
+  }
+}
+
+TEST(Experiments, SwingStrategiesUseRoundedIndicatorPeriods) {
+  auto zones = make_strategy("exp03_var_zones");
+  ParamSet zonesParams = params_of(*zones);
+  zonesParams.set("osclen", 20.6);
+  ASSERT_TRUE(zones->validate(zonesParams));
+  EXPECT_DOUBLE_EQ(zones->indicators(zonesParams).at(0).params.at(0), 21.0);
+
+  auto levels = make_strategy("exp01_sr_levels");
+  ParamSet levelsParams = params_of(*levels);
+  levelsParams.set("trailbar", 5.6);
+  ASSERT_TRUE(levels->validate(levelsParams));
+  const auto requests = levels->indicators(levelsParams);
+  EXPECT_DOUBLE_EQ(requests.at(2).params.at(0), 6.0);
+  EXPECT_DOUBLE_EQ(requests.at(3).params.at(0), 6.0);
 }
 
 // --- smoke run over synthetic daily data -------------------------------------

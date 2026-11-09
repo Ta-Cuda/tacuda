@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <exception>
+#include <map>
 #include <mutex>
 #include <stdexcept>
 #include <vector>
@@ -57,7 +58,8 @@ ctStatus_t classify_batch_exception(const char* context) {
     }
 }
 
-/// Process-wide pool of non-blocking streams reused by every batch call.
+/// Process-wide pool of non-blocking streams reused by every batch call. A
+/// stream belongs to the device it was created on, so each device has its own.
 class BatchStreamPool {
 public:
     static BatchStreamPool& instance() {
@@ -67,27 +69,34 @@ public:
 
     /// Returns `count` streams, creating them lazily. Thread-safe.
     std::vector<cudaStream_t> get(int count) {
+        int device = 0;
+        if (cudaGetDevice(&device) != cudaSuccess) {
+            return {};  // callers fall back to the default stream
+        }
         std::lock_guard<std::mutex> lock(mutex_);
-        while (static_cast<int>(streams_.size()) < count) {
+        std::vector<cudaStream_t>& streams = byDevice_[device];
+        while (static_cast<int>(streams.size()) < count) {
             cudaStream_t s = nullptr;
             if (cudaStreamCreateWithFlags(&s, cudaStreamNonBlocking) != cudaSuccess) {
                 break;  // degrade gracefully to fewer streams
             }
-            streams_.push_back(s);
+            streams.push_back(s);
         }
-        int usable = std::min<int>(count, static_cast<int>(streams_.size()));
-        return {streams_.begin(), streams_.begin() + usable};
+        int usable = std::min<int>(count, static_cast<int>(streams.size()));
+        return {streams.begin(), streams.begin() + usable};
     }
 
 private:
     BatchStreamPool() = default;
     ~BatchStreamPool() {
-        for (cudaStream_t s : streams_) {
-            cudaStreamDestroy(s);
+        for (auto& entry : byDevice_) {
+            for (cudaStream_t s : entry.second) {
+                cudaStreamDestroy(s);
+            }
         }
     }
     std::mutex mutex_;
-    std::vector<cudaStream_t> streams_;
+    std::map<int, std::vector<cudaStream_t>> byDevice_;
 };
 
 /// RAII: temporarily page-lock a host matrix for faster async copies.

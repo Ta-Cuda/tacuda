@@ -1,0 +1,131 @@
+{
+  "version": "0.8.1",
+  "date": "2026-11-09",
+  "status": "local-uncommitted-candidate",
+  "public_base": "fe7392b67d9f9ee8dc9957a3a194c4d6ef90bcc8",
+  "branch": "release/0.8.1",
+  "source_snapshot_sha256": "14c41c33ea46b37b85d948cb9b11bd5ae013bde56ffc27f2af437e5a4768ba31",
+  "source_scope": "Working-tree snapshot including new files; later validation notes only do not change native/binding sources.",
+  "environments": {
+    "linux": {
+      "os": "Ubuntu 24.04.4 LTS",
+      "gpu": "RTX 3090 Ti",
+      "driver": "590.48.01",
+      "cuda": "12.8.93",
+      "gcc": "13.3.0",
+      "python": "3.12.3",
+      "numpy": "2.2.6",
+      "talib_python": "0.7.0",
+      "talib_native_reported": "0.6.4 (Jul  3 2026 22:58:17)",
+      "node": "22.23.3",
+      "dotnet_sdk": "8.0.422"
+    },
+    "windows": {
+      "os": "Windows Server 2022",
+      "gpu": null,
+      "cuda": "12.9.86",
+      "msvc": "19.44.35228.0",
+      "python": "3.13.7",
+      "node": "22.23.0",
+      "dotnet_sdk": "11.0.100-rc.3.26522.148"
+    }
+  },
+  "native_architectures": [
+    75,
+    80,
+    86,
+    89,
+    90
+  ],
+  "gpu_test_architectures": [
+    86
+  ],
+  "checks": {
+    "python_contract_release_tools": {
+      "passed": 24,
+      "failed": 0,
+      "lockfile_negative_control_expected_failures": 2
+    },
+    "abi": {
+      "declarations": 811,
+      "missing": 0,
+      "production_test_hook_exports": 0
+    },
+    "gpu_ctest": {
+      "total": 490,
+      "passed": 489,
+      "failed": 0,
+      "skipped": [
+        "Backends.TalibMatchesReference"
+      ]
+    },
+    "windows_optimizer": {
+      "total": 166,
+      "passed": 162,
+      "failed": 0,
+      "skipped": [
+        "Backends.TacudaMatchesReference",
+        "Backends.TalibMatchesReference",
+        "Backends.TacudaBatchMatchesPerSymbolReference",
+        "Backends.BatchFactoryPerSymbolFallbackWorks"
+      ]
+    },
+    "differential_corpus": {
+      "passed_cells": 1319,
+      "total_cells": 1319,
+      "green_specs": 165,
+      "total_specs": 165
+    },
+    "streaming_corpus": {
+      "passed_cells": 699,
+      "total_cells": 699
+    },
+    "pipelines": {
+      "python": 37,
+      "node": 203,
+      "csharp_pipeline": 36,
+      "csharp_additional": 100,
+      "failed": 0
+    },
+    "asan": {
+      "linux": "pass",
+      "windows": "pass"
+    },
+    "compute_sanitizer": {
+      "version": "2025.1.0.0 (CUDA 12.8.93)",
+      "tool": "memcheck",
+      "production_host_device_macd_calls": 130,
+      "pairs": 5,
+      "errors": 0,
+      "exit_code": 0,
+      "negative_control_errors": 12,
+      "negative_control_exit_code": 99,
+      "negative_control_finding": "invalid global read outside allocation",
+      "harness": "tests/gpu/macd_memcheck.py"
+    },
+    "package_installs": {
+      "windows": "Python/npm/NuGet load the installed native and report 0.8.1; no GPU computation",
+      "linux": "Python/npm/NuGet report 0.8.1, SMA(20) and incremental SMA both return 54.5 for 1..64"
+    },
+    "packaging": "two platform wheels with exactly one matching native each; source-only sdist; npm tgz; both RID natives in NuGet; twine check passed"
+  },
+  "native_sha256": {
+    "linux": "5ec4605270b19d643a8225107f7cb12aa659bfa07717e018f8857a7a2dd1ce84",
+    "windows": "5f30d553bd22e854aacdae29d3fbea88dc17c922f7bc6e6b2fa5bc40cf257cd4"
+  },
+  "artifacts_sha256": {
+    "tacuda-0.8.1-py3-none-linux_x86_64.whl": "b6c9686e30009492801f5942c4b966d14f4385e02f4edda96158cfadec646bb4",
+    "tacuda-0.8.1-py3-none-win_amd64.whl": "705cec5fa7e969461f3d222c30c288a0e541d7c426098539856b95625a4523a9",
+    "tacuda-0.8.1.tar.gz": "150d894f2c62e0326db03db673ee9a5cb85b2d776f064b984a4fea3b56ec72e6",
+    "tacuda-0.8.1.tgz": "8d363e97d133b985a278393d6ebad23580c8de253435409e11e7041b986c3a36",
+    "Tacuda.0.8.1.nupkg": "d14490b5d17fc98287a4885bddd1d5db63dcdb233deed8cbf7d0dc221daad375"
+  },
+  "limitations": [
+    "Local validation packages, not official CI release artifacts",
+    "Linux wheels use linux_x86_64; no manylinux_2_35 acceptance",
+    "Two-GPU ownership validation (A16) pending",
+    "Windows GPU runtime untested",
+    "Exact-commit Actions packaging/GPU dry run pending",
+    "No commit, push, tag, workflow dispatch or publication performed"
+  ]
+}

@@ -5,6 +5,8 @@
 /* ======================================================================== */
 #include <gtest/gtest.h>
 
+#include <limits>
+
 #include "core/ParamSpace.h"
 
 using namespace topt;
@@ -92,4 +94,63 @@ TEST(ParamSpace, RoundsIntegerParams) {
   auto variants = enumerate_variants(defs, {parse_grid_spec("period=7.4,7.6")}, {});
   EXPECT_DOUBLE_EQ(variants[0].get("period"), 7.0);
   EXPECT_DOUBLE_EQ(variants[1].get("period"), 8.0);
+}
+
+TEST(ParamSpace, RejectsNonFiniteSetAndListValues) {
+  for (const char* value : {"nan", "inf", "-inf", "1e999"}) {
+    EXPECT_THROW(parse_set_spec(std::string("period=") + value),
+                 std::invalid_argument) << value;
+    EXPECT_THROW(parse_grid_spec(std::string("period=1,") + value),
+                 std::invalid_argument) << value;
+  }
+}
+
+TEST(ParamSpace, RejectsNonFiniteRangeBoundsAndSteps) {
+  for (const char* spec : {"p=0..inf:1", "p=-inf..1:1", "p=0..1:inf",
+                           "p=nan..1:1", "p=0..1:nan"}) {
+    EXPECT_THROW(parse_grid_spec(spec), std::invalid_argument) << spec;
+  }
+}
+
+TEST(ParamSpace, RangeStopsAtTerminalValueWithoutProgress) {
+  auto axis = parse_grid_spec("p=1e20..1e20:1");
+  ASSERT_EQ(axis.values.size(), 1u);
+  EXPECT_DOUBLE_EQ(axis.values[0], 1e20);
+}
+
+TEST(ParamSpace, RejectsRangeStepThatCannotAdvance) {
+  EXPECT_THROW(parse_grid_spec("p=1e20..1.000000000000001e20:1"),
+               std::invalid_argument);
+}
+
+TEST(ParamSpace, GetIntPreservesNearestIntegerRounding) {
+  ParamSet ps;
+  for (auto pair : {std::pair<double, int>{2.5, 3}, {-2.5, -3},
+                    {static_cast<double>(std::numeric_limits<int>::max()) + 0.49,
+                     std::numeric_limits<int>::max()},
+                    {static_cast<double>(std::numeric_limits<int>::min()) - 0.49,
+                     std::numeric_limits<int>::min()}}) {
+    ps.set("value", pair.first);
+    EXPECT_EQ(ps.get_int("value"), pair.second);
+  }
+}
+
+TEST(ParamSpace, GetIntRejectsNonFiniteValues) {
+  ParamSet ps;
+  for (double value : {std::numeric_limits<double>::quiet_NaN(),
+                        std::numeric_limits<double>::infinity(),
+                        -std::numeric_limits<double>::infinity()}) {
+    ps.set("value", value);
+    EXPECT_THROW(ps.get_int("value"), std::invalid_argument);
+  }
+}
+
+TEST(ParamSpace, GetIntRejectsValuesOutsideIntRange) {
+  ParamSet ps;
+  for (double value : {static_cast<double>(std::numeric_limits<int>::max()) + 0.5,
+                        static_cast<double>(std::numeric_limits<int>::min()) - 0.5,
+                        std::numeric_limits<double>::max()}) {
+    ps.set("value", value);
+    EXPECT_THROW(ps.get_int("value"), std::out_of_range);
+  }
 }

@@ -30,6 +30,16 @@ namespace topt::exp {
 
 inline bool finite(float v) { return std::isfinite(v); }
 
+// Match ParamSet::get_int rounding without converting invalid/out-of-range input.
+// ParamDef min/max describe a search grid, not the full valid parameter domain.
+inline bool positive_int_param(const ParamSet& ps, const char* name) {
+  const double value = ps.get(name);
+  if (!std::isfinite(value)) return false;
+  const double rounded = std::round(value);
+  return rounded >= 1.0 &&
+         rounded <= static_cast<double>(std::numeric_limits<int>::max());
+}
+
 // Shorthand accessors so strategy loops stay readable.
 inline float O(const Series& b, int i) { return b.open[static_cast<std::size_t>(i)]; }
 inline float H(const Series& b, int i) { return b.high[static_cast<std::size_t>(i)]; }

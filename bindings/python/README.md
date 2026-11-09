@@ -75,7 +75,7 @@ n = len(prices)
 d_in = tacuda.device_alloc(n)
 d_out = tacuda.device_alloc(n)
 try:
-    tacuda.device_upload(prices, d_in, n)   # 1 PCIe transfer in
+    tacuda.device_upload(prices, d_in)      # 1 PCIe transfer in
     tacuda.sma_d(d_in, d_out, n, 20)        # compute on GPU
     tacuda.sin_d(d_out, d_out, n)           # chain kernels, zero copies
     tacuda.device_sync()
@@ -84,6 +84,15 @@ finally:
     tacuda.device_free(d_in)
     tacuda.device_free(d_out)
 ```
+
+`device_upload` takes its element count from the array. An explicit `count` may
+transfer a prefix but never more than the array holds: the native call receives
+only a pointer, so this is checked before it. The raw `tacuda._lib` entry points
+do not have this protection.
+
+Single-series functions require a 1D array and raise `ValueError` otherwise,
+because a matrix would be read as one concatenated series crossing symbol
+boundaries. Use the `*_batch` functions for `(numSeries, seriesLen)` matrices.
 
 ## Available Indicators (TA-Lib 0.7.1 baseline coverage)
 
@@ -148,8 +157,10 @@ Apache License 2.0 — see [LICENSE](../../LICENSE).
 
 ## Streaming and version pairing
 
-The 0.8.0 bindings add incremental single-series and portfolio updates for
-10 indicator families. Use a matching 0.8.0 native library; an older binary
-does not export the streaming functions. See the
+Streaming was added in 0.8.0 for incremental single-series and portfolio
+updates across 10 indicator families. Pair bindings with the native library
+from the same release; 0.8.1 includes precision, input-validation and stream
+correctness fixes. A native older than 0.8.0 does not export the streaming
+functions. See the
 [Streaming API guide](https://github.com/Ta-Cuda/tacuda/blob/main/docs/STREAMING_API.md).
 The 161-function compatibility baseline is native TA-Lib 0.7.1, not TA-Lib 0.8.1.

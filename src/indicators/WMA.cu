@@ -41,6 +41,7 @@ __global__ void buildIndexTimesKernel(const float* __restrict__ input,
 // Finalize WMA from prefix sums with end-of-window alignment (weights 1..P oldest->newest)
 __global__ void wmaFinalizeFromPrefixKernel(const double* __restrict__ prefixX,
                                             const double* __restrict__ prefixIX,
+                                            const float* __restrict__ input,
                                             float* __restrict__ output,
                                             int period,
                                             int size) {
@@ -52,6 +53,13 @@ __global__ void wmaFinalizeFromPrefixKernel(const double* __restrict__ prefixX,
     double sumX = prefixX[end] - (j > 0 ? prefixX[j - 1] : 0.0);
     double sumIX = prefixIX[end] - (j > 0 ? prefixIX[j - 1] : 0.0);
     double weighted = sumIX + (1.0 - static_cast<double>(j)) * sumX;
+    // A non-finite input poisons every later prefix value; see the SMA kernel.
+    if (!isfinite(weighted)) {
+        weighted = 0.0;
+        for (int k = 0; k < period; ++k) {
+            weighted += static_cast<double>(k + 1) * static_cast<double>(input[j + k]);
+        }
+    }
     double denom = 0.5 * static_cast<double>(period) * static_cast<double>(period + 1);
     output[end] = static_cast<float>(weighted / denom);
 }
@@ -277,7 +285,7 @@ void WMA::calculate(const float* input, float* output, int size, cudaStream_t st
             thrust::device_ptr<double> pix(prefixIX.get());
             thrust::inclusive_scan(thrust::cuda::par.on(stream), pix, pix + size, pix);
         }
-        wmaFinalizeFromPrefixKernel<<<g, b, 0, stream>>>(prefixX.get(), prefixIX.get(), output, window, size);
+        wmaFinalizeFromPrefixKernel<<<g, b, 0, stream>>>(prefixX.get(), prefixIX.get(), input, output, window, size);
     CUDA_CHECK(cudaGetLastError());
 }
 }

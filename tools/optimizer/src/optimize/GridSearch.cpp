@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
+#include <cmath>
 #include <cstdio>
 #include <stdexcept>
 #include <thread>
@@ -62,6 +63,9 @@ VariantResult run_variant(const Series& bars, const IStrategy& strategy,
     res.metrics = compute_metrics(sim, exec.barsPerYear);
     if (fitness) {
       res.fitness = fitness->eval(fitness_variables(res.metrics));
+      if (!std::isfinite(res.fitness)) {
+        throw std::runtime_error("fitness expression produced a non-finite value");
+      }
     }
     res.valid = true;
     if (simOut) *simOut = std::move(sim);

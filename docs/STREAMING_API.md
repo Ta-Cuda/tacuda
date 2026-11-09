@@ -107,7 +107,10 @@ library making that decision for them.
 
 Policy may change between appends; state migrates with it (asserted by a test
 that runs one series through CPU, then GPU, then CPU again and compares
-against a single-series reference).
+against a single-series reference). `reset` makes the host copy authoritative
+in both directions, so every CPU/GPU combination around a reset equals a fresh
+handle. A handle that has used the GPU stays on that device; using it after
+`cudaSetDevice` selected another one returns `CT_STATUS_INVALID_ARGUMENT`.
 
 ### Windows validation after the handle fix (2026-10-07)
 
@@ -189,6 +192,17 @@ pointers, `n <= 0`, out-of-range periods (TA-Lib's own BAD_PARAM ranges),
 destroyed or foreign handles, and appending through the wrong family's
 function (an SMA append on an ATR handle is rejected, not silently
 misinterpreted).
+
+A failed GPU append never returns stale data as success, and `bars` counts only
+appends that succeeded:
+
+| Failure | Status | State afterwards |
+| --- | --- | --- |
+| Allocation, state or input upload | `ALLOC_FAILED` / `COPY_FAILED` | Unchanged; the same append can be retried |
+| Kernel, output download, device-to-host state sync | `KERNEL_FAILED` / `COPY_FAILED` | Undefined; further appends return `DEVICE_ERROR` until `reset` |
+
+The second group cannot be retried because the device may already have advanced
+past bars the caller never received. Recover by `reset` and replaying history.
 
 ## Numerical relationship to the full-series API
 
@@ -329,6 +343,11 @@ differential corpus makes, for the same reason.
 single streams bit for bit — per family, per execution path, at chunk sizes
 1/7/whole — plus introspection, reset (including invalidation of resident
 device state), policy changes mid-stream, and the error contract.
+
+`tests/cpp/test_stream_batch_faults.cpp` drives that failure table through
+injected faults. GPU errors cannot be provoked on demand, so the hook exists
+only in builds configured with `-DTACUDA_STREAM_FAULT_INJECTION=ON`; never ship
+such a build, it exports `ct_test_stream_batch_fail_next`.
 
 `tests/cpp/test_stream_api.cpp` asserts, for every family:
 stream-vs-full-series parity under the corpus oracle at four chunk sizes,

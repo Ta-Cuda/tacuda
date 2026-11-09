@@ -92,6 +92,7 @@ struct ParamSet {
   std::vector<std::pair<std::string, double>> values;
 
   double get(const std::string& name) const;
+  // Nearest integer, halfway away from zero; rejects non-finite/out-of-range input.
   int get_int(const std::string& name) const;
   bool has(const std::string& name) const;
   void set(const std::string& name, double v);

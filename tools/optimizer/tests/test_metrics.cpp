@@ -83,3 +83,50 @@ TEST(Metrics, ProfitFactorCappedWithoutLosses) {
   MetricsResult m = compute_metrics(sim, 252);
   EXPECT_DOUBLE_EQ(m.profitFactor, 1e9);
 }
+
+TEST(Metrics, RangedSegmentFirstBarLossCountsFromCapital) {
+  SimResult sim;
+  sim.initialCapital = 100.0;
+  sim.equity = {90.0, 90.0};
+  sim.finalEquity = 90.0;
+  MetricsResult m = compute_metrics(sim, 252);
+  EXPECT_DOUBLE_EQ(m.netProfit, -10.0);
+  EXPECT_DOUBLE_EQ(m.maxDrawdown, 10.0);
+  EXPECT_DOUBLE_EQ(m.maxDrawdownPct, 0.1);
+  // Two observations, -10 and 0: mean -5, std 5, downside sqrt(100 / 2).
+  EXPECT_NEAR(m.sharpe, -std::sqrt(252.0), 1e-12);
+  EXPECT_NEAR(m.sortino, -5.0 / std::sqrt(50.0) * std::sqrt(252.0), 1e-12);
+}
+
+TEST(Metrics, RangedSegmentFirstBarGainRaisesThePeak) {
+  SimResult sim;
+  sim.initialCapital = 100.0;
+  sim.equity = {110.0, 99.0};
+  sim.finalEquity = 99.0;
+  MetricsResult m = compute_metrics(sim, 252);
+  EXPECT_DOUBLE_EQ(m.maxDrawdown, 11.0);
+  EXPECT_DOUBLE_EQ(m.maxDrawdownPct, 0.1);
+}
+
+TEST(Metrics, SingleBarSegmentKeepsItsLoss) {
+  SimResult sim;
+  sim.initialCapital = 100.0;
+  sim.equity = {95.0};
+  sim.finalEquity = 95.0;
+  MetricsResult m = compute_metrics(sim, 252);
+  EXPECT_DOUBLE_EQ(m.netProfit, -5.0);
+  EXPECT_DOUBLE_EQ(m.maxDrawdown, 5.0);
+  EXPECT_DOUBLE_EQ(m.sharpe, 0.0);
+}
+
+TEST(Metrics, FlatStartIsNotAnExtraObservation) {
+  SimResult flat;
+  flat.initialCapital = 100.0;
+  flat.equity = {100.0, 101.0, 103.0, 102.0};
+  flat.finalEquity = 102.0;
+  MetricsResult m = compute_metrics(flat, 252);
+  const double mean = 2.0 / 3.0;
+  const double var = ((1 - mean) * (1 - mean) + (2 - mean) * (2 - mean) +
+                      (-1 - mean) * (-1 - mean)) / 3.0;
+  EXPECT_NEAR(m.sharpe, mean / std::sqrt(var) * std::sqrt(252.0), 1e-12);
+}

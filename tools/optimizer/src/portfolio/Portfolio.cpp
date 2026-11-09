@@ -15,14 +15,19 @@ namespace topt {
 
 namespace {
 
-// Timestamps usable for alignment: present, non-zero, strictly increasing.
-bool usable_timestamps(const Series& s) {
-  if (s.ts.size() != s.close.size() || s.ts.empty()) return false;
-  if (s.ts.front() == 0) return false;
+enum class TimeAxis { Absent, Valid, Broken };
+
+// A series either carries no time at all, or a strictly increasing axis.
+// Anything else is damaged data and must not degrade to positional matching.
+TimeAxis classify_time_axis(const Series& s) {
+  const bool present =
+      std::any_of(s.ts.begin(), s.ts.end(), [](std::int64_t t) { return t != 0; });
+  if (!present) return TimeAxis::Absent;
+  if (s.ts.size() != s.close.size()) return TimeAxis::Broken;
   for (std::size_t i = 1; i < s.ts.size(); ++i) {
-    if (s.ts[i] <= s.ts[i - 1]) return false;
+    if (s.ts[i] <= s.ts[i - 1]) return TimeAxis::Broken;
   }
-  return true;
+  return TimeAxis::Valid;
 }
 
 // Keeps only bars whose timestamp is in `keep` (both sides sorted ascending).
@@ -68,15 +73,21 @@ void align_portfolio(std::vector<Series>& series, std::string& log) {
     return;
   }
 
-  bool allTs = true;
-  for (const Series& s : series) {
-    if (!usable_timestamps(s)) {
-      allTs = false;
-      break;
+  std::size_t withTime = 0;
+  for (std::size_t i = 0; i < series.size(); ++i) {
+    const TimeAxis axis = classify_time_axis(series[i]);
+    if (axis == TimeAxis::Broken) {
+      throw std::invalid_argument("portfolio: series #" + std::to_string(i + 1) +
+                                  " has timestamps that are not strictly increasing");
     }
+    if (axis == TimeAxis::Valid) ++withTime;
+  }
+  if (withTime != 0 && withTime != series.size()) {
+    throw std::invalid_argument(
+        "portfolio: some series have timestamps and others do not; cannot align them");
   }
 
-  if (!allTs) {
+  if (withTime == 0) {
     const int n0 = series.front().size();
     for (const Series& s : series) {
       if (s.size() != n0) {
@@ -86,7 +97,7 @@ void align_portfolio(std::vector<Series>& series, std::string& log) {
             ") and timestamps are unavailable for alignment");
       }
     }
-    log = "portfolio: equal-length series, aligned by bar index";
+    log = "portfolio: no timestamps in any series, aligned by bar index";
     return;
   }
 

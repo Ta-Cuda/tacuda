@@ -5,6 +5,10 @@
 /* ======================================================================== */
 #include <gtest/gtest.h>
 
+#include <cmath>
+#include <limits>
+
+#include "engine/Metrics.h"
 #include "engine/Simulator.h"
 
 using namespace topt;
@@ -221,4 +225,36 @@ TEST(Simulator, RejectsBadRanges) {
   EXPECT_THROW(simulate(kBars, desired.data(), cfg, SimRange{3, 3}), std::invalid_argument);
   EXPECT_THROW(simulate(kBars, desired.data(), cfg, SimRange{2, 6}), std::invalid_argument);
   EXPECT_THROW(simulate(kBars, desired.data(), cfg, SimRange{5, 5}), std::invalid_argument);
+}
+
+TEST(Simulator, RejectsNonFiniteConfiguration) {
+  std::vector<Signal> desired = {0, 0, 0, 0, 0};
+  const double nan = std::numeric_limits<double>::quiet_NaN();
+  const double inf = std::numeric_limits<double>::infinity();
+  double ExecConfig::*fields[] = {&ExecConfig::commissionBps, &ExecConfig::commissionFixed,
+                                  &ExecConfig::slippageTicks, &ExecConfig::tickSize,
+                                  &ExecConfig::qty,           &ExecConfig::capital};
+  for (auto field : fields) {
+    for (double bad : {nan, inf, -inf}) {
+      ExecConfig cfg;
+      cfg.*field = bad;
+      EXPECT_THROW(simulate(kBars, desired.data(), cfg), std::invalid_argument);
+    }
+  }
+  ExecConfig noYear;
+  noYear.barsPerYear = 0;
+  EXPECT_THROW(simulate(kBars, desired.data(), noYear), std::invalid_argument);
+}
+
+TEST(Simulator, RangedFirstBarCostReachesTheMetrics) {
+  std::vector<Signal> desired = {1, 1, 1, 1, 1};
+  ExecConfig cfg;
+  cfg.capital = 1000.0;
+  cfg.commissionFixed = 5.0;
+  SimResult r = simulate(kBars, desired.data(), cfg, SimRange{1, 3});
+  // Fills at open[1]=11 for 5, marks 11.5, then force-closes at 12.5 for 5.
+  EXPECT_DOUBLE_EQ(r.equity[0], 995.5);
+  EXPECT_DOUBLE_EQ(r.finalEquity, 991.5);
+  MetricsResult m = compute_metrics(r, cfg.barsPerYear);
+  EXPECT_DOUBLE_EQ(m.maxDrawdown, 8.5);
 }

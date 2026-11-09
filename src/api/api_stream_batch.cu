@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <cstring>
 #include <functional>
+#include <iterator>
 #include <memory>
 #include <new>
 #include <stdexcept>
@@ -34,6 +35,11 @@
 #include <utils/StreamStates.h>
 #include <utils/StreamHandleRegistry.h>
 
+#ifdef TACUDA_STREAM_FAULT_INJECTION
+#include <atomic>
+#include <utils/StreamBatchFaults.h>
+#endif
+
 namespace st = tacuda::streaming;
 
 namespace {
@@ -43,6 +49,19 @@ namespace {
 // against 126.3 us on the GPU, and 317.8 us at 4096 against 161.6 us. The
 // crossover sits between them.
 constexpr int kGpuThreshold = 2048;
+
+// Controlled failures for the state-transition tests. Compiled out of normal
+// builds, where FAULT() is a constant false and costs nothing.
+#ifdef TACUDA_STREAM_FAULT_INJECTION
+std::atomic<int> gNextFault{0};
+bool consume_fault(ctStreamBatchFault_t site) {
+  int expected = static_cast<int>(site);
+  return gNextFault.compare_exchange_strong(expected, 0);
+}
+#define FAULT(site) consume_fault(site)
+#else
+#define FAULT(site) false
+#endif
 
 enum class Family { SMA, EMA, WMA, RSI, ATR, NATR, OBV, AD, MACD, BBANDS };
 
@@ -103,7 +122,7 @@ class BatchEngine {
 public:
   virtual ~BatchEngine() = default;
   virtual void resetAll() = 0;
-  virtual void appendCpu(const Inputs &in, int n, float **outs, int from, int to) = 0;
+  virtual ctStatus_t appendCpu(const Inputs &in, int n, float **outs, int from, int to) = 0;
   virtual ctStatus_t appendGpu(const Inputs &in, int n, float **outs) = 0;
   virtual void releaseDevice() = 0;
   virtual int numOutputs() const = 0;
@@ -135,11 +154,19 @@ public:
     seed_(fresh);
     std::fill(states_.begin(), states_.end(), fresh);
     std::fill(rings_.begin(), rings_.end(), 0.0f);
+    // The host copy is now the authoritative one, in both directions: whatever
+    // the device still holds must be neither pulled back nor resumed from.
     deviceDirty_ = true;
+    hostDirty_ = false;
+    failed_ = false;
   }
 
-  void appendCpu(const Inputs &in, int n, float **outs, int from, int to) override {
-    if (deviceLive_) syncFromDevice();
+  ctStatus_t appendCpu(const Inputs &in, int n, float **outs, int from, int to) override {
+    if (failed_) return report_failed();
+    if (deviceLive_) {
+      const ctStatus_t status = syncFromDevice();
+      if (status != CT_STATUS_SUCCESS) return status;
+    }
     for (int s = from; s < to; ++s) {
       Pod state = states_[static_cast<std::size_t>(s)];
       float *ring = ringLen_ > 0
@@ -154,9 +181,14 @@ public:
       states_[static_cast<std::size_t>(s)] = state;
     }
     deviceDirty_ = true;
+    return CT_STATUS_SUCCESS;
   }
 
+  // Failures before the kernel leave the state untouched, so the caller may
+  // retry. From the launch onwards the device state may already have advanced
+  // past what the caller received; the handle then refuses work until reset.
   ctStatus_t appendGpu(const Inputs &in, int n, float **outs) override {
+    if (failed_) return report_failed();
     const std::size_t elems = static_cast<std::size_t>(numSeries_) * n;
     ctStatus_t status = ensureDevice();
     if (status != CT_STATUS_SUCCESS) return status;
@@ -167,7 +199,8 @@ public:
     const float *src[4] = {in.high, in.low, in.close, in.volume};
     for (int c = 0; c < 4; ++c) {
       if (!src[c]) continue;
-      if (cudaMemcpy(devIn_[c], src[c], elems * sizeof(float),
+      if (FAULT(CT_STREAM_BATCH_FAULT_INPUT_UPLOAD) ||
+          cudaMemcpy(devIn_[c], src[c], elems * sizeof(float),
                      cudaMemcpyHostToDevice) != cudaSuccess) {
         tacuda::detail::set_last_error("stream batch: device upload failed");
         return CT_STATUS_COPY_FAILED;
@@ -181,22 +214,20 @@ public:
         in.high ? devIn_[0] : nullptr, in.low ? devIn_[1] : nullptr,
         in.close ? devIn_[2] : nullptr, in.volume ? devIn_[3] : nullptr,
         numSeries_, n, outputs_, devOut_[0], devOut_[1], devOut_[2]);
+    hostDirty_ = true;  // the device now holds the authoritative state
     if (cudaGetLastError() != cudaSuccess) {
-      tacuda::detail::set_last_error("stream batch: kernel launch failed");
-      return CT_STATUS_KERNEL_FAILED;
+      return fail("stream batch: kernel launch failed", CT_STATUS_KERNEL_FAILED);
     }
-    if (cudaDeviceSynchronize() != cudaSuccess) {
-      tacuda::detail::set_last_error("stream batch: kernel execution failed");
-      return CT_STATUS_KERNEL_FAILED;
+    if (cudaDeviceSynchronize() != cudaSuccess || FAULT(CT_STREAM_BATCH_FAULT_KERNEL)) {
+      return fail("stream batch: kernel execution failed", CT_STATUS_KERNEL_FAILED);
     }
     for (int k = 0; k < outputs_; ++k) {
-      if (cudaMemcpy(outs[k], devOut_[k], elems * sizeof(float),
+      if (FAULT(CT_STREAM_BATCH_FAULT_OUTPUT_DOWNLOAD) ||
+          cudaMemcpy(outs[k], devOut_[k], elems * sizeof(float),
                      cudaMemcpyDeviceToHost) != cudaSuccess) {
-        tacuda::detail::set_last_error("stream batch: device download failed");
-        return CT_STATUS_COPY_FAILED;
+        return fail("stream batch: device download failed", CT_STATUS_COPY_FAILED);
       }
     }
-    hostDirty_ = true;  // the device now holds the authoritative state
     return CT_STATUS_SUCCESS;
   }
 
@@ -207,6 +238,9 @@ public:
     for (float *&p : devOut_) { if (p) { cudaFree(p); p = nullptr; } }
     ioElems_ = 0;
     deviceLive_ = false;
+    deviceDirty_ = true;
+    hostDirty_ = false;
+    ownerDevice_ = -1;
   }
 
   int numOutputs() const override { return outputs_; }
@@ -216,28 +250,52 @@ public:
 private:
   // I/O buffers stay resident across appends: reallocating them per tick
   // would dominate the very latency this path exists to reduce.
+  // The new set is complete before the old one goes away: a failed growth
+  // keeps the existing buffers and the capacity that describes them.
   ctStatus_t ensureIoBuffers(std::size_t elems) {
     if (elems <= ioElems_) return CT_STATUS_SUCCESS;
-    for (float *&p : devIn_) { if (p) { cudaFree(p); p = nullptr; } }
-    for (float *&p : devOut_) { if (p) { cudaFree(p); p = nullptr; } }
+    float *freshIn[4] = {nullptr, nullptr, nullptr, nullptr};
+    float *freshOut[3] = {nullptr, nullptr, nullptr};
+    const auto discardFresh = [&]() {
+      for (float *p : freshIn) { if (p) cudaFree(p); }
+      for (float *p : freshOut) { if (p) cudaFree(p); }
+    };
     const std::size_t bytes = elems * sizeof(float);
     for (int c = 0; c < 4; ++c) {
-      if (cudaMalloc(&devIn_[c], bytes) != cudaSuccess) {
+      if (FAULT(CT_STREAM_BATCH_FAULT_IO_ALLOC) ||
+          cudaMalloc(&freshIn[c], bytes) != cudaSuccess) {
+        discardFresh();
         tacuda::detail::set_last_error("stream batch: input allocation failed");
         return CT_STATUS_ALLOC_FAILED;
       }
     }
     for (int k = 0; k < outputs_; ++k) {
-      if (cudaMalloc(&devOut_[k], bytes) != cudaSuccess) {
+      if (cudaMalloc(&freshOut[k], bytes) != cudaSuccess) {
+        discardFresh();
         tacuda::detail::set_last_error("stream batch: output allocation failed");
         return CT_STATUS_ALLOC_FAILED;
       }
     }
+    for (float *&p : devIn_) { if (p) cudaFree(p); }
+    for (float *&p : devOut_) { if (p) cudaFree(p); }
+    std::copy(std::begin(freshIn), std::end(freshIn), std::begin(devIn_));
+    std::copy(std::begin(freshOut), std::end(freshOut), std::begin(devOut_));
     ioElems_ = elems;
     return CT_STATUS_SUCCESS;
   }
 
   ctStatus_t ensureDevice() {
+    // Device pointers are only meaningful on the GPU that allocated them.
+    int device = 0;
+    if (cudaGetDevice(&device) != cudaSuccess) {
+      tacuda::detail::set_last_error("stream batch: cannot query the current device");
+      return CT_STATUS_DEVICE_ERROR;
+    }
+    if (ownerDevice_ >= 0 && ownerDevice_ != device) {
+      tacuda::detail::set_last_error(
+          "stream batch: handle is bound to another GPU; reset does not move it");
+      return CT_STATUS_INVALID_ARGUMENT;
+    }
     const std::size_t stateBytes = static_cast<std::size_t>(numSeries_) * sizeof(Pod);
     const std::size_t ringBytes = static_cast<std::size_t>(numSeries_) *
                                   static_cast<std::size_t>(ringLen_) * sizeof(float);
@@ -249,14 +307,18 @@ private:
       if (cudaMalloc(&devRings_, ringBytes) != cudaSuccess) return CT_STATUS_ALLOC_FAILED;
       deviceDirty_ = true;
     }
+    ownerDevice_ = device;
     if (deviceDirty_) {
-      if (cudaMemcpy(devStates_, states_.data(), stateBytes,
+      if (FAULT(CT_STREAM_BATCH_FAULT_STATE_UPLOAD) ||
+          cudaMemcpy(devStates_, states_.data(), stateBytes,
                      cudaMemcpyHostToDevice) != cudaSuccess) {
+        tacuda::detail::set_last_error("stream batch: state upload failed");
         return CT_STATUS_COPY_FAILED;
       }
       if (ringBytes > 0 &&
           cudaMemcpy(devRings_, rings_.data(), ringBytes,
                      cudaMemcpyHostToDevice) != cudaSuccess) {
+        tacuda::detail::set_last_error("stream batch: ring upload failed");
         return CT_STATUS_COPY_FAILED;
       }
       deviceDirty_ = false;
@@ -265,18 +327,35 @@ private:
     return CT_STATUS_SUCCESS;
   }
 
-  void syncFromDevice() {
-    if (!hostDirty_ || !devStates_) { hostDirty_ = false; return; }
-    cudaMemcpy(states_.data(), devStates_,
-               static_cast<std::size_t>(numSeries_) * sizeof(Pod),
-               cudaMemcpyDeviceToHost);
-    if (devRings_) {
-      cudaMemcpy(rings_.data(), devRings_,
-                 static_cast<std::size_t>(numSeries_) *
-                     static_cast<std::size_t>(ringLen_) * sizeof(float),
-                 cudaMemcpyDeviceToHost);
+  ctStatus_t syncFromDevice() {
+    if (!hostDirty_ || !devStates_) { hostDirty_ = false; return CT_STATUS_SUCCESS; }
+    if (FAULT(CT_STREAM_BATCH_FAULT_STATE_DOWNLOAD) ||
+        cudaMemcpy(states_.data(), devStates_,
+                   static_cast<std::size_t>(numSeries_) * sizeof(Pod),
+                   cudaMemcpyDeviceToHost) != cudaSuccess) {
+      return fail("stream batch: state download failed", CT_STATUS_COPY_FAILED);
+    }
+    if (devRings_ &&
+        cudaMemcpy(rings_.data(), devRings_,
+                   static_cast<std::size_t>(numSeries_) *
+                       static_cast<std::size_t>(ringLen_) * sizeof(float),
+                   cudaMemcpyDeviceToHost) != cudaSuccess) {
+      return fail("stream batch: ring download failed", CT_STATUS_COPY_FAILED);
     }
     hostDirty_ = false;
+    return CT_STATUS_SUCCESS;
+  }
+
+  ctStatus_t fail(const char *message, ctStatus_t status) {
+    failed_ = true;
+    tacuda::detail::set_last_error(message);
+    return status;
+  }
+
+  ctStatus_t report_failed() const {
+    tacuda::detail::set_last_error(
+        "stream batch: an earlier GPU failure left the state undefined; reset the batch");
+    return CT_STATUS_DEVICE_ERROR;
   }
 
   int numSeries_;
@@ -294,6 +373,8 @@ private:
   bool deviceLive_ = false;
   bool deviceDirty_ = true;   // host state not yet pushed to the device
   bool hostDirty_ = false;    // device state not yet pulled back to the host
+  bool failed_ = false;       // state undefined until the next reset
+  int ownerDevice_ = -1;      // GPU holding the device buffers, -1 before first use
 };
 
 }  // namespace
@@ -387,7 +468,7 @@ ctStatus_t run_batch_append(const char *what, ctStreamBatch *batch, Family famil
   if (exec == CT_STREAM_EXEC_GPU) {
     status = state->engine->appendGpu(in, n, outs);
   } else {
-    state->engine->appendCpu(in, n, outs, 0, state->numSeries);
+    status = state->engine->appendCpu(in, n, outs, 0, state->numSeries);
   }
   if (status == CT_STATUS_SUCCESS) state->bars += n;
   return status;
@@ -396,6 +477,12 @@ ctStatus_t run_batch_append(const char *what, ctStreamBatch *batch, Family famil
 }  // namespace
 
 extern "C" {
+
+#ifdef TACUDA_STREAM_FAULT_INJECTION
+void ct_test_stream_batch_fail_next(ctStreamBatchFault_t site) {
+  gNextFault.store(static_cast<int>(site));
+}
+#endif
 
 // ---------------------------------------------------------------------------
 // Lifetime and introspection

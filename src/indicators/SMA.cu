@@ -22,6 +22,7 @@ namespace {
 // Finalize SMA from prefix-sum in double with end-of-window alignment
 template<typename T>
 __global__ void smaFinalizeFromPrefixKernel(const double* __restrict__ prefix,
+                                            const T* __restrict__ input,
                                             T* __restrict__ output,
                                             int period,
                                             int size) {
@@ -31,6 +32,13 @@ __global__ void smaFinalizeFromPrefixKernel(const double* __restrict__ prefix,
 
     double sum = prefix[idx];
     if (idx >= period) sum -= prefix[idx - period];
+    // A non-finite input poisons every later prefix value, even once it has
+    // left the window. Recompute those windows directly so this path keeps the
+    // window semantics of the short-period kernels and of streaming.
+    if (!isfinite(sum)) {
+        sum = 0.0;
+        for (int k = idx - period + 1; k <= idx; ++k) sum += static_cast<double>(input[k]);
+    }
     output[idx] = static_cast<T>(sum / static_cast<double>(period));
 }
 
@@ -202,7 +210,7 @@ void sma_calculate_impl(int period, const T* input, T* output, int size, cudaStr
     if (period > size) {
         // TA-Lib succeeds with zero output elements when the input is
         // shorter than the lookback; the whole line is warm-up NaNs.
-        CUDA_CHECK(cudaMemsetAsync(output, 0xFF, static_cast<size_t>(size) * sizeof(float), stream));
+        CUDA_CHECK(cudaMemsetAsync(output, 0xFF, static_cast<size_t>(size) * sizeof(T), stream));
         return;
     }
 
@@ -260,7 +268,7 @@ void sma_calculate_impl(int period, const T* input, T* output, int size, cudaStr
         thrust::inclusive_scan(thrust::cuda::par.on(stream), inBegin, inBegin + size, preD);
         dim3 block = defaultBlock();
         dim3 grid = defaultGrid(size);
-        smaFinalizeFromPrefixKernel<T><<<grid, block, 0, stream>>>(prefixD.get(), output, window, size);
+        smaFinalizeFromPrefixKernel<T><<<grid, block, 0, stream>>>(prefixD.get(), input, output, window, size);
         CUDA_CHECK(cudaGetLastError());
     }
 }

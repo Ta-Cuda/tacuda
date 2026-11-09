@@ -539,3 +539,77 @@ uploaded to PyPI/NuGet/npm; keep the original tag and validated artifacts.
 The owner's cached-history cleanup request was submitted to GitHub Support
 on 2026-11-08. Actual removal of old references and cached views awaits
 Support review.
+
+## Local 0.8.1 candidate — 2026-11-09
+
+The local `release/0.8.1` branch is based on public `main` at `fe7392b`.
+The candidate was first validated from a local working-tree snapshot and is
+unpublished. The official `release-packages` dry run must use the exact
+committed public source; its result is separate from the local evidence below.
+The candidate version and pending-release changelog are consistent across the
+native, Python, Node and C# packages. The version checker also verifies both
+root entries in npm's lockfile; checking package.json alone previously missed
+a stale lockfile version.
+
+Source checks pass, including generated-file freshness, source headers, all
+811 C ABI declarations and 24 Python contract/release-tool tests. The Linux
+RTX 3090 Ti run registered 490 CTests: 489 passed, with only the optional
+`Backends.TalibMatchesReference` skipped. Differential and streaming corpora
+passed 1319/1319 cells (165/165 specs) and 699/699 cells. Pipelines passed
+Python 37/37, Node 203/203 and C# 36/36; the additional C# suite passed 100/100.
+The separate production build has fault injection disabled, exports all 811
+public declarations, has no `ct_test_` exports, and passes the CPU streaming
+lifetime test under AddressSanitizer.
+
+The reference environment uses NumPy 2.2.6 and Python TA-Lib 0.7.0. That wheel
+reports `__ta_version__ = 0.6.4 (Jul 3 2026 22:58:17)` and exposes 161 functions.
+These results describe the installed pinned oracle; they do not independently
+confirm the historical native-version label used elsewhere in this guide.
+
+### MACD buffer bounds under Compute Sanitizer
+
+`tests/gpu/macd_memcheck.py` covers 130 host/device calls across all five
+supported storage/compute pairs, short and reversed periods, and finite-output
+controls. Run it against the production native with fault injection disabled:
+
+```bash
+export TACUDA_LIBRARY="$PWD/build/libtacuda.so"
+export LD_LIBRARY_PATH="$PWD/build:$CUDA_HOME/lib64:${LD_LIBRARY_PATH:-}"
+compute-sanitizer --tool memcheck --error-exitcode 99 \
+  python tests/gpu/macd_memcheck.py
+```
+
+The CUDA 12.8.93 sanitizer reported **0 errors** on the candidate. Against the
+previous native, the short-buffer control (`--negative`) reported an invalid
+global read outside the allocation and exited 99. This establishes that the
+instrumentation detects the original defect, rather than merely running tests.
+
+Directly launching the linked C++ suite under this sanitizer failed with
+`CUDA initialized before the Sanitizer` and disabled instrumentation. Such a
+run is not a pass. The Python harness loads the native after process startup
+and completed with active instrumentation. NVIDIA describes this initialization
+issue in its [Compute Sanitizer forum](https://forums.developer.nvidia.com/t/getting-cuda-initialized-before-the-sanitizer-but-not-sure-how/344601);
+the [tool guide](https://docs.nvidia.com/compute-sanitizer/ComputeSanitizer/index.html)
+documents `memcheck` and its nonzero error exit option.
+
+### Remaining release evidence
+
+Windows built every target and passed 162 optimizer tests, with four GPU or
+optional-backend cases skipped. Windows ASan passed. Clean wheel/npm/NuGet
+installs on Windows loaded version 0.8.1; clean installs on the Linux GPU
+reported 0.8.1 and returned 54.5 for both SMA(20) and incremental SMA over 1..64.
+All packaged natives match their corresponding build hashes. The scoped
+results and package hashes are in
+[local-0.8.1-candidate.json](validation/2026-11-09/local-0.8.1-candidate.json).
+The local Linux
+native uses CUDA 12.8 on Ubuntu 24.04, while the official packaging workflow
+builds on Ubuntu 22.04 with CUDA 12.9. Local Linux wheels therefore use
+`linux_x86_64`; they do not certify the official manylinux tag. Both native
+builds target architectures 75, 80, 86, 89 and 90.
+
+Two-GPU ownership validation and Windows GPU runtime coverage remain open.
+The future Actions dry run must include all package jobs and the ephemeral
+Linux GPU runner before a signed version tag is created. The NaN window policy
+and remaining propagation exceptions are described in
+[IMPLEMENTATION_NOTES.md](IMPLEMENTATION_NOTES.md). Website benchmark updates
+are separate from this package candidate.

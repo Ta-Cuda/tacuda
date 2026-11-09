@@ -17,15 +17,17 @@ Expected results:
 - Device API should be faster than TA-Lib for large datasets
 """
 
+import argparse
 import numpy as np
 import time
 import ctypes
+import ctypes.util
 import os
 import sys
 import talib
 
 # Load tacuda library
-tacuda_lib_path = os.path.join(os.path.dirname(__file__), '..', 'build', 'Release', 'tacuda.dll')
+tacuda_lib_path = os.environ.get('TACUDA_LIBRARY') or os.path.join(os.path.dirname(__file__), '..', 'build', 'Release', 'tacuda.dll')
 if not os.path.exists(tacuda_lib_path):
     tacuda_lib_path = os.path.join(os.path.dirname(__file__), '..', 'build', 'libtacuda.so')
 
@@ -190,115 +192,113 @@ def benchmark_host_api(closes32, iterations=10):
     return np.median(times)
 
 
-def benchmark_device_api(closes32, iterations=10):
-    """tacuda Device API: Data stays on GPU using cudaMalloc/cudaMemcpy directly"""
+def load_cudart():
+    """Locate the CUDA runtime on Windows or Linux."""
+    if os.name == "nt":
+        names = ["cudart64_129.dll", "cudart64_12.dll"]
+    else:
+        names = [ctypes.util.find_library("cudart") or "libcudart.so", "libcudart.so.12"]
+    for name in names:
+        try:
+            return ctypes.CDLL(name)
+        except OSError:
+            continue
+    return None
+
+
+def check(status, what):
+    if status != 0:
+        raise RuntimeError(f"{what} failed with status {status}")
+
+
+def benchmark_device_api(closes32, iterations=10, download="all"):
+    """tacuda Device API: one upload, then GPU-resident kernels.
+
+    download="all" brings every output back and is comparable to the Host API
+    and TA-Lib, which return all seven arrays. download="rsi" keeps the other
+    six on the GPU, the case where a later GPU stage consumes them.
+    """
     size = len(closes32)
-    
-    # Check if device functions are available
+
     if not all([ct_sma_device, ct_ema_device, ct_rsi_device, ct_momentum_device, ct_roc_device, ct_stddev_device]):
         print("Device API functions not available, skipping...")
         return -1
-    
-    # Use cudaMalloc/cudaMemcpy via ctypes
-    try:
-        cudart = ctypes.CDLL('cudart64_129.dll')
-    except:
-        try:
-            cudart = ctypes.CDLL('cudart64_12.dll')
-        except:
-            print("CUDA runtime not found, skipping device API test")
-            return -1
-    
+
+    cudart = load_cudart()
+    if cudart is None:
+        print("CUDA runtime not found, skipping device API test")
+        return -1
+
     cudaMalloc = cudart.cudaMalloc
     cudaMalloc.argtypes = [ctypes.POINTER(ctypes.c_void_p), ctypes.c_size_t]
     cudaMalloc.restype = ctypes.c_int
-    
+
     cudaFree = cudart.cudaFree
     cudaFree.argtypes = [ctypes.c_void_p]
     cudaFree.restype = ctypes.c_int
-    
+
     cudaMemcpy = cudart.cudaMemcpy
     cudaMemcpy.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int]
     cudaMemcpy.restype = ctypes.c_int
-    
+
     cudaDeviceSynchronize = cudart.cudaDeviceSynchronize
     cudaDeviceSynchronize.restype = ctypes.c_int
-    
+
     cudaMemcpyHostToDevice = 1
     cudaMemcpyDeviceToHost = 2
-    
-    # Allocate device buffers
-    d_input = ctypes.c_void_p()
-    d_sma = ctypes.c_void_p()
-    d_ema12 = ctypes.c_void_p()
-    d_ema26 = ctypes.c_void_p()
-    d_rsi = ctypes.c_void_p()
-    d_mom = ctypes.c_void_p()
-    d_roc = ctypes.c_void_p()
-    d_std = ctypes.c_void_p()
-    
+
+    float_ptr = ctypes.POINTER(ctypes.c_float)
     buf_size = size * ctypes.sizeof(ctypes.c_float)
-    
-    err = cudaMalloc(ctypes.byref(d_input), buf_size)
-    if err != 0:
-        print(f"cudaMalloc failed: {err}")
-        return -1
-    cudaMalloc(ctypes.byref(d_sma), buf_size)
-    cudaMalloc(ctypes.byref(d_ema12), buf_size)
-    cudaMalloc(ctypes.byref(d_ema26), buf_size)
-    cudaMalloc(ctypes.byref(d_rsi), buf_size)
-    cudaMalloc(ctypes.byref(d_mom), buf_size)
-    cudaMalloc(ctypes.byref(d_roc), buf_size)
-    cudaMalloc(ctypes.byref(d_std), buf_size)
-    
+
+    def alloc():
+        ptr = ctypes.c_void_p()
+        check(cudaMalloc(ctypes.byref(ptr), buf_size), "cudaMalloc")
+        return ptr
+
+    d_input = alloc()
+    d_rsi = alloc()
+    calls = [
+        (ct_sma_device, alloc(), 20),
+        (ct_ema_device, alloc(), 12),
+        (ct_ema_device, alloc(), 26),
+        (ct_rsi_device, d_rsi, 14),
+        (ct_momentum_device, alloc(), 10),
+        (ct_roc_device, alloc(), 10),
+        (ct_stddev_device, alloc(), 20),
+    ]
+    downloads = [d_rsi] if download == "rsi" else [out for _, out, _ in calls]
+    host_outs = [np.zeros(size, dtype=np.float32) for _ in downloads]
     close_ptr = closes32.ctypes.data_as(ctypes.c_void_p)
-    host_out = np.zeros(size, dtype=np.float32)
-    
+
     times = []
     for _ in range(iterations):
         start = time.perf_counter()
-        
-        # Upload data once
-        cudaMemcpy(d_input, close_ptr, buf_size, cudaMemcpyHostToDevice)
-        
-        # All computations on GPU - no intermediate transfers!
-        ct_sma_device(ctypes.cast(d_input, ctypes.POINTER(ctypes.c_float)),
-                      ctypes.cast(d_sma, ctypes.POINTER(ctypes.c_float)), size, 20, None)
-        ct_ema_device(ctypes.cast(d_input, ctypes.POINTER(ctypes.c_float)),
-                      ctypes.cast(d_ema12, ctypes.POINTER(ctypes.c_float)), size, 12, None)
-        ct_ema_device(ctypes.cast(d_input, ctypes.POINTER(ctypes.c_float)),
-                      ctypes.cast(d_ema26, ctypes.POINTER(ctypes.c_float)), size, 26, None)
-        ct_rsi_device(ctypes.cast(d_input, ctypes.POINTER(ctypes.c_float)),
-                      ctypes.cast(d_rsi, ctypes.POINTER(ctypes.c_float)), size, 14, None)
-        ct_momentum_device(ctypes.cast(d_input, ctypes.POINTER(ctypes.c_float)),
-                           ctypes.cast(d_mom, ctypes.POINTER(ctypes.c_float)), size, 10, None)
-        ct_roc_device(ctypes.cast(d_input, ctypes.POINTER(ctypes.c_float)),
-                      ctypes.cast(d_roc, ctypes.POINTER(ctypes.c_float)), size, 10, None)
-        ct_stddev_device(ctypes.cast(d_input, ctypes.POINTER(ctypes.c_float)),
-                         ctypes.cast(d_std, ctypes.POINTER(ctypes.c_float)), size, 20, None)
-        
-        # Download only what we need (just RSI for verification)
-        cudaMemcpy(host_out.ctypes.data_as(ctypes.c_void_p), d_rsi, buf_size, cudaMemcpyDeviceToHost)
-        
-        # Sync
-        cudaDeviceSynchronize()
-        
+
+        check(cudaMemcpy(d_input, close_ptr, buf_size, cudaMemcpyHostToDevice), "upload")
+        for fn, out, period in calls:
+            check(fn(ctypes.cast(d_input, float_ptr), ctypes.cast(out, float_ptr), size, period, None),
+                  fn.__name__)
+        for host, device in zip(host_outs, downloads):
+            check(cudaMemcpy(host.ctypes.data_as(ctypes.c_void_p), device, buf_size,
+                             cudaMemcpyDeviceToHost), "download")
+        check(cudaDeviceSynchronize(), "cudaDeviceSynchronize")
+
         times.append((time.perf_counter() - start) * 1000)
-    
-    # Free device memory
-    cudaFree(d_input)
-    cudaFree(d_sma)
-    cudaFree(d_ema12)
-    cudaFree(d_ema26)
-    cudaFree(d_rsi)
-    cudaFree(d_mom)
-    cudaFree(d_roc)
-    cudaFree(d_std)
-    
+
+    for ptr in [d_input] + [out for _, out, _ in calls]:
+        check(cudaFree(ptr), "cudaFree")
+
     return np.median(times)
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--download", choices=("all", "rsi"), default="all",
+                        help="device outputs brought back to the CPU; 'all' is the comparison with Host and TA-Lib")
+    parser.add_argument("--sizes", type=int, nargs="+", default=[100000, 250000, 500000, 1000000, 2000000])
+    args = parser.parse_args()
+    downloads = 7 if args.download == "all" else 1
+
     print_header("Device API Benchmark: tacuda Device vs Host vs TA-Lib")
     print()
     print("Testing 7 indicators: SMA(20), EMA(12), EMA(26), RSI(14), MOM(10), ROC(10), STDDEV(20)")
@@ -306,10 +306,10 @@ def main():
     print("Approaches:")
     print("  1. TA-Lib:        CPU-based, highly optimized C code")
     print("  2. tacuda Host:   Each ct_*() call does host->device->host transfer")
-    print("  3. tacuda Device: Upload once -> compute all -> download results")
+    print(f"  3. tacuda Device: Upload once -> compute all -> download {downloads} of 7 outputs")
     print()
     
-    sizes = [100000, 250000, 500000, 1000000, 2000000]
+    sizes = args.sizes
     
     print(f"{'Size':>12} | {'TA-Lib':>12} | {'Host API':>12} | {'Device API':>12} | {'Device/Host':>12} | {'Device/TA-Lib':>14}")
     print("-" * 95)
@@ -322,7 +322,7 @@ def main():
         
         talib_time = benchmark_talib(closes64)
         host_time = benchmark_host_api(closes32)
-        device_time = benchmark_device_api(closes32)
+        device_time = benchmark_device_api(closes32, download=args.download)
         
         if device_time > 0:
             speedup_vs_host = host_time / device_time
@@ -363,16 +363,16 @@ def main():
     print("=" * 95)
     print(f"{'ANALYSIS':^95}")
     print("=" * 95)
-    print("""
+    transfers = 1 + downloads
+    print(f"""
 Key findings:
 
-1. Device API eliminates 7 host->device + 7 device->host transfers per iteration
-   - Host API: 14 transfers per call batch
-   - Device API: 1 upload + 1 download = 2 transfers
+1. Transfers per iteration
+   - Host API: 7 uploads + 7 downloads = 14
+   - Device API: 1 upload + {downloads} download(s) = {transfers}
 
-2. Memory bandwidth savings:
-   - For 1M floats: 14 * 4MB = 56MB vs 2 * 4MB = 8MB per iteration
-   - That's 7x less PCIe bandwidth usage!
+2. Memory bandwidth:
+   - For 1M floats: 14 * 4MB = 56MB vs {transfers} * 4MB = {transfers * 4}MB per iteration
 
 3. GPU kernel launch overhead is amortized:
    - Device pointers are already valid, no allocation needed

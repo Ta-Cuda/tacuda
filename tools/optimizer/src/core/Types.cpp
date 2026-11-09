@@ -6,6 +6,7 @@
 #include "core/Types.h"
 
 #include <cmath>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 
@@ -154,7 +155,16 @@ double ParamSet::get(const std::string& name) const {
 }
 
 int ParamSet::get_int(const std::string& name) const {
-  return static_cast<int>(std::llround(get(name)));
+  const double value = get(name);
+  if (!std::isfinite(value)) {
+    throw std::invalid_argument("ParamSet: parameter '" + name + "' must be finite");
+  }
+  const double rounded = std::round(value);
+  if (rounded < static_cast<double>(std::numeric_limits<int>::min()) ||
+      rounded > static_cast<double>(std::numeric_limits<int>::max())) {
+    throw std::out_of_range("ParamSet: parameter '" + name + "' is outside int range");
+  }
+  return static_cast<int>(rounded);
 }
 
 bool ParamSet::has(const std::string& name) const {

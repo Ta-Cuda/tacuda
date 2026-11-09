@@ -167,3 +167,16 @@ TEST(GridSearch, FitnessOrdersResults) {
     EXPECT_DOUBLE_EQ(r.fitness, r.metrics.netProfit);
   }
 }
+
+TEST(GridSearch, NonFiniteFitnessIsAnErrorNotARankedResult) {
+  Series bars = generate_synthetic(600, 5);
+  TestBackend backend(bars);
+  IndicatorCache cache(bars, backend);
+  auto s = make_strategy("ma_cross");
+  auto variants = ma_cross_variants(*s, "fast=5", "slow=20");
+  auto fitness = FitnessExpr::parse("1e308*1e308", fitness_variable_names());
+  auto results = run_grid(bars, *s, variants, cache, quiet_config(), fitness);
+  ASSERT_EQ(results.size(), 1u);
+  EXPECT_FALSE(results[0].valid);
+  EXPECT_NE(results[0].error.find("non-finite"), std::string::npos) << results[0].error;
+}

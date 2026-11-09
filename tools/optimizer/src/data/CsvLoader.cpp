@@ -8,9 +8,9 @@
 #include <algorithm>
 #include <cctype>
 #include <cmath>
-#include <cstdio>
 #include <cstdlib>
 #include <fstream>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 
@@ -64,6 +64,76 @@ std::int64_t days_from_civil(int y, int m, int d) {
   return static_cast<std::int64_t>(era) * 146097 + static_cast<std::int64_t>(doe) - 719468;
 }
 
+bool read_int(const std::string& s, std::size_t& i, int maxDigits, int& out) {
+  int digits = 0, value = 0;
+  while (i < s.size() && digits < maxDigits && std::isdigit(static_cast<unsigned char>(s[i]))) {
+    value = value * 10 + (s[i] - '0');
+    ++i;
+    ++digits;
+  }
+  if (digits == 0) return false;
+  out = value;
+  return true;
+}
+
+int days_in_month(int year, int month) {
+  static const int days[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+  const bool leap = (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
+  return month == 2 && leap ? 29 : days[month - 1];
+}
+
+// Optional UTC designator: Z, +HH, +HH:MM or +HHMM (seconds east of UTC).
+bool parse_utc_offset(const std::string& s, std::size_t& i, int& seconds) {
+  seconds = 0;
+  if (i == s.size()) return true;
+  if (s[i] == ' ' && ++i == s.size()) return false;
+  if (s[i] == 'Z' || s[i] == 'z') return ++i == s.size();
+  if (s[i] != '+' && s[i] != '-') return false;
+  const int sign = s[i] == '-' ? -1 : 1;
+  ++i;
+  int hours = 0, minutes = 0;
+  if (!read_int(s, i, 2, hours)) return false;
+  if (i < s.size()) {
+    if (s[i] == ':') ++i;
+    if (!read_int(s, i, 2, minutes)) return false;
+  }
+  if (i != s.size() || minutes > 59 || hours * 60 + minutes > 14 * 60) return false;
+  seconds = sign * (hours * 3600 + minutes * 60);
+  return true;
+}
+
+// YYYY-MM-DD[( |T)HH[:MM[:SS[.fff]]]][offset]. A value without an offset is
+// taken as UTC. Fractions are floored; a trailing token is an error so that an
+// unsupported spelling cannot silently change the instant.
+bool parse_iso8601(const std::string& s, std::int64_t& out) {
+  std::size_t i = 0;
+  int y = 0, mo = 0, d = 0, h = 0, mi = 0, sec = 0, offset = 0;
+  if (!read_int(s, i, 4, y) || i >= s.size() || s[i++] != '-') return false;
+  if (!read_int(s, i, 2, mo) || i >= s.size() || s[i++] != '-') return false;
+  if (!read_int(s, i, 2, d)) return false;
+  if (mo < 1 || mo > 12 || d < 1 || d > days_in_month(y, mo)) return false;
+  if (i < s.size() && (s[i] == ' ' || s[i] == 'T' || s[i] == 't')) {
+    ++i;
+    if (!read_int(s, i, 2, h) || h > 23) return false;
+    if (i < s.size() && s[i] == ':') {
+      ++i;
+      if (!read_int(s, i, 2, mi) || mi > 59) return false;
+      if (i < s.size() && s[i] == ':') {
+        ++i;
+        if (!read_int(s, i, 2, sec) || sec > 59) return false;
+        if (i < s.size() && s[i] == '.') {
+          const std::size_t start = ++i;
+          while (i < s.size() && std::isdigit(static_cast<unsigned char>(s[i]))) ++i;
+          if (i == start) return false;
+        }
+      }
+    }
+  }
+  if (!parse_utc_offset(s, i, offset)) return false;
+  out = days_from_civil(y, mo, d) * 86400ll + h * 3600ll + mi * 60ll + sec - offset;
+  return true;
+}
+
 // Parses timestamps: unix seconds, unix millis, ISO date / datetime.
 bool parse_timestamp(const std::string& raw, std::int64_t& out) {
   if (raw.empty()) return false;
@@ -83,12 +153,7 @@ bool parse_timestamp(const std::string& raw, std::int64_t& out) {
     out = static_cast<std::int64_t>(v);
     return true;
   }
-  int y = 0, mo = 0, d = 0, h = 0, mi = 0, s = 0;
-  int matched = std::sscanf(raw.c_str(), "%d-%d-%d%*1[ T]%d:%d:%d", &y, &mo, &d, &h, &mi, &s);
-  if (matched < 3) return false;
-  if (mo < 1 || mo > 12 || d < 1 || d > 31) return false;
-  out = days_from_civil(y, mo, d) * 86400ll + h * 3600ll + mi * 60ll + s;
-  return true;
+  return parse_iso8601(raw, out);
 }
 
 struct ColumnMap {
@@ -179,11 +244,17 @@ Series load_csv(const std::string& path) {
 
     auto cell_value = [&](int idx, const char* what) {
       double v;
-      if (!parse_double(cells[static_cast<std::size_t>(idx)], v) || !std::isfinite(v)) {
+      // Columns are stored as float32, so a finite double beyond its range
+      // would otherwise become Inf only after this check.
+      if (!parse_double(cells[static_cast<std::size_t>(idx)], v) || !std::isfinite(v) ||
+          std::fabs(v) > static_cast<double>(std::numeric_limits<float>::max())) {
         throw std::runtime_error(path + ":" + std::to_string(lineNo) + ": bad " +
                                  what + " value '" + cells[static_cast<std::size_t>(idx)] + "'");
       }
       return v;
+    };
+    auto fail = [&](const std::string& why) {
+      throw std::runtime_error(path + ":" + std::to_string(lineNo) + ": " + why);
     };
 
     double o = cell_value(map.open, "open");
@@ -193,13 +264,22 @@ Series load_csv(const std::string& path) {
     if (h < l) {
       throw std::runtime_error(path + ":" + std::to_string(lineNo) + ": high < low");
     }
+    // Bar geometry is a universal invariant; the sign of a price is not, since
+    // spreads and some energy contracts legitimately trade below zero.
+    if (o < l || o > h) fail("open outside [low, high]");
+    if (c < l || c > h) fail("close outside [low, high]");
     double v = map.volume >= 0 ? cell_value(map.volume, "volume") : 0.0;
+    if (v < 0.0) fail("negative volume");
 
     std::int64_t ts = 0;
     if (map.ts >= 0) {
       if (!parse_timestamp(cells[static_cast<std::size_t>(map.ts)], ts)) {
         throw std::runtime_error(path + ":" + std::to_string(lineNo) + ": bad timestamp '" +
                                  cells[static_cast<std::size_t>(map.ts)] + "'");
+      }
+      if (!series.ts.empty() && ts <= series.ts.back()) {
+        fail("timestamp '" + cells[static_cast<std::size_t>(map.ts)] +
+             "' is not after the previous bar (rows must be strictly increasing in time)");
       }
     }
 

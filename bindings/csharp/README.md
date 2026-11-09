@@ -156,8 +156,10 @@ Apache License 2.0 — see [LICENSE](../../LICENSE).
 
 ## Streaming and version pairing
 
-The 0.8.0 bindings add incremental single-series and portfolio updates for
-10 indicator families. Use a matching 0.8.0 native library; an older binary
-does not export the streaming functions. See the
+Streaming was added in 0.8.0 for incremental single-series and portfolio
+updates across 10 indicator families. Pair bindings with the native library
+from the same release; 0.8.1 includes precision, input-validation and stream
+correctness fixes. A native older than 0.8.0 does not export the streaming
+functions. See the
 [Streaming API guide](https://github.com/Ta-Cuda/tacuda/blob/main/docs/STREAMING_API.md).
 The 161-function compatibility baseline is native TA-Lib 0.7.1, not TA-Lib 0.8.1.

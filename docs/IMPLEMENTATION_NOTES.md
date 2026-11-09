@@ -59,6 +59,32 @@ see [OPERATIONS.md](OPERATIONS.md) for the dated evidence.
 - `KAMA`'s efficiency ratio is forced to 1 when the volatility sum is zero
   or does not exceed the signed direction, exactly like TA-Lib.
 
+## Non-finite inputs in window indicators
+
+A NaN or Inf affects exactly the windows containing it; the output recovers
+once the value has left the window. This holds for SMA, WMA and BBANDS on every
+internal algorithm and in streaming, so choosing a period never changes what a
+gap means.
+
+TA-Lib does not define this case: its running totals keep a NaN forever when
+called directly. We chose window semantics because the short-period kernels and
+streaming already behaved that way, and because device pipelines routinely feed
+one indicator's warm-up NaNs into another.
+
+Prefix-sum paths stay O(N) on clean data at the cost of one branch per element.
+A window whose prefix difference is not finite is recomputed directly from the
+input, which is O(period) for those windows only. A series with leading NaNs
+pays that for every window after them; the alternative was a second scan on all
+data, including the clean majority.
+
+`SUM`, `STDDEV`, `VAR`-style statistics built only on prefix sums, `CORREL` and
+`BETA` have a single code path and still propagate a NaN to the end of the
+series. They do not switch behaviour with the period and have no streaming
+counterpart; extending the policy to them is open work.
+
+Recursive indicators (EMA, RSI, ATR, MACD) are not window indicators: a NaN
+poisons the recursion permanently in bulk and in streaming alike.
+
 ## Tie-breaking in rolling extrema
 
 - `MAXINDEX`/`MININDEX`/`MINMAXINDEX` reproduce TA-Lib's *stateful* tie
@@ -75,6 +101,11 @@ see [OPERATIONS.md](OPERATIONS.md) for the dated evidence.
 - Storage precision is float32 by default (`_ex` variants offer
   float16/float64). Comparisons against TA-Lib's double math use a mixed
   absolute/relative criterion: `|a-b| / max(1, |a|, |b|) <= tol`.
+- A precision path must not restate an indicator's semantics. RSI runs `RSIT<T>`
+  and float-compute MACD runs MACDEXT for that reason. MACDEXT is float-only, so
+  double-compute MACD is a separate kernel (EMA only) pinned to the same seeds
+  by `tests/cpp/test_precision_ex.cpp`, which compares on random walks because a
+  linear ramp hides a misplaced EMA seed.
 - Windowed statistics use double-precision prefix sums to minimize
   accumulation error; CCI accumulates its window in double; MAMA and the
   MAVP per-period EMA/KAMA state machines run fully in double.

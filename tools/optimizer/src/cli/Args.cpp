@@ -5,8 +5,11 @@
 /* ======================================================================== */
 #include "cli/Args.h"
 
+#include <cmath>
 #include <cstdlib>
 #include <stdexcept>
+
+#include "engine/Simulator.h"
 
 namespace topt {
 
@@ -15,7 +18,7 @@ namespace {
 double to_double(const std::string& v, const std::string& flag) {
   char* end = nullptr;
   double d = std::strtod(v.c_str(), &end);
-  if (!end || *end != '\0' || v.empty()) {
+  if (!end || *end != '\0' || v.empty() || !std::isfinite(d)) {
     throw std::invalid_argument("bad numeric value '" + v + "' for " + flag);
   }
   return d;
@@ -302,6 +305,7 @@ CliOptions parse_cli(int argc, const char* const* argv) {
   if (opt.mcMode != "permute" && opt.mcMode != "resample") {
     throw std::invalid_argument("--mc-mode must be permute or resample");
   }
+  validate_exec_config(opt.exec);
   return opt;
 }
 

@@ -190,3 +190,22 @@ TEST(Args, WfoDefaultsAndValidation) {
                       "ma_cross"}),
                std::invalid_argument);
 }
+
+TEST(Args, RejectsUnusableExecutionValues) {
+  const char* flags[] = {"--qty", "--capital", "--commission-bps", "--commission-fixed",
+                         "--slippage-ticks", "--tick-size"};
+  for (const char* flag : flags) {
+    for (const char* bad : {"nan", "inf", "-inf"}) {
+      EXPECT_THROW(parse({"tacuda-opt", "backtest", "--synthetic", "100", "--strategy",
+                          "ma_cross", flag, bad}),
+                   std::invalid_argument)
+          << flag << " " << bad;
+    }
+  }
+  EXPECT_THROW(parse({"tacuda-opt", "backtest", "--synthetic", "100", "--strategy",
+                      "ma_cross", "--qty", "0"}),
+               std::invalid_argument);
+  EXPECT_THROW(parse({"tacuda-opt", "backtest", "--synthetic", "100", "--strategy",
+                      "ma_cross", "--bars-per-year", "0"}),
+               std::invalid_argument);
+}

@@ -62,6 +62,10 @@ struct SimRange {
 // formed on the last bar before the segment executes on its first bar).
 // equity covers [begin, end) (local indices); Trade bar numbers stay
 // absolute series indices.
+// Throws std::invalid_argument unless every scalar can produce a meaningful
+// result: all finite, qty positive, annualization positive.
+void validate_exec_config(const ExecConfig& cfg);
+
 SimResult simulate(const Series& bars, const Signal* desired, const ExecConfig& cfg,
                    SimRange range = {});
 

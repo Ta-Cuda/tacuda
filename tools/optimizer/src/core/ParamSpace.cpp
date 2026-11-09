@@ -16,7 +16,7 @@ namespace {
 double parse_number(const std::string& text, const std::string& context) {
   char* end = nullptr;
   double v = std::strtod(text.c_str(), &end);
-  if (!end || *end != '\0' || text.empty()) {
+  if (!end || *end != '\0' || text.empty() || !std::isfinite(v)) {
     throw std::invalid_argument("bad number '" + text + "' in " + context);
   }
   return v;
@@ -53,8 +53,15 @@ GridAxis parse_grid_spec(const std::string& spec) {
       throw std::invalid_argument("grid upper bound below lower bound in '" + spec + "'");
     }
     // Half-step tolerance so from..to:step includes `to` despite fp error.
-    for (double v = from; v <= to + step * 0.5; v += step) {
+    for (double v = from; v <= to + step * 0.5;) {
       axis.values.push_back(v);
+      if (v >= to) break;
+      const double next = v + step;
+      if (next <= v) {
+        throw std::invalid_argument("grid step is too small to advance in '" + spec + "'");
+      }
+      if (!std::isfinite(next)) break;
+      v = next;
     }
   } else {
     // Comma-separated list of explicit values.

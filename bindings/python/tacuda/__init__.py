@@ -16,6 +16,7 @@ from __future__ import annotations
 import ctypes
 import ctypes.util
 import inspect
+import operator
 import os
 import sys
 from typing import Any, Dict, List, Tuple
@@ -132,7 +133,18 @@ _ENUM_TO_NP_DTYPE = {
 }
 
 
-def _normalize_dtype(dtype: str | np.dtype | type) -> int:
+_C_INT_MAX = 2**31 - 1
+
+
+def _normalize_dtype(dtype: str | np.dtype | type | int) -> int:
+    """Resolve a CT_DTYPE_* enum, name, NumPy dtype or scalar type to the enum."""
+    if isinstance(dtype, (bool, np.bool_)):
+        raise TypeError("dtype must be a name, NumPy dtype or CT_DTYPE_* value, not bool")
+    if isinstance(dtype, (int, np.integer)):
+        value = int(dtype)
+        if value not in _ENUM_TO_NP_DTYPE:
+            raise ValueError(f"Unsupported dtype enum {value}. Use CT_DTYPE_F16/F32/F64.")
+        return value
     if isinstance(dtype, np.dtype):
         dtype = str(dtype)
     elif isinstance(dtype, type):
@@ -163,6 +175,43 @@ def _as_float_array(arr: Any) -> Tuple[np.ndarray, ctypes.POINTER(ctypes.c_float
     if arr.dtype != np.float32 or not arr.flags.c_contiguous:
         arr = np.ascontiguousarray(arr, dtype=np.float32)
     return arr, arr.ctypes.data_as(ctypes.POINTER(ctypes.c_float))
+
+
+def _require_series(arr: np.ndarray, func: str, param: str) -> np.ndarray:
+    """Reject anything but a 1D series before it can reach a single-series call.
+
+    The native side only sees a pointer and a length, so a matrix would be read
+    as one concatenated series that crosses symbol boundaries.
+    """
+    if arr.ndim != 1:
+        raise ValueError(
+            f"{func}: {param} must be a 1D array, got shape {arr.shape}; "
+            "use the *_batch functions for (numSeries, seriesLen) matrices"
+        )
+    return arr
+
+
+def _as_series(arr: Any, dtype_enum: int, func: str, param: str = "input") -> np.ndarray:
+    return _require_series(_as_typed_array(arr, dtype_enum), func, param)
+
+
+def _checked_count(value: Any, name: str, limit: int | None = None) -> int:
+    """Validate an element count bound for a C ``int`` parameter.
+
+    ``limit`` is the capacity of the host array the count applies to; the native
+    side receives a bare pointer and could not detect an over-read itself.
+    """
+    if isinstance(value, (bool, np.bool_)):
+        raise TypeError(f"{name} must be an integer, not bool")
+    try:
+        count = operator.index(value)
+    except TypeError:
+        raise TypeError(f"{name} must be an integer, got {type(value).__name__}") from None
+    if count < 0 or count > _C_INT_MAX:
+        raise ValueError(f"{name}={count} is outside the range of a C int count")
+    if limit is not None and count > limit:
+        raise ValueError(f"{name}={count} exceeds the host array size {limit}")
+    return count
 
 
 _C_FLOAT_PTR = ctypes.POINTER(ctypes.c_float)
@@ -323,10 +372,18 @@ def _bind_function(name: str, spec: _generated.FunctionSpec) -> None:
             inspect.Parameter("size", inspect.Parameter.POSITIONAL_OR_KEYWORD)
         )
 
-    for scalar in spec.scalars:
+    single_series = bool(spec.size_param) and has_host_inputs
+
+    for scalar_index, scalar in enumerate(spec.scalars):
         default = inspect._empty
         if scalar.ctype == "cudaStream_t" and scalar.default is not None:
             default = None
+        elif (
+            scalar.name == "count"
+            and has_host_inputs
+            and all(s.ctype == "cudaStream_t" for s in spec.scalars[scalar_index + 1:])
+        ):
+            default = None  # derived from the host array
         parameters.append(
             inspect.Parameter(
                 scalar.name,
@@ -363,8 +420,15 @@ def _bind_function(name: str, spec: _generated.FunctionSpec) -> None:
         storage_enum = None
         if storage_aware:
             sval = bound.arguments.get("storageType", CT_DTYPE_F32)
-            storage_enum = int(sval) if isinstance(sval, (int, np.integer)) else _dtype_to_enum(sval)
+            storage_enum = _normalize_dtype(sval)
             bound.arguments["storageType"] = storage_enum
+            if "computeType" in bound.arguments:
+                compute_enum = _normalize_dtype(bound.arguments["computeType"])
+                bound.arguments["computeType"] = compute_enum
+                if storage_enum == CT_DTYPE_F16 and compute_enum != CT_DTYPE_F32:
+                    raise ValueError(
+                        f"{name}: float16 storage is only computed in float32"
+                    )
 
         c_args: List[Any] = []
         c_args_inputs: List[Any] = []
@@ -383,10 +447,14 @@ def _bind_function(name: str, spec: _generated.FunctionSpec) -> None:
                 c_args_inputs.append(_prepare_device_ptr(val))
             elif storage_enum is not None:
                 arr_np = _as_typed_array(val, storage_enum)
+                if single_series:
+                    _require_series(arr_np, name, name_)
                 np_inputs.append(arr_np)
                 c_args_inputs.append(arr_np.ctypes.data_as(ctypes.c_void_p))
             else:
                 arr_np, ptr = _as_float_array(val)
+                if single_series:
+                    _require_series(arr_np, name, name_)
                 np_inputs.append(arr_np)
                 c_args_inputs.append(ptr)
 
@@ -398,9 +466,18 @@ def _bind_function(name: str, spec: _generated.FunctionSpec) -> None:
                 if arr.size != size:
                     raise ValueError("Input arrays must have the same size")
         elif "size" in bound.arguments:
-             size = bound.arguments["size"]
+            size = _checked_count(bound.arguments["size"], "size")
+            bound.arguments["size"] = size
         elif "count" in bound.arguments:
-             size = bound.arguments["count"]
+            size = _checked_count(bound.arguments["count"], "count")
+            bound.arguments["count"] = size
+
+        # A host source is authoritative: count may shorten it, never extend it.
+        if np_inputs and "count" in bound.arguments:
+            requested = bound.arguments["count"]
+            bound.arguments["count"] = (
+                size if requested is None else _checked_count(requested, "count", size)
+            )
 
         # Process Outputs
         outputs_to_return: List[Any] = [] # Only host outputs are returned
@@ -444,31 +521,9 @@ def _bind_function(name: str, spec: _generated.FunctionSpec) -> None:
 
         # Size parameter
         if spec.size_param:
-             # If we have size from numpy arrays, use it.
-             # If we rely on manual size passing (e.g. for device-only calls), we need to find where 'size' comes from.
-             # But wait, 'size' is EXCLUDED from python signature in 'render_python' logic for standard functions.
-             # "FunctionSpec.scalar_params" excludes size.
-             
-             # Issue: For device-only functions, we MUST pass size manually.
-             # My generate_bindings script excluded 'size' from scalars.
-             # This is a problem for Device API functions where size cannot be inferred from numpy arrays.
-             
-             # Quick fix: If size is 0 (no numpy inputs), try to find 'size' in kwargs? No, it's not in signature.
-             
-             # We will add a hack: if we have no host inputs, we implicitly assume 'size' is passed as argument? 
-             # But wrapper signature doesn't have it.
-             
-             # Real fix: generate_bindings should include 'size' in scalars if it cannot be inferred?
-             # Or we assume for now Device API is mixed with Host API or manual calls use ctypes directly.
-             
-             # Let's assume if np_inputs is empty, we check if 'size' is in bound args (it won't be).
-             # This is a limitation. I will assume size is available or 0.
-             # For pure device functions, the user currently CANNOT pass size via this wrapper if it was stripped.
-             
-             # However, 'ct_device_alloc' takes 'count' (renamed to size?). No, 'count'.
-             # 'ct_sma_d' takes 'size'.
-             
-             c_args.append(ctypes.c_int(size))
+            # Inferred from the host arrays, or the explicit ``size`` argument
+            # that device-only functions add to their signature.
+            c_args.append(ctypes.c_int(size))
 
         # Scalars
         for scalar in spec.scalars:
@@ -549,7 +604,7 @@ def sma(input: Any, period: int, stream: Any = None, dtype: str = "float32") -> 
     storage = _normalize_dtype(dtype)
     if storage == CT_DTYPE_F32:
         return _sma_f32(input, period, stream)
-    x = _as_typed_array(input, storage)
+    x = _as_series(input, storage, "sma")
     out = np.zeros_like(x)
     compute = _compute_dtype_for_storage(storage)
     rc = _lib.ct_sma_ex(
@@ -565,7 +620,7 @@ def ema(input: Any, period: int, stream: Any = None, dtype: str = "float32") -> 
     storage = _normalize_dtype(dtype)
     if storage == CT_DTYPE_F32:
         return _ema_f32(input, period, stream)
-    x = _as_typed_array(input, storage)
+    x = _as_series(input, storage, "ema")
     out = np.zeros_like(x)
     compute = _compute_dtype_for_storage(storage)
     rc = _lib.ct_ema_ex(
@@ -581,7 +636,7 @@ def rsi(input: Any, period: int, stream: Any = None, dtype: str = "float32") -> 
     storage = _normalize_dtype(dtype)
     if storage == CT_DTYPE_F32:
         return _rsi_f32(input, period, stream)
-    x = _as_typed_array(input, storage)
+    x = _as_series(input, storage, "rsi")
     out = np.zeros_like(x)
     compute = _compute_dtype_for_storage(storage)
     rc = _lib.ct_rsi_ex(
@@ -605,7 +660,7 @@ def macd(
     storage = _normalize_dtype(dtype)
     if storage == CT_DTYPE_F32:
         return _macd_f32(input, fastPeriod, slowPeriod, signalPeriod, type, stream)
-    x = _as_typed_array(input, storage)
+    x = _as_series(input, storage, "macd")
     m = np.zeros_like(x)
     s = np.zeros_like(x)
     h = np.zeros_like(x)
@@ -640,9 +695,9 @@ def atr(
     storage = _normalize_dtype(dtype)
     if storage == CT_DTYPE_F32:
         return _atr_f32(high, low, close, period, initial, stream)
-    h = _as_typed_array(high, storage)
-    l = _as_typed_array(low, storage)
-    c = _as_typed_array(close, storage)
+    h = _as_series(high, storage, "atr", "high")
+    l = _as_series(low, storage, "atr", "low")
+    c = _as_series(close, storage, "atr", "close")
     if h.size != l.size or h.size != c.size:
         raise ValueError("high/low/close arrays must have same size")
     out = np.zeros_like(h)
@@ -664,7 +719,7 @@ def bbands(
     storage = _normalize_dtype(dtype)
     if storage == CT_DTYPE_F32:
         return _bbands_f32(input, period, upperMul, lowerMul, stream)
-    x = _as_typed_array(input, storage)
+    x = _as_series(input, storage, "bbands")
     up = np.zeros_like(x)
     mid = np.zeros_like(x)
     lo = np.zeros_like(x)

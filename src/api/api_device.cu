@@ -12,6 +12,7 @@
 
 #include <cuda_runtime.h>
 #include <cuda_fp16.h>
+#include <algorithm>
 #include <limits>
 #include <cmath>
 #include <type_traits>
@@ -214,42 +215,6 @@ __global__ void emaKernelCompute(const T* input, T* output, int size, int period
 }
 
 template <typename T>
-__global__ void rsiKernelCompute(const T* input, T* output, int size, int period) {
-    if (threadIdx.x != 0 || blockIdx.x != 0) return;
-    const T qnan = std::numeric_limits<T>::quiet_NaN();
-    if (size <= 0 || period <= 0) return;
-    for (int i = 0; i < size; ++i) output[i] = qnan;
-    if (size <= period) return;
-
-    T gain = static_cast<T>(0);
-    T loss = static_cast<T>(0);
-    for (int i = 1; i <= period; ++i) {
-        T d = input[i] - input[i - 1];
-        if (d > static_cast<T>(0)) gain += d;
-        else loss -= d;
-    }
-    T avgGain = gain / static_cast<T>(period);
-    T avgLoss = loss / static_cast<T>(period);
-    T rs = (avgLoss == static_cast<T>(0)) ? static_cast<T>(0) : (avgGain / avgLoss);
-    output[period] = (avgLoss == static_cast<T>(0))
-                     ? static_cast<T>(100)
-                     : static_cast<T>(100) - static_cast<T>(100) / (static_cast<T>(1) + rs);
-
-    for (int i = period + 1; i < size; ++i) {
-        T d = input[i] - input[i - 1];
-        T g = d > static_cast<T>(0) ? d : static_cast<T>(0);
-        T l = d < static_cast<T>(0) ? -d : static_cast<T>(0);
-        avgGain = (avgGain * static_cast<T>(period - 1) + g) / static_cast<T>(period);
-        avgLoss = (avgLoss * static_cast<T>(period - 1) + l) / static_cast<T>(period);
-        if (avgLoss == static_cast<T>(0)) output[i] = static_cast<T>(100);
-        else {
-            rs = avgGain / avgLoss;
-            output[i] = static_cast<T>(100) - static_cast<T>(100) / (static_cast<T>(1) + rs);
-        }
-    }
-}
-
-template <typename T>
 __global__ void atrKernelCompute(const T* high, const T* low, const T* close,
                                  T* output, int size, int period) {
     if (threadIdx.x != 0 || blockIdx.x != 0) return;
@@ -306,57 +271,50 @@ __global__ void bbandsKernelCompute(const T* input, T* upper, T* middle, T* lowe
     lower[idx] = mean - nbDevDn * stdev;
 }
 
+// All-EMA MACD for a compute type MACDEXT cannot serve (it is float-only).
+// Mirrors MACDEXT and the streaming state: both EMA seeds sit at macdLookback
+// (the fast seed is the fast-length SMA ending there, not one at fastPeriod-1)
+// and all three outputs stay NaN until the signal lookback. The caller has
+// already normalized the periods, so the seed windows are inside the buffer.
 template <typename T>
-__global__ void macdKernelCompute(const T* input, T* macd, T* signal, T* hist,
-                                  T* fastEma, T* slowEma, int size,
+__global__ void macdKernelCompute(const T* input, T* macd, T* signal, T* hist, int size,
                                   int fastPeriod, int slowPeriod, int signalPeriod) {
     if (threadIdx.x != 0 || blockIdx.x != 0) return;
     const T qnan = std::numeric_limits<T>::quiet_NaN();
     for (int i = 0; i < size; ++i) {
-        macd[i] = signal[i] = hist[i] = fastEma[i] = slowEma[i] = qnan;
+        macd[i] = signal[i] = hist[i] = qnan;
     }
-    if (size <= slowPeriod || fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0) return;
+    const int macdLookback = slowPeriod - 1;
+    const int signalLookback = macdLookback + signalPeriod - 1;
+    if (signalLookback >= size) return;
 
-    // fast ema
-    T fastSeed = static_cast<T>(0);
-    for (int i = 0; i < fastPeriod; ++i) fastSeed += input[i];
-    fastSeed /= static_cast<T>(fastPeriod);
-    fastEma[fastPeriod - 1] = fastSeed;
-    T fastAlpha = static_cast<T>(2.0) / static_cast<T>(fastPeriod + 1);
-    T prevFast = fastSeed;
-    for (int i = fastPeriod; i < size; ++i) {
-        prevFast = prevFast + fastAlpha * (input[i] - prevFast);
-        fastEma[i] = prevFast;
-    }
+    T fast = static_cast<T>(0);
+    for (int i = macdLookback - fastPeriod + 1; i <= macdLookback; ++i) fast += input[i];
+    fast /= static_cast<T>(fastPeriod);
+    T slow = static_cast<T>(0);
+    for (int i = 0; i <= macdLookback; ++i) slow += input[i];
+    slow /= static_cast<T>(slowPeriod);
 
-    // slow ema
-    T slowSeed = static_cast<T>(0);
-    for (int i = 0; i < slowPeriod; ++i) slowSeed += input[i];
-    slowSeed /= static_cast<T>(slowPeriod);
-    slowEma[slowPeriod - 1] = slowSeed;
-    T slowAlpha = static_cast<T>(2.0) / static_cast<T>(slowPeriod + 1);
-    T prevSlow = slowSeed;
-    for (int i = slowPeriod; i < size; ++i) {
-        prevSlow = prevSlow + slowAlpha * (input[i] - prevSlow);
-        slowEma[i] = prevSlow;
-        if (!isnan(static_cast<double>(fastEma[i]))) {
-            macd[i] = fastEma[i] - slowEma[i];
+    const T fastAlpha = static_cast<T>(2.0) / static_cast<T>(fastPeriod + 1);
+    const T slowAlpha = static_cast<T>(2.0) / static_cast<T>(slowPeriod + 1);
+    const T signalAlpha = static_cast<T>(2.0) / static_cast<T>(signalPeriod + 1);
+    T lineSum = static_cast<T>(0);
+    T sig = static_cast<T>(0);
+    for (int i = macdLookback; i < size; ++i) {
+        if (i > macdLookback) {
+            fast += fastAlpha * (input[i] - fast);
+            slow += slowAlpha * (input[i] - slow);
         }
-    }
-
-    int signalStart = slowPeriod - 1 + signalPeriod - 1;
-    if (signalStart >= size) return;
-    T sigSeed = static_cast<T>(0);
-    for (int i = slowPeriod - 1; i <= signalStart; ++i) sigSeed += macd[i];
-    sigSeed /= static_cast<T>(signalPeriod);
-    signal[signalStart] = sigSeed;
-    hist[signalStart] = macd[signalStart] - sigSeed;
-    T sigAlpha = static_cast<T>(2.0) / static_cast<T>(signalPeriod + 1);
-    T prevSig = sigSeed;
-    for (int i = signalStart + 1; i < size; ++i) {
-        prevSig = prevSig + sigAlpha * (macd[i] - prevSig);
-        signal[i] = prevSig;
-        hist[i] = macd[i] - prevSig;
+        const T line = fast - slow;
+        if (i < signalLookback) {
+            lineSum += line;
+            continue;
+        }
+        sig = (i == signalLookback) ? (lineSum + line) / static_cast<T>(signalPeriod)
+                                    : sig + signalAlpha * (line - sig);
+        macd[i] = line;
+        signal[i] = sig;
+        hist[i] = line - sig;
     }
 }
 
@@ -384,6 +342,53 @@ static ctStatus_t run_single_input_compute_path(const void* d_input, void* d_out
                         d_output, storageType, size, stream);
     cleanup();
     return st;
+}
+template <typename ComputeT, typename Launcher>
+static ctStatus_t run_macd_compute_path(const void* d_input, void* d_macd, void* d_signal, void* d_hist,
+                                        int size, ctDataType_t storageType, cudaStream_t stream,
+                                        Launcher&& launcher) {
+    const ctDataType_t computeType =
+        std::is_same<ComputeT, double>::value ? CT_DTYPE_F64 : CT_DTYPE_F32;
+    const size_t bytes = static_cast<size_t>(size) * sizeof(ComputeT);
+    ComputeT* in = nullptr;
+    ComputeT* m = nullptr;
+    ComputeT* s = nullptr;
+    ComputeT* h = nullptr;
+    auto cleanup = [&]() {
+        if (in) cudaFree(in);
+        if (m) cudaFree(m);
+        if (s) cudaFree(s);
+        if (h) cudaFree(h);
+    };
+    if (cudaMalloc(&in, bytes) != cudaSuccess || cudaMalloc(&m, bytes) != cudaSuccess ||
+        cudaMalloc(&s, bytes) != cudaSuccess || cudaMalloc(&h, bytes) != cudaSuccess) {
+        cleanup();
+        return CT_STATUS_ALLOC_FAILED;
+    }
+    ctStatus_t st = launch_convert(d_input, storageType, in, computeType, size, stream);
+    if (st == CT_STATUS_SUCCESS) st = launcher(in, m, s, h);
+    if (st == CT_STATUS_SUCCESS) st = launch_convert(m, computeType, d_macd, storageType, size, stream);
+    if (st == CT_STATUS_SUCCESS) st = launch_convert(s, computeType, d_signal, storageType, size, stream);
+    if (st == CT_STATUS_SUCCESS) st = launch_convert(h, computeType, d_hist, storageType, size, stream);
+    cleanup();
+    return st;
+}
+
+ctStatus_t reject_period(const char* message) {
+    tacuda::detail::set_last_error(message);
+    return CT_STATUS_INVALID_ARGUMENT;
+}
+
+// RSIT holds the semantics the plain float path is tested against (flat window
+// is 0, a NaN poisons the recursion), so the precision path must not restate them.
+template <typename T>
+ctStatus_t launch_rsi(const T* in, T* out, int size, int period, cudaStream_t stream) {
+    try {
+        tacuda::RSIT<T>(period).calculate(in, out, size, stream);
+        return CT_STATUS_SUCCESS;
+    } catch (...) {
+        return classify_exception();
+    }
 }
 } // namespace
 
@@ -531,6 +536,7 @@ ctStatus_t ct_sma_ex_d(const void* d_input, void* d_output, int size, int period
     if (storageType == CT_DTYPE_F32 && computeType == CT_DTYPE_F32) {
         return ct_sma_d(static_cast<const float*>(d_input), static_cast<float*>(d_output), size, period, stream);
     }
+    if (period <= 0) return reject_period("SMA: period must be positive");
     if (computeType == CT_DTYPE_F32) {
         return run_single_input_compute_path<float>(
             d_input, d_output, size, storageType, stream,
@@ -575,6 +581,7 @@ ctStatus_t ct_ema_ex_d(const void* d_input, void* d_output, int size, int period
     if (storageType == CT_DTYPE_F32 && computeType == CT_DTYPE_F32) {
         return ct_ema_d(static_cast<const float*>(d_input), static_cast<float*>(d_output), size, period, stream);
     }
+    if (period <= 0) return reject_period("EMA: period must be positive");
     if (computeType == CT_DTYPE_F32) {
         return run_single_input_compute_path<float>(
             d_input, d_output, size, storageType, stream,
@@ -695,20 +702,15 @@ ctStatus_t ct_rsi_ex_d(const void* d_input, void* d_output, int size, int period
     if (storageType == CT_DTYPE_F32 && computeType == CT_DTYPE_F32) {
         return ct_rsi_d(static_cast<const float*>(d_input), static_cast<float*>(d_output), size, period, stream);
     }
+    if (period <= 0) return reject_period("RSI: period must be positive");
     if (computeType == CT_DTYPE_F32) {
         return run_single_input_compute_path<float>(
             d_input, d_output, size, storageType, stream,
-            [=](const float* in, float* out) {
-                rsiKernelCompute<float><<<1, 1, 0, stream>>>(in, out, size, period);
-                return (cudaGetLastError() == cudaSuccess) ? CT_STATUS_SUCCESS : CT_STATUS_KERNEL_FAILED;
-            });
+            [=](const float* in, float* out) { return launch_rsi(in, out, size, period, stream); });
     }
     return run_single_input_compute_path<double>(
         d_input, d_output, size, storageType, stream,
-        [=](const double* in, double* out) {
-            rsiKernelCompute<double><<<1, 1, 0, stream>>>(in, out, size, period);
-            return (cudaGetLastError() == cudaSuccess) ? CT_STATUS_SUCCESS : CT_STATUS_KERNEL_FAILED;
-        });
+        [=](const double* in, double* out) { return launch_rsi(in, out, size, period, stream); });
 }
 
 ctStatus_t ct_momentum_d(const float* d_input, float* d_output, int size, int period, cudaStream_t stream) {
@@ -817,6 +819,7 @@ ctStatus_t ct_atr_ex_d(const void* d_high, const void* d_low, const void* d_clos
                         static_cast<const float*>(d_close), static_cast<float*>(d_output),
                         size, period, percentile, stream);
     }
+    if (period <= 0) return reject_period("ATR: period must be positive");
     if (computeType == CT_DTYPE_F32) {
         float *h = nullptr, *l = nullptr, *c = nullptr, *o = nullptr;
         if (cudaMalloc(&h, static_cast<size_t>(size) * sizeof(float)) != cudaSuccess ||
@@ -1005,6 +1008,7 @@ ctStatus_t ct_macd_ex_d(const void* d_input, void* d_macd, void* d_signal, void*
         return CT_STATUS_INVALID_ARGUMENT;
     }
     if (!tacuda::precision::is_supported_compute_pair(storageType, computeType)) {
+        tacuda::detail::set_last_error("unsupported storage/compute dtype pair");
         return CT_STATUS_UNSUPPORTED;
     }
     if (storageType == CT_DTYPE_F32 && computeType == CT_DTYPE_F32) {
@@ -1012,53 +1016,36 @@ ctStatus_t ct_macd_ex_d(const void* d_input, void* d_macd, void* d_signal, void*
                          static_cast<float*>(d_signal), static_cast<float*>(d_hist),
                          size, fastPeriod, slowPeriod, signalPeriod, maType, stream);
     }
-    if (computeType == CT_DTYPE_F32) {
-        float *in = nullptr, *m = nullptr, *s = nullptr, *h = nullptr, *f = nullptr, *sl = nullptr;
-        if (cudaMalloc(&in, static_cast<size_t>(size) * sizeof(float)) != cudaSuccess ||
-            cudaMalloc(&m, static_cast<size_t>(size) * sizeof(float)) != cudaSuccess ||
-            cudaMalloc(&s, static_cast<size_t>(size) * sizeof(float)) != cudaSuccess ||
-            cudaMalloc(&h, static_cast<size_t>(size) * sizeof(float)) != cudaSuccess ||
-            cudaMalloc(&f, static_cast<size_t>(size) * sizeof(float)) != cudaSuccess ||
-            cudaMalloc(&sl, static_cast<size_t>(size) * sizeof(float)) != cudaSuccess) {
-            if (in) cudaFree(in); if (m) cudaFree(m); if (s) cudaFree(s); if (h) cudaFree(h); if (f) cudaFree(f); if (sl) cudaFree(sl);
-            return CT_STATUS_ALLOC_FAILED;
-        }
-        auto cleanup = [&]() { cudaFree(in); cudaFree(m); cudaFree(s); cudaFree(h); cudaFree(f); cudaFree(sl); };
-        ctStatus_t st = launch_convert(d_input, storageType, in, CT_DTYPE_F32, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        macdKernelCompute<float><<<1, 1, 0, stream>>>(in, m, s, h, f, sl, size, fastPeriod, slowPeriod, signalPeriod);
-        if (cudaGetLastError() != cudaSuccess) { cleanup(); return CT_STATUS_KERNEL_FAILED; }
-        st = launch_convert(m, CT_DTYPE_F32, d_macd, storageType, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        st = launch_convert(s, CT_DTYPE_F32, d_signal, storageType, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        st = launch_convert(h, CT_DTYPE_F32, d_hist, storageType, size, stream);
-        cleanup();
-        return st;
-    } else {
-        double *in = nullptr, *m = nullptr, *s = nullptr, *h = nullptr, *f = nullptr, *sl = nullptr;
-        if (cudaMalloc(&in, static_cast<size_t>(size) * sizeof(double)) != cudaSuccess ||
-            cudaMalloc(&m, static_cast<size_t>(size) * sizeof(double)) != cudaSuccess ||
-            cudaMalloc(&s, static_cast<size_t>(size) * sizeof(double)) != cudaSuccess ||
-            cudaMalloc(&h, static_cast<size_t>(size) * sizeof(double)) != cudaSuccess ||
-            cudaMalloc(&f, static_cast<size_t>(size) * sizeof(double)) != cudaSuccess ||
-            cudaMalloc(&sl, static_cast<size_t>(size) * sizeof(double)) != cudaSuccess) {
-            if (in) cudaFree(in); if (m) cudaFree(m); if (s) cudaFree(s); if (h) cudaFree(h); if (f) cudaFree(f); if (sl) cudaFree(sl);
-            return CT_STATUS_ALLOC_FAILED;
-        }
-        auto cleanup = [&]() { cudaFree(in); cudaFree(m); cudaFree(s); cudaFree(h); cudaFree(f); cudaFree(sl); };
-        ctStatus_t st = launch_convert(d_input, storageType, in, CT_DTYPE_F64, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        macdKernelCompute<double><<<1, 1, 0, stream>>>(in, m, s, h, f, sl, size, fastPeriod, slowPeriod, signalPeriod);
-        if (cudaGetLastError() != cudaSuccess) { cleanup(); return CT_STATUS_KERNEL_FAILED; }
-        st = launch_convert(m, CT_DTYPE_F64, d_macd, storageType, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        st = launch_convert(s, CT_DTYPE_F64, d_signal, storageType, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        st = launch_convert(h, CT_DTYPE_F64, d_hist, storageType, size, stream);
-        cleanup();
-        return st;
+    if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0) {
+        return reject_period("MACD: periods must be positive");
     }
+    if (computeType == CT_DTYPE_F32) {
+        return run_macd_compute_path<float>(
+            d_input, d_macd, d_signal, d_hist, size, storageType, stream,
+            [=](const float* in, float* m, float* s, float* h) -> ctStatus_t {
+                try {
+                    tacuda::MACDEXT ind(fastPeriod, slowPeriod, signalPeriod,
+                                        static_cast<tacuda::MAType>(maType));
+                    ind.calculate(in, m, s, h, size, stream);
+                    return CT_STATUS_SUCCESS;
+                } catch (...) {
+                    return classify_exception();
+                }
+            });
+    }
+    if (maType != CT_MA_EMA) {
+        tacuda::detail::set_last_error("MACD: float64 compute supports only maType = EMA");
+        return CT_STATUS_UNSUPPORTED;
+    }
+    // TA-Lib treats the larger period as slow rather than rejecting the call.
+    const int fast = (std::min)(fastPeriod, slowPeriod);
+    const int slow = (std::max)(fastPeriod, slowPeriod);
+    return run_macd_compute_path<double>(
+        d_input, d_macd, d_signal, d_hist, size, storageType, stream,
+        [=](const double* in, double* m, double* s, double* h) -> ctStatus_t {
+            macdKernelCompute<double><<<1, 1, 0, stream>>>(in, m, s, h, size, fast, slow, signalPeriod);
+            return (cudaGetLastError() == cudaSuccess) ? CT_STATUS_SUCCESS : CT_STATUS_KERNEL_FAILED;
+        });
 }
 
 ctStatus_t ct_stochastic_d(const float* d_high, const float* d_low, const float* d_close,
@@ -1172,6 +1159,7 @@ ctStatus_t ct_bbands_ex_d(const void* d_input, void* d_upper, void* d_middle, vo
                            static_cast<float*>(d_middle), static_cast<float*>(d_lower),
                            size, period, nbDevUp, nbDevDn, stream);
     }
+    if (period <= 0) return reject_period("BBANDS: period must be positive");
     if (computeType == CT_DTYPE_F32) {
         float *in = nullptr, *u = nullptr, *m = nullptr, *l = nullptr;
         if (cudaMalloc(&in, static_cast<size_t>(size) * sizeof(float)) != cudaSuccess ||

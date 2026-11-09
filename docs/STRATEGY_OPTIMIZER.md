@@ -65,9 +65,14 @@ tacuda-opt --help     full option reference
   columns are matched by name (`time/date/timestamp`, `open`, `high`,
   `low`, `close`, `volume`); without one the layout
   `[ts,]open,high,low,close[,volume]` is inferred. Timestamps may be unix
-  seconds/millis or `YYYY-MM-DD[ HH:MM[:SS]]`. Rows with `high < low` or
-  non-numeric prices abort loading with the file:line in the message.
-  The `portfolio` command takes one `--data` per symbol.
+  seconds/millis or ISO-8601 `YYYY-MM-DD[( |T)HH[:MM[:SS[.fff]]]]` with an
+  optional `Z`, `+HH`, `+HH:MM` or `+HHMM`; a value without an offset is taken
+  as UTC, and fractions are floored. Loading aborts with file:line on impossible
+  dates, trailing text, rows not strictly increasing in time, `high < low`, open
+  or close outside `[low, high]`, negative volume, and non-numeric values or
+  values outside float32. Negative prices remain valid: spreads and some energy
+  contracts trade below zero. The `portfolio` command takes one `--data` per
+  symbol.
 - `--synthetic N --seed S` — deterministic synthetic OHLCV (geometric
   random walk with a trend cycle), for demos and benchmarks. For
   `portfolio`, `--symbols K` (default 4) generates K series with seeds
@@ -88,6 +93,26 @@ On top of the three core strategies the **EXPERIMENTS pack** registers 94
 classic systems (`exp01_*`…`exp13_*`) ported from the STAD Club volumes
 1–13 — see [EXPERIMENTS.md](EXPERIMENTS.md) and the per-system pages on
 the site. `tacuda-opt list` prints all 97 with their parameter spaces.
+
+### Parameter validation
+
+`--set` and `--grid` accept finite numbers only. `NaN`, infinities and numeric
+overflow are rejected before loading a backend. A range also requires a
+positive step that actually advances its floating-point value; a single-point
+range finishes immediately. This prevents malformed grids from looping forever.
+
+The declared parameter min/max values are search-grid suggestions, not hard
+limits for every `--set` override. Valid configurations outside those bounds
+remain usable. Integer conversion keeps nearest-integer rounding, with halfway
+values rounded away from zero; non-finite or out-of-`int` results are rejected.
+
+`exp03_var_zones` requires positive representable integer counts for `osclen`,
+`strength` and `swings`, plus a finite `factor` representable as float32.
+`exp01_sr_levels` applies the same count check to `strength`, `numswing` and
+`trailbar`. Their indicator periods use the same rounding as their signal
+parameters. Invalid variants are rejected before simulation; calling their
+`signals()` methods directly with invalid parameters throws `invalid_argument`.
+A pivot window larger than the input is valid and simply confirms no pivots.
 
 ### Execution model
 
@@ -112,6 +137,15 @@ NetProfit, GrossProfit/Loss, ProfitFactor (capped at 1e9 with no losers),
 MaxDrawdown (absolute and % of peak), annualized Sharpe and Sortino
 (`--bars-per-year`, default 252, population std over per-bar equity
 diffs), WinRate, AvgTrade, trade count, exposure.
+
+Drawdown starts from the funded capital. A ranged segment (IS/OOS, walk-forward)
+can trade on its first bar, so that bar's result is part of the curve and, when
+it moved equity, one more per-bar diff. A run that starts flat keeps its n-1
+diffs, which leaves full-range results unchanged.
+
+Execution options must be finite, `--qty` and `--bars-per-year` positive; a
+fitness expression that evaluates to a non-finite value marks the variant
+invalid with an error instead of ranking it.
 
 `--fitness` accepts an arithmetic expression over those metrics
 (`+ - * / ( )`, unary minus, case-insensitive variables):
@@ -236,10 +270,12 @@ defaults otherwise) across several symbols and aggregates the result:
 
 - **Data.** One `--data CSV` per symbol (symbol names come from the file
   names), or `--synthetic N --symbols K` for a synthetic portfolio. Series
-  are brought to a common bar grid first: when every file has usable
-  timestamps they are aligned to the **timestamp intersection** (bars
-  missing from any symbol are dropped and reported); without timestamps
-  the series must already have equal lengths.
+  are brought to a common bar grid first: when every file has timestamps
+  they are aligned to the **timestamp intersection** (bars missing from any
+  symbol are dropped and reported). Positional alignment is used only when no
+  file has timestamps, and then the series must have equal lengths. A damaged
+  time axis, or a mix of files with and without one, is an error rather than a
+  silent fall back to matching bars by position.
 - **Batch API.** This is the optimizer's consumer of TaCuda's batch
   entrypoints: per used OHLCV column one `numSeries × seriesLen` matrix is
   uploaded to the GPU once, and each indicator request becomes a single

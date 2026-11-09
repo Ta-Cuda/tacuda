@@ -53,6 +53,7 @@
 #include <indicators/MAX.h>
 #include <indicators/SUM.h>
 
+#include <cmath>
 #include <stdexcept>
 
 namespace tacuda {
@@ -517,17 +518,24 @@ DeviceBuffer Context::trange(const DeviceBuffer& high, const DeviceBuffer& low,
     return output;
 }
 
-DeviceBuffer Context::stddev(const DeviceBuffer& input, int period, double /*nbdev*/) {
+DeviceBuffer Context::stddev(const DeviceBuffer& input, int period, double nbdev) {
     require_own_buffer(input, "Context::stddev");
+    if (!std::isfinite(nbdev)) {
+        throw std::invalid_argument("Context::stddev: nbdev must be finite");
+    }
     DeviceBuffer output(input.size(), stream_, streamOwner_);
-    StdDev ind(period);  // nbdev is applied separately if needed
+    StdDev ind(period);
     ind.calculate(input.data(), output.data(), input.size(), stream_);
-    return output;
+    if (nbdev == 1.0) return output;
+    return scale(output, static_cast<float>(nbdev));
 }
 
 Context::BollingerResult Context::bbands(const DeviceBuffer& input, int period,
-                                          double nbdevup, double nbdevdn, int /*matype*/) {
+                                          double nbdevup, double nbdevdn, int matype) {
     require_own_buffer(input, "Context::bbands");
+    if (matype != 0) {
+        throw std::invalid_argument("Context::bbands: only matype 0 (SMA) is supported");
+    }
     BollingerResult result;
     size_t size = input.size();
     

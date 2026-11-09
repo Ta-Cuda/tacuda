@@ -109,3 +109,78 @@ TEST(Synthetic, BarsAreConsistent) {
     EXPECT_GT(s.close[idx], 0.0f);
   }
 }
+
+namespace {
+
+std::int64_t single_timestamp(const std::string& file, const std::string& stamp) {
+  Series s = load_csv(write_temp(file, "timestamp,open,high,low,close\n" + stamp + ",1,2,0.5,1.5\n"));
+  return s.ts.at(0);
+}
+
+void expect_rejected_at_line(const std::string& file, const std::string& csv, const char* line) {
+  try {
+    load_csv(write_temp(file, csv));
+    ADD_FAILURE() << csv << " was accepted";
+  } catch (const std::runtime_error& e) {
+    EXPECT_NE(std::string(e.what()).find(line), std::string::npos) << e.what();
+  }
+}
+
+} // namespace
+
+TEST(CsvTimestamps, SameInstantInAnyOffsetIsOneTimestamp) {
+  const std::int64_t utc = single_timestamp("ts_utc.csv", "2024-03-01T00:00:00Z");
+  EXPECT_EQ(single_timestamp("ts_plus.csv", "2024-03-01T03:00:00+03:00"), utc);
+  EXPECT_EQ(single_timestamp("ts_compact.csv", "2024-03-01T03:00:00+0300"), utc);
+  EXPECT_EQ(single_timestamp("ts_hours.csv", "2024-03-01 03:00:00+03"), utc);
+  EXPECT_EQ(single_timestamp("ts_space.csv", "2024-03-01 03:00:00 +03:00"), utc);
+  EXPECT_EQ(single_timestamp("ts_minus.csv", "2024-02-29T19:00:00-05:00"), utc);
+  EXPECT_EQ(single_timestamp("ts_naive.csv", "2024-03-01 00:00:00"), utc);
+}
+
+TEST(CsvTimestamps, FractionsAreFlooredAndLeapDaysAreValid) {
+  EXPECT_EQ(single_timestamp("ts_frac.csv", "2024-02-29T00:00:00.750Z"),
+            single_timestamp("ts_whole.csv", "2024-02-29T00:00:00Z"));
+}
+
+TEST(CsvTimestamps, ImpossibleOrUnsupportedSpellingsAreRejected) {
+  const char* bad[] = {
+      "2024-03-01T00:00:00 EST",     "2024-02-30",
+      "2023-02-29",                  "2024-13-01",
+      "2024-01-01 24:00:00",         "2024-01-01 10:60:00",
+      "2024-01-01 10:00:60",         "2024-01-01T00:00:00+15:00",
+      "2024-01-01T00:00:00+03:00x",  "2024-01-01T00:00:00.",
+  };
+  for (const char* stamp : bad) {
+    EXPECT_THROW(single_timestamp("ts_bad.csv", stamp), std::runtime_error) << stamp;
+  }
+}
+
+TEST(CsvTimestamps, RowsMustBeStrictlyIncreasing) {
+  const std::string header = "timestamp,open,high,low,close\n";
+  expect_rejected_at_line("ts_desc.csv",
+                          header + "1700000300,1,2,0.5,1.5\n1700000000,1,2,0.5,1.5\n", ":3:");
+  expect_rejected_at_line("ts_dup.csv",
+                          header + "1700000000,1,2,0.5,1.5\n1700000000,1,2,0.5,1.5\n", ":3:");
+  // Two spellings of one instant are duplicates once the offset is honoured.
+  expect_rejected_at_line("ts_alias.csv",
+                          header + "2024-03-01T03:00:00+03:00,1,2,0.5,1.5\n"
+                                   "2024-03-01T00:00:00Z,1,2,0.5,1.5\n", ":3:");
+}
+
+TEST(CsvValues, RejectsValuesOutsideFloat32) {
+  expect_rejected_at_line("big.csv", "open,high,low,close\n1,1e50,0.5,1.5\n", ":2:");
+  expect_rejected_at_line("bigvol.csv", "open,high,low,close,volume\n1,2,0.5,1.5,1e50\n", ":2:");
+}
+
+TEST(CsvValues, BarGeometryIsEnforced) {
+  expect_rejected_at_line("open.csv", "open,high,low,close\n3,2,0.5,1.5\n", ":2:");
+  expect_rejected_at_line("close.csv", "open,high,low,close\n1,2,0.5,0.1\n", ":2:");
+  expect_rejected_at_line("vol.csv", "open,high,low,close,volume\n1,2,0.5,1.5,-1\n", ":2:");
+}
+
+TEST(CsvValues, NegativePricesRemainValid) {
+  Series s = load_csv(write_temp("neg.csv", "open,high,low,close\n-3,-1,-5,-2\n"));
+  ASSERT_EQ(s.size(), 1);
+  EXPECT_FLOAT_EQ(s.close[0], -2.0f);
+}

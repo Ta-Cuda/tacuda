@@ -1,6 +1,83 @@
 Changelog
 =========
 
+0.8.1 — pending release
+---------------------
+Candidate correctness update for precision entry points, batch streams, Python
+input validation and the optimizer. Release validation is in progress; this
+version has not been published. Two-GPU ownership validation remains pending.
+
+Fixed — `*_ex` / `*_ex_d` precision paths (every pair except float32/float32),
+which also serve `dtype=` in the Python wrappers:
+
+- RSI ran a separate kernel: a flat series returned 100 instead of 0 and an
+  interior NaN was treated as zero change. It now runs `RSIT<T>`, the
+  implementation the plain path uses.
+- MACD never produced a finite signal or histogram, and seeded the fast EMA at
+  `fastPeriod-1` instead of `slowPeriod-1`, so fixing the NaN alone would have
+  given finite but wrong values. Float compute now runs MACDEXT, double compute
+  a kernel with the same seeds; `macd` also stays NaN until the signal lookback.
+- `fastPeriod > size` wrote and read outside a device buffer. Periods are now
+  normalized before launch and reversed fast/slow behave like TA-Lib.
+- `period <= 0` returned success without writing the output for RSI and EMA.
+  All six families now return `CT_STATUS_INVALID_ARGUMENT`.
+- `maType` was silently ignored. Float compute honours it; float64 compute
+  returns `CT_STATUS_UNSUPPORTED` for anything but EMA.
+
+Fixed — batch streams:
+
+- `reset` after a GPU append followed by a CPU append restored the old state
+  from the device.
+- Failed GPU transfers are now checked. A failure before the kernel can be
+  retried; from the kernel onwards the handle refuses work until `reset`. See
+  "Error contract" in `docs/STREAMING_API.md`.
+- Growing the I/O buffers no longer loses the existing set when allocation
+  fails. A handle used from another GPU is rejected instead of dereferencing
+  foreign pointers; the internal batch stream pool is now per device.
+
+Changed — behaviour callers can observe:
+
+- SMA (period >= 96), WMA on its prefix path and BBANDS keep window semantics
+  for NaN/Inf: only windows containing the value are affected. Previously one
+  NaN turned every later output into NaN, so an SMA over warm-up NaNs of another
+  indicator returned nothing. See `docs/IMPLEMENTATION_NOTES.md`.
+- Python: `device_upload` derives `count` from the array and rejects a count
+  beyond it before the native call; single-series functions reject anything but
+  1D input (use `*_batch`); dtype arguments accept enums, names and NumPy types,
+  fixing the `NameError` in `*_ex`.
+- `Context::stddev` applies `nbdev`; `Context::bbands` rejects `matype != 0`.
+- Short `SMAT<double>` / `EMAT<double>` outputs are fully initialized.
+- Optimizer: ISO timestamps honour UTC offsets and reject trailing text and
+  impossible dates; rows must be strictly increasing in time; OHLC geometry,
+  negative volume and values outside float32 are rejected with file:line.
+  Portfolios no longer fall back to positional alignment over damaged or mixed
+  time axes. Non-finite configuration values and fitness results are errors.
+- Optimizer metrics: drawdown and Sharpe/Sortino of a ranged segment count from
+  the funded capital, so a first-bar loss is visible. Runs that start flat keep
+  their previous numbers.
+
+Benchmarks: `benchmark_vector_math.py` gives LN/LOG10/SQRT the same positive
+input on the device as on the CPU (the device used to get roughly half
+negative values) and refuses to time a case whose status or NaN mask disagrees.
+`benchmark_device_api.py` runs on Linux, checks every status and reports its
+output scope; `--download all` is now the default comparison with the Host API.
+
+Release checks now reject stale versions in either root npm lockfile entry.
+A late-loading Compute Sanitizer harness covers the MACD short-buffer host
+and device precision paths without the linked test binary's initialization
+failure; the previous native serves as an out-of-bounds negative control.
+
+Optimizer parameter validation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Reject invalid swing-history counts in `exp03_var_zones` and
+  `exp01_sr_levels`, including direct signal calls; prevent empty-history
+  access and division by zero.
+- Avoid signed index overflow for large support/resistance pivot strengths.
+  Valid values outside the suggested search grid remain supported.
+- Reject non-finite grid/set values and unsafe integer conversions; stop
+  terminal grid ranges and reject steps that cannot advance. Preserve
+  nearest-integer rounding and use it for the affected indicator periods.
+
 0.8.0 — 2026-11-08
 ------------------
 Streaming (incremental update) API for live and paper trading: append a newly

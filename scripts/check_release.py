@@ -20,8 +20,11 @@ def release_state(root=ROOT, tag=None, release=False):
                       for part in ("MAJOR", "MINOR", "PATCH"))
     python = re.search(r'^version = "([^"]+)"', (root / "bindings/python/pyproject.toml").read_text(encoding="utf-8"), re.M).group(1)
     node = json.loads((root / "bindings/nodejs/package.json").read_text(encoding="utf-8"))["version"]
+    lock = json.loads((root / "bindings/nodejs/package-lock.json").read_text(encoding="utf-8"))
     csharp = re.search(r"<Version>([^<]+)</Version>", (root / "bindings/csharp/Tacuda.Bindings.csproj").read_text(encoding="utf-8")).group(1)
-    versions = dict(native=native, macros=macros, python=python, node=node, csharp=csharp)
+    versions = dict(native=native, macros=macros, python=python, node=node,
+                    node_lock=lock["version"], node_lock_package=lock["packages"][""]["version"],
+                    csharp=csharp)
     if len(set(versions.values())) != 1:
         raise ValueError(f"version mismatch: {versions}")
     if tag is not None and tag != "v" + native:

@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <deque>
 #include <limits>
+#include <stdexcept>
 #include <vector>
 
 #include "strategy/ExpHelpers.h"
@@ -303,18 +304,27 @@ public:
     };
   }
 
+  bool validate(const ParamSet& ps) const override {
+    return positive_int_param(ps, "strength") &&
+           positive_int_param(ps, "numswing") &&
+           positive_int_param(ps, "trailbar");
+  }
+
   std::vector<IndicatorRequest> indicators(const ParamSet& ps) const override {
     return {
         {Family::EMA, Column::High, {4}},
         {Family::EMA, Column::Low, {4}},
-        {Family::MAX, Column::High, {ps.get("trailbar")}},
-        {Family::MIN, Column::Low, {ps.get("trailbar")}},
+        {Family::MAX, Column::High, {static_cast<double>(ps.get_int("trailbar"))}},
+        {Family::MIN, Column::Low, {static_cast<double>(ps.get_int("trailbar"))}},
         {Family::TRANGE, Column::Close, {}},
     };
   }
 
   void signals(const Series& bars, const ParamSet& ps, const IndicatorView& ind,
                Signal* out) const override {
+    if (!validate(ps)) {
+      throw std::invalid_argument("exp01_sr_levels: invalid parameters");
+    }
     const float* emaHigh = ind.line(0);
     const float* emaLow = ind.line(1);
     const float* hiTrail = ind.line(2);
@@ -332,21 +342,19 @@ public:
     float prevEmaH = std::numeric_limits<float>::quiet_NaN();
     float prevEmaL = std::numeric_limits<float>::quiet_NaN();
 
-    auto is_swing_high = [&](int b) {
+    auto is_swing_high = [&](std::size_t center) {
       for (int k = 1; k <= strength; ++k) {
-        if (bars.high[static_cast<std::size_t>(b)] <
-            bars.high[static_cast<std::size_t>(b - k)]) return false;
-        if (bars.high[static_cast<std::size_t>(b)] <=
-            bars.high[static_cast<std::size_t>(b + k)]) return false;
+        const std::size_t offset = static_cast<std::size_t>(k);
+        if (bars.high[center] < bars.high[center - offset]) return false;
+        if (bars.high[center] <= bars.high[center + offset]) return false;
       }
       return true;
     };
-    auto is_swing_low = [&](int b) {
+    auto is_swing_low = [&](std::size_t center) {
       for (int k = 1; k <= strength; ++k) {
-        if (bars.low[static_cast<std::size_t>(b)] >
-            bars.low[static_cast<std::size_t>(b - k)]) return false;
-        if (bars.low[static_cast<std::size_t>(b)] >=
-            bars.low[static_cast<std::size_t>(b + k)]) return false;
+        const std::size_t offset = static_cast<std::size_t>(k);
+        if (bars.low[center] > bars.low[center - offset]) return false;
+        if (bars.low[center] >= bars.low[center + offset]) return false;
       }
       return true;
     };
@@ -354,12 +362,13 @@ public:
     for (int i = 0; i < n; ++i) {
       // Confirm swings `strength` bars back, using only data up to bar i.
       const int b = i - strength;
-      if (b - strength >= 0) {
-        if (is_swing_high(b)) {
+      if (b >= strength) {
+        const std::size_t center = static_cast<std::size_t>(b);
+        if (is_swing_high(center)) {
           swingHighs.push_front(bars.high[static_cast<std::size_t>(b)]);
           while (static_cast<int>(swingHighs.size()) > numswing) swingHighs.pop_back();
         }
-        if (is_swing_low(b)) {
+        if (is_swing_low(center)) {
           swingLows.push_front(bars.low[static_cast<std::size_t>(b)]);
           while (static_cast<int>(swingLows.size()) > numswing) swingLows.pop_back();
         }
@@ -375,15 +384,16 @@ public:
         }
       }
 
-      if (static_cast<int>(swingHighs.size()) == numswing &&
+      if (!swingHighs.empty() && !swingLows.empty() &&
+          static_cast<int>(swingHighs.size()) == numswing &&
           static_cast<int>(swingLows.size()) == numswing &&
           finite(atr10[static_cast<std::size_t>(i)]) && finite(emaHigh[i]) &&
           finite(emaLow[i])) {
         float rLevel = 0.f, sLevel = 0.f, hh = swingHighs[0], ll = swingLows[0];
         for (float v : swingHighs) { rLevel += v; hh = std::max(hh, v); }
         for (float v : swingLows) { sLevel += v; ll = std::min(ll, v); }
-        rLevel /= numswing;
-        sLevel /= numswing;
+        rLevel /= static_cast<float>(swingHighs.size());
+        sLevel /= static_cast<float>(swingLows.size());
 
         const float c = bars.close[static_cast<std::size_t>(i)];
         const float span = hh - ll;

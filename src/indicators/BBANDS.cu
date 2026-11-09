@@ -86,6 +86,7 @@ __global__ void initMomentsAndKeysKernel(const float* __restrict__ in,
 }
 
 __global__ void bbands_finalize_from_moments_kernel(const WelfordData* __restrict__ prefix,
+                                                    const float* __restrict__ in,
                                                     float* __restrict__ upper,
                                                     float* __restrict__ middle,
                                                     float* __restrict__ lower,
@@ -103,6 +104,18 @@ __global__ void bbands_finalize_from_moments_kernel(const WelfordData* __restric
 
     double mean = win.mean;
     double var  = win.m2 / win.count;
+    // A non-finite input poisons every later prefix moment, even once it has
+    // left the window; recompute those windows from the input (see SMA).
+    if (!isfinite(mean) || !isfinite(var)) {
+      double sum = 0.0, sum2 = 0.0;
+      for (int k = idx - period + 1; k <= idx; ++k) {
+        const double v = static_cast<double>(in[k]);
+        sum += v;
+        sum2 += v * v;
+      }
+      mean = sum / static_cast<double>(period);
+      var = sum2 / static_cast<double>(period) - mean * mean;
+    }
     if (var < 0.0) var = 0.0;
     double sd = sqrt(var);
 
@@ -253,7 +266,7 @@ void BBANDS::calculate(const float* input, float* upper, float* middle, float* l
     dim3 block = defaultBlock();
     dim3 grid  = defaultGrid(size);
     bbands_finalize_from_moments_kernel<<<grid, block, 0, stream>>>(
-        dMoments.get(), upper, middle, lower,
+        dMoments.get(), input, upper, middle, lower,
         size, seriesLen, period, upperMultiplier, lowerMultiplier);
     CUDA_CHECK(cudaGetLastError());
   }
