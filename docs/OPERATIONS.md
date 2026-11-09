@@ -613,3 +613,44 @@ Linux GPU runner before a signed version tag is created. The NaN window policy
 and remaining propagation exceptions are described in
 [IMPLEMENTATION_NOTES.md](IMPLEMENTATION_NOTES.md). Website benchmark updates
 are separate from this package candidate.
+
+## Official 0.8.1 dry run and Windows GPU acceptance — 2026-11-09
+
+The signed public source commit `963494e` on `release/0.8.1` passed the complete
+[`release-packages` dry run, 42606429873](https://github.com/Ta-Cuda/tacuda/actions/runs/42606429873),
+dispatched with `publish=false`. Metadata, source checks, Windows and Linux
+native builds, the mandatory Linux GPU job and all three package jobs succeeded.
+The `publish` and `github-release` jobs were skipped. No `v0.8.1` tag or registry
+release was created; the changelog remains pending release.
+
+| Acceptance | Result |
+| --- | --- |
+| Actions Linux GPU CTest | 490 registered, 489 passed, optional TA-Lib optimizer backend skipped |
+| Windows GPU CTest, including injected-failure tests and CPU ASan target | 490 registered, 489 passed, the same optional backend skipped |
+| Differential / streaming corpora, each platform | 1319/1319 cells, 165/165 specs / 699/699 cells |
+| Binding pipelines, each platform | Python 37/37; Node 203/203; C# 36/36 plus 100/100 |
+| Actual Actions Windows production DLL on a Windows GPU | 314 C++ tests; optimizer 165 passed / 1 optional skip; all pipelines and both corpora passed |
+| Clean installation of actual Actions wheel/npm/NuGet packages, each platform | Native 0.8.1; SMA(20) and incremental SMA return 54.5 for 1..64 |
+
+The Windows GPU run used Windows 11 Enterprise build 26300, an RTX 3090 Ti,
+driver 617.42, CUDA 12.9.41 and MSVC 19.44.35229.0. The separate test build
+targeted architecture 86 with fault injection enabled. The production DLL from
+Actions was tested independently, rather than inferring its correctness from
+that test build. Every downloaded artifact archive passed its GitHub SHA-256
+digest check; packaged natives matched the corresponding native-build artifacts.
+The official Linux wheel is the workflow's `manylinux_2_35_x86_64` artifact,
+built on Ubuntu 22.04; it is separate from the earlier local `linux_x86_64` wheel.
+
+Scoped results and package hashes are in
+[actions-dry-run.json](validation/2026-11-09/actions-dry-run.json) and
+[windows-gpu.json](validation/2026-11-09/windows-gpu.json). Follow-up acceptance
+documentation does not change the tested native, bindings or package metadata.
+The one-job Linux GPU runner deregistered after completion; its transient
+service stopped and its short-lived registration token was consumed.
+
+Windows Compute Sanitizer did not attach to the Python target in this remote
+environment, through either the venv or base interpreter. The timed-out attempts
+are unsuccessful instrumentation, not clean memory reports. The earlier Linux
+MACD `memcheck` acceptance remains valid. Two-GPU ownership validation (A16)
+still requires a host with two GPUs. Before any publication, finalize the
+release date and authorize the existing signed-tag release procedure separately.

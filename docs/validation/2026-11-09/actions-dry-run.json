@@ -1,0 +1,201 @@
+{
+  "date": "2026-11-09",
+  "version": "0.8.1",
+  "run_id": 42606429873,
+  "source": "963494e0a4ec4bdb17f0ab86e846befc2aff4b8c",
+  "branch": "release/0.8.1",
+  "url": "https://github.com/Ta-Cuda/tacuda/actions/runs/42606429873",
+  "event": "workflow_dispatch",
+  "status": "completed",
+  "conclusion": "success",
+  "publish_requested": false,
+  "jobs": [
+    {
+      "id": 129123508077,
+      "name": "release-metadata",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 129123587588,
+      "name": "natives / source-checks",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 129123587619,
+      "name": "natives / windows-x64",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 129123587802,
+      "name": "natives / linux-x64",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 129129360733,
+      "name": "natives / gpu-tests",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 129131761277,
+      "name": "python-package",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 129131761431,
+      "name": "npm-package",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 129131761551,
+      "name": "nuget-package",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "id": 129132069037,
+      "name": "publish",
+      "status": "completed",
+      "conclusion": "skipped"
+    },
+    {
+      "id": 129132069299,
+      "name": "github-release",
+      "status": "completed",
+      "conclusion": "skipped"
+    }
+  ],
+  "ctest": {
+    "tests": 490,
+    "failures": 0,
+    "skipped": 1,
+    "passed": 489,
+    "skipped_names": [
+      "Backends.TalibMatchesReference"
+    ]
+  },
+  "corpus": {
+    "passed": 1319,
+    "total": 1319,
+    "specsGreen": 165,
+    "specs": 165
+  },
+  "streaming": {
+    "passed": 699,
+    "total": 699
+  },
+  "natives": {
+    "libtacuda.so": {
+      "sha256": "a90e6316bee8cde3c904e603bd5735ff9b4125d7f7affbb98b88f847537e2a55",
+      "size": 64608120
+    },
+    "tacuda.dll": {
+      "sha256": "a434ac452e4a27c998792aab8b6a345def5561f4bdca77682de727fc76546d90",
+      "size": 62625792
+    }
+  },
+  "packages": {
+    "tacuda-0.8.1-py3-none-win_amd64.whl": {
+      "size": 23966529,
+      "sha256": "286abaf2a02a6cc76915c6e28dc368417e997d51ee99e20f60c85b3fe4534ab5",
+      "sha1": "f389b4901c2d5d13be0b8e125a680d5892682e3a",
+      "integrity": "sha512-pGwo5wjE70yXEP2nAxQy2cHyzSa2SQmz59wKhRG1S7GX2Zgmtt1NVqW+bV6ATMt6WsC1w4qPZMF30GBq54MZEQ==",
+      "natives": {
+        "tacuda/tacuda.dll": "a434ac452e4a27c998792aab8b6a345def5561f4bdca77682de727fc76546d90"
+      }
+    },
+    "tacuda-0.8.1-py3-none-manylinux_2_35_x86_64.whl": {
+      "size": 24253273,
+      "sha256": "51c715c23cd538271ef54637fb65772682f8197424b5864aec7110f7573c009e",
+      "sha1": "9821f1ad0386d04a67440e44280b9da929a91096",
+      "integrity": "sha512-ozvCNRXbrDttl6su8z/gUzz7TADnX1OkwrDlQk1n1UiAePT8P5jgWmh6MpzOw1KtV/8bbjUk+78ol7bBgXZrRg==",
+      "natives": {
+        "tacuda/libtacuda.so": "a90e6316bee8cde3c904e603bd5735ff9b4125d7f7affbb98b88f847537e2a55"
+      }
+    },
+    "tacuda-0.8.1.tar.gz": {
+      "size": 38263,
+      "sha256": "49e87c0bb0ce0d1ee8b513cbf090f05364aa84190710d9d871a43845751d8d86",
+      "sha1": "da831455ab9823c3dd59fe60e98de3926cf75bee",
+      "integrity": "sha512-yuNtnvgZcZOteSfKwpRINbkZWILrjmnH0MKKweXR+iAzrTB5vGCOb2v0ueaoj2BWghEGSDVBmNN0waJjOQQ9oA==",
+      "source_only": true
+    },
+    "tacuda-0.8.1.tgz": {
+      "size": 42321,
+      "sha256": "4c325e0b36d79afbdf00f6cf98cdad9552bbff61ccdcfb9e020a34aa2c812101",
+      "sha1": "50b1e5b14a5f1133f49b2b067b2ab08c76137502",
+      "integrity": "sha512-gcfDkTsKMm1hhD7JjpnI3NC4C+q1MmGi9QL9B7sG7BWHJ23Aj2Ducu/Fg+HUFWVbZSuFVf34COOQry/qk5sa8w=="
+    },
+    "Tacuda.0.8.1.nupkg": {
+      "size": 48435283,
+      "sha256": "74e66edef9bc9c6bc85d87636e70d786cdebc81295dd411e272e6aca64d551ca",
+      "sha1": "8ac83d0b2a4c581a393d8e197c211043afd1bd67",
+      "integrity": "sha512-tze5xKVtU5tuVzh1Z6uuDrv1PAZfp1mLPgZ2hlyt6qhH3ELD8eZDo4pFKEfxduJm/Tudo/0BhiznRZOuunKdew==",
+      "natives": {
+        "runtimes/linux-x64/native/libtacuda.so": "a90e6316bee8cde3c904e603bd5735ff9b4125d7f7affbb98b88f847537e2a55",
+        "runtimes/win-x64/native/tacuda.dll": "a434ac452e4a27c998792aab8b6a345def5561f4bdca77682de727fc76546d90"
+      }
+    }
+  },
+  "artifact_archives": [
+    {
+      "name": "native-win-x64.zip",
+      "sha256": "239173ce305b0b078e6a8a37c03bf0cc333c1374d6fb8b535af9e0a036d1cf25",
+      "id": 13669600684
+    },
+    {
+      "name": "gpu-correctness.zip",
+      "sha256": "5f6425799fd6f09b8537a0c9713a98a63e44813e06796ece51956190a8391cd6",
+      "id": 13669531202
+    },
+    {
+      "name": "nuget-dist.zip",
+      "sha256": "00b64c850ef5d8a03e34f4dadf7db11dfcfcc65c8f774738c5a5a269bb0568c5",
+      "id": 13669322489
+    },
+    {
+      "name": "pypi-dist.zip",
+      "sha256": "1425efce445984c35cf99942bd5fe7a20987d35d87c9a4861a8947f26696a4d7",
+      "id": 13669267161
+    },
+    {
+      "name": "npm-dist.zip",
+      "sha256": "5b12241f4a686c091d109ff664468976bba669d2466fa2272d669e0ff2cdf27f",
+      "id": 13668443952
+    },
+    {
+      "name": "native-linux-x64.zip",
+      "sha256": "5a1e6ef78a0e6761334273fd481718fff6cf7d5d63687c159a0e86fee3e41e63",
+      "id": 13667584658
+    }
+  ],
+  "ephemeral_runner_removed": true,
+  "version_tag_created": false,
+  "registries_updated": false,
+  "package_installation": {
+    "linux": "passed: clean wheel/npm/NuGet install, version 0.8.1, GPU SMA/streaming 54.5",
+    "windows": "passed: clean wheel/npm/NuGet install, version 0.8.1, GPU SMA/streaming 54.5"
+  },
+  "windows_gpu_native": "Actual native-win-x64 DLL passed C++ tests, optimizer, Python/Node/C# pipelines and both corpora; see windows-gpu.json.",
+  "limitations": [
+    "A16 requires two GPUs",
+    "Windows Compute Sanitizer could not attach; no Windows memcheck pass claimed"
+  ],
+  "package_install_native_sha256": {
+    "linux": "a90e6316bee8cde3c904e603bd5735ff9b4125d7f7affbb98b88f847537e2a55",
+    "windows": "a434ac452e4a27c998792aab8b6a345def5561f4bdca77682de727fc76546d90"
+  },
+  "post_dry_run_registry_http_status": {
+    "pypi": 404,
+    "npm": 404,
+    "nuget": 404,
+    "github_release": 404,
+    "github_tag": 404
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "date": "2026-11-09",
+  "source": "963494e0a4ec4bdb17f0ab86e846befc2aff4b8c",
+  "scope": "Manual Windows GPU run; Actions-native package acceptance is recorded separately.",
+  "environment": {
+    "os": "Windows 11 Enterprise, build 26300",
+    "gpu": "RTX 3090 Ti",
+    "driver": "617.42",
+    "cuda": "12.9.41",
+    "msvc": "19.44.35229.0",
+    "python": "3.12.8",
+    "numpy": "2.2.6",
+    "talib_python": "0.7.0",
+    "node": "20.15.1",
+    "dotnet_sdk": "8.0.319"
+  },
+  "source_archive_sha256": "a05f6e1bc8c3fab922e1f29216202b6de66ecd1b078bab6f8f0f0f8328ddd1c4",
+  "native_and_binding_sources_match_commit": true,
+  "compared_source_files": 659,
+  "test_build": {
+    "architecture": 86,
+    "fault_injection": true,
+    "asan_lifetime_target": true
+  },
+  "ctest": {
+    "total": 490,
+    "passed": 489,
+    "failed": 0,
+    "skipped": [
+      "Backends.TalibMatchesReference"
+    ]
+  },
+  "precision_regressions_passed": 14,
+  "batch_fault_regressions_passed": 3,
+  "shipping_dll_sha256": "5f30d553bd22e854aacdae29d3fbea88dc17c922f7bc6e6b2fa5bc40cf257cd4",
+  "shipping_native_suite": 314,
+  "shipping_optimizer": {
+    "total": 166,
+    "passed": 165,
+    "skipped": 1
+  },
+  "corpus": {
+    "cells": 1319,
+    "passed": 1319,
+    "green_specs": 165
+  },
+  "streaming": {
+    "cells": 699,
+    "passed": 699
+  },
+  "pipelines": {
+    "python": 37,
+    "node": 203,
+    "csharp_pipeline": 36,
+    "csharp_tests": 100,
+    "failed": 0
+  },
+  "windows_compute_sanitizer": {
+    "status": "not-validated",
+    "reason": "CUDA 12.9 tool could not attach to Python and timed out. Both venv and base interpreter attempts are retained as unsuccessful instrumentation; no Windows memcheck pass is claimed."
+  },
+  "limitations": [
+    "One GPU; multi-device ownership case A16 remains untested",
+    "Windows Compute Sanitizer injection failed; Linux memcheck acceptance is separate"
+  ],
+  "actions_native": {
+    "run_id": 42606429873,
+    "source": "963494e0a4ec4bdb17f0ab86e846befc2aff4b8c",
+    "native_sha256": "a434ac452e4a27c998792aab8b6a345def5561f4bdca77682de727fc76546d90",
+    "native_cpp_passed": 314,
+    "optimizer_passed": 165,
+    "optimizer_skipped": 1,
+    "differential_cells_passed": 1319,
+    "green_specs": 165,
+    "streaming_cells_passed": 699,
+    "pipelines": {
+      "python": 37,
+      "node": 203,
+      "csharp_pipeline": 36,
+      "csharp_additional": 100,
+      "failed": 0
+    }
+  }
+}
