@@ -22,6 +22,8 @@
 // --- Helper kernel for final step: prefix difference -> MFI ---
 __global__ void mfiFromPrefixesKernel(const double* __restrict__ posPrefix,
                                       const double* __restrict__ negPrefix,
+                                      const double* __restrict__ tp,
+                                      const float* __restrict__ volume,
                                       float* __restrict__ output,
                                       int period,
                                       int size)
@@ -39,6 +41,20 @@ __global__ void mfiFromPrefixesKernel(const double* __restrict__ posPrefix,
     double leftNeg = (i >= period) ? negPrefix[i - period] : 0.0;
     double posSum = posPrefix[i] - leftPos;
     double negSum = negPrefix[i] - leftNeg;
+
+    // Differently rounded prefixes can produce a negative total for an
+    // empty flow window. Re-sum that window, preserving signed-volume inputs
+    // instead of clamping their genuinely negative money flows.
+    if (posSum < 0.0 || negSum < 0.0) {
+        posSum = negSum = 0.0;
+        for (int k = i - period + 1; k <= i; ++k) {
+            const double curr = tp[k], prev = tp[k - 1];
+            if (!isfinite(curr) || !isfinite(prev)) continue;
+            const double flow = curr * static_cast<double>(volume[k]);
+            if (curr > prev) posSum += flow;
+            else if (curr < prev) negSum += flow;
+        }
+    }
 
     double total = posSum + negSum;
     float mfi = (total < 1.0)
@@ -140,7 +156,7 @@ void MFI::calculate(const float* high, const float* low, const float* close,
         dim3 block = defaultBlock();
         dim3 grid  = defaultGrid(size);
         mfiFromPrefixesKernel<<<grid, block, 0, stream>>>(posPrefix.get(), negPrefix.get(),
-                                                          output, period, size);
+                                                          tp.get(), volume, output, period, size);
         CUDA_CHECK(cudaGetLastError());
     }
 }

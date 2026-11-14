@@ -765,6 +765,16 @@ struct MfiState {
     ring[pos] = p; ring[period + pos] = n;
     if (++pos == period) pos = 0;
     positive += p; negative += n;
+    if (i >= period && (positive < 0.0 || negative < 0.0)) {
+      // Rebase a rounded zero window from its actual stored flows. This
+      // removes tiny negative residuals without clipping signed volumes.
+      positive = negative = 0.0;
+      for (int k = 0; k < period; ++k) {
+        int j = pos + k;
+        if (j >= period) j -= period;
+        positive += ring[j]; negative += ring[period + j];
+      }
+    }
     const double total = positive + negative;
     out[0] = i < period ? stream_nan() : total < 1.0 ? 0.0f
              : static_cast<float>(100.0 * (positive / total));

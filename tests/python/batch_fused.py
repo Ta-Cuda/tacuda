@@ -328,6 +328,25 @@ def main():
                 result = check_case(cuda, lib, spec, flat, stream)
                 for a, b in zip(result, reference(name, flat, c.p)):
                     np.testing.assert_array_equal(a, b)
+                if name == "mfi":
+                    t = np.arange(4096, dtype="f4")
+                    price = np.float32(100) + np.float32(2) * np.sin(np.float32(.01) * t) + np.float32(.5) * np.cos(np.float32(.005) * t) + np.float32(.0001) * t
+                    o = price + np.float32(.1) * np.sin(np.float32(.03) * t)
+                    cl = price + np.float32(.1) * np.cos(np.float32(.02) * t)
+                    bounded = dict(close=cl[None, :],
+                        high=(np.maximum(o, cl) + np.float32(.2) + np.float32(.3) * np.abs(np.sin(np.float32(.01) * t)))[None, :],
+                        low=(np.minimum(o, cl) - np.float32(.2) - np.float32(.3) * np.abs(np.cos(np.float32(.01) * t)))[None, :],
+                        volume=(100000 + ((np.arange(4096) * 37) % 1000) * 10).astype("f4")[None, :])
+                    for mode in ("1", "0"):
+                        os.environ["TACUDA_BATCH_FUSED"] = mode
+                        line = check_case(cuda, lib, spec, bounded, stream)[0][:, 14:]
+                        assert np.isfinite(line).all() and (line >= 0).all() and (line <= 100).all(), ("MFI range", mode, float(np.nanmin(line)), float(np.nanmax(line)))
+                        signed_close = np.array([[1, 2, 1, 2, 1]], dtype="f4")
+                        signed = dict(close=signed_close, high=signed_close + 1, low=signed_close - 1,
+                                      volume=np.array([[10, -1, 10, -1, 10]], dtype="f4"))
+                        signed_out = check_case(cuda, lib, spec, signed, stream, period=2)[0]
+                        np.testing.assert_array_equal(signed_out[:, 2:], -25.0)
+                    os.environ["TACUDA_BATCH_FUSED"] = "1"
                 if name == "ema":
                     unit = {"close": np.array([[1e30, 1.0, -1e30, 1.0, np.nan, 2.0]], dtype="f4")}
                     out = check_case(cuda, lib, spec, unit, stream, period=1)

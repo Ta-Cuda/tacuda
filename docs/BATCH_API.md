@@ -129,6 +129,9 @@ guards. NaNs cannot cross rows; direct windows can recover after a NaN leaves
 the window. STOCH preserves the shipped float arithmetic and summation order,
 so it is tolerance-compatible with TA-Lib rather than universally bit-equal.
 No universal bit-equality claim is made for TA-Lib's rolling double windows.
+MFI re-sums its stored flows if cancellation produces a negative window total.
+This removes tiny negative residuals for positive prices/volumes while retaining
+genuine signed-volume behavior; tiny TA-Lib residuals near zero can differ.
 
 Separately, single-series MFI, AD, ADOSC and STDDEV use a fixed-tree scan in
 place of a scheduling-dependent device-wide floating-point scan. Repeated

@@ -131,11 +131,13 @@ Correctness evidence:
   node per supported call, poisoned-output graph replay, host/default/user
   stream agreement, row permutation, batch size, prefixes, NaN isolation,
   dispatch boundaries, unsupported parameters and error classification.
-- Reporter's original 4000 × 234 inputs: 12 of 13 families bit-equal to
-  float32-rounded TA-Lib. STOCH retains the shipped float arithmetic and
+- Reporter's original 4000 × 234 inputs were checked against float32-rounded
+  TA-Lib. STOCH retains the shipped float arithmetic and
   its 663242 differing elements. The additional EMA/WMA/NATR/MACD regression
   fixtures are also bit-equal at their normal periods. This is evidence for
   these fixtures, not a universal bit-equality guarantee for every input.
+- MFI checks include positive-volume range boundaries and signed-volume
+  controls. Re-summing a rounded zero window can remove tiny TA-Lib residuals.
 - Native CTest 327/327 (library targets; optimizer disabled for this run),
   plus 180 graph-capture cases over all 166 batch families
   in both forced-on and forced-off modes; full differential corpus
