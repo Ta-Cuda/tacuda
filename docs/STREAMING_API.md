@@ -1,5 +1,10 @@
 # Streaming (Incremental Update) API
 
+In 0.9.0, ATR and NATR with period 1 both emit unnormalized true ranges,
+matching the full-series API and TA-Lib. Their first bar is NaN; a later NaN
+bar does not poison subsequent true ranges. Normal-period streaming rounding
+is unchanged. These boundary cases are included in the streaming corpus.
+
 Shipped in v0.8.0. A stream carries indicator state across calls, so a newly
 closed bar costs a state update instead of a full-series recompute. This is
 the API for live and paper trading; the host, device and batch APIs remain

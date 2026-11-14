@@ -6,6 +6,7 @@
 // src/indicators/ATR.cu
 #include <indicators/ATR.h>
 #include <utils/CudaUtils.h>
+#include <utils/TrueRange.cuh>
 #include <utils/DeviceBufferPool.h>
 #include <utils/AffineScan.cuh>
 #include <utils/TacudaConfig.h>
@@ -158,6 +159,10 @@ void ATR::calculate(const float* high, const float* low, const float* close,
 
     if (seriesLen <= period) {
         throw std::invalid_argument("ATR: series length must be > period");
+    }
+    if (period == 1) {
+        tacuda::detail::true_range_period_one(high, low, close, output, size, seriesLen, stream);
+        return;
     }
 
     // TR buffer

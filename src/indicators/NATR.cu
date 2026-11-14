@@ -6,6 +6,7 @@
 // src/indicators/NATR.cu
 #include <indicators/NATR.h>
 #include <utils/CudaUtils.h>
+#include <utils/TrueRange.cuh>
 #include <utils/DeviceBufferPool.h>
 #include <utils/AffineScan.cuh>
 #include <utils/TacudaConfig.h>
@@ -38,22 +39,6 @@ static NATRBatchCfg getBatchCfg(int size) {
 }
 
 // ------------------ TR (True Range) for batches ------------------
-// TA-Lib's NATR(period=1) returns unnormalized TRANGE. Compute this directly
-// in double, including per-row warm-up and recovery after a NaN bar.
-__global__ void natrPeriodOneKernel(const float* high, const float* low,
-                                    const float* close, float* out,
-                                    int size, int seriesLen) {
-    const size_t i = static_cast<size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
-    if (i >= static_cast<size_t>(size)) return;
-    if (i % seriesLen == 0) { out[i] = nanf(""); return; }
-    const double hi = high[i], lo = low[i], prev = close[i - 1];
-    double tr = hi - lo;
-    const double a = fabs(hi - prev), b = fabs(lo - prev);
-    if (a > tr) tr = a;
-    if (b > tr) tr = b;
-    out[i] = static_cast<float>(tr);
-}
-
 __global__ void trueRangeBatchedKernel(const float* __restrict__ high,
                                        const float* __restrict__ low,
                                        const float* __restrict__ close,
@@ -184,9 +169,7 @@ void NATR::calculate(const float* high, const float* low, const float* close,
         throw std::invalid_argument("NATR: series length must be > period");
     }
     if (period == 1) {
-        natrPeriodOneKernel<<<defaultGrid(size), defaultBlock(), 0, stream>>>(
-            high, low, close, output, size, seriesLen);
-        CUDA_CHECK(cudaGetLastError());
+        tacuda::detail::true_range_period_one(high, low, close, output, size, seriesLen, stream);
         return;
     }
 

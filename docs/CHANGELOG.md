@@ -44,7 +44,8 @@ Fixed:
   long-prefix variance differences.
 - EMA period 1 copies the input, including NaNs and extreme changes. NATR
   period 1 returns unnormalized TRANGE like TA-Lib on both dispatchers.
-  Fused ATR period 1 computes independent true ranges after a NaN bar.
+  ATR/NATR period 1 uses independent true ranges after a NaN bar in full,
+  batched and streaming APIs. NATR streaming no longer normalizes period 1.
 - MFI re-sums a flow window if prefix subtraction or rolling cancellation
   produces a negative total. This removes tiny negative outputs on positive
   prices/volumes without clamping legitimate signed-volume calculations.

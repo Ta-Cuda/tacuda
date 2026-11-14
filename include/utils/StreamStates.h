@@ -376,6 +376,11 @@ struct AtrCore {
     if (lc > tr) tr = lc;
     prevClose = bar.close;
 
+    if (period == 1) {
+      atr = static_cast<double>(tr);
+      ready = 1;
+      return true;
+    }
     if (i <= period) {
       trSum += static_cast<double>(tr);
       if (i < period) {
@@ -408,7 +413,8 @@ struct AtrState {
 
 /**
  * @brief Mirrors applyAffineNormalizedKernel (NATR.cu): TA-Lib's TA_IS_ZERO
- * guard on the close, normalization performed in float.
+ * guard on the close, normalization performed in float. Period one is the
+ * TA-Lib unnormalized true-range special case.
  */
 struct NatrState {
   AtrCore core;
@@ -424,6 +430,10 @@ struct NatrState {
       return;
     }
     const float atr = static_cast<float>(core.atr);
+    if (core.period == 1) {
+      out[0] = atr;
+      return;
+    }
     const float c = bar.close;
     out[0] = (stream_fabsf(c) < 1e-14f) ? 0.0f : 100.0f * atr / c;
   }

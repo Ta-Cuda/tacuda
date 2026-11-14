@@ -113,7 +113,9 @@ states in `utils/StreamStates.h`.
 
 Period 1 retains EMA's copy-through behavior. NATR period 1 follows TA-Lib's
 special case: unnormalized TRANGE, with a NaN at the first bar. This boundary
-case is corrected on the original NATR path as well.
+case is corrected on the original and streaming ATR/NATR paths as well;
+period-one true ranges recover after a NaN bar. Normal-period streaming
+rounding remains unchanged.
 
 Every **fused** row is bit-independent of row order, other rows, batch size
 and future bars. This does not imply bit equality across dispatcher paths:

@@ -123,6 +123,14 @@ def build_specs() -> List[Spec]:
         ("high", "low", "close"), 1,
         lambda d: tacuda.atr(_f32(d, "high"), _f32(d, "low"), _f32(d, "close"), 14),
         lambda d: talib.ATR(_ref_in(d, "high"), _ref_in(d, "low"), _ref_in(d, "close"), timeperiod=14))
+    add("ATR(1)", lambda: st.Atr(1), lambda n: st.AtrBatch(1, num_series=n),
+        ("high", "low", "close"), 1,
+        lambda d: tacuda.atr(_f32(d, "high"), _f32(d, "low"), _f32(d, "close"), 1),
+        lambda d: talib.ATR(_ref_in(d, "high"), _ref_in(d, "low"), _ref_in(d, "close"), timeperiod=1))
+    add("NATR(1)", lambda: st.Natr(1), lambda n: st.NatrBatch(1, num_series=n),
+        ("high", "low", "close"), 1,
+        lambda d: tacuda.natr(_f32(d, "high"), _f32(d, "low"), _f32(d, "close"), 1),
+        lambda d: talib.NATR(_ref_in(d, "high"), _ref_in(d, "low"), _ref_in(d, "close"), timeperiod=1))
     add("NATR", lambda: st.Natr(14), lambda n: st.NatrBatch(14, num_series=n),
         ("high", "low", "close"), 1,
         lambda d: tacuda.natr(_f32(d, "high"), _f32(d, "low"), _f32(d, "close"), 14),
@@ -300,7 +308,7 @@ def main() -> int:
     total = len(results)
     passed = sum(1 for r in results if r.get("ok"))
     print(f"\nstreaming corpus: {passed}/{total} cells passed "
-          f"({len(specs)} families x {len(corpus)} datasets)")
+          f"({len(specs)} parameter sets x {len(corpus)} datasets)")
     if failures:
         print("\nFAILURES:")
         for r in results:

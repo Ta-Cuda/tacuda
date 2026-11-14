@@ -242,6 +242,30 @@ TEST(TacudaStream, AtrMatchesFullSeries) {
   }
 }
 
+TEST(TacudaStream, PeriodOneTrueRangeMatchesFullAndRecoversAfterNaN) {
+  const std::vector<float> high = {10.0f, 12.0f, NAN, 13.0f};
+  const std::vector<float> low = {8.0f, 10.0f, 12.0f, 11.0f};
+  const std::vector<float> close = {9.0f, 11.0f, 13.0f, 12.0f};
+  for (bool normalized : {false, true}) {
+    StreamHandle h;
+    ASSERT_EQ(normalized ? ct_natr_stream_create(1, h.out()) : ct_atr_stream_create(1, h.out()),
+              CT_STATUS_SUCCESS);
+    std::vector<float> got(4), full(4);
+    for (int i = 0; i < 4; ++i) {
+      ASSERT_EQ(normalized ? ct_natr_stream_append(h.get(), high.data()+i, low.data()+i, close.data()+i, 1, got.data()+i)
+                           : ct_atr_stream_append(h.get(), high.data()+i, low.data()+i, close.data()+i, 1, got.data()+i),
+                CT_STATUS_SUCCESS);
+    }
+    ASSERT_EQ(normalized ? ct_natr(high.data(), low.data(), close.data(), full.data(), 4, 1)
+                         : ct_atr(high.data(), low.data(), close.data(), full.data(), 4, 1, 0),
+              CT_STATUS_SUCCESS);
+    for (const auto& line : {got, full}) {
+      EXPECT_TRUE(std::isnan(line[0])); EXPECT_EQ(line[1], 3.0f);
+      EXPECT_TRUE(std::isnan(line[2])); EXPECT_EQ(line[3], 2.0f);
+    }
+  }
+}
+
 TEST(TacudaStream, NatrMatchesFullSeries) {
   const auto &s = series();
   const int period = 14;
