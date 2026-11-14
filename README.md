@@ -47,6 +47,8 @@ Implementation semantics (EMA seeding, warmup NaNs, indexing conventions) are do
 
 ---
 
+Release verification: [tag workflow](https://github.com/Ta-Cuda/tacuda/actions/runs/43630756431) · [GPU and package receipts](docs/validation/2026-11-14/tag-validation.json).
+
 ## Fused batches in 0.9.0
 
 One kernel processes all series in a supported batch. On RTX 3090 Ti, the
@@ -548,12 +550,12 @@ Adding a new indicator touches four places (see
 
 ## ✅ Status & TODO
 
-### ✅ Implemented as of 0.8.0
+### ✅ Implemented as of 0.9.0
 
 - [x] **All 161 functions from TA-Lib 0.7.1 implemented** (incl. MACDEXT with independent MA types and 19 element-wise vector math functions); numerical parity is verified per function by the strict differential corpus — 165/165 specs green, remaining corner-case notes in [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md)
 - [x] **All 61 candlestick patterns** match TA-Lib signal-for-signal (double-precision literal ports, exact-equality oracle with hand-crafted activation fixtures for the rare patterns)
 - [x] **Device API** (`ct_*_d`, 200 functions) for zero-copy multi-indicator pipelines, with `_ex_d` float16/32/64 precision variants
-- [x] **Batch API**: 166 indicator families over a stream pool (`maxConcurrency` control)
+- [x] **Batch API**: 166 indicator families, 17 fused kernels with automatic fallback, and CUDA Graph capture on caller streams
 - [x] Python (ctypes), Node.js (koffi) and .NET 8/9 bindings covering the full 811-symbol C ABI (audited in CI)
 - [x] Packaging workflow for PyPI (platform wheels with natives), npm (tgz) and NuGet (nupkg with win-x64 + linux-x64 natives), GPU-gated publishing
 - [x] **SAREXT** bit-for-bit TA-Lib semantics; SAR/SAREXT host API uses a fast CPU path
@@ -564,7 +566,7 @@ Adding a new indicator touches four places (see
 
 Current priorities live in **[docs/ROADMAP.md](docs/ROADMAP.md)**:
 
-- finish the streaming line: site section, live-trading guide, the ADX group and STOCH/STOCHF as stream families;
+- extend the streaming line: live-trading guide, the ADX group and STOCH/STOCHF as stream families;
 - TA-Lib 0.8.1 coverage (40 missing corpus specs, IMI/WILLR edge semantics);
 - persistent batch plans (deferred on measurement — see the roadmap) and multi-GPU dispatch;
 - Conda/Docker/Jetson distribution;

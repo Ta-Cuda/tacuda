@@ -654,3 +654,36 @@ are unsuccessful instrumentation, not clean memory reports. The earlier Linux
 MACD `memcheck` acceptance remains valid. Two-GPU ownership validation (A16)
 still requires a host with two GPUs. Before any publication, finalize the
 release date and authorize the existing signed-tag release procedure separately.
+
+## Published 0.9.0 and two-platform GPU acceptance — 2026-11-14
+
+Signed tag `v0.9.0` points to public source `96f8e1cdf907d0d524e6e145cc6410a5d282191c`.
+The [package dry run](https://github.com/Ta-Cuda/tacuda/actions/runs/43628298368)
+passed before tagging. The [tag workflow](https://github.com/Ta-Cuda/tacuda/actions/runs/43630756431)
+then built and published the release. PyPI wheels/sdist, npm integrity,
+NuGet native payloads and GitHub native checksums match that tag run.
+The earlier 0.8.1 candidate was never released; its corrections are included.
+
+Linux and Windows RTX 3090 Ti validation each registered 498 CTest cases:
+497 passed, one optional TA-Lib optimizer backend skipped. Both corpora passed
+1319/1319 differential cells and 839/839 streaming cells. Python, Node.js and
+C# pipelines passed, including 100 additional C# checks. New checks cover all
+17 fused families, one-node graph capture, row/batch independence, NaN isolation,
+period-one ATR/NATR and fixed-tree scan replay. The separate Windows fault-
+injection build also passed the eight-million-element scan test.
+
+Actual tag-run wheel/npm/NuGet artifacts were installed in clean environments
+on both GPU platforms. Version 0.9.0, GPU and incremental SMA, the packaged-native
+fused/scan tests and both corpora passed. Packaged native hashes equal the
+corresponding native-build artifacts; production libraries retain no test hooks.
+The pinned oracle is NumPy 2.2.6, Python TA-Lib 0.7.0 linked to C 0.6.4;
+this does not independently certify the older 0.7.1 native baseline label.
+
+The Linux test host uses Ubuntu 24.04.4, driver 590.48.01 and CUDA 12.8;
+the official Linux native is built on Ubuntu 22.04/CUDA 12.9 and carried by
+the `manylinux_2_35_x86_64` wheel. Windows uses driver 617.42, CUDA 12.9 and
+MSVC 19.44. Scoped receipts and hashes are in
+[tag-validation.json](validation/2026-11-14/tag-validation.json).
+These acceptance documentation changes follow the immutable tagged source.
+Windows Compute Sanitizer attachment and two-GPU ownership validation retain
+their previously documented gaps; neither is inferred from single-GPU results.

@@ -1,16 +1,16 @@
 # TaCuda Roadmap
 
-Last reviewed: 2026-11-08 (0.8.0 released).
+Last reviewed: 2026-11-14 (0.9.0 released).
 This document tracks where the project stands and what ships next.
 Order inside a milestone is priority order; items move, versions don't slip silently.
 
-## Current release (0.8.0)
+## Current release (0.9.0)
 
 | Area | State |
 |------|-------|
 | TA-Lib coverage | 161/161 functions of native TA-Lib 0.7.1; strict differential corpus 165/165 specs green (exact-name coverage enforcement, exact candlestick parity incl. activation fixtures for the rare patterns) |
 | Native ABI | 811 `extern "C"` entrypoints: 559 host, including three introspection functions (incl. `_ex` precision and `_batch`) + 200 `_d` device + 52 streaming; append-only policy ([CONTRIBUTING.md](CONTRIBUTING.md#abi-stability-policy)) |
-| Batch API | 166 indicator families (incl. all candlestick patterns and the STAD club pack), stream-pool scheduling, host + device variants ([BATCH_API.md](BATCH_API.md)) |
+| Batch API | 166 indicator families; 17 fused kernels with shape/period-based fallback, host + device variants, CUDA Graph capture on caller streams ([BATCH_API.md](BATCH_API.md)) |
 | Bindings | Python (ctypes), Node.js (koffi), C#/.NET (P/Invoke) — full 811-symbol surface incl. streaming handles, audited in CI (`bindings/audit_bindings.py`) |
 | Streaming | Incremental append for 10 families, single-series and portfolio-wide ([STREAMING_API.md](STREAMING_API.md)); parity swept by `benchmarks/streaming_corpus.py` |
 | Memory safety | Stream-ordered buffer pool; buffers may outlive their Context; cross-Context use rejected; lifetime tests in ctest |
@@ -18,7 +18,7 @@ Order inside a milestone is priority order; items move, versions don't slip sile
 | CI | `native-build` (Linux + Windows, all targets), GPU test job on a self-hosted RTX 3090 Ti runner (ctest + corpus + binding pipelines) mandatory for version tags |
 | Docs | User guide / API / performance / operations tree, implementation notes, changelog, release criteria, adoption checklist |
 | Site | https://tacuda.com (maintained separately; EXPERIMENTS pages generated from this repo) |
-| Benchmarks | Pipeline 15.4x vs TA-Lib @1M bars, separate NumPy/TA-Lib vector-math baselines, batch up to 7.5x vs loops (RTX 3090 Ti) |
+| Benchmarks | Pipeline 15.4x vs TA-Lib @1M bars, separate NumPy/TA-Lib vector-math baselines, issue #6 GPU-resident 13-call pass: 431.09 to 2.615 ms at 4000 x 234 during 0.9.0 preparation; historical results retain their environments (RTX 3090 Ti) |
 | Tools | `tacuda-opt` strategy optimizer (M0–M4 shipped) with the 94-system EXPERIMENTS pack |
 
 Historical timings below predate the handle-registry fix; release benchmarks
@@ -122,7 +122,8 @@ measurements behind each decision: [DESIGN_STREAMING_API.md](DESIGN_STREAMING_AP
 
 Moved here from v0.8.0 during release preparation (2026-10-14), not dropped.
 
-- [ ] Site section for streaming and a live-trading article.
+- [x] Site section for streaming (published separately at tacuda.com).
+- [ ] Live-trading article.
 - [ ] TA-Lib 0.8.1 migration: add the 40 missing corpus specs, determine which
       are existing TACUDA extras, resolve IMI/WILLR edge semantics, then run
       strict parity without widening tolerances. Current coverage names 0.7.1.
@@ -141,9 +142,26 @@ Moved here from v0.8.0 during release preparation (2026-10-14), not dropped.
       deviations): sin/cos table computed on the host, no FMA in the phase
       sums — or keep the deviation documented.
 
-## v0.9.0 — scale & distribution
+## v0.9.0 — fused portfolios and graph execution
 
-Deferred until 0.8.0 shows where demand actually is.
+Released 2026-11-14 with a signed tag, Windows/Linux native builds, mandatory
+Linux GPU checks, clean package installations on both GPU platforms and
+verified PyPI/npm/NuGet payloads. The unpublished 0.8.1 corrections ship here.
+
+- [x] Seventeen fused batch families, one kernel per supported device call,
+      automatic long-series fallback and `TACUDA_BATCH_FUSED=auto|0|1`.
+- [x] CUDA Graph capture across all batch families on caller streams.
+- [x] Double recurrence arithmetic, documented float32 migration controls,
+      row independence and NaN isolation regressions.
+- [x] Deterministic long-series MFI/AD/ADOSC/STDDEV scans and MFI cancellation
+      correction, plus boundary-period EMA/ATR/NATR fixes.
+- [x] Both GPU platforms: 497 CTest passes plus one optional skip;
+      differential corpus 1319/1319; streaming corpus 839/839, including
+      ATR/NATR period 1. See [release evidence](validation/2026-11-14/tag-validation.json).
+
+## Future scale and distribution
+
+Version unassigned; prioritize from measured downstream demand.
 
 - [ ] Multi-GPU dispatch for batch API (`deviceId` in batch options; one
       stream pool per device).

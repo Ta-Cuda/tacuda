@@ -1,0 +1,390 @@
+{
+  "date": "2026-11-14",
+  "version": "0.9.0",
+  "run_id": 43630756431,
+  "source": "96f8e1cdf907d0d524e6e145cc6410a5d282191c",
+  "url": "https://github.com/Ta-Cuda/tacuda/actions/runs/43630756431",
+  "packages": {
+    "tacuda-0.9.0-py3-none-manylinux_2_35_x86_64.whl": {
+      "size": 21789515,
+      "sha256": "4346c29d894eb124d6b92aa94d07fa5dfebb4a330ebc310108aff860b111827e",
+      "sha1": "d7fab8a12367667f417c7336a1ea3bca9262be52",
+      "integrity": "sha512-4hWWexlDrMpxODQM+7/gH2eWXJdtin1ZQ1jlsMEkMMUM2y7pbqe/j8NktC4g1W+wcYLFMlFCe38rBI6Yphlx4g==",
+      "natives": {
+        "tacuda/libtacuda.so": "8e94e697e151347dede5bb7805d572f8a28605feb07b320cb75095883c29f635"
+      }
+    },
+    "tacuda-0.9.0-py3-none-win_amd64.whl": {
+      "size": 21548605,
+      "sha256": "23d4bc64090f5aab5d5e8227e9fe75e71f841d27e84b53e8684dc4e5e3c3b2bf",
+      "sha1": "d938cd41942b6d57dad3c81bb34e64fa86cfea0d",
+      "integrity": "sha512-BvaILUCD5j7VGUAmcjvWzR3t/he+0kub+VYQyUTd+f9e9v5gdIKsytZfhqmWUDqimDenqiO3ttPpuSq5s+kq/Q==",
+      "natives": {
+        "tacuda/tacuda.dll": "4fe146b0b33e65256f2237e6c08c2fa4055aed217d2e59ab24200fada032468a"
+      }
+    },
+    "tacuda-0.9.0.tar.gz": {
+      "size": 38630,
+      "sha256": "ed65a09d0841cc5b1eab1f9796077e1ccf40b757e8a737eae487240c89b7d36b",
+      "sha1": "2c09480047e4a4627f7d9ea399bfc2d6015fb887",
+      "integrity": "sha512-RbNh78v5lD95VLPb5GkzBOuBaNjmHqr4ovbaScXdGn6tTSkRxp6Vxicfbn9ydkP8SlZ8860UroOrvwCFe4JSmQ=="
+    },
+    "tacuda-0.9.0.tgz": {
+      "size": 42549,
+      "sha256": "2a576c2609fb95f9d0c2a4676e4421a8c8408e88aa135089840a36f99ae9ffa7",
+      "sha1": "65f15af6459bdec0476a5528002aa3d6a90b6c83",
+      "integrity": "sha512-xo1x/jtFZq0sAezaidt/L/WTfDbKS0DaaXqfmEHJPXzpJJn1d7DwoZSm+ffNMykYY0BGgrhSWWwCS43sBEcxVA=="
+    },
+    "Tacuda.0.9.0.nupkg": {
+      "size": 43549088,
+      "sha256": "45cdec29c5b82ee1af92e3be89442019bbf73b04c08bf5f56f998ee89802e259",
+      "sha1": "1040c5aad552c76b21a145088ac3f4c3a91983b4",
+      "integrity": "sha512-PVno16geJnUVKlq6q6m6goOo30CoLU/MA69bbIkwjf79NGMEascM/gN8iMfQ5Q23Q+ilTHinmkIL/v5peTlu8Q=="
+    }
+  },
+  "natives": {
+    "tacuda.dll": {
+      "sha256": "4fe146b0b33e65256f2237e6c08c2fa4055aed217d2e59ab24200fada032468a",
+      "size": 57594368
+    },
+    "libtacuda.so": {
+      "sha256": "8e94e697e151347dede5bb7805d572f8a28605feb07b320cb75095883c29f635",
+      "size": 59384976
+    }
+  },
+  "publication": {
+    "version": "0.9.0",
+    "source": "96f8e1cdf907d0d524e6e145cc6410a5d282191c",
+    "run_id": 43630756431,
+    "pypi": {
+      "status": "PASS",
+      "files": [
+        "tacuda-0.9.0-py3-none-manylinux_2_35_x86_64.whl",
+        "tacuda-0.9.0-py3-none-win_amd64.whl",
+        "tacuda-0.9.0.tar.gz"
+      ],
+      "url": "https://pypi.org/project/tacuda/0.9.0/"
+    },
+    "npm": {
+      "status": "PASS",
+      "integrity": "sha512-xo1x/jtFZq0sAezaidt/L/WTfDbKS0DaaXqfmEHJPXzpJJn1d7DwoZSm+ffNMykYY0BGgrhSWWwCS43sBEcxVA==",
+      "url": "https://www.npmjs.com/package/tacuda/v/0.9.0"
+    },
+    "nuget": {
+      "status": "PASS",
+      "native_payloads_match_ci": true,
+      "url": "https://www.nuget.org/packages/Tacuda/0.9.0"
+    },
+    "github_release": {
+      "status": "PASS",
+      "url": "https://github.com/Ta-Cuda/tacuda/releases/tag/v0.9.0",
+      "tag_object": "1c51171366b888e95ee7ae54607a6cd1c18aa08d",
+      "assets": [
+        "checksums.txt",
+        "libtacuda.so",
+        "tacuda.dll"
+      ],
+      "tag_signature": "SSH signature present; cryptographic verification performed locally"
+    }
+  },
+  "gpu_ctest": {
+    "registered": 498,
+    "passed": 497,
+    "optional_skipped": 1
+  },
+  "differential": {
+    "specs": 165,
+    "passed": 1319,
+    "total": 1319
+  },
+  "streaming": {
+    "passed": 839,
+    "total": 839
+  },
+  "windows_gpu": {
+    "source": "96f8e1cdf907d0d524e6e145cc6410a5d282191c",
+    "platform": "Windows",
+    "status": "PASS",
+    "ctest_registered": 498,
+    "ctest_passed": 497,
+    "ctest_optional_skipped": 1,
+    "checks": {
+      "venv": {
+        "exit_code": 0,
+        "seconds": 7.23
+      },
+      "reference-install": {
+        "exit_code": 0,
+        "seconds": 34.91
+      },
+      "build": {
+        "exit_code": 0,
+        "seconds": 422.48
+      },
+      "ctest": {
+        "exit_code": 0,
+        "seconds": 114.48
+      },
+      "forced-fused-async": {
+        "exit_code": 0,
+        "seconds": 0.95
+      },
+      "python-pipeline": {
+        "exit_code": 0,
+        "seconds": 0.58
+      },
+      "npm-ci": {
+        "exit_code": 0,
+        "seconds": 11.59
+      },
+      "node-pipeline": {
+        "exit_code": 0,
+        "seconds": 0.47
+      },
+      "csharp-pipeline": {
+        "exit_code": 0,
+        "seconds": 8.3
+      },
+      "csharp-tests": {
+        "exit_code": 0,
+        "seconds": 0.92
+      },
+      "corpus": {
+        "exit_code": 0,
+        "seconds": 1.31
+      },
+      "streaming": {
+        "exit_code": 0,
+        "seconds": 11.62
+      },
+      "scan-8m": {
+        "exit_code": 0,
+        "seconds": 7.98
+      }
+    },
+    "source_verification": {
+      "source": "96f8e1cdf907d0d524e6e145cc6410a5d282191c",
+      "checked": 1015,
+      "archive_sha256": "23bb37bff52adebcd613b2a30f380a77bcd7cb70de5ab3eeda6441595986a548",
+      "documentation_only_updates": [],
+      "differences": []
+    },
+    "differential_corpus": {
+      "passed": 1319,
+      "total": 1319,
+      "specsGreen": 165,
+      "specs": 165,
+      "candleSignalsBySpec": {
+        "CDLABANDONEDBABY": 127,
+        "CDLADVANCEBLOCK": 7,
+        "CDLBELTHOLD": 2582,
+        "CDLBREAKAWAY": 10,
+        "CDLCLOSINGMARUBOZU": 2927,
+        "CDLCONCEALBABYSWALL": 1,
+        "CDLCOUNTERATTACK": 114,
+        "CDLDARKCLOUDCOVER": 1,
+        "CDLDOJI": 11647,
+        "CDLDOJISTAR": 1872,
+        "CDLDRAGONFLYDOJI": 841,
+        "CDLENGULFING": 159,
+        "CDLEVENINGDOJISTAR": 84,
+        "CDLEVENINGSTAR": 82,
+        "CDLGAPSIDESIDEWHITE": 79,
+        "CDLGRAVESTONEDOJI": 806,
+        "CDLHAMMER": 393,
+        "CDLHANGINGMAN": 391,
+        "CDLHARAMI": 250,
+        "CDLHARAMICROSS": 181,
+        "CDLHIGHWAVE": 6046,
+        "CDLHIKKAKE": 818,
+        "CDLHIKKAKEMOD": 9,
+        "CDLHOMINGPIGEON": 86,
+        "CDLIDENTICAL3CROWS": 1,
+        "CDLINNECK": 10,
+        "CDLINVERTEDHAMMER": 419,
+        "CDLKICKING": 1,
+        "CDLKICKINGBYLENGTH": 1,
+        "CDLLADDERBOTTOM": 18,
+        "CDLLONGLEGGEDDOJI": 7495,
+        "CDLLONGLINE": 2337,
+        "CDLMARUBOZU": 682,
+        "CDLMATHOLD": 1,
+        "CDLMATCHINGLOW": 231,
+        "CDLMORNINGDOJISTAR": 86,
+        "CDLMORNINGSTAR": 94,
+        "CDLONNECK": 31,
+        "CDLPIERCING": 1,
+        "CDLRICKSHAWMAN": 4738,
+        "CDLRISEFALL3METHODS": 1,
+        "CDLSEPARATINGLINES": 21,
+        "CDLSHOOTINGSTAR": 400,
+        "CDLSHORTLINE": 1926,
+        "CDLSPINNINGTOP": 6850,
+        "CDLSTALLEDPATTERN": 1,
+        "CDLSTICKSANDWICH": 9,
+        "CDLTAKURI": 831,
+        "CDLTASUKIGAP": 39,
+        "CDL3BLACKCROWS": 1,
+        "CDL3INSIDE": 26,
+        "CDL3LINESTRIKE": 1,
+        "CDL3OUTSIDE": 61,
+        "CDL3STARSINSOUTH": 1,
+        "CDL3WHITESOLDIERS": 2,
+        "CDLTHRUSTING": 2,
+        "CDLTRISTAR": 1158,
+        "CDL2CROWS": 7,
+        "CDLUNIQUE3RIVER": 8,
+        "CDLUPSIDEGAP2CROWS": 9,
+        "CDLXSIDEGAP3METHODS": 10
+      },
+      "inactiveCandleSpecs": [],
+      "coverageMissing": []
+    },
+    "streaming_corpus": {
+      "version": "0.9.0",
+      "total": 839,
+      "passed": 839
+    },
+    "environment": {
+      "os": "Windows 11",
+      "gpu": "RTX 3090 Ti",
+      "driver": "617.42",
+      "cuda": "12.9",
+      "compiler": "MSVC 19.44",
+      "python": "3.12.8",
+      "numpy": "2.2.6",
+      "python_talib": "0.7.0"
+    }
+  },
+  "installed_packages": {
+    "linux": {
+      "run_id": 43630756431,
+      "source": "96f8e1cdf907d0d524e6e145cc6410a5d282191c",
+      "os": "Linux",
+      "checks": {
+        "venv": {
+          "exit_code": 0,
+          "seconds": 1.11
+        },
+        "wheel-install": {
+          "exit_code": 0,
+          "seconds": 0.28
+        },
+        "wheel-gpu-smoke": {
+          "exit_code": 0,
+          "seconds": 0.26
+        },
+        "npm-install": {
+          "exit_code": 0,
+          "seconds": 0.16
+        },
+        "npm-gpu-smoke": {
+          "exit_code": 0,
+          "seconds": 0.18
+        },
+        "nuget-gpu-smoke": {
+          "exit_code": 0,
+          "seconds": 2.43
+        },
+        "production-exports": {
+          "exit_code": 0,
+          "seconds": 0.04
+        },
+        "fused-packaged-native": {
+          "exit_code": 0,
+          "seconds": 0.38
+        },
+        "scan-packaged-native": {
+          "exit_code": 0,
+          "seconds": 0.55
+        },
+        "corpus-packaged-native": {
+          "exit_code": 0,
+          "seconds": 0.66
+        },
+        "streaming-packaged-native": {
+          "exit_code": 0,
+          "seconds": 4.73
+        }
+      },
+      "native_sha256": "8e94e697e151347dede5bb7805d572f8a28605feb07b320cb75095883c29f635",
+      "packages_sha256": {
+        "Tacuda.0.9.0.nupkg": "45cdec29c5b82ee1af92e3be89442019bbf73b04c08bf5f56f998ee89802e259",
+        "tacuda-0.9.0-py3-none-manylinux_2_35_x86_64.whl": "4346c29d894eb124d6b92aa94d07fa5dfebb4a330ebc310108aff860b111827e",
+        "tacuda-0.9.0-py3-none-win_amd64.whl": "23d4bc64090f5aab5d5e8227e9fe75e71f841d27e84b53e8684dc4e5e3c3b2bf",
+        "tacuda-0.9.0.tar.gz": "ed65a09d0841cc5b1eab1f9796077e1ccf40b757e8a737eae487240c89b7d36b",
+        "tacuda-0.9.0.tgz": "2a576c2609fb95f9d0c2a4676e4421a8c8408e88aa135089840a36f99ae9ffa7"
+      },
+      "native_version": "0.9.0",
+      "gpu_sma": 54.5,
+      "incremental_sma": 54.5
+    },
+    "windows": {
+      "run_id": 43630756431,
+      "source": "96f8e1cdf907d0d524e6e145cc6410a5d282191c",
+      "os": "Windows",
+      "checks": {
+        "venv": {
+          "exit_code": 0,
+          "seconds": 6.47
+        },
+        "wheel-install": {
+          "exit_code": 0,
+          "seconds": 34.86
+        },
+        "wheel-gpu-smoke": {
+          "exit_code": 0,
+          "seconds": 0.64
+        },
+        "npm-install": {
+          "exit_code": 0,
+          "seconds": 2.67
+        },
+        "npm-gpu-smoke": {
+          "exit_code": 0,
+          "seconds": 0.36
+        },
+        "nuget-gpu-smoke": {
+          "exit_code": 0,
+          "seconds": 5.62
+        },
+        "production-exports": {
+          "exit_code": 0,
+          "seconds": 0.23
+        },
+        "fused-packaged-native": {
+          "exit_code": 0,
+          "seconds": 0.98
+        },
+        "scan-packaged-native": {
+          "exit_code": 0,
+          "seconds": 1.81
+        },
+        "corpus-packaged-native": {
+          "exit_code": 0,
+          "seconds": 1.31
+        },
+        "streaming-packaged-native": {
+          "exit_code": 0,
+          "seconds": 11.5
+        }
+      },
+      "native_sha256": "4fe146b0b33e65256f2237e6c08c2fa4055aed217d2e59ab24200fada032468a",
+      "packages_sha256": {
+        "tacuda-0.9.0-py3-none-manylinux_2_35_x86_64.whl": "4346c29d894eb124d6b92aa94d07fa5dfebb4a330ebc310108aff860b111827e",
+        "tacuda-0.9.0-py3-none-win_amd64.whl": "23d4bc64090f5aab5d5e8227e9fe75e71f841d27e84b53e8684dc4e5e3c3b2bf",
+        "tacuda-0.9.0.tar.gz": "ed65a09d0841cc5b1eab1f9796077e1ccf40b757e8a737eae487240c89b7d36b",
+        "tacuda-0.9.0.tgz": "2a576c2609fb95f9d0c2a4676e4421a8c8408e88aa135089840a36f99ae9ffa7",
+        "Tacuda.0.9.0.nupkg": "45cdec29c5b82ee1af92e3be89442019bbf73b04c08bf5f56f998ee89802e259"
+      },
+      "native_version": "0.9.0",
+      "gpu_sma": 54.5,
+      "incremental_sma": 54.5
+    }
+  },
+  "reference": {
+    "numpy": "2.2.6",
+    "python_talib": "0.7.0",
+    "linked_talib": "0.6.4"
+  }
+}
