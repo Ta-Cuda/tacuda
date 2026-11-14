@@ -202,6 +202,7 @@ add_library(tacuda SHARED
     src/api/api_device.cu
     src/api/api_vector_math.cu
     src/api/api_batch.cu
+    src/api/BatchFused.cu
     src/api/api_stream.cpp
     src/api/api_stream_batch.cu
     src/utils/DeviceBufferPool.cu
@@ -260,6 +261,10 @@ target_compile_options(tacuda PRIVATE
         --extended-lambda
     >
 )
+
+# TA-Lib recurrences use distinct multiply/add operations; contracting them
+# into FMA changes the final float32 bits on cancellation-heavy inputs.
+set_source_files_properties(src/api/BatchFused.cu PROPERTIES COMPILE_OPTIONS "--fmad=false")
 
 add_executable(example_app src/main.cpp)
 target_compile_features(example_app PRIVATE cxx_std_17)
@@ -321,6 +326,22 @@ if (BUILD_TESTING)
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/check_release.py)
   add_test(NAME python_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/test_python_contract.py)
+  # Every *_batch_d on a user stream: strict (global-mode) CUDA graph capture
+  # and replay equal to the eager result. Needs a GPU.
+  if (WIN32)
+    set(TACUDA_CUDART_DIR "${CUDAToolkit_BIN_DIR}")
+  else()
+    set(TACUDA_CUDART_DIR "${CUDAToolkit_LIBRARY_DIR}")
+  endif()
+  add_test(NAME batch_graph_capture_sweep
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/batch_graph_capture_sweep.py
+            --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR})
+  add_test(NAME batch_fused
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/batch_fused.py
+            --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR})
+  add_test(NAME scan_determinism
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/scan_determinism.py
+            --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR})
   if (TACUDA_ENABLE_ASAN_TEST)
     add_test(NAME stream_lifetime_sanitizer COMMAND stream_lifetime_sanitizer)
   endif()

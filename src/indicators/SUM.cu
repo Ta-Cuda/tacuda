@@ -6,6 +6,7 @@
 #include <indicators/SUM.h>
 #include <stdexcept>
 #include <thrust/device_ptr.h>
+#include <utils/ThrustPolicy.cuh>
 #include <thrust/execution_policy.h>
 #include <thrust/scan.h>
 #include <utils/CudaUtils.h>
@@ -27,7 +28,12 @@ __global__ void sumKernelPrefixD(const double *__restrict__ prefix,
                                  float *__restrict__ output, int period,
                                  int size) {
   int end = blockIdx.x * blockDim.x + threadIdx.x;
-  if (end >= size || end < period - 1) return;
+  if (end >= size) return;
+  if (end < period - 1) {
+    // Warm-up NaN written here instead of a separate memset (same pattern).
+    output[end] = __int_as_float(0xFFFFFFFF);
+    return;
+  }
   int j = end - period + 1;
   double prev = (j == 0) ? 0.0 : prefix[j - 1];
   double sum = prefix[end] - prev;
@@ -47,7 +53,7 @@ void tacuda::SUM::calculate(const float *input, float *output,
       CUDA_CHECK(cudaMemsetAsync(output, 0xFF, static_cast<size_t>(size) * sizeof(float), stream));
       return;
   }
-  CUDA_CHECK(cudaMemsetAsync(output, 0xFF, size * sizeof(float), stream));
+  // No NaN pre-fill: sumKernelPrefixD writes every element.
 
   // Compute prefix in double via explicit cast to avoid float-accumulation drift
   auto prefixD = acquireDeviceBufferAsync<double>(size, stream);
@@ -58,7 +64,7 @@ void tacuda::SUM::calculate(const float *input, float *output,
     CUDA_CHECK(cudaGetLastError());
   }
   thrust::device_ptr<double> preD(prefixD.get());
-  thrust::inclusive_scan(thrust::cuda::par.on(stream), preD, preD + size, preD);
+  thrust::inclusive_scan(tacuda::detail::thrust_on(stream), preD, preD + size, preD);
 
   dim3 block = defaultBlock();
   dim3 grid = defaultGrid(size);

@@ -170,8 +170,17 @@ Apache License 2.0 — see [LICENSE](../../LICENSE).
 
 Streaming was added in 0.8.0 for incremental single-series and portfolio
 updates across 10 indicator families. Pair bindings with the native library
-from the same release; 0.8.1 includes precision, input-validation and stream
+from the same release; 0.9.0 also includes precision, input-validation and stream
 correctness fixes. A native older than 0.8.0 does not export the streaming
 functions. See the
 [Streaming API guide](https://github.com/Ta-Cuda/tacuda/blob/main/docs/STREAMING_API.md).
 The 161-function compatibility baseline is native TA-Lib 0.7.1, not TA-Lib 0.8.1.
+
+## Fused portfolio batches (0.9.0)
+
+Seventeen indicator families can process a portfolio in one CUDA kernel
+per call. Supported device batches are CUDA Graph compatible; user-stream
+calls stay asynchronous. `TACUDA_BATCH_FUSED=auto|0|1` controls automatic,
+per-series or forced fused dispatch. Period/shape limits apply, and the
+double internal arithmetic can change the last float32 bits from 0.8.
+See [batch dispatch and migration](https://github.com/Ta-Cuda/tacuda/blob/v0.9.0/docs/BATCH_API.md#fused-execution).

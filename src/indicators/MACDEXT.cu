@@ -10,18 +10,12 @@
 #include <utils/AffineScan.cuh>
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
-#include <thrust/device_ptr.h>
-#include <thrust/execution_policy.h>
-#include <thrust/transform_reduce.h>
+#include <utils/DeviceSeed.cuh>
 
 namespace {
 
 using AffinePair = tacuda::detail::AffineTransform1<double>;
 using AffineCompose = tacuda::detail::AffineCompose1<double>;
-
-struct ToDouble {
-    __host__ __device__ double operator()(float v) const { return static_cast<double>(v); }
-};
 
 __global__ void buildEmaPairsFromIndexKernel(const float* __restrict__ input,
                                     AffinePair* __restrict__ pairs,
@@ -35,26 +29,28 @@ __global__ void buildEmaPairsFromIndexKernel(const float* __restrict__ input,
     pairs[k] = AffinePair{a, alpha * static_cast<double>(input[i])};
 }
 
+// The seed is read through a device pointer (it may live in `output` itself,
+// just before firstIdx), so neither pointer is __restrict__-qualified.
 __global__ void finalizeSeededEmaKernel(const AffinePair* __restrict__ pref,
-                                  double* __restrict__ output,
+                                  double* output,
                                   int firstIdx,
                                   int nPairs,
-                                  double seed) {
+                                  const double* seedp) {
     int k = blockIdx.x * blockDim.x + threadIdx.x;
     if (k >= nPairs) return;
     AffinePair p = pref[k];
-    output[firstIdx + k] = p.A * seed + p.b;
+    output[firstIdx + k] = p.A * (*seedp) + p.b;
 }
 
 __global__ void finalizeSeededEmaToFloatKernel(const AffinePair* __restrict__ pref,
-                                               float* __restrict__ output,
+                                               float* output,
                                                int firstIdx,
                                                int nPairs,
-                                               double seed) {
+                                               const double* seedp) {
     int k = blockIdx.x * blockDim.x + threadIdx.x;
     if (k >= nPairs) return;
     AffinePair p = pref[k];
-    output[firstIdx + k] = static_cast<float>(p.A * seed + p.b);
+    output[firstIdx + k] = static_cast<float>(p.A * (*seedp) + p.b);
 }
 
 __global__ void computeMacdFromEmaKernel(const double* __restrict__ fastEma,
@@ -109,7 +105,7 @@ static void computeSeededEmaFrom(const float* input,
                                  double* output,
                                  int size,
                                  int firstIdx,
-                                 double seed,
+                                 const double* seed,
                                  int period,
                                  cudaStream_t stream) {
     if (firstIdx >= size) return;
@@ -137,7 +133,7 @@ static void computeSeededEmaFromToFloat(const float* input,
                                         float* output,
                                         int size,
                                         int firstIdx,
-                                        double seed,
+                                        const double* seed,
                                         int period,
                                         cudaStream_t stream) {
     if (firstIdx >= size) return;
@@ -253,25 +249,18 @@ void MACDEXT::calculate(const float* input, float* macd, float* signal, float* h
         CUDA_CHECK(cudaMemsetAsync(fastEma.get(), 0xFF, static_cast<size_t>(size) * sizeof(double), stream));
         CUDA_CHECK(cudaMemsetAsync(slowEma.get(), 0xFF, static_cast<size_t>(size) * sizeof(double), stream));
 
+        // Seeds are SMAs computed on the device and stored where the EMA
+        // lines expect them (index macdLookback); the recurrences read them
+        // from there.
         const int fastSeedStart = macdLookback - fastPeriod + 1;
-        double fastSeedSum = thrust::transform_reduce(
-            thrust::cuda::par.on(stream),
-            thrust::device_pointer_cast(input) + fastSeedStart,
-            thrust::device_pointer_cast(input) + macdLookback + 1,
-            ToDouble{}, 0.0, thrust::plus<double>{});
-        double fastSeed = fastSeedSum / static_cast<double>(fastPeriod);
-
-        double slowSeedSum = thrust::transform_reduce(
-            thrust::cuda::par.on(stream),
-            thrust::device_pointer_cast(input),
-            thrust::device_pointer_cast(input) + slowPeriod,
-            ToDouble{}, 0.0, thrust::plus<double>{});
-        double slowSeed = slowSeedSum / static_cast<double>(slowPeriod);
-
-        CUDA_CHECK(cudaMemcpyAsync(fastEma.get() + macdLookback, &fastSeed, sizeof(double),
-                                   cudaMemcpyHostToDevice, stream));
-        CUDA_CHECK(cudaMemcpyAsync(slowEma.get() + macdLookback, &slowSeed, sizeof(double),
-                                   cudaMemcpyHostToDevice, stream));
+        double* fastSeed = fastEma.get() + macdLookback;
+        double* slowSeed = slowEma.get() + macdLookback;
+        tacuda::detail::launch_seed_sum(input, fastSeedStart, fastPeriod,
+                                        static_cast<double>(fastPeriod), fastSeed,
+                                        nullptr, 0, stream);
+        tacuda::detail::launch_seed_sum(input, 0, slowPeriod,
+                                        static_cast<double>(slowPeriod), slowSeed,
+                                        nullptr, 0, stream);
 
         computeSeededEmaFrom(input, fastEma.get(), size, slowPeriod, fastSeed, fastPeriod, stream);
         computeSeededEmaFrom(input, slowEma.get(), size, slowPeriod, slowSeed, slowPeriod, stream);
@@ -280,16 +269,13 @@ void MACDEXT::calculate(const float* input, float* macd, float* signal, float* h
             fastEma.get(), slowEma.get(), macd, size, macdLookback);
         CUDA_CHECK(cudaGetLastError());
 
-        double signalSeedSum = thrust::transform_reduce(
-            thrust::cuda::par.on(stream),
-            thrust::device_pointer_cast(macd) + macdLookback,
-            thrust::device_pointer_cast(macd) + signalLookback + 1,
-            ToDouble{}, 0.0, thrust::plus<double>{});
-        double signalSeed = signalSeedSum / static_cast<double>(signalPeriod);
-        float signalSeedF = static_cast<float>(signalSeed);
-        CUDA_CHECK(cudaMemcpyAsync(signal + signalLookback, &signalSeedF, sizeof(float),
-                                   cudaMemcpyHostToDevice, stream));
-        computeSeededEmaFromToFloat(macd, signal, size, signalLookback + 1, signalSeed, signalPeriod, stream);
+        // Signal seed: SMA over MACD[macdLookback..signalLookback], also
+        // written (as float) into signal[signalLookback].
+        auto signalSeed = acquireDeviceBufferAsync<double>(1, stream);
+        tacuda::detail::launch_seed_sum(macd, macdLookback, signalPeriod,
+                                        static_cast<double>(signalPeriod), signalSeed.get(),
+                                        signal, signalLookback, stream);
+        computeSeededEmaFromToFloat(macd, signal, size, signalLookback + 1, signalSeed.get(), signalPeriod, stream);
 
         finalizeMacdOutputsKernel<<<grid, block, 0, stream>>>(macd, signal, hist, size, signalLookback);
         CUDA_CHECK(cudaGetLastError());

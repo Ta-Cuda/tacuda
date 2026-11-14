@@ -8,6 +8,7 @@
 #include <utils/DeviceBufferPool.h>
 #include <utils/TacudaConfig.h>
 #include <thrust/device_ptr.h>
+#include <utils/ThrustPolicy.cuh>
 #include <thrust/execution_policy.h>
 #include <thrust/scan.h>
 #include <stdexcept>
@@ -279,11 +280,11 @@ void WMA::calculate(const float* input, float* output, int size, cudaStream_t st
         CUDA_CHECK(cudaGetLastError());
         {
             thrust::device_ptr<double> px(prefixX.get());
-            thrust::inclusive_scan(thrust::cuda::par.on(stream), px, px + size, px);
+            thrust::inclusive_scan(tacuda::detail::thrust_on(stream), px, px + size, px);
         }
         {
             thrust::device_ptr<double> pix(prefixIX.get());
-            thrust::inclusive_scan(thrust::cuda::par.on(stream), pix, pix + size, pix);
+            thrust::inclusive_scan(tacuda::detail::thrust_on(stream), pix, pix + size, pix);
         }
         wmaFinalizeFromPrefixKernel<<<g, b, 0, stream>>>(prefixX.get(), prefixIX.get(), input, output, window, size);
     CUDA_CHECK(cudaGetLastError());

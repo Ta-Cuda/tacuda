@@ -7,8 +7,10 @@
 #include <indicators/AD.h>
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
+#include <utils/DeterministicScan.cuh>
 
 #include <thrust/scan.h>
+#include <utils/ThrustPolicy.cuh>
 #include <thrust/transform.h>
 #include <thrust/execution_policy.h>
 #include <thrust/iterator/counting_iterator.h>
@@ -59,13 +61,11 @@ void AD::calculate(const float* high, const float* low, const float* close,
         auto idx0   = thrust::make_counting_iterator<int>(0);
         auto termIt = thrust::make_transform_iterator(idx0, ADTerm{high, low, close, volume});
 
-        thrust::inclusive_scan(thrust::cuda::par.on(stream),
-                               termIt, termIt + size,
-                               tmpD.get());
+        tacuda::detail::deterministic_double_scan(termIt, tmpD.get(), size, stream);
     }
 
     // Convert to float in output buffer
-    thrust::transform(thrust::cuda::par.on(stream),
+    thrust::transform(tacuda::detail::thrust_on(stream),
                       tmpD.get(), tmpD.get() + size,
                       output,
                       [] __device__ (double x) { return static_cast<float>(x); });

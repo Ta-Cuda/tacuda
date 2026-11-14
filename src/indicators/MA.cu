@@ -75,15 +75,12 @@ void tacuda::MA::calculate(const float* input, float* output, int size, cudaStre
     case tacuda::MAType::MAMA: {
         // MAMA doesn't use period parameter - uses default fastLimit/slowLimit instead
         tacuda::MAMA mama(0.5f, 0.05f);
-        // MAMA outputs two values - allocate temp device buffer for both
-        float* d_temp = nullptr;
-        CUDA_CHECK(cudaMalloc(&d_temp, 2 * size * sizeof(float)));
-        mama.calculate(input, d_temp, size, stream);
+        // MAMA outputs two values - a stream-ordered temp buffer holds both
+        // (released after the copy below completes, without a host sync).
+        auto temp = acquireDeviceBufferAsync<float>(2 * static_cast<size_t>(size), stream);
+        mama.calculate(input, temp.get(), size, stream);
         // Copy only MAMA line (first half) to output
-        CUDA_CHECK(cudaMemcpyAsync(output, d_temp, size * sizeof(float), cudaMemcpyDeviceToDevice, stream));
-        // Wait for async copy to complete before freeing temp buffer
-        CUDA_CHECK(cudaStreamSynchronize(stream));
-        CUDA_CHECK(cudaFree(d_temp));
+        CUDA_CHECK(cudaMemcpyAsync(output, temp.get(), size * sizeof(float), cudaMemcpyDeviceToDevice, stream));
         break;
     }
     case tacuda::MAType::T3: {

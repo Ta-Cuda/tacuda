@@ -6,8 +6,117 @@
 #include <utils/DeviceBufferPool.h>
 #include <utils/CudaUtils.h>
 
+#include <cstdint>
 #include <exception>
 #include <iostream>
+#include <limits>
+#include <map>
+#include <mutex>
+
+namespace {
+
+// Library-private stream-ordered memory pools, one per device, for call-local
+// scratch (ScratchMode::StreamOrdered). Separate from the device's default
+// pool so the host application's pool attributes are never touched.
+class ScratchPools {
+public:
+    static ScratchPools& instance() {
+        // Leaked on purpose: usable from static destructors; the driver
+        // reclaims the pools with the context at process exit.
+        static ScratchPools* pools = new ScratchPools();
+        return *pools;
+    }
+
+    /// nullptr when the device cannot back a memory pool.
+    cudaMemPool_t get(int device) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        auto it = pools_.find(device);
+        if (it != pools_.end()) return it->second;
+        cudaMemPool_t pool = create(device);
+        pools_[device] = pool;
+        return pool;
+    }
+
+    void trimTo(uint64_t bytes) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        trimLocked(bytes);
+    }
+
+    void setReleaseThreshold(uint64_t bytes) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        threshold_ = bytes;
+#if CUDART_VERSION >= 11020
+        for (auto& kv : pools_) {
+            if (kv.second) {
+                (void)cudaMemPoolSetAttribute(kv.second, cudaMemPoolAttrReleaseThreshold, &threshold_);
+            }
+        }
+#endif
+        trimLocked(bytes);  // apply a lower limit now, not at the next sync
+    }
+
+private:
+    void trimLocked(uint64_t bytes) {
+#if CUDART_VERSION >= 11020
+        const size_t keep = bytes > std::numeric_limits<size_t>::max()
+                                ? std::numeric_limits<size_t>::max()
+                                : static_cast<size_t>(bytes);
+        for (auto& kv : pools_) {
+            if (kv.second) (void)cudaMemPoolTrimTo(kv.second, keep);
+        }
+#else
+        (void)bytes;
+#endif
+    }
+
+    cudaMemPool_t create(int device) {
+#if CUDART_VERSION >= 11020
+        int supported = 0;
+        if (cudaDeviceGetAttribute(&supported, cudaDevAttrMemoryPoolsSupported, device) != cudaSuccess ||
+            !supported) {
+            (void)cudaGetLastError();
+            return nullptr;
+        }
+        cudaMemPoolProps props = {};
+        props.allocType = cudaMemAllocationTypePinned;
+        props.handleTypes = cudaMemHandleTypeNone;
+        props.location.type = cudaMemLocationTypeDevice;
+        props.location.id = device;
+        cudaMemPool_t pool = nullptr;
+        if (cudaMemPoolCreate(&pool, &props) != cudaSuccess) {
+            (void)cudaGetLastError();
+            return nullptr;
+        }
+        uint64_t threshold = threshold_;
+        (void)cudaMemPoolSetAttribute(pool, cudaMemPoolAttrReleaseThreshold, &threshold);
+        // Reuse policy: same-stream reuse only (plus blocks whose free the
+        // allocating stream already depends on through an event). Same-stream
+        // reuse needs no dependency at all; after a host synchronization
+        // freed blocks are reusable by any stream, so memory stays bounded
+        // even when every call uses a new stream.
+        //  - Internal dependencies would make an allocation on one stream
+        //    wait for work queued on another: serializes the batch pool.
+        //  - Opportunistic reuse of blocks freed on other streams made the
+        //    round-robin batch pool slow: 4 000 short series over 16 streams
+        //    took 270 ms instead of 31 ms on an RTX 3090 Ti (CUDA 12.8), and
+        //    multi-stream ATR/RSI batches ran 7-10x slower than with it off.
+        int disabled = 0;
+        (void)cudaMemPoolSetAttribute(pool, cudaMemPoolReuseAllowInternalDependencies, &disabled);
+        (void)cudaMemPoolSetAttribute(pool, cudaMemPoolReuseAllowOpportunistic, &disabled);
+        return pool;
+#else
+        (void)device;
+        return nullptr;
+#endif
+    }
+
+    std::mutex mutex_;
+    std::map<int, cudaMemPool_t> pools_;
+    // Like DeviceBufferPool's default cache limit: keep what was reserved.
+    uint64_t threshold_ = std::numeric_limits<uint64_t>::max();
+};
+
+}  // namespace
 
 DeviceBufferPool& DeviceBufferPool::instance() {
     static DeviceBufferPool pool;
@@ -214,12 +323,18 @@ void DeviceBufferPool::cleanup() {
     freeBuffers.clear();
     // allocations counter is cumulative - don't reset it
     cachedBytes = 0;
+
+    // Call-local scratch lives in the stream-ordered pools: release what
+    // they hold unused as well (nothing is in flight after the sync).
+    tacuda::detail::scratch_trim();
 }
 
 size_t DeviceBufferPool::setMaxCacheBytes(size_t bytes) {
     std::lock_guard<std::mutex> lock(mutex);
     size_t oldLimit = maxCachedBytes;
     maxCachedBytes = bytes;
+    // The same limit bounds what the stream-ordered scratch pools keep.
+    tacuda::detail::scratch_set_release_threshold(bytes);
 
     // First, move any ready stream-deferred buffers into the free list.
     drainPendingLocked();
@@ -289,3 +404,79 @@ size_t DeviceBufferPool::allocationCount() const {
     std::lock_guard<std::mutex> lock(mutex);
     return allocations;
 }
+
+namespace tacuda {
+namespace detail {
+
+bool stream_is_capturing(cudaStream_t stream) noexcept {
+    cudaStreamCaptureStatus status = cudaStreamCaptureStatusNone;
+    if (cudaStreamIsCapturing(stream, &status) != cudaSuccess) {
+        // E.g. the legacy stream queried while another stream captures in
+        // global mode. Consume the error so the next cudaGetLastError() check
+        // after a kernel launch does not report it as a launch failure.
+        (void)cudaGetLastError();
+        return false;
+    }
+    return status != cudaStreamCaptureStatusNone;
+}
+
+ScratchMode scratch_mode(cudaStream_t stream) noexcept {
+    if (stream_is_capturing(stream)) return ScratchMode::Graph;
+    int device = 0;
+    if (cudaGetDevice(&device) != cudaSuccess) {
+        (void)cudaGetLastError();
+        return ScratchMode::Pooled;
+    }
+    return ScratchPools::instance().get(device) ? ScratchMode::StreamOrdered
+                                                : ScratchMode::Pooled;
+}
+
+void* scratch_acquire(size_t bytes, cudaStream_t stream, ScratchMode mode) {
+    if (bytes == 0) return nullptr;
+    if (mode == ScratchMode::Pooled) {
+        return DeviceBufferPool::instance().acquire(bytes);
+    }
+#if CUDART_VERSION >= 11020
+    void* ptr = nullptr;
+    if (mode == ScratchMode::Graph) {
+        CUDA_CHECK(cudaMallocAsync(&ptr, bytes, stream));
+        return ptr;
+    }
+    int device = 0;
+    CUDA_CHECK(cudaGetDevice(&device));
+    cudaMemPool_t pool = ScratchPools::instance().get(device);
+    if (!pool) {
+        throw std::runtime_error("scratch_acquire: device has no memory pool support");
+    }
+    CUDA_CHECK(cudaMallocFromPoolAsync(&ptr, bytes, pool, stream));
+    return ptr;
+#else
+    (void)stream;
+    throw std::runtime_error("stream-ordered allocation needs CUDA 11.2+");
+#endif
+}
+
+void scratch_release(void* ptr, cudaStream_t stream, ScratchMode mode) noexcept {
+    if (!ptr) return;
+    if (mode == ScratchMode::Pooled) {
+        DeviceBufferPool::instance().releaseAsync(ptr, stream);
+        return;
+    }
+#if CUDART_VERSION >= 11020
+    // Ordered after all work already queued on `stream`. During capture a
+    // failure means the capture is already invalidated; the graph and its
+    // allocation node are discarded with it.
+    (void)cudaFreeAsync(ptr, stream);
+#endif
+}
+
+void scratch_trim() noexcept {
+    ScratchPools::instance().trimTo(0);
+}
+
+void scratch_set_release_threshold(size_t bytes) noexcept {
+    ScratchPools::instance().setReleaseThreshold(static_cast<uint64_t>(bytes));
+}
+
+}  // namespace detail
+}  // namespace tacuda

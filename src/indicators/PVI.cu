@@ -7,6 +7,7 @@
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
 #include <thrust/device_ptr.h>
+#include <utils/ThrustPolicy.cuh>
 #include <thrust/execution_policy.h>
 #include <thrust/scan.h>
 #include <thrust/functional.h>
@@ -57,7 +58,7 @@ void tacuda::PVI::calculate(const float* close, const float* volume, float* outp
     {
         thrust::device_ptr<float> in(factors.get());
         thrust::device_ptr<float> out(output);
-        thrust::inclusive_scan(thrust::cuda::par.on(stream),
+        thrust::inclusive_scan(tacuda::detail::thrust_on(stream),
                                in, in + size, out,
                                thrust::multiplies<float>());
     }

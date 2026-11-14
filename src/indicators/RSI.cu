@@ -232,8 +232,8 @@ void rsi_calculate_impl(int period, const T* input, T* output, int size, cudaStr
     return;
   }
 
-  // Initialize NaN
-  CUDA_CHECK(cudaMemsetAsync(output, 0xFF, size * sizeof(T), stream));
+  // No NaN pre-fill: both paths below write every element, warm-up NaNs
+  // included (rsi_wilder_one_series / finalize_rsi_kernel).
 
   // Batch settings
   RSIBatchCfg cfg = getRSICfg(size);

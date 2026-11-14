@@ -11,14 +11,14 @@
  *   1. Upload every input matrix (numSeries x seriesLen, series-major) in one
  *      bulk H2D copy on the base stream. Host matrices are temporarily
  *      page-locked when large enough for the registration cost to pay off.
- *   2. Dispatch each series round-robin across an internal pool of
- *      non-blocking CUDA streams so independent kernels overlap on the GPU.
+ *   2. Launch one fused kernel for supported workloads; otherwise dispatch
+ *      series round-robin across an internal pool of non-blocking streams.
  *   3. Gather results with one bulk D2H copy per output matrix and
  *      synchronize before returning (host-API semantics).
  *
  * Device variants (_batch_d) skip steps 1 and 3: matrices are already
- * GPU-resident. With stream == 0 the pool first waits for the legacy default
- * stream, where the caller (PyTorch, CuPy, plain CUDA) usually produced them.
+ * GPU-resident. With stream == 0, fused work runs on the legacy default
+ * stream and the fallback pool first waits for preceding work on it.
  */
 
 #include <algorithm>
@@ -35,8 +35,13 @@
 #include "tacuda_device.h"
 #include <utils/DeviceBufferPool.h>
 #include <utils/ErrorState.h>
+#include "BatchFused.h"
 
 namespace {
+
+using tacuda::detail::FusedCall;
+using tacuda::detail::FusedFamily;
+using tacuda::detail::fused_call;
 
 constexpr int kMaxIo = 5;              // max input/output matrices per call (WOBV: OHLCV)
 constexpr int kAutoStreamCap = 4;      // auto concurrency heuristic cap
@@ -261,7 +266,8 @@ template <typename LaunchFn>
 ctStatus_t run_host_batch(const float* const* hostIns, int nIn,
                           float* const* hostOuts, int nOut, int seriesLen,
                           int numSeries, int maxConcurrency,
-                          cudaStream_t userStream, LaunchFn&& launchSeries) {
+                          cudaStream_t userStream, LaunchFn&& launchSeries,
+                          FusedCall fused = {}) {
     tacuda::detail::clear_last_error();
     if (seriesLen <= 0 || numSeries <= 0 || nIn > kMaxIo || nOut > kMaxIo) {
         return CT_STATUS_INVALID_ARGUMENT;
@@ -285,7 +291,9 @@ ctStatus_t run_host_batch(const float* const* hostIns, int nIn,
     if (st == CT_STATUS_SUCCESS) st = dOut.acquire(nOut, bytes);
     if (st != CT_STATUS_SUCCESS) return st;
 
-    BatchStreams bs = resolve_streams(numSeries, maxConcurrency, userStream);
+    const bool useFused = fused.enabled(seriesLen, numSeries);
+    BatchStreams bs = useFused ? BatchStreams{{userStream}, userStream}
+                              : resolve_streams(numSeries, maxConcurrency, userStream);
 
     for (int j = 0; st == CT_STATUS_SUCCESS && j < nIn; ++j) {
         if (cudaMemcpyAsync(dIn.at(j), hostIns[j], bytes,
@@ -296,7 +304,14 @@ ctStatus_t run_host_batch(const float* const* hostIns, int nIn,
     }
     if (st == CT_STATUS_SUCCESS) st = fan_out(bs);
 
-    for (int i = 0; st == CT_STATUS_SUCCESS && i < numSeries; ++i) {
+    if (useFused && st == CT_STATUS_SUCCESS) {
+        const float* in[kMaxIo];
+        float* out[kMaxIo];
+        for (int j = 0; j < nIn; ++j) in[j] = dIn.at(j);
+        for (int j = 0; j < nOut; ++j) out[j] = dOut.at(j);
+        st = fused.launch(in, out, seriesLen, numSeries, bs.base);
+    }
+    for (int i = 0; !useFused && st == CT_STATUS_SUCCESS && i < numSeries; ++i) {
         const float* in[kMaxIo];
         float* out[kMaxIo];
         const size_t off = static_cast<size_t>(i) * seriesLen;
@@ -330,7 +345,8 @@ template <typename LaunchFn>
 ctStatus_t run_device_batch(const float* const* dIns, int nIn,
                             float* const* dOuts, int nOut, int seriesLen,
                             int numSeries, int maxConcurrency,
-                            cudaStream_t userStream, LaunchFn&& launchSeries) {
+                            cudaStream_t userStream, LaunchFn&& launchSeries,
+                            FusedCall fused = {}) {
     tacuda::detail::clear_last_error();
     if (seriesLen <= 0 || numSeries <= 0 || nIn > kMaxIo || nOut > kMaxIo) {
         return CT_STATUS_INVALID_ARGUMENT;
@@ -342,6 +358,19 @@ ctStatus_t run_device_batch(const float* const* dIns, int nIn,
         if (!dOuts[j]) return CT_STATUS_INVALID_ARGUMENT;
     }
 
+    if (fused.enabled(seriesLen, numSeries)) {
+        ctStatus_t st = fused.launch(dIns, dOuts, seriesLen, numSeries, userStream);
+        // Keep the existing stream-0 completion contract. On a caller's
+        // stream this is just one asynchronous kernel, including capture.
+        if (userStream == nullptr) {
+            const cudaError_t err = cudaStreamSynchronize(nullptr);
+            if (err != cudaSuccess && st == CT_STATUS_SUCCESS) {
+                tacuda::detail::set_last_error(cudaGetErrorString(err));
+                st = CT_STATUS_DEVICE_ERROR;
+            }
+        }
+        return st;
+    }
     BatchStreams bs = resolve_streams(numSeries, maxConcurrency, userStream);
     ctStatus_t st = CT_STATUS_SUCCESS;
     if (userStream == nullptr) st = join_legacy_stream(bs);
@@ -387,7 +416,7 @@ ctStatus_t ct_sma_batch(const float* host_inputs, float* host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_sma_d(in[0], out[0], seriesLen, period, s);
-        });
+        }, fused_call(FusedFamily::Sma, period));
 }
 
 ctStatus_t ct_ema_batch(const float* host_inputs, float* host_outputs,
@@ -399,7 +428,7 @@ ctStatus_t ct_ema_batch(const float* host_inputs, float* host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ema_d(in[0], out[0], seriesLen, period, s);
-        });
+        }, fused_call(FusedFamily::Ema, period));
 }
 
 ctStatus_t ct_rsi_batch(const float* host_inputs, float* host_outputs,
@@ -411,7 +440,7 @@ ctStatus_t ct_rsi_batch(const float* host_inputs, float* host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_rsi_d(in[0], out[0], seriesLen, period, s);
-        });
+        }, fused_call(FusedFamily::Rsi, period));
 }
 
 ctStatus_t ct_atr_batch(const float* host_highs, const float* host_lows,
@@ -425,7 +454,7 @@ ctStatus_t ct_atr_batch(const float* host_highs, const float* host_lows,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_atr_d(in[0], in[1], in[2], out[0], seriesLen, period,
                             initial, s);
-        });
+        }, fused_call(FusedFamily::Atr, period));
 }
 
 ctStatus_t ct_macd_batch(const float* host_inputs, float* host_macds,
@@ -440,7 +469,7 @@ ctStatus_t ct_macd_batch(const float* host_inputs, float* host_macds,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_macd_d(in[0], out[0], out[1], out[2], seriesLen,
                              fastPeriod, slowPeriod, signalPeriod, maType, s);
-        });
+        }, fused_call(FusedFamily::Macd, fastPeriod, slowPeriod, signalPeriod, maType));
 }
 
 ctStatus_t ct_bbands_batch(const float* host_inputs, float* host_uppers,
@@ -455,7 +484,7 @@ ctStatus_t ct_bbands_batch(const float* host_inputs, float* host_uppers,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_bbands_d(in[0], out[0], out[1], out[2], seriesLen,
                                period, upperMul, lowerMul, s);
-        });
+        }, fused_call(FusedFamily::Bbands, period, 0, 0, 1, upperMul, lowerMul));
 }
 
 ctStatus_t ct_stochastic_batch(const float* host_highs, const float* host_lows,
@@ -470,7 +499,7 @@ ctStatus_t ct_stochastic_batch(const float* host_highs, const float* host_lows,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_stochastic_d(in[0], in[1], in[2], out[0], out[1],
                                    seriesLen, kPeriod, dPeriod, s);
-        });
+        }, fused_call(FusedFamily::Stochastic, kPeriod, dPeriod));
 }
 
 // ---------------------------------------------------------------------------
@@ -486,7 +515,7 @@ ctStatus_t ct_sma_batch_d(const float* d_inputs, float* d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_sma_d(in[0], out[0], seriesLen, period, s);
-        });
+        }, fused_call(FusedFamily::Sma, period));
 }
 
 ctStatus_t ct_ema_batch_d(const float* d_inputs, float* d_outputs,
@@ -498,7 +527,7 @@ ctStatus_t ct_ema_batch_d(const float* d_inputs, float* d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ema_d(in[0], out[0], seriesLen, period, s);
-        });
+        }, fused_call(FusedFamily::Ema, period));
 }
 
 ctStatus_t ct_rsi_batch_d(const float* d_inputs, float* d_outputs,
@@ -510,7 +539,7 @@ ctStatus_t ct_rsi_batch_d(const float* d_inputs, float* d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_rsi_d(in[0], out[0], seriesLen, period, s);
-        });
+        }, fused_call(FusedFamily::Rsi, period));
 }
 
 ctStatus_t ct_atr_batch_d(const float* d_highs, const float* d_lows,
@@ -525,7 +554,7 @@ ctStatus_t ct_atr_batch_d(const float* d_highs, const float* d_lows,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_atr_d(in[0], in[1], in[2], out[0], seriesLen, period,
                             initial, s);
-        });
+        }, fused_call(FusedFamily::Atr, period));
 }
 
 ctStatus_t ct_macd_batch_d(const float* d_inputs, float* d_macds,
@@ -540,7 +569,7 @@ ctStatus_t ct_macd_batch_d(const float* d_inputs, float* d_macds,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_macd_d(in[0], out[0], out[1], out[2], seriesLen,
                              fastPeriod, slowPeriod, signalPeriod, maType, s);
-        });
+        }, fused_call(FusedFamily::Macd, fastPeriod, slowPeriod, signalPeriod, maType));
 }
 
 ctStatus_t ct_bbands_batch_d(const float* d_inputs, float* d_uppers,
@@ -555,7 +584,7 @@ ctStatus_t ct_bbands_batch_d(const float* d_inputs, float* d_uppers,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_bbands_d(in[0], out[0], out[1], out[2], seriesLen,
                                period, upperMul, lowerMul, s);
-        });
+        }, fused_call(FusedFamily::Bbands, period, 0, 0, 1, upperMul, lowerMul));
 }
 
 ctStatus_t ct_stochastic_batch_d(const float* d_highs, const float* d_lows,
@@ -570,7 +599,7 @@ ctStatus_t ct_stochastic_batch_d(const float* d_highs, const float* d_lows,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_stochastic_d(in[0], in[1], in[2], out[0], out[1],
                                    seriesLen, kPeriod, dPeriod, s);
-        });
+        }, fused_call(FusedFamily::Stochastic, kPeriod, dPeriod));
 }
 
 // Generated batch families (scripts/generate_batch_api.py).

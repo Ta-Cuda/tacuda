@@ -9,21 +9,12 @@
 #include <stdexcept>
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
-#include <thrust/device_ptr.h>
-#include <thrust/execution_policy.h>
-#include <thrust/functional.h>
-#include <thrust/transform_reduce.h>
+#include <utils/DeviceSeed.cuh>
 
 namespace {
 
 using AffinePair = tacuda::detail::AffineTransform1<double>;
 using AffineCompose = tacuda::detail::AffineCompose1<double>;
-
-struct ToDouble {
-  __host__ __device__ double operator()(float v) const {
-    return static_cast<double>(v);
-  }
-};
 
 __global__ void buildPlusDmAndTrKernel(const float* __restrict__ high,
                                        const float* __restrict__ low,
@@ -61,13 +52,13 @@ __global__ void fillPairsKernel(const float* __restrict__ x,
 
 __global__ void finalizeSmoothKernel(const AffinePair* __restrict__ pref,
                                      float* __restrict__ y,
-                                     double seed,
+                                     const double* __restrict__ seedp,
                                      int seedIdx,
                                      int nPairs) {
   int k = blockIdx.x * blockDim.x + threadIdx.x;
   if (k >= nPairs) return;
   AffinePair p = pref[k];
-  y[seedIdx + 1 + k] = static_cast<float>(p.A * seed + p.b);
+  y[seedIdx + 1 + k] = static_cast<float>(p.A * (*seedp) + p.b);
 }
 
 __global__ void computeDiKernel(const float* __restrict__ smDm,
@@ -88,19 +79,11 @@ __global__ void computeDiKernel(const float* __restrict__ smDm,
 static void smoothFromPeriodMinusOneSeed(const float* x, float* y, int size, int period,
                                          cudaStream_t stream) {
   // Seed at index=period-1 with SUM(x[1..period-1]), then apply Wilder update from i=period.
-  double seed = thrust::transform_reduce(
-      thrust::cuda::par.on(stream),
-      thrust::device_pointer_cast(x) + 1,
-      thrust::device_pointer_cast(x) + period,
-      ToDouble{}, 0.0, thrust::plus<double>{});
-
+  // The seed is computed and kept on the device (after the NaN fill it overwrites).
   CUDA_CHECK(cudaMemsetAsync(y, 0xFF, static_cast<size_t>(size) * sizeof(float), stream));
   const int seedIdx = period - 1;
-  {
-    float seedVal = static_cast<float>(seed);
-    CUDA_CHECK(cudaMemcpyAsync(y + seedIdx, &seedVal, sizeof(float),
-                               cudaMemcpyHostToDevice, stream));
-  }
+  auto seed = acquireDeviceBufferAsync<double>(1, stream);
+  tacuda::detail::launch_seed_sum(x, 1, period - 1, 1.0, seed.get(), y, seedIdx, stream);
 
   const int firstIdx = period;
   const int nPairs = size - firstIdx;
@@ -118,7 +101,7 @@ static void smoothFromPeriodMinusOneSeed(const float* x, float* y, int size, int
   tacuda::detail::affine_inclusive_scan<AffinePair, AffineCompose>(
       pairs.get(), pref.get(), nPairs, stream);
 
-  finalizeSmoothKernel<<<grid, block, 0, stream>>>(pref.get(), y, seed, seedIdx, nPairs);
+  finalizeSmoothKernel<<<grid, block, 0, stream>>>(pref.get(), y, seed.get(), seedIdx, nPairs);
   CUDA_CHECK(cudaGetLastError());
 }
 

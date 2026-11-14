@@ -24,6 +24,7 @@
 
 #include <cuda_runtime.h>
 #include <thrust/device_ptr.h>
+#include <utils/ThrustPolicy.cuh>
 #include <thrust/execution_policy.h>
 #include <thrust/scan.h>
 #include <thrust/functional.h>
@@ -88,7 +89,7 @@ inline void affine_inclusive_scan(PairT* d_input, PairT* d_output, int count,
                                  cudaStream_t stream) {
     thrust::device_ptr<PairT> in(d_input);
     thrust::device_ptr<PairT> out(d_output);
-    thrust::inclusive_scan(thrust::cuda::par.on(stream),
+    thrust::inclusive_scan(tacuda::detail::thrust_on(stream),
                            in, in + count, out, ComposeT{});
 }
 
@@ -102,7 +103,7 @@ inline void affine_inclusive_scan_by_key(const int* d_keys,
     thrust::device_ptr<const int> kBeg(d_keys);
     thrust::device_ptr<PairT> in(d_input);
     thrust::device_ptr<PairT> out(d_output);
-    thrust::inclusive_scan_by_key(thrust::cuda::par.on(stream),
+    thrust::inclusive_scan_by_key(tacuda::detail::thrust_on(stream),
                                   kBeg, kBeg + count,
                                   in, out,
                                   thrust::equal_to<int>(),

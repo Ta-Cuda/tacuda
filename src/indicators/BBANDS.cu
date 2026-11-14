@@ -12,6 +12,7 @@
 #include <utils/TacudaConfig.h>
 #include <stdexcept>
 #include <thrust/device_ptr.h>
+#include <utils/ThrustPolicy.cuh>
 #include <thrust/execution_policy.h>
 #include <thrust/functional.h>
 #include <thrust/scan.h>
@@ -251,7 +252,7 @@ void BBANDS::calculate(const float* input, float* upper, float* middle, float* l
   {
     thrust::device_ptr<WelfordData> momentsBegin(dMoments.get());
     thrust::device_ptr<int> keysBegin(dKeys.get());
-    thrust::inclusive_scan_by_key(thrust::cuda::par.on(stream),
+    thrust::inclusive_scan_by_key(tacuda::detail::thrust_on(stream),
                                   keysBegin, keysBegin + size,
                                   momentsBegin,
                                   momentsBegin,

@@ -595,6 +595,222 @@ struct MacdState {
   }
 };
 
+// TA-Lib-order recurrences for the fused batch path. Keep these separate from
+// the legacy streaming states above: those reproduce float intermediates of
+// the original full-series kernels. These states round only at the output.
+namespace precise {
+
+struct EmaCore {
+  double alpha, value;
+  TACUDA_HD void init(int period) {
+    alpha = 2.0 / (static_cast<double>(period) + 1.0);
+    value = 0.0;
+  }
+  TACUDA_HD void step(double x) { value = (x - value) * alpha + value; }
+};
+
+struct EmaState {
+  EmaCore core;
+  int period;
+  long long idx;
+  double seed;
+  TACUDA_HD void init(int p) { period = p; idx = 0; seed = 0; core.init(p); }
+  TACUDA_HD int ring_size() const { return 0; }
+  TACUDA_HD int lookback() const { return period - 1; }
+  TACUDA_HD int outputs() const { return 1; }
+  TACUDA_HD void step(float*, const StreamBar& bar, float* out) {
+    const long long i = idx++;
+    if (period == 1) {
+      core.value = bar.close;
+      out[0] = bar.close;
+      return;
+    }
+    if (i < period) {
+      seed += static_cast<double>(bar.close);
+      if (i == period - 1) core.value = seed / period;
+    } else {
+      core.step(static_cast<double>(bar.close));
+    }
+    out[0] = i < period - 1 ? stream_nan() : static_cast<float>(core.value);
+  }
+};
+
+struct RsiState {
+  int period;
+  long long idx;
+  double prev, gain, loss;
+  TACUDA_HD void init(int p) { period = p; idx = 0; prev = gain = loss = 0; }
+  TACUDA_HD int ring_size() const { return 0; }
+  TACUDA_HD int lookback() const { return period; }
+  TACUDA_HD int outputs() const { return 1; }
+  TACUDA_HD void step(float*, const StreamBar& bar, float* out) {
+    const long long i = idx++;
+    const double x = bar.close;
+    const double d = x - prev;
+    prev = x;
+    if (i > 0) {
+      if (i > period) { gain *= period - 1; loss *= period - 1; }
+      if (stream_isnan(d)) { gain = loss = d; }
+      else if (d < 0) loss -= d;
+      else gain += d;
+      if (i >= period) { gain /= period; loss /= period; }
+    }
+    const double total = gain + loss;
+    out[0] = i < period ? stream_nan()
+             : (total > -1e-14 && total < 1e-14) ? 0.0f
+             : static_cast<float>(100.0 * (gain / total));
+  }
+};
+
+struct AtrState {
+  int period;
+  long long idx;
+  double prev, value;
+  TACUDA_HD void init(int p) { period = p; idx = 0; prev = value = 0; }
+  TACUDA_HD int ring_size() const { return 0; }
+  TACUDA_HD int lookback() const { return period; }
+  TACUDA_HD int outputs() const { return 1; }
+  TACUDA_HD void step(float*, const StreamBar& bar, float* out) {
+    const long long i = idx++;
+    if (i > 0) {
+      const double hi = bar.high, lo = bar.low;
+      double tr = hi - lo;
+      double a = hi - prev; if (a < 0) a = -a;
+      double b = lo - prev; if (b < 0) b = -b;
+      if (a > tr) tr = a;
+      if (b > tr) tr = b;
+      if (period == 1) {
+        value = tr;
+      } else if (i <= period) {
+        value += tr;
+        if (i == period) value /= period;
+      } else {
+        value *= period - 1;
+        value += tr;
+        value /= period;
+      }
+    }
+    prev = bar.close;
+    out[0] = i < period ? stream_nan() : static_cast<float>(value);
+  }
+};
+
+struct NatrState {
+  AtrState atr;
+  TACUDA_HD void init(int p) { atr.init(p); }
+  TACUDA_HD int ring_size() const { return 0; }
+  TACUDA_HD int lookback() const { return atr.lookback(); }
+  TACUDA_HD int outputs() const { return 1; }
+  TACUDA_HD void step(float* ring, const StreamBar& bar, float* out) {
+    atr.step(ring, bar, out);
+    if (atr.idx <= atr.period || atr.period == 1) return;
+    const double c = bar.close;
+    out[0] = (c > -1e-14 && c < 1e-14) ? 0.0f
+             : static_cast<float>((atr.value / c) * 100.0);
+  }
+};
+
+struct AdoscState {
+  AdState ad;
+  int warmup;
+  long long idx;
+  double fast, slow, kf, ks;
+  TACUDA_HD void init(int f, int s) {
+    ad.init(); idx = 0; warmup = (f > s ? f : s) - 1;
+    fast = slow = 0; kf = 2.0 / (f + 1.0); ks = 2.0 / (s + 1.0);
+  }
+  TACUDA_HD int ring_size() const { return 0; }
+  TACUDA_HD int lookback() const { return warmup; }
+  TACUDA_HD int outputs() const { return 1; }
+  TACUDA_HD void step(float* ring, const StreamBar& bar, float* out) {
+    const long long i = idx++;
+    ad.step(ring, bar, out);
+    if (i == 0) fast = slow = ad.acc;
+    else {
+      fast = kf * ad.acc + (1.0 - kf) * fast;
+      slow = ks * ad.acc + (1.0 - ks) * slow;
+    }
+    out[0] = i < warmup ? stream_nan() : static_cast<float>(fast - slow);
+  }
+};
+
+// Caller-owned double ring: positive flows in [0,p), negative in [p,2p).
+// Reusing the exact stored flow on eviction avoids recomputing its rounding.
+struct MfiState {
+  int period, pos;
+  long long idx;
+  double prev, positive, negative;
+  TACUDA_HD void init(int p) {
+    period = p; pos = 0; idx = 0;
+    prev = positive = negative = 0;
+  }
+  TACUDA_HD int ring_size() const { return 2 * period; }  // doubles
+  TACUDA_HD int lookback() const { return period; }
+  TACUDA_HD int outputs() const { return 1; }
+  TACUDA_HD void step(double* ring, const StreamBar& bar, float* out) {
+    const long long i = idx++;
+    const double price = (static_cast<double>(bar.high) + bar.low + bar.close) / 3.0;
+    if (i == 0) { prev = price; out[0] = stream_nan(); return; }
+    if (i > period) {
+      positive -= ring[pos];
+      negative -= ring[period + pos];
+    }
+    double p = 0, n = 0;
+    if (stream_isfinite(price) && stream_isfinite(prev)) {
+      const double flow = price * static_cast<double>(bar.volume);
+      if (price > prev) p = flow;
+      else if (price < prev) n = flow;
+    }
+    prev = price;
+    ring[pos] = p; ring[period + pos] = n;
+    if (++pos == period) pos = 0;
+    positive += p; negative += n;
+    const double total = positive + negative;
+    out[0] = i < period ? stream_nan() : total < 1.0 ? 0.0f
+             : static_cast<float>(100.0 * (positive / total));
+  }
+};
+
+struct MacdState {
+  EmaCore fast, slow, signal;
+  int fastPeriod, slowPeriod, signalPeriod;
+  long long idx;
+  double fastSeed, slowSeed, signalSeed;
+  TACUDA_HD void init(int f, int s, int sig) {
+    if (f > s) { const int tmp = f; f = s; s = tmp; }
+    fastPeriod = f; slowPeriod = s; signalPeriod = sig;
+    fast.init(f); slow.init(s); signal.init(sig);
+    idx = 0; fastSeed = slowSeed = signalSeed = 0;
+  }
+  TACUDA_HD int ring_size() const { return 0; }
+  TACUDA_HD int lookback() const { return slowPeriod + signalPeriod - 2; }
+  TACUDA_HD int outputs() const { return 3; }
+  TACUDA_HD void step(float*, const StreamBar& bar, float* out) {
+    const long long i = idx++;
+    const double x = bar.close;
+    const int start = slowPeriod - 1;
+    const long long ready = static_cast<long long>(start) + signalPeriod - 1;
+    if (i <= start) {
+      slowSeed += x;
+      if (i >= slowPeriod - fastPeriod) fastSeed += x;
+      if (i == start) {
+        fast.value = fastSeed / fastPeriod;
+        slow.value = slowSeed / slowPeriod;
+      }
+    } else { fast.step(x); slow.step(x); }
+    const double macd = fast.value - slow.value;
+    if (i >= start && i <= ready) {
+      signalSeed += macd;
+      if (i == ready) signal.value = signalSeed / signalPeriod;
+    } else if (i > ready) signal.step(macd);
+    if (i < ready) { out[0] = out[1] = out[2] = stream_nan(); return; }
+    out[0] = static_cast<float>(macd);
+    out[1] = static_cast<float>(signal.value);
+    out[2] = static_cast<float>(macd - signal.value);
+  }
+};
+
+}  // namespace precise
 }  // namespace streaming
 }  // namespace tacuda
 

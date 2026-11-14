@@ -22,9 +22,10 @@
 > each pattern actually produced). The few remaining corner-case notes live
 > in [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md).
 
-**Release status:** **0.8.0** is the current release on PyPI, npm and NuGet;
-it adds the streaming API. Streaming requires a native library and bindings
-from the same 0.8.0 release. The 161-function compatibility baseline is
+**Release 0.9.0:** fused portfolio batches for 17 families and CUDA Graph
+device pipelines, with unchanged C signatures. Use native libraries and
+bindings from the same 0.9.0 release. The numerical migration controls are
+in [BATCH_API.md](docs/BATCH_API.md#fused-execution). The 161-function compatibility baseline is
 pinned in `tests/requirements-reference.txt` (Python TA-Lib 0.7.0, whose
 bundled native library reports 0.7.1 on Windows and 0.6.4 on Linux; both
 pass the same strict corpus). TA-Lib 0.8.1 has 201 functions;
@@ -45,6 +46,16 @@ TACUDA delivers lightning-fast technical analysis indicators powered by NVIDIA C
 Implementation semantics (EMA seeding, warmup NaNs, indexing conventions) are documented in [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md).
 
 ---
+
+## Fused batches in 0.9.0
+
+One kernel processes all series in a supported batch. On RTX 3090 Ti, the
+13-call, 4000-series x 234-bar pass from issue #6 takes **2.62 ms**, versus
+**431 ms** on the previous GPU dispatcher; graph replay takes **2.53 ms**.
+This measures that workload with GPU-resident float32 buffers. Long series
+retain the parallel fallback; `TACUDA_BATCH_FUSED=auto|0|1` selects dispatch.
+Double recurrences improve TA-Lib agreement and can change final bits from
+0.8. [Dispatch, supported families and migration](docs/BATCH_API.md#fused-execution).
 
 ## ✨ Key Features
 

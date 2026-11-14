@@ -7,6 +7,7 @@
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
 #include <thrust/device_ptr.h>
+#include <utils/ThrustPolicy.cuh>
 #include <thrust/execution_policy.h>
 #include <thrust/scan.h>
 #include <stdexcept>
@@ -108,11 +109,11 @@ void tacuda::Correl::calculate(const float* x, const float* y, float* output, in
     thrust::device_ptr<double> px2(x2.get());
     thrust::device_ptr<double> py2(y2.get());
     thrust::device_ptr<double> pxy(xy.get());
-    thrust::inclusive_scan(thrust::cuda::par.on(stream), px, px + size, px);
-    thrust::inclusive_scan(thrust::cuda::par.on(stream), py, py + size, py);
-    thrust::inclusive_scan(thrust::cuda::par.on(stream), px2, px2 + size, px2);
-    thrust::inclusive_scan(thrust::cuda::par.on(stream), py2, py2 + size, py2);
-    thrust::inclusive_scan(thrust::cuda::par.on(stream), pxy, pxy + size, pxy);
+    thrust::inclusive_scan(tacuda::detail::thrust_on(stream), px, px + size, px);
+    thrust::inclusive_scan(tacuda::detail::thrust_on(stream), py, py + size, py);
+    thrust::inclusive_scan(tacuda::detail::thrust_on(stream), px2, px2 + size, px2);
+    thrust::inclusive_scan(tacuda::detail::thrust_on(stream), py2, py2 + size, py2);
+    thrust::inclusive_scan(tacuda::detail::thrust_on(stream), pxy, pxy + size, pxy);
 
     // Final rolling correlation
     correlFromPrefixesD<<<grid, block, 0, stream>>>(px.get(), py.get(), px2.get(), py2.get(), pxy.get(), output, period, size);

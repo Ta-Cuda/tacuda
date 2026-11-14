@@ -7,8 +7,10 @@
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
 #include <utils/AffineScan.cuh>
+#include <utils/DeterministicScan.cuh>
 
 #include <thrust/scan.h>
+#include <utils/ThrustPolicy.cuh>
 #include <thrust/transform.h>
 #include <thrust/execution_policy.h>
 #include <thrust/iterator/counting_iterator.h>
@@ -124,9 +126,7 @@ void ADOSC::calculate(const float* high, const float* low, const float* close,
         auto termIt = thrust::make_transform_iterator(idx, ADTerm{high, low, close, volume});
         
         // Inclusive scan to get cumulative AD
-        thrust::inclusive_scan(thrust::cuda::par.on(stream),
-                               termIt, termIt + size,
-                               adLine.get());
+        tacuda::detail::deterministic_double_scan(termIt, adLine.get(), size, stream);
     }
 
     // 2. Calculate EMA(Fast) and EMA(Slow) using parallel scan
@@ -143,19 +143,15 @@ void ADOSC::calculate(const float* high, const float* low, const float* close,
     // Fast EMA Scan
     {
         auto genFast = thrust::make_transform_iterator(idx, EmaGenerator{adLine.get(), alphaShort});
-        thrust::inclusive_scan(thrust::cuda::par.on(stream),
-                               genFast, genFast + size,
-                               thrust::device_pointer_cast(emaFast.get()),
-                               AffineCompose());
+        tacuda::detail::deterministic_inclusive_scan<AffinePair>(
+            genFast, emaFast.get(), size, stream, AffineCompose{}, AffinePair{1.0, 0.0});
     }
 
     // Slow EMA Scan
     {
         auto genSlow = thrust::make_transform_iterator(idx, EmaGenerator{adLine.get(), alphaLong});
-        thrust::inclusive_scan(thrust::cuda::par.on(stream),
-                               genSlow, genSlow + size,
-                               thrust::device_pointer_cast(emaSlow.get()),
-                               AffineCompose());
+        tacuda::detail::deterministic_inclusive_scan<AffinePair>(
+            genSlow, emaSlow.get(), size, stream, AffineCompose{}, AffinePair{1.0, 0.0});
     }
 
     // 3. Compute Difference

@@ -104,12 +104,57 @@ DeviceBufferPtr<T> acquireDeviceBuffer(size_t count) {
     return DeviceBufferPtr<T>(static_cast<T*>(DeviceBufferPool::instance().acquire(count * sizeof(T))));
 }
 
+namespace tacuda {
+namespace detail {
+
+// True while `stream` is being captured into a CUDA graph (also while a
+// capture that already failed has not been ended yet).
+bool stream_is_capturing(cudaStream_t stream) noexcept;
+
+// How call-local scratch memory for a stream is allocated. Every mode is
+// ordered on the stream; none synchronizes the host.
+enum class ScratchMode : unsigned char {
+    // Library-private cudaMemPool (cudaMallocFromPoolAsync / cudaFreeAsync).
+    // A block freed on a stream is reused by the next allocation on that
+    // stream at once, so a batch that enqueues series far ahead of the GPU
+    // still needs about one series' scratch per stream. (DeviceBufferPool
+    // reuses a block only after its event fired: every series in flight
+    // would take fresh memory.)
+    StreamOrdered,
+    // Stream capture: cudaMallocAsync / cudaFreeAsync become memory nodes
+    // owned by the graph. Pooled memory must not be used here: the graph
+    // would keep writing to it on every replay after the pool handed it to
+    // someone else, and querying an event recorded on a capturing stream
+    // invalidates the capture.
+    Graph,
+    // Devices without memory-pool support: DeviceBufferPool + release event.
+    Pooled,
+};
+
+// Picks the mode for `stream` now. Evaluate once per buffer (or allocator)
+// and pass the same value to the matching scratch_release.
+ScratchMode scratch_mode(cudaStream_t stream) noexcept;
+void* scratch_acquire(size_t bytes, cudaStream_t stream, ScratchMode mode);
+void scratch_release(void* ptr, cudaStream_t stream, ScratchMode mode) noexcept;
+
+// Releases unused memory held by the private scratch pools (all devices);
+// DeviceBufferPool::cleanup() calls it.
+void scratch_trim() noexcept;
+// Memory the scratch pools keep reserved across synchronizations
+// (cudaMemPoolAttrReleaseThreshold); DeviceBufferPool::setMaxCacheBytes()
+// applies its limit here too.
+void scratch_set_release_threshold(size_t bytes) noexcept;
+
+}  // namespace detail
+}  // namespace tacuda
+
 template <typename T>
 struct DeviceBufferAsyncDeleter {
     cudaStream_t stream = 0;
+    tacuda::detail::ScratchMode mode = tacuda::detail::ScratchMode::Pooled;
     void operator()(T* ptr) const noexcept {
         if (ptr) {
-            DeviceBufferPool::instance().releaseAsync(ptr, stream);
+            tacuda::detail::scratch_release(ptr, stream, mode);
         }
     }
 };
@@ -119,9 +164,10 @@ using DeviceBufferPtrAsync = std::unique_ptr<T, DeviceBufferAsyncDeleter<T>>;
 
 template <typename T>
 DeviceBufferPtrAsync<T> acquireDeviceBufferAsync(size_t count, cudaStream_t stream) {
+    const tacuda::detail::ScratchMode mode = tacuda::detail::scratch_mode(stream);
     return DeviceBufferPtrAsync<T>(
-        static_cast<T*>(DeviceBufferPool::instance().acquire(count * sizeof(T))),
-        DeviceBufferAsyncDeleter<T>{stream});
+        static_cast<T*>(tacuda::detail::scratch_acquire(count * sizeof(T), stream, mode)),
+        DeviceBufferAsyncDeleter<T>{stream, mode});
 }
 
 #endif

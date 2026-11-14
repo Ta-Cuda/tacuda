@@ -17,6 +17,7 @@
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
 #include <thrust/device_ptr.h>
+#include <utils/ThrustPolicy.cuh>
 #include <thrust/execution_policy.h>
 #include <thrust/scan.h>
 #include <cmath>
@@ -108,7 +109,7 @@ __global__ void castPrefixKernel(const double* __restrict__ prefix,
 
 void scan_double_inplace(double* term, int size, cudaStream_t stream) {
     thrust::device_ptr<double> p(term);
-    thrust::inclusive_scan(thrust::cuda::par.on(stream), p, p + size, p);
+    thrust::inclusive_scan(tacuda::detail::thrust_on(stream), p, p + size, p);
 }
 
 // ---------------------------------------------------------------------------
@@ -635,7 +636,7 @@ void XAverage::calculate(const float* input, float* output, int size,
     CUDA_CHECK(cudaGetLastError());
     {
         thrust::device_ptr<SeededEma> p(elems.get());
-        thrust::inclusive_scan(thrust::cuda::par.on(stream), p, p + size, p,
+        thrust::inclusive_scan(tacuda::detail::thrust_on(stream), p, p + size, p,
                                SeededEmaCompose{});
     }
     xaverageFinalizeKernel<<<defaultGrid(size), defaultBlock(), 0, stream>>>(

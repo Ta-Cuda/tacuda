@@ -6,7 +6,9 @@
 #include <indicators/StdDev.h>
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
+#include <utils/DeterministicScan.cuh>
 #include <thrust/device_ptr.h>
+#include <utils/ThrustPolicy.cuh>
 #include <thrust/execution_policy.h>
 /* keep thrust/scan include order aligned with other files */
 #include <thrust/scan.h>
@@ -42,7 +44,11 @@ __global__ void stddevFromPrefixesD(const double* __restrict__ prefix,
                                     int period, int size) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx >= size) return;
-    if (idx < period - 1) return; // keep NaN warmup
+    if (idx < period - 1) {
+        // Warm-up NaN written here instead of a separate memset (same pattern).
+        output[idx] = __int_as_float(0xFFFFFFFF);
+        return;
+    }
     const double prevSum = (idx == period - 1) ? 0.0 : prefix[idx - period];
     const double sum = prefix[idx] - prevSum;
     const double prevSumSq = (idx == period - 1) ? 0.0 : prefixSq[idx - period];
@@ -66,8 +72,7 @@ void tacuda::StdDev::calculate(const float* input, float* output, int size, cuda
         CUDA_CHECK(cudaMemsetAsync(output, 0xFF, static_cast<size_t>(size) * sizeof(float), stream));
         return;
     }
-    // Initialize warmup region as NaN
-    CUDA_CHECK(cudaMemsetAsync(output, 0xFF, size * sizeof(float), stream));
+    // No NaN pre-fill: stddevFromPrefixesD writes every element.
 
     // Prepare double prefixes for sum and sum of squares
     auto prefix = acquireDeviceBufferAsync<double>(static_cast<size_t>(size), stream);
@@ -80,7 +85,7 @@ void tacuda::StdDev::calculate(const float* input, float* output, int size, cuda
         stddevCastToDoubleKernel<<<grid, block, 0, stream>>>(input, prefix.get(), size);
         CUDA_CHECK(cudaGetLastError());
         thrust::device_ptr<double> prePtr(prefix.get());
-        thrust::inclusive_scan(thrust::cuda::par.on(stream), prePtr, prePtr + size, prePtr);
+        tacuda::detail::deterministic_double_scan(prePtr, prefix.get(), size, stream);
     }
 
     // Build squares in double then inclusive scan in-place
@@ -90,7 +95,7 @@ void tacuda::StdDev::calculate(const float* input, float* output, int size, cuda
         stddevSquareToDoubleKernel<<<grid, block, 0, stream>>>(input, prefixSq.get(), size);
         CUDA_CHECK(cudaGetLastError());
         thrust::device_ptr<double> preSqPtr(prefixSq.get());
-        thrust::inclusive_scan(thrust::cuda::par.on(stream), preSqPtr, preSqPtr + size, preSqPtr);
+        tacuda::detail::deterministic_double_scan(preSqPtr, prefixSq.get(), size, stream);
     }
 
     // Compute rolling stddev from prefixes

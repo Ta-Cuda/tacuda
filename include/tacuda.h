@@ -60,9 +60,9 @@ CTAPI_EXPORT const char* ct_get_last_error(void);
  * docs/CONTRIBUTING.md.
  */
 #define CT_VERSION_MAJOR 0
-#define CT_VERSION_MINOR 8
-#define CT_VERSION_PATCH 1
-#define CT_VERSION_STRING "0.8.1"
+#define CT_VERSION_MINOR 9
+#define CT_VERSION_PATCH 0
+#define CT_VERSION_STRING "0.9.0"
 
 /**
  * @brief Return the library version as "MAJOR.MINOR.PATCH".
@@ -826,7 +826,10 @@ CTAPI_EXPORT size_t ct_device_buffer_pool_set_max_cache_bytes(size_t bytes);
  * seriesLen elements each (row i = series i, contiguous). Every series is
  * processed independently with the same parameters.
  *
- * Scheduling: work is distributed round-robin over an internal pool of CUDA
+ * Supported fused workloads launch one kernel on the supplied stream and
+ * ignore maxConcurrency. TACUDA_BATCH_FUSED=auto|0|1 controls dispatch; see
+ * docs/BATCH_API.md for the family/shape limits and numerical contract.
+ * Otherwise work is distributed round-robin over an internal pool of CUDA
  * streams so host->device transfers of one series overlap kernels and
  * device->host transfers of others. maxConcurrency limits the pool size
  * (0 = auto heuristic, currently min(numSeries, 4)). When a non-null
@@ -883,11 +886,13 @@ CTAPI_EXPORT ctStatus_t ct_stochastic_batch(const float *host_highs,
 
 /*
  * Device-pointer batch variants: matrices already resident on the GPU
- * (numSeries * seriesLen floats). No host transfers are performed; series
- * are dispatched across the internal stream pool for concurrent execution.
+ * (numSeries * seriesLen floats). No host transfers are performed. Supported
+ * workloads use one fused kernel; others use the internal stream pool.
  * stream == 0 is the legacy default stream (also PyTorch's and CuPy's): the
- * pool first waits for work already queued on it and the call returns once
- * the batch is done. A non-null stream orders the batch on it, asynchronously.
+ * work waits for preceding operations on it and the call returns once
+ * the batch is done. A non-null stream orders the batch on it, asynchronously:
+ * the call only enqueues work (no host synchronization) and can be captured
+ * into a CUDA graph, in any capture mode. See docs/BATCH_API.md.
  */
 CTAPI_EXPORT ctStatus_t ct_sma_batch_d(const float *d_inputs,
                                        float *d_outputs, int seriesLen,

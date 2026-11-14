@@ -4,8 +4,8 @@ Added in v0.2.0, extended to 52 indicator families in v0.3.0 and to the
 full indicator surface (166 families, including the 63 candlestick
 patterns and the STAD club pack) in v0.4.0. The batch API computes the
 same indicator over many independent series (symbols) in one call,
-dispatching work across an internal pool of CUDA streams so transfers
-and kernels overlap.
+using a fused kernel for supported workloads and an internal pool of CUDA
+streams for the remaining workloads.
 
 ## Covered families (v0.4.0)
 
@@ -40,8 +40,12 @@ are prefix sums of per-bar terms (thrust inclusive scan in double), HPI
 is an `AffineScan` recurrence like EMA, and XAverage scans a seed-aware
 affine monoid whose NaN inputs are identities — one series saturates the
 GPU on its own. Genuinely sequential state machines (SAR, SAREXT,
-SAR_EL, MAMA, HT_*) still run one GPU thread per series; their
+SAR_EL, MAMA, HT_*) still run one GPU thread over a series; their
 throughput comes from batching many series, not from parallelizing one.
+
+The first fused batch families and their dispatch rules are described below.
+Other families still loop over series, each with its own launch sequence,
+spread over the stream pool or ordered on the caller's stream.
 
 Vector-math functions (SIN, ADD, ...) are intentionally not batched:
 element-wise kernels are shape-agnostic, so calling e.g. `ct_sin` on the
@@ -61,8 +65,78 @@ python bindings/generate_bindings.py   # ctypes / P-Invoke layers
 All batch entry points take dense **series-major** matrices:
 `numSeries` rows of `seriesLen` float32 elements, row `i` = series `i`,
 rows contiguous in memory. Every series is processed independently with
-identical parameters — exactly equivalent to calling the single-series
-function per row, but with far less per-call overhead.
+identical parameters. The fused path uses double recurrences and can differ
+in the last float32 bits from the original single-series kernels; see the
+numerical contract below.
+
+## Fused execution
+
+Added in 0.9.0. A supported `*_batch_d` call launches **one kernel for the entire matrix**,
+without scratch allocations or memory nodes. Host variants upload and
+download the full matrices around that same kernel. The C ABI and all binding
+signatures are unchanged. `maxConcurrency` is ignored on this path.
+
+| Families | Work per thread | Automatic selection |
+|----------|-----------------|---------------------|
+| SMA, WMA, SUM, MIN, MAX, STDDEV, BBANDS | one output element, direct window in double (MIN/MAX use float comparisons) | period 1..64 |
+| STOCHASTIC | one output element, fused FASTK/SLOWK/SLOWD | K and D periods 1..64 and `(2*D-1)*K + D*D <= 1024` |
+| ATR, NATR, RSI, EMA, OBV, AD, ADOSC | one series, sequential recurrence in double | `seriesLen <= 4*numSeries` |
+| MFI | one series, double flow ring and rolling totals | same shape rule; period 2..64 |
+| MACD | one series, EMA recurrences in double | same shape rule; `maType == CT_MA_EMA` |
+
+The window limits bound redundant work; the shape rule avoids serializing a
+long history on one GPU thread. Unsupported periods, MACD types and families
+keep the original implementation and its argument validation.
+
+`TACUDA_BATCH_FUSED` selects the dispatcher:
+
+- `auto` (default, also used for unrecognized values): the table above.
+- `0`: original per-series dispatcher for every family.
+- `1`: force fused execution for supported families, overriding the recurrent
+  shape rule. Window limits and supported MACD types still apply. This can be
+  much slower for long histories with few series.
+
+The variable is read on each call. Set it before submitting work; changing
+process environment concurrently with library calls is the caller's
+responsibility. A captured graph retains its chosen kernel regardless of
+later environment changes.
+
+### Numerical contract and migration
+
+Recurrent fused kernels evaluate the TA-Lib recurrence in double, without
+FMA contraction, then round each public output to float32. ATR/NATR compute
+true range in double; MACD keeps its internal MACD and signal lines in double
+until output. This improves agreement with TA-Lib, but changes the last bits
+of results from 0.8, notably ATR and RSI. Existing streaming handles retain
+their original rounding contract; the new recurrences are separate reusable
+states in `utils/StreamStates.h`.
+
+Period 1 retains EMA's copy-through behavior. NATR period 1 follows TA-Lib's
+special case: unnormalized TRANGE, with a NaN at the first bar. This boundary
+case is corrected on the original NATR path as well.
+
+Every **fused** row is bit-independent of row order, other rows, batch size
+and future bars. This does not imply bit equality across dispatcher paths:
+in `auto`, reducing the number of series can select the original float-based
+recurrent kernels. Use `1` when that invariant must hold even for a single
+row, or `0` to keep the original per-series numerical path.
+
+Windows sum their local float32 inputs in double. STDDEV/BBANDS use population
+variance `E[x*x] - E[x]*E[x]`, clamped at zero. They avoid subtracting long
+prefix sums but still have the usual cancellation limit for high-offset,
+low-variance data. MFI and AD preserve the library's non-finite contribution
+guards. NaNs cannot cross rows; direct windows can recover after a NaN leaves
+the window. STOCH preserves the shipped float arithmetic and summation order,
+so it is tolerance-compatible with TA-Lib rather than universally bit-equal.
+No universal bit-equality claim is made for TA-Lib's rolling double windows.
+
+Separately, single-series MFI, AD, ADOSC and STDDEV use a fixed-tree scan in
+place of a scheduling-dependent device-wide floating-point scan. Repeated
+eager calls and graph replay are deterministic for the same build/device,
+including million-element inputs. This fix also applies with the fused
+dispatcher disabled: `0` cannot reproduce the old scan's nondeterministic
+choice of rounding. See the GPU validation commands in
+[the performance guide](PERFORMANCE.md#fused-batch-validation).
 
 ## Native C API
 
@@ -88,21 +162,79 @@ Device-matrix variants (`*_batch_d`) take GPU pointers of
 
 ### Scheduling semantics
 
-- `maxConcurrency = 0` — auto: `min(numSeries, 4)` internal non-blocking
+- Fused calls use the supplied stream directly; `maxConcurrency` is ignored.
+  With stream `0`, device variants synchronize that stream before returning.
+  On a non-null stream they only enqueue one kernel and stay asynchronous.
+- On the original dispatcher, `maxConcurrency = 0` — auto: `min(numSeries, 4)` internal non-blocking
   streams (process-wide pool, reused across calls).
-- `maxConcurrency = N` — cap the pool at N streams.
-- `stream == NULL` is the legacy default stream, as everywhere in CUDA:
+- On the original dispatcher, `maxConcurrency = N` — cap the pool at N streams.
+- On the original dispatcher, `stream == NULL` is the legacy default stream:
   `*_batch_d` makes the pool wait for work already queued there, then
   blocks until the batch is done.
 - `stream != NULL` — everything runs ordered on the caller's stream;
   `maxConcurrency` is ignored and `*_batch_d` variants stay asynchronous
   (host variants still synchronize before returning, matching host-API
-  semantics).
+  semantics). The call only enqueues work: nothing inside it waits for the
+  stream or the device, and it can be captured into a CUDA graph (below).
+- No `*_d` call, or `*_batch_d` call on a non-null stream, synchronizes internally. Before this was
+  fixed, every Thrust scan ran with `thrust::cuda::par` — `cudaMalloc`,
+  `cudaStreamSynchronize`, `cudaFree` per scan — and a few seeds were read
+  back to the host, so families built on scans (MFI, RSI, ATR, ADOSC,
+  STDDEV, BBANDS, SUM, OBV, AD, ADX, MACDEXT, KAMA, ...) blocked the host once
+  or twice per series: `maxConcurrency` changed nothing and the
+  "asynchronous" user-stream call returned only when its work had finished.
+  Library code passes `tacuda::detail::thrust_on(stream)`
+  (`include/utils/ThrustPolicy.cuh`) to Thrust; it is `par_nosync` with
+  stream-ordered temporary storage. Thrust algorithms that return a value
+  to the host (`reduce`, `transform_reduce`, ...) synchronize under any
+  policy and must not be used in device paths
+  (`include/utils/DeviceSeed.cuh` computes such seeds on the device).
 - Host matrices ≥ 1 MB are temporarily page-locked (`cudaHostRegister`)
   to enable truly async copies; registration failure silently degrades
   to pageable copies.
 - Fan-out/fan-in is event-based: transfers on the base stream, kernels
   round-robin across the pool, downloads after all kernels complete.
+
+### CUDA graph capture
+
+A `*_batch_d` call on a non-null stream can be captured into a CUDA graph
+(any capture mode, `cudaStreamCaptureModeGlobal` included) and replayed.
+For a fixed pipeline over buffers that never move, a whole pass of many
+calls becomes one graph launch:
+
+```python
+s = torch.cuda.Stream()
+with torch.cuda.stream(s):          # warm-up outside the capture
+    tacuda.mfi_batch_d(h.data_ptr(), l.data_ptr(), c.data_ptr(), v.data_ptr(),
+                       out.data_ptr(), T, S, 14, 0, s.cuda_stream)
+s.synchronize()
+g = torch.cuda.CUDAGraph()
+with torch.cuda.graph(g, stream=s):
+    tacuda.mfi_batch_d(h.data_ptr(), l.data_ptr(), c.data_ptr(), v.data_ptr(),
+                       out.data_ptr(), T, S, 14, 0, s.cuda_stream)
+g.replay()                           # recomputes `out` from the current h/l/c/v
+```
+
+- Capture only a call with a non-null stream. With `stream == 0` the call
+  fans out to the internal stream pool and blocks until it is done, which
+  is not capturable.
+- Pointers and scalars are frozen into the graph: a replay reads the same
+  input buffers and writes the same outputs.
+- Scratch memory a call needs is allocated during capture with
+  `cudaMallocAsync`/`cudaFreeAsync`, i.e. as memory nodes owned by the
+  graph; outside capture it comes from the library's stream-ordered pool
+  (see "Memory contracts" in `docs/api/conventions.md`). CUDA allows at most
+  one executable instance of a graph with memory nodes at a time.
+- Make one eager call first (as above) so kernel loading and pool growth do
+  not happen inside the capture.
+- Replay removes the host cost of submitting the work, not the work: a call
+  still issues its per-series kernels, and thousands of tiny kernels cost
+  the device a few microseconds each.
+
+`tests/python/batch_graph_capture_sweep.py` (CTest
+`batch_graph_capture_sweep`) captures every `*_batch_d` family in global
+mode, replays it and requires the eager result bit for bit; with
+`--ref-lib` it also compares against another build of the library.
 
 ### Error handling
 
@@ -170,8 +302,9 @@ Which stream handle to pass:
 
 - PyTorch's default stream *is* the legacy default stream, so on it
   `cuda_stream == 0` (CuPy's null stream likewise). That is the example
-  above: the batch waits for the default stream, overlaps series across
-  the pool (`maxConcurrency` applies) and returns when done.
+  above: the batch waits for preceding default-stream work and returns
+  when done. Fused calls run there directly; the fallback dispatcher uses
+  the stream pool (`maxConcurrency` applies only to that fallback).
 - On a side stream (`torch.cuda.Stream()`) pass its handle: the batch is
   ordered on it, `maxConcurrency` is ignored and the call returns
   immediately. Passing `0` from inside `with torch.cuda.stream(side):` is a
@@ -259,9 +392,30 @@ user streams.
 
 ## Performance notes
 
+- The measurements below describe the original dispatcher (`TACUDA_BATCH_FUSED=0`),
+  before fused execution. Current fused measurements and reproduction commands
+  are recorded in [the performance guide](PERFORMANCE.md#fused-batch-validation).
 - Series of ≥ 64K elements: single-series kernels already saturate the GPU;
   batching mainly saves call overhead — use moderate `maxConcurrency` (2-4).
 - Many short series (≤ 16K elements): stream overlap matters; benchmark
   `benchmarks/benchmark_batch_api.py` measures the sweet spot on your GPU.
-- `*_batch_d` + one user stream per portfolio is the lowest-overhead path
-  for pipelines that already keep data on the GPU.
+- Thousands of short series: every series costs its own launches, so the
+  host's launch rate is the limit, not arithmetic. RTX 3090 Ti, 4 000 series
+  × 234 bars, one call each of MFI, ATR, RSI, ADOSC, STDDEV, BBANDS, SUM,
+  OBV, AD, STOCH, SMA, MIN, MAX (the pass from issue #6): 1.11 s with the
+  per-scan synchronization, 0.44 s without it (`stream = 0`,
+  `maxConcurrency` 0 or 4); MFI alone 143 → 50 ms. `maxConcurrency = 1`
+  is 1.7–3.7× slower than 4 for BBANDS, AD and ADOSC — before the fix every
+  value gave the same time.
+- On a user stream the whole batch is ordered on that one stream, so
+  kernels of different series never overlap on the device: the same pass
+  takes 0.71–0.74 s, and its graph replay 0.56 s (the device runs ~2.5 µs
+  kernels one after another). For many short series `stream = 0` with the
+  default pool is the faster choice; a user stream buys ordering with the
+  caller's work and graph capture.
+- Scratch memory no longer grows with the number of series in flight: the
+  stream-ordered pool reuses a block on its stream as soon as the work
+  that freed it is queued. 64 series × 200 000 bars of MFI reserve 34 MiB
+  whether the pool or a user stream runs them. (With event-based reuse, as
+  `DeviceBufferPool` does, the same batch took 44–62 MiB and grew with how
+  far the host ran ahead of the GPU.)

@@ -27,3 +27,16 @@ TEST(Tacuda, NATR) {
   auto ref = natr_ref(high, low, close, p);
   expect_approx_equal(out, ref);
 }
+
+TEST(Tacuda, NatrPeriodOneReturnsUnnormalizedTrueRange) {
+  const std::vector<float> high = {10.0f, 12.0f, NAN, 13.0f};
+  const std::vector<float> low = {8.0f, 10.0f, 12.0f, 11.0f};
+  const std::vector<float> close = {9.0f, 11.0f, 13.0f, 12.0f};
+  std::vector<float> out(4, -1.0f);
+  ASSERT_EQ(ct_natr(high.data(), low.data(), close.data(), out.data(), 4, 1),
+            CT_STATUS_SUCCESS);
+  EXPECT_TRUE(std::isnan(out[0]));
+  EXPECT_EQ(out[1], 3.0f);
+  EXPECT_TRUE(std::isnan(out[2]));
+  EXPECT_EQ(out[3], 2.0f);
+}

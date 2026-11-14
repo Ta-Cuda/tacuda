@@ -19,6 +19,7 @@
 #include <stdexcept>
 #include "tacuda.h"
 #include "tacuda_device.h"
+#include <utils/DeviceBufferPool.h>
 #include <utils/ErrorState.h>
 #include <utils/Precision.h>
 
@@ -318,30 +319,41 @@ __global__ void macdKernelCompute(const T* input, T* macd, T* signal, T* hist, i
     }
 }
 
+// Temporary device buffers of the wrappers in this file. They are released
+// in stream order (reused only after the work queued before the release has
+// finished) and become graph-owned memory nodes under stream capture.
+// cudaMalloc/cudaFree used to be called here: cudaFree synchronizes the
+// device, so every such call blocked the host, and the graph would keep
+// writing to memory freed after the capture.
+template <typename T>
+static ctStatus_t acquire_scratch(DeviceBufferPtrAsync<T>& buf, size_t count,
+                                  cudaStream_t stream) {
+    try {
+        buf = acquireDeviceBufferAsync<T>(count, stream);
+        return CT_STATUS_SUCCESS;
+    } catch (const std::exception& e) {
+        tacuda::detail::set_last_error(e.what());
+        return CT_STATUS_ALLOC_FAILED;
+    }
+}
+
 template <typename ComputeT, typename KernelLauncher>
 static ctStatus_t run_single_input_compute_path(const void* d_input, void* d_output, int size,
                                                 ctDataType_t storageType, cudaStream_t stream,
                                                 KernelLauncher&& launcher) {
-    ComputeT* in = nullptr;
-    ComputeT* out = nullptr;
-    if (cudaMalloc(&in, static_cast<size_t>(size) * sizeof(ComputeT)) != cudaSuccess ||
-        cudaMalloc(&out, static_cast<size_t>(size) * sizeof(ComputeT)) != cudaSuccess) {
-        if (in) cudaFree(in);
-        if (out) cudaFree(out);
-        return CT_STATUS_ALLOC_FAILED;
-    }
-    auto cleanup = [&]() { cudaFree(in); cudaFree(out); };
-    ctStatus_t st = launch_convert(d_input, storageType, in,
-                                   std::is_same<ComputeT, double>::value ? CT_DTYPE_F64 : CT_DTYPE_F32,
-                                   size, stream);
-    if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-    st = launcher(in, out);
-    if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-    st = launch_convert(out,
+    DeviceBufferPtrAsync<ComputeT> in, out;
+    ctStatus_t st = acquire_scratch(in, static_cast<size_t>(size), stream);
+    if (st == CT_STATUS_SUCCESS) st = acquire_scratch(out, static_cast<size_t>(size), stream);
+    if (st != CT_STATUS_SUCCESS) return st;
+    st = launch_convert(d_input, storageType, in.get(),
                         std::is_same<ComputeT, double>::value ? CT_DTYPE_F64 : CT_DTYPE_F32,
-                        d_output, storageType, size, stream);
-    cleanup();
-    return st;
+                        size, stream);
+    if (st != CT_STATUS_SUCCESS) return st;
+    st = launcher(in.get(), out.get());
+    if (st != CT_STATUS_SUCCESS) return st;
+    return launch_convert(out.get(),
+                          std::is_same<ComputeT, double>::value ? CT_DTYPE_F64 : CT_DTYPE_F32,
+                          d_output, storageType, size, stream);
 }
 template <typename ComputeT, typename Launcher>
 static ctStatus_t run_macd_compute_path(const void* d_input, void* d_macd, void* d_signal, void* d_hist,
@@ -349,28 +361,18 @@ static ctStatus_t run_macd_compute_path(const void* d_input, void* d_macd, void*
                                         Launcher&& launcher) {
     const ctDataType_t computeType =
         std::is_same<ComputeT, double>::value ? CT_DTYPE_F64 : CT_DTYPE_F32;
-    const size_t bytes = static_cast<size_t>(size) * sizeof(ComputeT);
-    ComputeT* in = nullptr;
-    ComputeT* m = nullptr;
-    ComputeT* s = nullptr;
-    ComputeT* h = nullptr;
-    auto cleanup = [&]() {
-        if (in) cudaFree(in);
-        if (m) cudaFree(m);
-        if (s) cudaFree(s);
-        if (h) cudaFree(h);
-    };
-    if (cudaMalloc(&in, bytes) != cudaSuccess || cudaMalloc(&m, bytes) != cudaSuccess ||
-        cudaMalloc(&s, bytes) != cudaSuccess || cudaMalloc(&h, bytes) != cudaSuccess) {
-        cleanup();
-        return CT_STATUS_ALLOC_FAILED;
-    }
-    ctStatus_t st = launch_convert(d_input, storageType, in, computeType, size, stream);
-    if (st == CT_STATUS_SUCCESS) st = launcher(in, m, s, h);
-    if (st == CT_STATUS_SUCCESS) st = launch_convert(m, computeType, d_macd, storageType, size, stream);
-    if (st == CT_STATUS_SUCCESS) st = launch_convert(s, computeType, d_signal, storageType, size, stream);
-    if (st == CT_STATUS_SUCCESS) st = launch_convert(h, computeType, d_hist, storageType, size, stream);
-    cleanup();
+    const size_t count = static_cast<size_t>(size);
+    DeviceBufferPtrAsync<ComputeT> in, m, s, h;
+    ctStatus_t st = acquire_scratch(in, count, stream);
+    if (st == CT_STATUS_SUCCESS) st = acquire_scratch(m, count, stream);
+    if (st == CT_STATUS_SUCCESS) st = acquire_scratch(s, count, stream);
+    if (st == CT_STATUS_SUCCESS) st = acquire_scratch(h, count, stream);
+    if (st != CT_STATUS_SUCCESS) return st;
+    st = launch_convert(d_input, storageType, in.get(), computeType, size, stream);
+    if (st == CT_STATUS_SUCCESS) st = launcher(in.get(), m.get(), s.get(), h.get());
+    if (st == CT_STATUS_SUCCESS) st = launch_convert(m.get(), computeType, d_macd, storageType, size, stream);
+    if (st == CT_STATUS_SUCCESS) st = launch_convert(s.get(), computeType, d_signal, storageType, size, stream);
+    if (st == CT_STATUS_SUCCESS) st = launch_convert(h.get(), computeType, d_hist, storageType, size, stream);
     return st;
 }
 
@@ -820,48 +822,33 @@ ctStatus_t ct_atr_ex_d(const void* d_high, const void* d_low, const void* d_clos
                         size, period, percentile, stream);
     }
     if (period <= 0) return reject_period("ATR: period must be positive");
+    const size_t count = static_cast<size_t>(size);
     if (computeType == CT_DTYPE_F32) {
-        float *h = nullptr, *l = nullptr, *c = nullptr, *o = nullptr;
-        if (cudaMalloc(&h, static_cast<size_t>(size) * sizeof(float)) != cudaSuccess ||
-            cudaMalloc(&l, static_cast<size_t>(size) * sizeof(float)) != cudaSuccess ||
-            cudaMalloc(&c, static_cast<size_t>(size) * sizeof(float)) != cudaSuccess ||
-            cudaMalloc(&o, static_cast<size_t>(size) * sizeof(float)) != cudaSuccess) {
-            if (h) cudaFree(h); if (l) cudaFree(l); if (c) cudaFree(c); if (o) cudaFree(o);
-            return CT_STATUS_ALLOC_FAILED;
-        }
-        auto cleanup = [&]() { cudaFree(h); cudaFree(l); cudaFree(c); cudaFree(o); };
-        ctStatus_t st = launch_convert(d_high, storageType, h, CT_DTYPE_F32, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        st = launch_convert(d_low, storageType, l, CT_DTYPE_F32, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        st = launch_convert(d_close, storageType, c, CT_DTYPE_F32, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        atrKernelCompute<float><<<1, 1, 0, stream>>>(h, l, c, o, size, period);
-        if (cudaGetLastError() != cudaSuccess) { cleanup(); return CT_STATUS_KERNEL_FAILED; }
-        st = launch_convert(o, CT_DTYPE_F32, d_output, storageType, size, stream);
-        cleanup();
-        return st;
+        DeviceBufferPtrAsync<float> h, l, c, o;
+        ctStatus_t st = acquire_scratch(h, count, stream);
+        if (st == CT_STATUS_SUCCESS) st = acquire_scratch(l, count, stream);
+        if (st == CT_STATUS_SUCCESS) st = acquire_scratch(c, count, stream);
+        if (st == CT_STATUS_SUCCESS) st = acquire_scratch(o, count, stream);
+        if (st == CT_STATUS_SUCCESS) st = launch_convert(d_high, storageType, h.get(), CT_DTYPE_F32, size, stream);
+        if (st == CT_STATUS_SUCCESS) st = launch_convert(d_low, storageType, l.get(), CT_DTYPE_F32, size, stream);
+        if (st == CT_STATUS_SUCCESS) st = launch_convert(d_close, storageType, c.get(), CT_DTYPE_F32, size, stream);
+        if (st != CT_STATUS_SUCCESS) return st;
+        atrKernelCompute<float><<<1, 1, 0, stream>>>(h.get(), l.get(), c.get(), o.get(), size, period);
+        if (cudaGetLastError() != cudaSuccess) return CT_STATUS_KERNEL_FAILED;
+        return launch_convert(o.get(), CT_DTYPE_F32, d_output, storageType, size, stream);
     } else {
-        double *h = nullptr, *l = nullptr, *c = nullptr, *o = nullptr;
-        if (cudaMalloc(&h, static_cast<size_t>(size) * sizeof(double)) != cudaSuccess ||
-            cudaMalloc(&l, static_cast<size_t>(size) * sizeof(double)) != cudaSuccess ||
-            cudaMalloc(&c, static_cast<size_t>(size) * sizeof(double)) != cudaSuccess ||
-            cudaMalloc(&o, static_cast<size_t>(size) * sizeof(double)) != cudaSuccess) {
-            if (h) cudaFree(h); if (l) cudaFree(l); if (c) cudaFree(c); if (o) cudaFree(o);
-            return CT_STATUS_ALLOC_FAILED;
-        }
-        auto cleanup = [&]() { cudaFree(h); cudaFree(l); cudaFree(c); cudaFree(o); };
-        ctStatus_t st = launch_convert(d_high, storageType, h, CT_DTYPE_F64, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        st = launch_convert(d_low, storageType, l, CT_DTYPE_F64, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        st = launch_convert(d_close, storageType, c, CT_DTYPE_F64, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        atrKernelCompute<double><<<1, 1, 0, stream>>>(h, l, c, o, size, period);
-        if (cudaGetLastError() != cudaSuccess) { cleanup(); return CT_STATUS_KERNEL_FAILED; }
-        st = launch_convert(o, CT_DTYPE_F64, d_output, storageType, size, stream);
-        cleanup();
-        return st;
+        DeviceBufferPtrAsync<double> h, l, c, o;
+        ctStatus_t st = acquire_scratch(h, count, stream);
+        if (st == CT_STATUS_SUCCESS) st = acquire_scratch(l, count, stream);
+        if (st == CT_STATUS_SUCCESS) st = acquire_scratch(c, count, stream);
+        if (st == CT_STATUS_SUCCESS) st = acquire_scratch(o, count, stream);
+        if (st == CT_STATUS_SUCCESS) st = launch_convert(d_high, storageType, h.get(), CT_DTYPE_F64, size, stream);
+        if (st == CT_STATUS_SUCCESS) st = launch_convert(d_low, storageType, l.get(), CT_DTYPE_F64, size, stream);
+        if (st == CT_STATUS_SUCCESS) st = launch_convert(d_close, storageType, c.get(), CT_DTYPE_F64, size, stream);
+        if (st != CT_STATUS_SUCCESS) return st;
+        atrKernelCompute<double><<<1, 1, 0, stream>>>(h.get(), l.get(), c.get(), o.get(), size, period);
+        if (cudaGetLastError() != cudaSuccess) return CT_STATUS_KERNEL_FAILED;
+        return launch_convert(o.get(), CT_DTYPE_F64, d_output, storageType, size, stream);
     }
 }
 
@@ -1067,20 +1054,17 @@ ctStatus_t ct_stochastic_fast_d(const float* d_high, const float* d_low, const f
                                 int dPeriod, int /*dMaType*/, cudaStream_t stream) {
     tacuda::detail::clear_last_error();
     if (!d_high || !d_low || !d_close || !d_fastK || !d_fastD || size <= 0) { tacuda::detail::set_last_error("null pointer or invalid size"); return CT_STATUS_INVALID_ARGUMENT; }
-    float* tmp = nullptr;
-    const size_t bytes = static_cast<size_t>(size) * 2 * sizeof(float);
-    if (cudaMalloc(&tmp, bytes) != cudaSuccess) return CT_STATUS_ALLOC_FAILED;
-    auto cleanup = [&]() { cudaFree(tmp); };
+    DeviceBufferPtrAsync<float> tmp;
+    ctStatus_t st = acquire_scratch(tmp, static_cast<size_t>(size) * 2, stream);
+    if (st != CT_STATUS_SUCCESS) return st;
     try {
         tacuda::StochasticFast ind(kPeriod, dPeriod);
-        ind.calculate(d_high, d_low, d_close, tmp, size, stream);
-        cudaError_t e1 = cudaMemcpyAsync(d_fastK, tmp,          size * sizeof(float), cudaMemcpyDeviceToDevice, stream);
-        cudaError_t e2 = cudaMemcpyAsync(d_fastD, tmp + size,   size * sizeof(float), cudaMemcpyDeviceToDevice, stream);
-        cleanup();
+        ind.calculate(d_high, d_low, d_close, tmp.get(), size, stream);
+        cudaError_t e1 = cudaMemcpyAsync(d_fastK, tmp.get(),        size * sizeof(float), cudaMemcpyDeviceToDevice, stream);
+        cudaError_t e2 = cudaMemcpyAsync(d_fastD, tmp.get() + size, size * sizeof(float), cudaMemcpyDeviceToDevice, stream);
         if (e1 != cudaSuccess || e2 != cudaSuccess) return CT_STATUS_COPY_FAILED;
         return CT_STATUS_SUCCESS;
     } catch (...) {
-        cleanup();
         return CT_STATUS_KERNEL_FAILED;
     }
 }
@@ -1160,49 +1144,35 @@ ctStatus_t ct_bbands_ex_d(const void* d_input, void* d_upper, void* d_middle, vo
                            size, period, nbDevUp, nbDevDn, stream);
     }
     if (period <= 0) return reject_period("BBANDS: period must be positive");
+    const size_t count = static_cast<size_t>(size);
+    const int block = 256, grid = (size + block - 1) / block;
     if (computeType == CT_DTYPE_F32) {
-        float *in = nullptr, *u = nullptr, *m = nullptr, *l = nullptr;
-        if (cudaMalloc(&in, static_cast<size_t>(size) * sizeof(float)) != cudaSuccess ||
-            cudaMalloc(&u, static_cast<size_t>(size) * sizeof(float)) != cudaSuccess ||
-            cudaMalloc(&m, static_cast<size_t>(size) * sizeof(float)) != cudaSuccess ||
-            cudaMalloc(&l, static_cast<size_t>(size) * sizeof(float)) != cudaSuccess) {
-            if (in) cudaFree(in); if (u) cudaFree(u); if (m) cudaFree(m); if (l) cudaFree(l);
-            return CT_STATUS_ALLOC_FAILED;
-        }
-        auto cleanup = [&]() { cudaFree(in); cudaFree(u); cudaFree(m); cudaFree(l); };
-        ctStatus_t st = launch_convert(d_input, storageType, in, CT_DTYPE_F32, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        const int block = 256, grid = (size + block - 1) / block;
-        bbandsKernelCompute<float><<<grid, block, 0, stream>>>(in, u, m, l, size, period, nbDevUp, nbDevDn);
-        if (cudaGetLastError() != cudaSuccess) { cleanup(); return CT_STATUS_KERNEL_FAILED; }
-        st = launch_convert(u, CT_DTYPE_F32, d_upper, storageType, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        st = launch_convert(m, CT_DTYPE_F32, d_middle, storageType, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        st = launch_convert(l, CT_DTYPE_F32, d_lower, storageType, size, stream);
-        cleanup();
+        DeviceBufferPtrAsync<float> in, u, m, l;
+        ctStatus_t st = acquire_scratch(in, count, stream);
+        if (st == CT_STATUS_SUCCESS) st = acquire_scratch(u, count, stream);
+        if (st == CT_STATUS_SUCCESS) st = acquire_scratch(m, count, stream);
+        if (st == CT_STATUS_SUCCESS) st = acquire_scratch(l, count, stream);
+        if (st == CT_STATUS_SUCCESS) st = launch_convert(d_input, storageType, in.get(), CT_DTYPE_F32, size, stream);
+        if (st != CT_STATUS_SUCCESS) return st;
+        bbandsKernelCompute<float><<<grid, block, 0, stream>>>(in.get(), u.get(), m.get(), l.get(), size, period, nbDevUp, nbDevDn);
+        if (cudaGetLastError() != cudaSuccess) return CT_STATUS_KERNEL_FAILED;
+        st = launch_convert(u.get(), CT_DTYPE_F32, d_upper, storageType, size, stream);
+        if (st == CT_STATUS_SUCCESS) st = launch_convert(m.get(), CT_DTYPE_F32, d_middle, storageType, size, stream);
+        if (st == CT_STATUS_SUCCESS) st = launch_convert(l.get(), CT_DTYPE_F32, d_lower, storageType, size, stream);
         return st;
     } else {
-        double *in = nullptr, *u = nullptr, *m = nullptr, *l = nullptr;
-        if (cudaMalloc(&in, static_cast<size_t>(size) * sizeof(double)) != cudaSuccess ||
-            cudaMalloc(&u, static_cast<size_t>(size) * sizeof(double)) != cudaSuccess ||
-            cudaMalloc(&m, static_cast<size_t>(size) * sizeof(double)) != cudaSuccess ||
-            cudaMalloc(&l, static_cast<size_t>(size) * sizeof(double)) != cudaSuccess) {
-            if (in) cudaFree(in); if (u) cudaFree(u); if (m) cudaFree(m); if (l) cudaFree(l);
-            return CT_STATUS_ALLOC_FAILED;
-        }
-        auto cleanup = [&]() { cudaFree(in); cudaFree(u); cudaFree(m); cudaFree(l); };
-        ctStatus_t st = launch_convert(d_input, storageType, in, CT_DTYPE_F64, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        const int block = 256, grid = (size + block - 1) / block;
-        bbandsKernelCompute<double><<<grid, block, 0, stream>>>(in, u, m, l, size, period, nbDevUp, nbDevDn);
-        if (cudaGetLastError() != cudaSuccess) { cleanup(); return CT_STATUS_KERNEL_FAILED; }
-        st = launch_convert(u, CT_DTYPE_F64, d_upper, storageType, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        st = launch_convert(m, CT_DTYPE_F64, d_middle, storageType, size, stream);
-        if (st != CT_STATUS_SUCCESS) { cleanup(); return st; }
-        st = launch_convert(l, CT_DTYPE_F64, d_lower, storageType, size, stream);
-        cleanup();
+        DeviceBufferPtrAsync<double> in, u, m, l;
+        ctStatus_t st = acquire_scratch(in, count, stream);
+        if (st == CT_STATUS_SUCCESS) st = acquire_scratch(u, count, stream);
+        if (st == CT_STATUS_SUCCESS) st = acquire_scratch(m, count, stream);
+        if (st == CT_STATUS_SUCCESS) st = acquire_scratch(l, count, stream);
+        if (st == CT_STATUS_SUCCESS) st = launch_convert(d_input, storageType, in.get(), CT_DTYPE_F64, size, stream);
+        if (st != CT_STATUS_SUCCESS) return st;
+        bbandsKernelCompute<double><<<grid, block, 0, stream>>>(in.get(), u.get(), m.get(), l.get(), size, period, nbDevUp, nbDevDn);
+        if (cudaGetLastError() != cudaSuccess) return CT_STATUS_KERNEL_FAILED;
+        st = launch_convert(u.get(), CT_DTYPE_F64, d_upper, storageType, size, stream);
+        if (st == CT_STATUS_SUCCESS) st = launch_convert(m.get(), CT_DTYPE_F64, d_middle, storageType, size, stream);
+        if (st == CT_STATUS_SUCCESS) st = launch_convert(l.get(), CT_DTYPE_F64, d_lower, storageType, size, stream);
         return st;
     }
 }
@@ -1211,23 +1181,20 @@ ctStatus_t ct_accbands_d(const float* d_high, const float* d_low, const float* d
                          float* d_upper, float* d_middle, float* d_lower,
                          int size, int period, cudaStream_t stream) {
     tacuda::detail::clear_last_error();
-    if (!d_high || !d_low || !d_close || !d_upper || !d_middle || !d_lower || size <= 0) 
+    if (!d_high || !d_low || !d_close || !d_upper || !d_middle || !d_lower || size <= 0)
         { tacuda::detail::set_last_error("null pointer or invalid size"); return CT_STATUS_INVALID_ARGUMENT; }
-    float* tmp = nullptr;
-    const size_t bytes = static_cast<size_t>(size) * 3 * sizeof(float);
-    if (cudaMalloc(&tmp, bytes) != cudaSuccess) return CT_STATUS_ALLOC_FAILED;
-    auto cleanup = [&]() { cudaFree(tmp); };
+    DeviceBufferPtrAsync<float> tmp;
+    ctStatus_t st = acquire_scratch(tmp, static_cast<size_t>(size) * 3, stream);
+    if (st != CT_STATUS_SUCCESS) return st;
     try {
         tacuda::ACCBANDS ind(period);
-        ind.calculate(d_high, d_low, d_close, tmp, size, stream);
-        cudaError_t e1 = cudaMemcpyAsync(d_upper,  tmp,            size * sizeof(float), cudaMemcpyDeviceToDevice, stream);
-        cudaError_t e2 = cudaMemcpyAsync(d_middle, tmp + size,     size * sizeof(float), cudaMemcpyDeviceToDevice, stream);
-        cudaError_t e3 = cudaMemcpyAsync(d_lower,  tmp + 2 * size, size * sizeof(float), cudaMemcpyDeviceToDevice, stream);
-        cleanup();
+        ind.calculate(d_high, d_low, d_close, tmp.get(), size, stream);
+        cudaError_t e1 = cudaMemcpyAsync(d_upper,  tmp.get(),            size * sizeof(float), cudaMemcpyDeviceToDevice, stream);
+        cudaError_t e2 = cudaMemcpyAsync(d_middle, tmp.get() + size,     size * sizeof(float), cudaMemcpyDeviceToDevice, stream);
+        cudaError_t e3 = cudaMemcpyAsync(d_lower,  tmp.get() + 2 * size, size * sizeof(float), cudaMemcpyDeviceToDevice, stream);
         if (e1 != cudaSuccess || e2 != cudaSuccess || e3 != cudaSuccess) return CT_STATUS_COPY_FAILED;
         return CT_STATUS_SUCCESS;
     } catch (...) {
-        cleanup();
         return CT_STATUS_KERNEL_FAILED;
     }
 }
@@ -1486,20 +1453,17 @@ ctStatus_t ct_aroon_d(const float* d_high, const float* d_low, float* d_aroonDow
                       float* d_aroonUp, int size, int period, cudaStream_t stream) {
     tacuda::detail::clear_last_error();
     if (!d_high || !d_low || !d_aroonDown || !d_aroonUp || size <= 0) { tacuda::detail::set_last_error("null pointer or invalid size"); return CT_STATUS_INVALID_ARGUMENT; }
-    float* tmp = nullptr;
-    const size_t bytes = static_cast<size_t>(size) * 3 * sizeof(float);
-    if (cudaMalloc(&tmp, bytes) != cudaSuccess) return CT_STATUS_ALLOC_FAILED;
-    auto cleanup = [&]() { cudaFree(tmp); };
+    DeviceBufferPtrAsync<float> tmp;
+    ctStatus_t st = acquire_scratch(tmp, static_cast<size_t>(size) * 3, stream);
+    if (st != CT_STATUS_SUCCESS) return st;
     try {
         tacuda::Aroon ind(period, period);
-        ind.calculate(d_high, d_low, tmp, size, stream);
-        cudaError_t e1 = cudaMemcpyAsync(d_aroonUp,   tmp,            size * sizeof(float), cudaMemcpyDeviceToDevice, stream);
-        cudaError_t e2 = cudaMemcpyAsync(d_aroonDown, tmp + size,     size * sizeof(float), cudaMemcpyDeviceToDevice, stream);
-        cleanup();
+        ind.calculate(d_high, d_low, tmp.get(), size, stream);
+        cudaError_t e1 = cudaMemcpyAsync(d_aroonUp,   tmp.get(),        size * sizeof(float), cudaMemcpyDeviceToDevice, stream);
+        cudaError_t e2 = cudaMemcpyAsync(d_aroonDown, tmp.get() + size, size * sizeof(float), cudaMemcpyDeviceToDevice, stream);
         if (e1 != cudaSuccess || e2 != cudaSuccess) return CT_STATUS_COPY_FAILED;
         return CT_STATUS_SUCCESS;
     } catch (...) {
-        cleanup();
         return CT_STATUS_KERNEL_FAILED;
     }
 }

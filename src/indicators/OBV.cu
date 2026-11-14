@@ -7,6 +7,7 @@
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
 #include <thrust/device_ptr.h>
+#include <utils/ThrustPolicy.cuh>
 #include <thrust/execution_policy.h>
 #include <thrust/scan.h>
 #include <stdexcept>
@@ -60,7 +61,7 @@ void tacuda::OBV::calculate(const float* price, const float* volume,
     // 2) Inclusive scan in double for numerical stability
     {
         thrust::device_ptr<double> ptr(contrib.get());
-        thrust::inclusive_scan(thrust::cuda::par.on(stream), ptr, ptr + size, ptr);
+        thrust::inclusive_scan(tacuda::detail::thrust_on(stream), ptr, ptr + size, ptr);
     }
 
     // 3) Cast to float output

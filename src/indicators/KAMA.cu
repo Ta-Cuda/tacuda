@@ -9,6 +9,7 @@
 #include <utils/TacudaConfig.h>
 #include <utils/AffineScan.cuh>
 #include <thrust/device_ptr.h>
+#include <utils/ThrustPolicy.cuh>
 #include <thrust/execution_policy.h>
 #include <thrust/scan.h>
 #include <thrust/iterator/counting_iterator.h>
@@ -139,16 +140,18 @@ __global__ void kamaApplyBlockPrefixesKernel(double2* __restrict__ pairs,
   pairs[global] = KamaComposeOp::compose(prefix, pairs[global]);
 }
 
-// Finalize KAMA from scanned pairs; skip j==0 to keep output[period-1] as NaN
+// Finalize KAMA from scanned pairs; skip j==0 to keep output[period-1] as NaN.
+// The seed y0 = input[period-1] is read on the device (no host round trip).
 __global__ void kamaFinalizeFromPairsKernel(const double2* __restrict__ pairs,
                                             float* __restrict__ output,
-                                            float y0,
+                                            const float* __restrict__ input,
                                             int period,
                                             int size) {
   int j = blockIdx.x * blockDim.x + threadIdx.x;
   int tailLen = size - (period - 1);
   if (j >= tailLen) return;
   if (j == 0) return; // keep output[period-1] as NaN for parity
+  const float y0 = input[period - 1];
   double2 t = pairs[j];
   double y = t.x * static_cast<double>(y0) + t.y;
   int outIdx = (period - 1) + j;
@@ -183,7 +186,7 @@ void KAMA::calculate(const float *input, float *output,
     thrust::counting_iterator<int> begin(0), end(size);
     AbsDiffFunctor f{input};
     auto it = thrust::make_transform_iterator(begin, f);
-    thrust::inclusive_scan(thrust::cuda::par.on(stream), it, it + size, thrust::device_pointer_cast(absPrefix.get()));
+    thrust::inclusive_scan(tacuda::detail::thrust_on(stream), it, it + size, thrust::device_pointer_cast(absPrefix.get()));
   }
 
   int tailLen = size - (period - 1);
@@ -209,11 +212,7 @@ void KAMA::calculate(const float *input, float *output,
     kamaBlockScanKernel<<<gridSize, blockSize, shm, stream>>>(pairs.get(), pairs.get(), nullptr, tailLen);
     CUDA_CHECK(cudaGetLastError());
 
-    float y0 = 0.0f;
-    CUDA_CHECK(cudaMemcpyAsync(&y0, input + (period - 1), sizeof(float), cudaMemcpyDeviceToHost, stream));
-    CUDA_CHECK(cudaStreamSynchronize(stream));
-
-    kamaFinalizeFromPairsKernel<<<defaultGrid(tailLen), defaultBlock(), 0, stream>>>(pairs.get(), output, y0, period, size);
+    kamaFinalizeFromPairsKernel<<<defaultGrid(tailLen), defaultBlock(), 0, stream>>>(pairs.get(), output, input, period, size);
     CUDA_CHECK(cudaGetLastError());
     return;
   }
@@ -235,7 +234,7 @@ void KAMA::calculate(const float *input, float *output,
   CUDA_CHECK(cudaGetLastError());
 
   // Scan block totals with thrust (small)
-  thrust::inclusive_scan(thrust::cuda::par.on(stream),
+  thrust::inclusive_scan(tacuda::detail::thrust_on(stream),
                          thrust::device_pointer_cast(blockTotals.get()),
                          thrust::device_pointer_cast(blockTotals.get() + numBlocks),
                          thrust::device_pointer_cast(blockTotals.get()),
@@ -246,10 +245,7 @@ void KAMA::calculate(const float *input, float *output,
   CUDA_CHECK(cudaGetLastError());
 
   // Finalize values
-  float y0 = 0.0f;
-  CUDA_CHECK(cudaMemcpyAsync(&y0, input + (period - 1), sizeof(float), cudaMemcpyDeviceToHost, stream));
-  CUDA_CHECK(cudaStreamSynchronize(stream));
-  kamaFinalizeFromPairsKernel<<<defaultGrid(tailLen), defaultBlock(), 0, stream>>>(pairs.get(), output, y0, period, size);
+  kamaFinalizeFromPairsKernel<<<defaultGrid(tailLen), defaultBlock(), 0, stream>>>(pairs.get(), output, input, period, size);
   CUDA_CHECK(cudaGetLastError());
 }
 

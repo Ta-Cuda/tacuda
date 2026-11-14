@@ -8,6 +8,7 @@
 #include <utils/DeviceBufferPool.h>
 #include <utils/AffineScan.cuh>
 #include <thrust/device_ptr.h>
+#include <utils/ThrustPolicy.cuh>
 #include <thrust/execution_policy.h>
 #include <thrust/scan.h>
 #include <stdexcept>
@@ -119,9 +120,9 @@ void tacuda::CMO::calculate(const float* input, float* output, int size, cudaStr
         // Make copies for prefix sums since we need originals for transforms
         auto gainPfx = acquireDeviceBufferAsync<float>(size, stream);
         auto lossPfx = acquireDeviceBufferAsync<float>(size, stream);
-        thrust::inclusive_scan(thrust::cuda::par.on(stream), gPtr, gPtr + size,
+        thrust::inclusive_scan(tacuda::detail::thrust_on(stream), gPtr, gPtr + size,
                                thrust::device_pointer_cast(gainPfx.get()));
-        thrust::inclusive_scan(thrust::cuda::par.on(stream), lPtr, lPtr + size,
+        thrust::inclusive_scan(tacuda::detail::thrust_on(stream), lPtr, lPtr + size,
                                thrust::device_pointer_cast(lossPfx.get()));
 
         // 3) Build affine transforms

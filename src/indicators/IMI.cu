@@ -5,6 +5,7 @@
 /* ======================================================================== */
 #include <indicators/IMI.h>
 #include <thrust/device_ptr.h>
+#include <utils/ThrustPolicy.cuh>
 #include <thrust/execution_policy.h>
 #include <thrust/scan.h>
 #include <utils/CudaUtils.h>
@@ -76,8 +77,8 @@ void tacuda::IMI::calculate(const float* open, const float* close, float* output
 
     thrust::device_ptr<double> upPtr(up.get());
     thrust::device_ptr<double> downPtr(down.get());
-    thrust::inclusive_scan(thrust::cuda::par.on(stream), upPtr, upPtr + size, upPtr);
-    thrust::inclusive_scan(thrust::cuda::par.on(stream), downPtr, downPtr + size, downPtr);
+    thrust::inclusive_scan(tacuda::detail::thrust_on(stream), upPtr, upPtr + size, upPtr);
+    thrust::inclusive_scan(tacuda::detail::thrust_on(stream), downPtr, downPtr + size, downPtr);
 
     imiKernel<<<grid, block, 0, stream>>>(up.get(), down.get(), output, period, size);
     CUDA_CHECK(cudaGetLastError());

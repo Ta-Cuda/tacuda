@@ -51,6 +51,15 @@ report `NaN` in the warm-up region (float outputs — a documented delta from
 TA-Lib's int `0`). The remaining corner cases are listed in
 [IMPLEMENTATION_NOTES.md](IMPLEMENTATION_NOTES.md).
 
+### Fused batch arithmetic and CUDA Graphs (0.9.0)
+
+Supported portfolio workloads use one kernel per batch and double internal
+recurrences. User-stream calls enqueue work without host synchronization and
+support CUDA Graph capture. The final float32 bits can change relative to
+the original per-series path and existing streaming handles. Selection,
+fallback boundaries and `TACUDA_BATCH_FUSED=auto|0|1` are documented in
+[BATCH_API.md](BATCH_API.md#fused-execution). The C ABI is unchanged.
+
 ### Memory contracts
 
 - Host API: caller owns all buffers; functions never allocate host memory.

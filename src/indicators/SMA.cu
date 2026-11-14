@@ -9,6 +9,7 @@
 #include <utils/TacudaConfig.h>
 #include <stdexcept>
 #include <thrust/device_ptr.h>
+#include <utils/ThrustPolicy.cuh>
 #include <thrust/execution_policy.h>
 #include <thrust/scan.h>
 #include <thrust/iterator/transform_iterator.h>
@@ -265,7 +266,7 @@ void sma_calculate_impl(int period, const T* input, T* output, int size, cudaStr
         thrust::device_ptr<const T> inPtr(input);
         auto inBegin = thrust::make_transform_iterator(inPtr, ToDoubleFunctor<T>{});
         thrust::device_ptr<double> preD(prefixD.get());
-        thrust::inclusive_scan(thrust::cuda::par.on(stream), inBegin, inBegin + size, preD);
+        thrust::inclusive_scan(tacuda::detail::thrust_on(stream), inBegin, inBegin + size, preD);
         dim3 block = defaultBlock();
         dim3 grid = defaultGrid(size);
         smaFinalizeFromPrefixKernel<T><<<grid, block, 0, stream>>>(prefixD.get(), input, output, window, size);

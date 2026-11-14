@@ -8,13 +8,9 @@
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
 #include <utils/AffineScan.cuh>
-#include <thrust/device_ptr.h>
-#include <thrust/execution_policy.h>
-#include <thrust/reduce.h>
-#include <thrust/scan.h>
+#include <utils/DeviceSeed.cuh>
 #include <stdexcept>
 #include <cmath>
-#include <thrust/transform_reduce.h>
 
 namespace {
 
@@ -35,22 +31,16 @@ __global__ void fillPairsKernel(const float* __restrict__ x,
 
 __global__ void finalizeSmoothKernel(const AffinePair* __restrict__ pref,
                                      float* __restrict__ y,
-                                     double y0,
+                                     const double* __restrict__ y0p,
                                      int baseIdx,
                                      int nPairs)
 {
     int k = blockIdx.x * blockDim.x + threadIdx.x;
     if (k >= nPairs) return;
     AffinePair p = pref[k];
-    double val = p.A * y0 + p.b;
+    double val = p.A * (*y0p) + p.b;
     y[baseIdx + 1 + k] = static_cast<float>(val);
 }
-
-// Replaced setAtIndexKernel with cudaMemcpyAsync in wilderSmoothDevice
-
-struct ToDouble {
-    __host__ __device__ double operator()(float v) const { return static_cast<double>(v); }
-};
 
 // Wilder smoothing for ADX with input data offset
 // offset - index at which valid data begins in input array x
@@ -63,20 +53,11 @@ static void wilderSmoothDeviceWithOffset(const float* x, float* y,
     if (availableData < period) return;
 
     // TA-Lib style for ADX: seed at index (offset + period - 1) with
-    // mean(x[offset .. offset+period-1]).
-    double s = thrust::transform_reduce(
-        thrust::cuda::par.on(stream),
-        thrust::device_pointer_cast(x) + offset,
-        thrust::device_pointer_cast(x) + offset + period,
-        ToDouble{}, 0.0, thrust::plus<double>{});
-    double y0 = s / static_cast<double>(period);
-
+    // mean(x[offset .. offset+period-1]). Computed and kept on the device.
     int seedIdx = offset + period - 1;
-    {
-        float seedVal = static_cast<float>(y0);
-        CUDA_CHECK(cudaMemcpyAsync(y + seedIdx, &seedVal, sizeof(float),
-                                    cudaMemcpyHostToDevice, stream));
-    }
+    auto dSeed = acquireDeviceBufferAsync<double>(1, stream);
+    tacuda::detail::launch_seed_sum(x, offset, period, static_cast<double>(period),
+                                    dSeed.get(), y, seedIdx, stream);
 
     // Recurrence smoothing starts at seedIdx+1
     const int firstIdx = seedIdx + 1;
@@ -102,7 +83,7 @@ static void wilderSmoothDeviceWithOffset(const float* x, float* y,
     {
         dim3 b = defaultBlock();
         dim3 g = defaultGrid(nPairs);
-        finalizeSmoothKernel<<<g, b, 0, stream>>>(dPref.get(), y, y0, seedIdx, nPairs);
+        finalizeSmoothKernel<<<g, b, 0, stream>>>(dPref.get(), y, dSeed.get(), seedIdx, nPairs);
         CUDA_CHECK(cudaGetLastError());
     }
 }

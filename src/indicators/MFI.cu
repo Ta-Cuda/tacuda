@@ -6,8 +6,10 @@
 #include <indicators/MFI.h>
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
+#include <utils/DeterministicScan.cuh>
 
 #include <thrust/device_ptr.h>
+#include <utils/ThrustPolicy.cuh>
 #include <thrust/execution_policy.h>
 #include <thrust/iterator/counting_iterator.h>
 #include <thrust/iterator/transform_iterator.h>
@@ -123,20 +125,17 @@ void MFI::calculate(const float* high, const float* low, const float* close,
     auto negPrefix = acquireDeviceBufferAsync<double>(size, stream);
 
     // transform_iterator over counting_iterator -> mf(i)
-    auto pol = thrust::cuda::par.on(stream);
-
     auto c0   = thrust::make_counting_iterator<int>(0);
-    auto cend = thrust::make_counting_iterator<int>(size);
 
     auto posIt = thrust::make_transform_iterator(c0,  PosMFFunctor{tp.get(), volume});
     auto negIt = thrust::make_transform_iterator(c0,  NegMFFunctor{tp.get(), volume});
 
     // inclusive_scan(posIt) -> posPrefix
-    thrust::inclusive_scan(pol, posIt, posIt + size, thrust::device_pointer_cast(posPrefix.get()));
-    thrust::inclusive_scan(pol, negIt, negIt + size, thrust::device_pointer_cast(negPrefix.get()));
+    tacuda::detail::deterministic_double_scan(posIt, posPrefix.get(), size, stream);
+    tacuda::detail::deterministic_double_scan(negIt, negPrefix.get(), size, stream);
 
-    // 3) Final kernel: prefix difference over window -> MFI
-    CUDA_CHECK(cudaMemsetAsync(output, 0xFF, size * sizeof(float), stream)); // NaN at start
+    // 3) Final kernel: prefix difference over window -> MFI. It writes every
+    //    element, the first `period` as NaN, so no NaN pre-fill is needed.
     {
         dim3 block = defaultBlock();
         dim3 grid  = defaultGrid(size);

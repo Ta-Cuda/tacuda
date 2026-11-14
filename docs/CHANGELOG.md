@@ -1,11 +1,60 @@
 Changelog
 =========
 
-0.8.1 — pending release
----------------------
-Candidate correctness update for precision entry points, batch streams, Python
-input validation and the optimizer. Release validation is in progress; this
-version has not been published. Two-GPU ownership validation remains pending.
+0.9.0 — 2026-11-14
+------------------
+Fused portfolio batches and CUDA Graph support. The C ABI is unchanged;
+the minor-version bump reflects improved numerical behavior on the fused path.
+
+Added:
+
+- One kernel for an entire supported batch, on host and device APIs, for MFI,
+  ATR, RSI, ADOSC, STDDEV, BBANDS, SUM, OBV, AD, STOCHASTIC, SMA, MIN, MAX,
+  EMA, WMA, NATR and EMA MACD. Direct windows are bounded to small periods;
+  recurrences use one thread per series when `seriesLen <= 4*numSeries`.
+- `TACUDA_BATCH_FUSED=auto|0|1`: automatic selection, per-series dispatch,
+  or forced supported fused execution. Window/work limits still apply in
+  forced mode. `maxConcurrency` is ignored on the fused path.
+- Supported fused device calls capture as exactly one CUDA kernel node,
+  without scratch allocations. All device batch families support graph
+  capture on a non-null caller stream, including the fallback dispatcher.
+
+Changed:
+
+- Fused recurrences follow TA-Lib's double-precision operation order and round
+  only at public float32 outputs. ATR, RSI, NATR, EMA and MACD can differ in
+  their last bits from 0.8. Existing streaming handles retain their rounding
+  contract. Fused rows are independent of row order, batch size and future
+  bars; crossing an automatic fallback boundary can change final bits.
+- Use `1` to keep supported fused arithmetic at every batch size, or `0`
+  for the original per-series dispatcher. The independent correctness fixes
+  below still apply with `0`; it does not reproduce old nondeterministic bits.
+- Direct windows isolate NaNs to their own row and recover when a NaN leaves
+  the window. STOCHASTIC retains the previous float arithmetic.
+
+Fixed:
+
+- Device calls on user streams no longer synchronize through Thrust or
+  host-read recurrence seeds. Scratch uses stream-ordered allocation, with
+  graph-owned memory during capture; the memory pool remains bounded under
+  queued batched work. This fixes CUDA Graph capture for every batch family.
+- Long-series MFI, AD, ADOSC and STDDEV use fixed-tree floating-point scans,
+  removing scheduling-dependent output changes between eager runs and graph
+  replays. This improves reproducibility, not the conditioning limit of
+  long-prefix variance differences.
+- EMA period 1 copies the input, including NaNs and extreme changes. NATR
+  period 1 returns unnormalized TRANGE like TA-Lib on both dispatchers.
+  Fused ATR period 1 computes independent true ranges after a NaN bar.
+
+Measured during preparation on RTX 3090 Ti, CUDA 12.8, GPU-resident float32,
+median synchronized wall time without transfers: the issue #6 pass of 13
+calls on 4000 series x 234 bars fell from 431.09 ms on the earlier per-series
+dispatcher to 2.615 ms (165x); graph replay took 2.527 ms with 13 kernel nodes.
+20000x234: 2151.44 to 13.60 ms; 100000x64: 10613.90 to 23.28 ms. These are
+workload-specific GPU-dispatch comparisons. See `docs/PERFORMANCE.md`.
+
+The release also carries the following corrections from the unpublished
+0.8.1 candidate:
 
 Fixed — `*_ex` / `*_ex_d` precision paths (every pair except float32/float32),
 which also serve `dtype=` in the Python wrappers:

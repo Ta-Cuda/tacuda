@@ -12,12 +12,16 @@ __global__ void maxKernel(const float* __restrict__ input,
                           float* __restrict__ output,
                           int period, int size) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    // Warm-up: the first period-1 outputs are NaN, written here instead of a
+    // separate memset (same 0xFFFFFFFF pattern the memset used to produce).
+    if (idx < period - 1 && idx < size) {
+        output[idx] = __int_as_float(0xFFFFFFFF);
+    }
     if (idx <= size - period) {
         float m = input[idx];
         for (int k = 1; k < period; ++k)
             m = fmaxf(m, input[idx + k]);
         // Write result at idx + period - 1 to match TA-Lib behavior
-        // (first period-1 values remain NaN as warmup)
         output[idx + period - 1] = m;
     }
 }
@@ -34,7 +38,6 @@ void tacuda::MAX::calculate(const float* input, float* output, int size, cudaStr
         CUDA_CHECK(cudaMemsetAsync(output, 0xFF, static_cast<size_t>(size) * sizeof(float), stream));
         return;
     }
-    CUDA_CHECK(cudaMemsetAsync(output, 0xFF, size * sizeof(float), stream));
     dim3 block = defaultBlock();
     dim3 grid = defaultGrid(size);
     maxKernel<<<grid, block, 0, stream>>>(input, output, period, size);

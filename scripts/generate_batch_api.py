@@ -67,6 +67,7 @@ class Family:
     outputs: Sequence[str]    # logical plural output names
     scalars: Sequence[Scalar] = ()
     host_single: bool = False  # also emit a plain ct_{name} host wrapper
+    fused: str = ""           # FusedFamily enumerator; empty keeps legacy dispatch
 
 
 @dataclasses.dataclass(frozen=True)
@@ -97,24 +98,24 @@ OUT_SINGLE = ("outputs",)
 PERIOD = (("int", "period"),)
 
 
-def _simple(name: str, extra: Sequence[Scalar] = PERIOD) -> Family:
-    return Family(name, f"ct_{name}_d", IN_SINGLE, OUT_SINGLE, extra)
+def _simple(name: str, extra: Sequence[Scalar] = PERIOD, fused: str = "") -> Family:
+    return Family(name, f"ct_{name}_d", IN_SINGLE, OUT_SINGLE, extra, fused=fused)
 
 
 # Families whose ct_*_d existed before 0.4.0 (hand-written in api_device.cu).
 BASE_FAMILIES: Sequence[Family] = (
     # --- single input, single output, period ---
-    _simple("wma"), _simple("dema"), _simple("tema"), _simple("trima"),
+    _simple("wma", fused="Wma"), _simple("dema"), _simple("tema"), _simple("trima"),
     _simple("momentum"), _simple("roc"), _simple("rocp"), _simple("rocr"),
-    _simple("rocr100"), _simple("cmo"), _simple("stddev"), _simple("var"),
-    _simple("sum"), _simple("max"), _simple("min"), _simple("linearreg"),
+    _simple("rocr100"), _simple("cmo"), _simple("stddev", fused="Stddev"), _simple("var"),
+    _simple("sum", fused="Sum"), _simple("max", fused="Max"), _simple("min", fused="Min"), _simple("linearreg"),
     _simple("linearreg_slope"), _simple("linearreg_intercept"),
     _simple("linearreg_angle"), _simple("tsf"),
     _simple("kama", (("int", "period"), ("int", "fastPeriod"),
                      ("int", "slowPeriod"))),
     _simple("t3", (("int", "period"), ("float", "vFactor"))),
     # --- high/low/close input, single output ---
-    Family("natr", "ct_natr_d", IN_HLC, OUT_SINGLE, PERIOD),
+    Family("natr", "ct_natr_d", IN_HLC, OUT_SINGLE, PERIOD, fused="Natr"),
     Family("adx", "ct_adx_d", IN_HLC, OUT_SINGLE, PERIOD),
     Family("adxr", "ct_adxr_d", IN_HLC, OUT_SINGLE, PERIOD),
     Family("dx", "ct_dx_d", IN_HLC, OUT_SINGLE, PERIOD),
@@ -143,11 +144,11 @@ BASE_FAMILIES: Sequence[Family] = (
            ("uppers", "middles", "lowers"), PERIOD),
     # --- price transforms / volume ---
     Family("avgprice", "ct_avgprice_d", IN_OHLC, OUT_SINGLE, ()),
-    Family("obv", "ct_obv_d", IN_CV, OUT_SINGLE, ()),
-    Family("mfi", "ct_mfi_d", IN_HLCV, OUT_SINGLE, PERIOD),
-    Family("ad", "ct_ad_d", IN_HLCV, OUT_SINGLE, ()),
+    Family("obv", "ct_obv_d", IN_CV, OUT_SINGLE, (), fused="Obv"),
+    Family("mfi", "ct_mfi_d", IN_HLCV, OUT_SINGLE, PERIOD, fused="Mfi"),
+    Family("ad", "ct_ad_d", IN_HLCV, OUT_SINGLE, (), fused="Ad"),
     Family("adosc", "ct_adosc_d", IN_HLCV, OUT_SINGLE,
-           (("int", "fastPeriod"), ("int", "slowPeriod"))),
+           (("int", "fastPeriod"), ("int", "slowPeriod")), fused="Adosc"),
 )
 
 # 63 candlestick patterns: ct_cdl_<name> -> tacuda class (OHLC in, one out).
@@ -571,7 +572,10 @@ def render_impl() -> str:
             out.append(f"        ins, {n_in}, outs, {n_out}, seriesLen, numSeries, maxConcurrency, stream,")
             out.append("        [&](const float* const* in, float* const* out, cudaStream_t s) {")
             out.append(f"            return {fam.d_func}({call_ins}, {call_outs}, seriesLen{scalar_args}, s);")
-            out.append("        });")
+            if fam.fused:
+                out.append(f"        }}, fused_call(FusedFamily::{fam.fused}{scalar_args}));")
+            else:
+                out.append("        });")
             out.append("}")
             out.append("")
         if fam.host_single:
