@@ -18,7 +18,9 @@ Windows: `scripts\build_win_dll.bat` (MSVC + Ninja; set `CUDA_PATH` first).
 The default configuration also builds the `tacuda-opt` optimizer and
 `example_app` — keep them compiling.
 
-With an NVIDIA GPU and the `TA-Lib` Python package installed, run the
+Install `tests/requirements-reference.txt` into an isolated Python environment
+before configuring CMake. With an NVIDIA GPU and the pinned native/Python
+TA-Lib 0.8.3 oracle installed, run the
 strict differential corpus — it is the source of truth for every
 compatibility claim:
 
@@ -38,17 +40,21 @@ dotnet run --project bindings/csharp/ConsoleExample -c Release -- --test
 
 ## Generated code
 
-Two generators produce checked-in artifacts. Never edit generated files by
+Three generators produce checked-in artifacts. Never edit generated files by
 hand — change the generator and re-run it:
 
 ```bash
+python scripts/generate_talib08.py       # offline formulas from curated licensed sources
 python scripts/generate_batch_api.py     # batch/device C surface + Node/C# layers
 python bindings/generate_bindings.py     # Python ctypes + C# P/Invoke from headers
 python bindings/audit_bindings.py        # must exit 0: full C ABI coverage
 ```
 
-CTest contains a `bindings_up_to_date` guard that fails when checked-in
-bindings are stale.
+All three generators support read-only `--check`; CI and CTest reject stale
+formulas, batch APIs or bindings. Preserve the upstream BSD license and
+`THIRD_PARTY_NOTICES.txt` in source and binary distributions. The pinned
+function catalog is `tests/reference/talib-0.8.3.json`; do not silently use
+an older oracle or lower the coverage denominator.
 
 ## Adding an indicator
 
@@ -127,6 +133,12 @@ release beforehand (deprecation = `@deprecated` doc comment in `tacuda.h`
 naming the replacement + changelog entry; the symbol stays functional until
 the next MAJOR).
 
+**Recorded pre-1.0 exception:** 0.9.1 is the maintainer-selected version for
+the additive TA-Lib 0.8.3 expansion and its numerical migration. It retains
+all 811 previous symbols/signatures and adds 318; output changes are listed
+in its changelog and [compatibility guide](TA_LIB_COMPATIBILITY.md). The
+patch number must not be interpreted as numerical identity with 0.9.0.
+
 Enforcement: `bindings/audit_bindings.py` (bindings must track ABI growth in
 the same release), `scripts/check_dll_exports.py` (all public declarations
 present in real PE/ELF export tables), the `bindings_up_to_date` CMake test (no drift
@@ -183,10 +195,9 @@ intentionally blocks publication; extraction never falls back to the
 previous version's notes. Manual dry-run packaging may keep Unreleased.
 
 The blocking numerical baseline is pinned in `tests/requirements-reference.txt`:
-Python TA-Lib 0.7.0 / native TA-Lib 0.7.1, 161 functions. Install it in the
-interpreter on PATH **before** CTest, whose native reference helpers invoke
-Python. TA-Lib 0.8.1 exposes 201 functions and still has 40 missing corpus
-specs plus IMI/WILLR differences; migrating that reference is separate work.
+native and Python TA-Lib 0.8.3, 237 functions, 241 specs and no corpus
+exclusions. Install it **before configuring CMake**: native reference helpers
+use the selected Python interpreter and reject version/function-set drift.
 Do not weaken tolerances or disable exact-name coverage to make it pass.
 
 Hosted native builds run `stream_lifetime_sanitizer`, compiled together with

@@ -1,9 +1,9 @@
 # API Reference
 
-tacuda exposes one flat C ABI: `include/tacuda.h` (559 host entry points)
-plus a device-pointer header `include/tacuda_device.h` (200 `ct_*_d`
+tacuda exposes one flat C ABI: `include/tacuda.h` (797 host entry points)
+plus a device-pointer header `include/tacuda_device.h` (280 `ct_*_d`
 functions), plus `include/tacuda_stream.h` (52 handle-based functions) —
-811 exported symbols in total, including the three string-returning
+1129 exported symbols in total, including the three string-returning
 introspection functions previously omitted by the audit. All language bindings are thin
 wrappers over this surface, so the conventions below apply to C++, Python,
 Node.js, and .NET alike.
@@ -30,7 +30,7 @@ helpers have their declared return types; they are not status-returning calls:
 | `CT_STATUS_KERNEL_FAILED` | kernel launch/execution failed |
 | `CT_STATUS_INVALID_ARGUMENT` | null pointer, non-positive size, bad period/parameter |
 | `CT_STATUS_DEVICE_ERROR` | other CUDA error |
-| `CT_STATUS_UNSUPPORTED` | unsupported storage/compute dtype combination |
+| `CT_STATUS_UNSUPPORTED` | unsupported dtype combination or capture capability |
 
 `ct_status_string(status)` renders the enum name; `ct_get_last_error()`
 returns a thread-local human-readable detail message. Every entry point
@@ -41,7 +41,7 @@ strings.
 
 ### Output alignment (warmup NaN)
 
-Outputs are always full-length (`size` elements). Elements before an
+Outputs are always full-length (`size` elements). For real arrays, elements before an
 indicator's first computable index are `NaN` — the "warmup" region — and
 inputs shorter than the lookback succeed with an all-NaN line, mirroring
 TA-Lib's empty output range. Alignment follows TA-Lib exactly (verified per
@@ -50,6 +50,12 @@ HT_TRENDMODE warm up with `0` like TA-Lib's int outputs; MAXINDEX/MININDEX
 report `NaN` in the warm-up region (float outputs — a documented delta from
 TA-Lib's int `0`). The remaining corner cases are listed in
 [IMPLEMENTATION_NOTES.md](IMPLEMENTATION_NOTES.md).
+
+New integer outputs use signed int32 with zero warm-up: FRACTAL flags,
+SUPERTREND direction, SQZMOM levels and ZIGZAG direction/pivot index. Legacy
+float candle/index signatures retain their types. HA and ICHIMOKU return
+four distinct arrays; mixed functions require a separate correctly typed
+buffer for each output. See [the 0.9.1 contract](TA_LIB_COMPATIBILITY.md).
 
 ### Fused batch arithmetic and CUDA Graphs (0.9.0)
 
@@ -114,43 +120,50 @@ TypedArray type in `*Ex` wrappers; C# exposes the raw `_ex` signatures.
 append-only — see the
 [ABI stability policy](CONTRIBUTING.md#abi-stability-policy).
 
-## Function categories (host API)
+## Function categories (representative examples)
 
-| Category | Examples | Count |
-|----------|----------|------:|
-| Moving averages | `ct_sma`, `ct_ema`, `ct_wma`, `ct_dema`, `ct_tema`, `ct_trima`, `ct_kama`, `ct_mama`, `ct_t3`, `ct_ma`, `ct_mavp` | 12 |
-| Momentum | `ct_rsi`, `ct_macd`, `ct_macdext`, `ct_stochastic`, `ct_willr`, `ct_cci`, `ct_cmo`, `ct_roc*`, `ct_mom`, `ct_apo`, `ct_ppo`, `ct_ultosc`, `ct_imi` | 25+ |
-| Directional movement | `ct_adx`, `ct_adxr`, `ct_dx`, `ct_plus_di`, `ct_minus_di`, `ct_plus_dm`, `ct_minus_dm`, `ct_aroon*` | 9 |
-| Volatility | `ct_atr`, `ct_natr`, `ct_trange`, `ct_stddev`, `ct_var`, `ct_avgdev`, `ct_bbands`, `ct_accbands` | 8 |
-| Volume | `ct_obv`, `ct_ad`, `ct_adosc`, `ct_mfi`, `ct_nvi`, `ct_pvi` | 6 |
-| Price transforms | `ct_avgprice`, `ct_medprice`, `ct_typprice`, `ct_wclprice`, `ct_midprice`, `ct_midpoint`, `ct_bop` | 7 |
-| Statistics / regression | `ct_linearreg*`, `ct_tsf`, `ct_beta`, `ct_correl`, `ct_max/min*`, `ct_sum` | 14 |
-| Hilbert transform | `ct_ht_dcperiod`, `ct_ht_dcphase`, `ct_ht_phasor`, `ct_ht_sine`, `ct_ht_trendline`, `ct_ht_trendmode` | 6 |
-| SAR | `ct_sar`, `ct_sarext` (hybrid CPU path for long single series) | 2 |
-| Candlestick patterns | `ct_cdl_doji`, `ct_cdl_engulfing`, ... (`ct_cdl_*`) | 63 |
-| Vector math | `ct_add`, `ct_sub`, `ct_mult`, `ct_div`, `ct_sin`, `ct_cos`, `ct_sqrt`, `ct_ln`, ... | 19 |
-| STAD club pack | `ct_asi`, `ct_obtr`, `ct_wobv`, `ct_hpi`, `ct_xaverage`, `ct_rolling_*`, ... | 17 |
-| Batch dispatchers | `ct_*_batch[_d]`, 166 indicator families | 332 |
-| Precision variants | `ct_*_ex` with `ctDataType_t` (float16/32/64) | 30+ |
-| Infrastructure | `ct_version`, `ct_status_string`, `ct_get_last_error`, `ct_device_*`, `ct_device_buffer_pool_*` | 15+ |
+| Category | Examples |
+|----------|----------|
+| Moving averages | `ct_sma`, `ct_ema`, `ct_wma`, `ct_rma`, `ct_hma`, `ct_zlema`, `ct_dema`, `ct_tema`, `ct_trima`, `ct_kama`, `ct_mama`, `ct_t3`, `ct_ma`, `ct_mavp` |
+| Momentum | `ct_rsi`, `ct_macd`, `ct_macdext`, `ct_stochastic`, `ct_willr`, `ct_cci`, `ct_cmo`, `ct_roc*`, `ct_mom`, `ct_apo`, `ct_ppo`, `ct_ultosc`, `ct_imi` |
+| Directional movement | `ct_adx`, `ct_adxr`, `ct_dx`, `ct_plus_di`, `ct_minus_di`, `ct_plus_dm`, `ct_minus_dm`, `ct_aroon*` |
+| Volatility | `ct_atr`, `ct_natr`, `ct_trange`, `ct_stddev`, `ct_var`, `ct_avgdev`, `ct_bbands`, `ct_accbands` |
+| Volume | `ct_obv`, `ct_ad`, `ct_adosc`, `ct_mfi`, `ct_nvi`, `ct_pvi` |
+| Price transforms | `ct_avgprice`, `ct_medprice`, `ct_typprice`, `ct_wclprice`, `ct_midprice`, `ct_midpoint`, `ct_bop` |
+| Statistics / regression | `ct_linearreg*`, `ct_tsf`, `ct_beta`, `ct_correl`, `ct_max/min*`, `ct_sum` |
+| Hilbert transform | `ct_ht_dcperiod`, `ct_ht_dcphase`, `ct_ht_phasor`, `ct_ht_sine`, `ct_ht_trendline`, `ct_ht_trendmode` |
+| SAR | `ct_sar`, `ct_sarext` (hybrid CPU path for long single series) |
+| Candlestick patterns | `ct_cdl_doji`, `ct_cdl_engulfing`, ... (`ct_cdl_*`) |
+| Vector math | `ct_add`, `ct_sub`, `ct_mult`, `ct_div`, `ct_sin`, `ct_cos`, `ct_sqrt`, `ct_ln`, ... |
+| STAD club pack | `ct_asi`, `ct_obtr`, `ct_wobv`, `ct_hpi`, `ct_xaverage`, `ct_rolling_*`, ... |
+| Batch dispatchers | `ct_*_batch[_d]`, 246 indicator families |
+| Precision variants | `ct_*_ex` with `ctDataType_t` (float16/32/64) |
+| Infrastructure | `ct_version`, `ct_status_string`, `ct_get_last_error`, `ct_device_*`, `ct_device_buffer_pool_*` |
 
-Every host function has a `ct_*_d` device twin unless it is CPU-only by
-design (SAR hybrid path still exposes `ct_sar_d`).
+
+Coverage is counted by the 237 unique names in
+`tests/reference/talib-0.8.3.json`; C aliases, MA variants, precision and
+batch entry points are separate ABI counts. The tables above are examples,
+not an exhaustive function inventory.
+
+Indicator families expose `ct_*_d` device variants; infrastructure and
+handle-based streaming APIs have their own contracts. SAR's hybrid host
+path still has a separate `ct_sar_d` implementation.
 
 ## Bindings
 
 | Metric | Python | Node.js | C# (.NET) |
 |--------|--------|---------|-----------|
-| Native entry points (audited) | 811 / 811 | 811 / 811 | 811 / 811 |
+| Native entry points (audited) | 1129 / 1129 | 1129 / 1129 | 1129 / 1129 |
 | FFI mechanism | `ctypes` (generated) | `koffi` (hand-written + generated) | P/Invoke (generated, public) |
-| Return style | numpy arrays; multi-output → tuple | `Float32Array`; multi-output → object | status code; caller allocates outputs |
+| Return style | NumPy float32 / int32 arrays; multi-output → tuple | `Float32Array` / `Int32Array`; multi-output → object | status code; caller allocates outputs |
 | Errors | `RuntimeError` | `Error` | `ctStatus_t` (+ `TacudaException` in helpers) |
 | OHLCV container | `tacuda.OHLCV` | `tacuda.Ohlcv` / plain object | `OhlcvSeries` + extension methods |
 | Batch API | `*_batch` (2D NumPy) | `*Batch` + `device.*Batch` | `TacudaBatch.*` |
 | Package | `tacuda` (PyPI) | `tacuda` (npm) | `Tacuda` (NuGet) |
 
 Generated bindings (Python, C#) are produced by
-`bindings/generate_bindings.py` from the two public headers. Node.js is
+`bindings/generate_bindings.py` from the public host/device headers. Node.js is
 maintained in `bindings/nodejs/index.js` plus the generated
 `batch_generated.js`. `bindings/audit_bindings.py` verifies all three cover
 every header symbol and exits non-zero on any gap (runs in CI).

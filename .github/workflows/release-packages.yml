@@ -388,4 +388,4 @@ jobs:
           gh release create "${GITHUB_REF_NAME}"
           --title "tacuda ${GITHUB_REF_NAME}"
           --notes-file release_notes.md
-          natives/* checksums.txt
+          natives/* checksums.txt THIRD_PARTY_NOTICES.txt

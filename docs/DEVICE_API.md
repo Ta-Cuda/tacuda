@@ -2,7 +2,7 @@
 
 The device API works on raw GPU pointers so multi-indicator pipelines pay
 for PCIe transfers once, not per call. Declarations live in
-`include/tacuda_device.h` (200 `ct_*_d` functions as of 0.7.1); memory
+`include/tacuda_device.h` (280 `ct_*_d` entry points in 0.9.1); memory
 management is part of the C ABI, so no CUDA headers are required.
 
 ## Memory management
@@ -27,8 +27,8 @@ on the same stream) before reading results.
 ## Indicator variants
 
 - `ct_<name>_d(...)` — same parameters as the host function, but every
-  array argument is a device pointer. All 200 single-series indicators are
-  covered, candlestick patterns included.
+  array argument is a device pointer. The single-series surface includes all 237 TA-Lib 0.8.3 functions,
+  compatible aliases and MA variants, candlestick patterns included.
 - `ct_<name>_ex_d(...)` — precision-selectable variants (SMA/EMA/RSI/ATR/
   MACD/BBANDS): `storageType` and `computeType` accept `CT_DTYPE_F16 /
   F32 / F64`.
@@ -38,6 +38,15 @@ on the same stream) before reading results.
 Error contract: every entry point clears the thread-local error message on
 entry and sets one on any non-success status — `ct_get_last_error()` always
 describes the *last* call (see [API.md](API.md#conventions)).
+
+New integer/mixed functions require correctly typed output device buffers:
+int32 flags/indices use four-byte signed elements, while real outputs remain
+float32. Allocate integer buffers with a CUDA allocator and pass an `int*`
+as declared in the header; the `ctDataType_t` precision enum describes floating
+storage, not integer output conversion. HA/ICHIMOKU require four distinct
+output buffers. New reference-backed calls use caller-stream scratch and
+require memory-pool support for captured memory nodes; eager execution is
+still supported without pools. See [compatibility](TA_LIB_COMPATIBILITY.md).
 
 ## Example: 3-indicator pipeline, 2 transfers
 

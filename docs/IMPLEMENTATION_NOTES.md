@@ -45,9 +45,9 @@ context. The former NATR zero-close oracle exclusion is removed in 0.9.1.
 
 ## Value conventions on degenerate inputs (TA-Lib aligned)
 
-- `RSI` of a fully flat window is `0` (TA-Lib computes `100*g/(g+l)` and
-  guards the zero denominator with 0). NaN inputs poison the Wilder
-  recursion instead of counting as zero change.
+- Flat `RSI` and `IMI` return neutral **50**, following TA-Lib 0.8.3.
+  Releases through 0.9.0 followed the older zero/NaN definitions. Middle
+  NaNs poison the RSI recurrence instead of counting as zero change.
 - `ROC`/`ROCP`/`ROCR`/`ROCR100` emit `0` when the denominator is zero.
 - Stochastic %K emits `0` when the high-low range is zero.
 - `CCI` emits `0` unless both the numerator and the mean deviation are
@@ -64,9 +64,10 @@ once the value has left the window. This holds for SMA, WMA and BBANDS on every
 internal algorithm and in streaming, so choosing a period never changes what a
 gap means.
 
-TA-Lib does not define this case: its running totals keep a NaN forever when
-called directly. We chose window semantics because the short-period kernels and
-streaming already behaved that way, and because device pipelines routinely feed
+This differs from the corresponding TA-Lib running-total paths, which can
+retain a middle NaN after it leaves the window. We chose window semantics
+because the short-period kernels and streaming already behaved that way,
+and because device pipelines routinely feed
 one indicator's warm-up NaNs into another.
 
 Prefix-sum paths stay O(N) on clean data at the cost of one branch per element.
@@ -75,22 +76,24 @@ input, which is O(period) for those windows only. A series with leading NaNs
 pays that for every window after them; the alternative was a second scan on all
 data, including the clean majority.
 
-`SUM`, `STDDEV`, `VAR`-style statistics built only on prefix sums, `CORREL` and
-`BETA` have a single code path and still propagate a NaN to the end of the
-series. They do not switch behaviour with the period and have no streaming
-counterpart; extending the policy to them is open work.
+Legacy prefix-based `SUM`, `STDDEV`, `VAR` and `BETA` paths do not
+recover after a non-finite input. CORREL preserves its zero-valued suffix
+after the first non-finite input. Eligible fused `SUM`/`STDDEV` instead use
+direct windows and can recover once the bad value leaves the window. Their
+gap behavior can therefore change with the period or `TACUDA_BATCH_FUSED`.
+A uniform window policy across these paths remains open work.
 
-Recursive indicators (EMA, RSI, ATR, MACD) are not window indicators: a NaN
-poisons the recursion permanently in bulk and in streaming alike.
+Recursive indicators (EMA, RSI, ATR, MACD) are not window indicators: a
+middle NaN poisons their recurrence. Leading-NaN alignment follows the
+individual API contract; the new backend skips the NumPy-wrapper prefix.
 
 ## Tie-breaking in rolling extrema
 
-- `MAXINDEX`/`MININDEX`/`MINMAXINDEX` reproduce TA-Lib's *stateful* tie
-  handling exactly: a stale extremum triggers a left-to-right recompute
-  where the oldest tie wins, while an incoming equal bar replaces the
-  tracked extremum (newest wins). This is path-dependent, so these kernels
-  walk each series sequentially (one thread per series; batch calls
-  parallelize across series).
+- `MAXINDEX`/`MININDEX`/`MINMAXINDEX` choose the newest equal extremum,
+  including when a stale window is recomputed, following TA-Lib 0.8.3.
+  Their implementation still walks each row sequentially; batch calls
+  parallelize across rows. The older reference used a path-dependent tie
+  rule, which remains relevant only to historical measurements.
 - `AROON`/`AROONOSC` use TA-Lib's `>=`/`<=` sliding updates, which our
   per-window kernels reproduce statelessly (most recent tie wins).
 
@@ -99,11 +102,12 @@ poisons the recursion permanently in bulk and in streaming alike.
 - Storage precision is float32 by default (`_ex` variants offer
   float16/float64). Comparisons against TA-Lib's double math use a mixed
   absolute/relative criterion: `|a-b| / max(1, |a|, |b|) <= tol`.
-- A precision path must not restate an indicator's semantics. RSI runs `RSIT<T>`
-  and float-compute MACD runs MACDEXT for that reason. MACDEXT is float-only, so
-  double-compute MACD is a separate kernel (EMA only) pinned to the same seeds
-  by `tests/cpp/test_precision_ex.cpp`, which compares on random walks because a
-  linear ramp hides a misplaced EMA seed.
+- Precision paths preserve each indicator's seeds and lookbacks. Ordinary
+  MACD retains its optimized implementation; MACDEXT and MAVP use the
+  reference-backed CUDA formulas for the expanded MA modes and exact seed/NaN
+  rules. These paths compute in double with float32 public real outputs and
+  can regress in throughput or scratch use on long rows. Precision tests use
+  random walks because a linear ramp can hide a misplaced EMA seed.
 - Windowed statistics use double-precision prefix sums to minimize
   accumulation error; CCI accumulates its window in double; MAMA and the
   MAVP per-period EMA/KAMA state machines run fully in double.

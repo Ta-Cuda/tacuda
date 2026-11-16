@@ -687,3 +687,54 @@ MSVC 19.44. Scoped receipts and hashes are in
 These acceptance documentation changes follow the immutable tagged source.
 Windows Compute Sanitizer attachment and two-GPU ownership validation retain
 their previously documented gaps; neither is inferred from single-GPU results.
+
+## Published 0.9.1 and physical Windows/GT 1030 acceptance — 2026-11-16
+
+Signed tag `v0.9.1` points to public source
+`515926cec3b3c99af311a6b3239e1d8fdf53f58f`. The full
+[dry run](https://github.com/Ta-Cuda/tacuda/actions/runs/43901249306) passed
+before tagging. The [tag workflow](https://github.com/Ta-Cuda/tacuda/actions/runs/43910079980)
+then passed all builds, GPU and package gates. Its first publication attempt
+stopped at npm authentication before registry writes; refreshing the existing
+configured token and rerunning only failed jobs completed publication.
+The original tag, binaries and package artifacts were preserved.
+
+Indexed PyPI wheels/sdist and npm integrity match the checked tag-run
+artifacts. NuGet's native payloads match both native builds and its net8/net9
+assemblies are present. GitHub native assets match checksums; the pinned
+upstream BSD notice is also attached to the release. Clean installations of
+the actual tag-run wheel, npm and NuGet packages passed 18 checks on each
+GPU platform, including int32/mixed/four-array consumers, 1129 required
+exports without test hooks, full/new/batch corpora and incremental updates.
+Hashes, public registry proofs and scoped results are in
+[tag-validation.json](validation/2026-11-16/tag-validation.json).
+
+Official GPU CTest includes the optimizer: 522 passed, two conditional skips,
+zero failures out of 524. The full corpus passes 1928/1928 cells over 241
+specs and 237 names, without exclusions; streaming passes 839/839. The
+production batch corpus passes 40686/40686 cells over all 246 families.
+
+Physical Windows acceptance uses Server 2022 build 20348, GT 1030 2 GiB,
+driver 582.78, CUDA 12.6 and MSVC 19.44.35230: 353 CTest passes, one
+conditional skip, no failures, with optimizer disabled in this source build.
+The installed MSVC 2026 compiler crashed CUDA 12.6's front end, so a separate
+MSVC 2022 toolchain was used. The device `isfinite` implementation was also
+corrected for NVCC/MSVC. Official CUDA 12.9 package natives were separately
+installed and exercised on this GPU; source-build success is not substituted
+for their acceptance. The isolated .NET package consumers use SDK 8.0.426.
+
+Linux validation uses Ubuntu 24.04.4, RTX 3090 Ti, driver 590.48.01 and CUDA
+runtime 12.8. Official natives were built in Ubuntu 22.04/CUDA 12.9 for
+SM60/61/70/75/80/86/89/90. Native/Python TA-Lib is pinned to 0.8.3 and NumPy
+to 2.5.5. The new-backend sanitizer result covers 80 families on Linux,
+not every legacy CUB path. No-pool capture is validated with a capability
+shim; physical Maxwell, Windows sanitizer attachment and two-GPU ownership
+retain their documented gaps. The one-job runner deregistered on completion.
+
+The website was deployed separately with before-copy, file hashes and drift
+guards. All 100 changed public payloads and 98 page versions matched; 20
+desktop/mobile light/dark Playwright cases passed, including mobile menu,
+typed-family search/batch filter and the dated benchmark link. Valid page
+cases had no console errors, broken images or page overflow.
+Follow-up documentation and future notice-attachment automation do not alter
+the immutable tagged source or registry packages.

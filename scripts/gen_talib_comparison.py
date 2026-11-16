@@ -297,28 +297,29 @@ def render() -> str:
             --strategies exp03_obtr,exp06_asi,…</code>
         </p>
 
-        <h3 class="sub-head">What TA-Lib cannot do at all</h3>
+        <h3 class="sub-head">Current API capabilities (0.9.1 release)</h3>
         <table class="data">
             <thead>
-                <tr><th>Capability</th><th>TA-Lib</th><th>tacuda 0.4.1</th></tr>
+                <tr><th>Capability</th><th>TA-Lib 0.8.3</th><th>TaCuda 0.9.1 release</th></tr>
             </thead>
             <tbody>
-                <tr><td>Indicator functions</td><td class="num">161, CPU only</td>
-                    <td class="num">757 entry points: host + device (<code>_d</code>) + batch, GPU-resident</td></tr>
+                <tr><td>Indicator functions</td><td class="num">237, CPU only</td>
+                    <td class="num">1129 C entry points: 797 host + 280 device + 52 streaming</td></tr>
                 <tr><td>Multi-symbol batch API</td><td class="num">—</td>
-                    <td class="num">166 families, one call per portfolio, CUDA stream pool</td></tr>
+                    <td class="num">246 batch families; 17 legacy fused kernels plus new reference-backed CUDA formulas</td></tr>
                 <tr><td>Derived-series chaining</td><td class="num">—</td>
                     <td class="num">"XAverage of OBTR" as one request, no host round-trips</td></tr>
                 <tr><td>STAD club pack (ASI, OBTR, wOBV, HPI, TrendScore, RefDev, pivots…)</td>
-                    <td class="num">—</td><td class="num">native families with batch + chaining</td></tr>
+                    <td class="num">Different scope; ASI uses the Wilder definition</td><td class="num">legacy club definitions plus compatible ASI, with batch + chaining</td></tr>
                 <tr><td>Zero-copy GPU pipelines</td><td class="num">—</td>
                     <td class="num"><code>ct_*_d</code> / <code>ct_*_batch_d</code> on device pointers</td></tr>
                 <tr><td>Bindings</td><td class="num">C + wrappers</td>
-                    <td class="num">Python / Node.js / .NET incl. device and batch surfaces</td></tr>
+                    <td class="num">Python / Node.js / .NET incl. device, batch and streaming surfaces</td></tr>
             </tbody>
         </table>
         <p class="table-note">
-            Correctness first: 88/88 accuracy specs against TA-Lib output, plus per-run
+            Current baseline: 241/241 differential-corpus specs against TA-Lib 0.8.3 output
+            (exact candlestick parity included), plus per-run
             net-profit parity between every backend in the strategy benchmarks above.
         </p>
     </div>

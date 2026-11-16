@@ -39,7 +39,7 @@ Implementation semantics (EMA seeding, warmup NaNs, indexing conventions) are do
 
 ---
 
-Release verification: [tag workflow](https://github.com/Ta-Cuda/tacuda/actions/runs/43630756431) · [GPU and package receipts](docs/validation/2026-11-14/tag-validation.json).
+Release verification: [0.9.1 tag workflow](https://github.com/Ta-Cuda/tacuda/actions/runs/43910079980) · [GPU and package receipts](docs/validation/2026-11-16/tag-validation.json).
 
 ## Fused batches in 0.9.0
 
@@ -55,9 +55,9 @@ Double recurrences improve TA-Lib agreement and can change final bits from
 
 ### 🔥 **Performance First**
 - **GPU-accelerated kernels** for massive parallel computation
-- **Device API** (`ct_*_d`, 200 functions) for zero-copy multi-indicator pipelines
+- **Device API** (`ct_*_d`, 280 entry points) for zero-copy multi-indicator pipelines
 - **Host API** (`ct_*`) for simple single-indicator calls
-- **Batch API** (`ct_*_batch[_d]`, 166 families) for multi-symbol portfolios
+- **Batch API** (`ct_*_batch[_d]`, 246 families) for multi-symbol portfolios
 - **Pipelined workloads** with optional `cudaStream_t` support and an internal device buffer pool
 
 ### 📊 **Comprehensive Indicator Suite (237 functions from TA-Lib 0.8.3)**
@@ -89,7 +89,7 @@ including the batch API and `_ex` precision variants) — verified by
 `bindings/audit_bindings.py`, see [docs/API.md](docs/API.md#bindings).
 
 ### 📦 **Batched (multi-symbol) execution**
-`ct_*_batch[_d]` for 166 indicator families (incl. all candlestick patterns): one call
+`ct_*_batch[_d]` for 246 indicator families (incl. all candlestick patterns): one call
 processes a whole portfolio (series-major matrix), overlapping transfers and kernels
 across an internal CUDA stream pool with per-call `maxConcurrency` control —
 [docs/BATCH_API.md](docs/BATCH_API.md).
@@ -431,8 +431,8 @@ ct_device_free(d_data); ct_device_free(d_sma);
 ct_device_free(d_ema);  ct_device_free(d_rsi);
 ```
 
-**Surface**: all 200 single-series indicators have a `ct_*_d` variant
-(declared in `include/tacuda_device.h`), plus `_ex_d` precision variants
+**Surface**: 280 device entry points cover the 237 TA-Lib 0.8.3 functions and compatible variants
+(declared in `include/tacuda_device.h`), including `_ex_d` precision variants
 (float16/32/64) and `ct_*_batch_d` for device-resident portfolios — see
 [docs/DEVICE_API.md](docs/DEVICE_API.md).
 
@@ -470,7 +470,7 @@ python benchmarks/benchmark_ema_vs_talib.py
 │  Language bindings    │    │   Flat C ABI         │    │  CUDA kernels    │
 │  Python / Node / C#   │───▶│   tacuda.h (559)     │───▶│  one indicator = │
 │  (thin, generated)    │    │   tacuda_device.h    │    │  one .cu class   │
-└───────────────────────┘    │   (200 ct_*_d)       │    └──────────────────┘
+└───────────────────────┘    │   (280 ct_*_d)       │    └──────────────────┘
                              └──────────────────────┘             │
                              ┌──────────────────────┐    ┌──────────────────┐
                              │  C++ RAII layer      │    │  DeviceBufferPool│
@@ -542,12 +542,12 @@ Adding a new indicator touches four places (see
 
 ## ✅ Status & TODO
 
-### ✅ Implemented as of 0.9.0
+### ✅ Implemented as of 0.9.1
 
-- [x] **All 237 functions from TA-Lib 0.8.3 implemented** (incl. MACDEXT with independent MA types and 19 element-wise vector math functions); numerical parity is verified per function by the strict differential corpus — 165/165 specs green, remaining corner-case notes in [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md)
+- [x] **All 237 functions from TA-Lib 0.8.3 implemented** (incl. MACDEXT with independent MA types and 19 element-wise vector math functions); numerical parity is verified per function by the strict differential corpus — 241/241 specs and 1928/1928 cells passed, remaining corner-case notes in [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md)
 - [x] **All 61 candlestick patterns** match TA-Lib signal-for-signal (double-precision literal ports, exact-equality oracle with hand-crafted activation fixtures for the rare patterns)
-- [x] **Device API** (`ct_*_d`, 200 functions) for zero-copy multi-indicator pipelines, with `_ex_d` float16/32/64 precision variants
-- [x] **Batch API**: 166 indicator families, 17 fused kernels with automatic fallback, and CUDA Graph capture on caller streams
+- [x] **Device API** (`ct_*_d`, 280 entry points) for zero-copy multi-indicator pipelines, with `_ex_d` float16/32/64 precision variants
+- [x] **Batch API**: 246 indicator families, 17 fused kernels with automatic fallback, and CUDA Graph capture on caller streams
 - [x] Python (ctypes), Node.js (koffi) and .NET 8/9 bindings covering the full 1129-symbol C ABI (audited in CI)
 - [x] Packaging workflow for PyPI (platform wheels with natives), npm (tgz) and NuGet (nupkg with win-x64 + linux-x64 natives), GPU-gated publishing
 - [x] **SAREXT** bit-for-bit TA-Lib semantics; SAR/SAREXT host API uses a fast CPU path
@@ -572,7 +572,7 @@ Current priorities live in **[docs/ROADMAP.md](docs/ROADMAP.md)**:
 - **[API Reference](docs/API.md)** - Conventions (statuses, NaN warm-up, dtypes, streams), function catalog, binding surface, OHLCV containers
 - **[Streaming API](docs/STREAMING_API.md)** - Incremental single-series and portfolio updates
 - **[Device API](docs/DEVICE_API.md)** - Zero-copy GPU pipelines (`ct_*_d`, `_ex_d`, buffer pool)
-- **[Batch API](docs/BATCH_API.md)** - Multi-symbol/portfolio execution (166 families)
+- **[Batch API](docs/BATCH_API.md)** - Multi-symbol/portfolio execution (246 families)
 - **[Implementation Notes](docs/IMPLEMENTATION_NOTES.md)** - TA-Lib parity semantics and corner cases
 - **[Performance Guide](docs/PERFORMANCE.md)** - Which API is fast where, tuning rules
 - **[Operations Guide](docs/OPERATIONS.md)** - Deployment, monitoring, upgrades, production adoption checklist

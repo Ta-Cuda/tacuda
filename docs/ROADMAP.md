@@ -1,10 +1,10 @@
 # TaCuda Roadmap
 
-Last reviewed: 2026-11-16 (0.9.1 release preparation).
+Last reviewed: 2026-11-16 (0.9.1 released).
 This document tracks where the project stands and what ships next.
 Order inside a milestone is priority order; items move, versions don't slip silently.
 
-## Current candidate (0.9.1)
+## Current release (0.9.1)
 
 | Area | State |
 |------|-------|
@@ -134,12 +134,12 @@ Moved here from v0.8.0 during release preparation (2026-10-14), not dropped.
 - [ ] Profile AUTO crossover and large-portfolio p99 on controlled Windows
       and Linux hosts; do not generalize the historical latency ceiling.
 - [ ] Remaining families: ADX group, STOCH/STOCHF.
-- [ ] Differential corpus for the device and batch API. The corpus calls
-      the host API only, which hid both the `*_batch_d` stream-0 race and
-      the GPU Hilbert deviation below until 0.8.0 release checks.
-- [ ] GPU Hilbert parity on constant input (IMPLEMENTATION_NOTES.md, known
-      deviations): sin/cos table computed on the host, no FMA in the phase
-      sums — or keep the deviation documented.
+- [x] Device/batch differential acceptance: 40686/40686 cells across all
+      246 batch families; typed row/count/permutation/graph contracts for
+      85 families. The original host-only coverage gap is closed in 0.9.1.
+- [x] GPU Hilbert flat/candle cases corrected in 0.9.1 using build-host
+      sin/cos coefficients and separate multiply/add operations. Cross-libm
+      universal bitwise identity is not claimed.
 
 ## v0.9.0 — fused portfolios and graph execution
 
@@ -157,6 +157,22 @@ verified PyPI/npm/NuGet payloads. The unpublished 0.8.1 corrections ship here.
 - [x] Both GPU platforms: 497 CTest passes plus one optional skip;
       differential corpus 1319/1319; streaming corpus 839/839, including
       ATR/NATR period 1. See [release evidence](validation/2026-11-14/tag-validation.json).
+
+## v0.9.1 — TA-Lib 0.8.3 coverage and numerical corrections
+
+Released 2026-11-16 from signed public source `515926c`. All 237 pinned
+function names are covered, with MA types 0–15, int32/mixed/four-array
+outputs, and 1129 public exports retaining all preceding signatures.
+Tagged CI, indexed PyPI/npm/NuGet payload verification, GitHub native
+checksums/notices, and clean package installs on Linux/RTX 3090 Ti and
+Windows/GT 1030 passed. See [acceptance](validation/2026-11-16/tag-validation.json).
+
+The reference-backed CUDA formulas establish numerical coverage. Optimizing
+their long-row throughput and scratch use remains open, including MAVP and
+MACDEXT; ordinary MACD retains its optimized path. New public streaming,
+stabilization and display-shift query contracts remain separate work.
+The selected patch version is a documented pre-1.0 exception to the usual
+minor-version policy for additive APIs; see [the policy](CONTRIBUTING.md#abi-stability-policy).
 
 ## Future scale and distribution
 

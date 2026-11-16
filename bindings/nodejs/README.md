@@ -16,7 +16,7 @@ TA-Lib 0.8.3 coverage (237 functions): indicators, candlestick patterns, MACDEXT
 
 - Node.js >= 18.0.0
 - NVIDIA GPU (Compute Capability >= 6.0)
-- CUDA Toolkit 11.x or 12.x
+- For official binaries: a driver compatible with CUDA 12.9; source builds use the toolkit selected by CMake
 - Built `tacuda` shared library (`tacuda.dll` / `libtacuda.so` / `libtacuda.dylib`)
 
 ## Package Scope

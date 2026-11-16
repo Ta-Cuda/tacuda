@@ -4,8 +4,10 @@ Added in v0.2.0, extended to 52 indicator families in v0.3.0 and to the
 full indicator surface (166 families, including the 63 candlestick
 patterns and the STAD club pack) in v0.4.0. The batch API computes the
 same indicator over many independent series (symbols) in one call,
-using a fused kernel for supported workloads and an internal pool of CUDA
-streams for the remaining workloads.
+using a fused kernel for eligible legacy workloads and a stream pool for
+their fallback. Release 0.9.1 provides **246 batch families**; its new
+reference-backed families use a shared CUDA kernel with caller-stream
+scratch. See the current coverage and capture limits below.
 
 ## Covered families (v0.4.0)
 
