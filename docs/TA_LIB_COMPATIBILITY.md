@@ -84,6 +84,10 @@ functions, with double intermediates and independent per-row state. One
 kernel processes rows using private caller-stream scratch. It ignores
 `maxConcurrency` and is independent of the legacy fused dispatcher switch.
 Existing optimized ordinary MACD and NVI/PVI paths remain available.
+MAVP and MACDEXT now use the reference backend for exact seeding and NaN
+semantics, including their older MA types. Compared with 0.9.0 this can
+increase scratch requirements and substantially reduce long-history
+throughput; use ordinary MACD for its existing optimized EMA path.
 
 Scratch reserves 64 doubles per bar plus 512 doubles per active worker.
 Workers share a 256 MiB budget; one longer row can exceed it (about 488 MiB

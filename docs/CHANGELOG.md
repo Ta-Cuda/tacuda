@@ -23,7 +23,10 @@ numerical results; pin 0.9.0 when reproducing its historical output.
   zero-close dataset now that upstream's write bug is fixed.
 - New reference-backed functions use a CUDA batch baseline in double with
   stream-owned scratch. Performance of long sequential histories remains a
-  separate optimization target; no universal speedup is claimed.
+  separate optimization target; no universal speedup is claimed. MAVP and
+  MACDEXT also use this path for exact seeding/NaN semantics; their long-row
+  throughput and memory use can regress from 0.9.0. Ordinary MACD retains
+  its optimized path.
 
 CUDA Graph compatibility:
 

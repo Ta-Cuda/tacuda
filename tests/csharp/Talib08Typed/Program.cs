@@ -13,7 +13,7 @@ void Check(float[] actual, JsonElement expected) {
     if (actual.Length != expected.GetArrayLength()) throw new Exception("length");
     for (int i=0;i<actual.Length;i++) {
         if (expected[i].ValueKind == JsonValueKind.Null) { if (!float.IsNaN(actual[i])) throw new Exception($"NaN at {i}"); }
-        else if (Math.Abs(actual[i]-expected[i].GetDouble()) > 2e-5*Math.Max(1,Math.Abs(expected[i].GetDouble()))) throw new Exception($"value at {i}");
+        else if (!float.IsFinite(actual[i]) || Math.Abs(actual[i]-expected[i].GetDouble()) > 2e-5*Math.Max(1,Math.Abs(expected[i].GetDouble()))) throw new Exception($"value at {i}");
     }
 }
 void CheckInt(int[] actual, JsonElement expected) {
