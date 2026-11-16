@@ -55,4 +55,8 @@
     <None Include="runtimes/**/*" Pack="true" PackagePath="runtimes" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="../../THIRD_PARTY_NOTICES.txt" Pack="true" PackagePath="" Link="THIRD_PARTY_NOTICES.txt" />
+  </ItemGroup>
+
 </Project>
