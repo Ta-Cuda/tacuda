@@ -310,6 +310,10 @@ if (BUILD_TESTING)
   file(GLOB TEST_SOURCES tests/cpp/*.cpp)
   add_executable(test_basic ${TEST_SOURCES})
   target_compile_features(test_basic PRIVATE cxx_std_17)
+  file(TO_CMAKE_PATH "${Python3_EXECUTABLE}" TACUDA_TEST_PYTHON_PATH)
+  target_compile_definitions(test_basic PRIVATE
+      TACUDA_TEST_PYTHON="${TACUDA_TEST_PYTHON_PATH}"
+      TACUDA_TEST_BENCHMARKS="${CMAKE_CURRENT_SOURCE_DIR}/benchmarks")
   target_include_directories(test_basic PRIVATE
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
   target_link_libraries(test_basic PRIVATE tacuda GTest::gtest_main CUDA::cudart)

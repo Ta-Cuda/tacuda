@@ -13,6 +13,7 @@
 #include <fstream>
 #include <limits>
 #include <sstream>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -27,6 +28,12 @@
 #endif
 
 namespace {
+
+void write_oracle_imports(std::ostream& out) {
+    out << "import sys\nimport numpy as np\nimport talib\n"
+        << "sys.path.insert(0, " << std::quoted(TACUDA_TEST_BENCHMARKS) << ")\n"
+        << "from talib_reference import require_reference\nrequire_reference(talib)\n";
+}
 
 // Cross-platform helper to run Python code and capture output
 std::vector<float> run_python_talib(const std::string& python_code, size_t expected_lines) {
@@ -54,30 +61,25 @@ std::vector<float> run_python_talib(const std::string& python_code, size_t expec
     {
         std::ofstream ofs(script_path);
         if (!ofs) return out;
-        ofs << "import numpy as np\n";
-        ofs << "try:\n";
-        ofs << "    import talib\n";
-        ofs << "except ImportError:\n";
-        ofs << "    import subprocess, sys\n";
-        ofs << "    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-q', 'TA-Lib'])\n";
-        ofs << "    import talib\n";
+        write_oracle_imports(ofs);
         ofs << python_code;
     }
 
     // Run Python script
 #ifdef _WIN32
-    std::string cmd = "python \"" + script_path + "\" 2>nul";
+    std::string cmd = std::string("\"\"") + TACUDA_TEST_PYTHON + "\" \"" + script_path + "\"\"";
 #else
-    std::string cmd = "python3 \"" + script_path + "\" 2>/dev/null";
+    std::string cmd = std::string("\"") + TACUDA_TEST_PYTHON + "\" \"" + script_path + "\"";
 #endif
 
+    int child_status = -1;
     FILE* pipe = popen(cmd.c_str(), "r");
     if (pipe) {
         char buf[128];
         for (size_t i = 0; i < out.size() && fgets(buf, sizeof(buf), pipe); ++i) {
             out[i] = std::strtof(buf, nullptr);
         }
-        pclose(pipe);
+        child_status = pclose(pipe);
     }
 
     // Cleanup temp file
@@ -86,6 +88,8 @@ std::vector<float> run_python_talib(const std::string& python_code, size_t expec
 #else
     unlink(script_path.c_str());
 #endif
+
+    if (child_status != 0) throw std::runtime_error("Pinned TA-Lib oracle process failed; check CMake Python3_EXECUTABLE");
 
     return out;
 }
@@ -128,22 +132,17 @@ std::pair<std::vector<float>, std::vector<float>> run_python_talib_pair(
     {
         std::ofstream ofs(script_path);
         if (!ofs) return {a, b};
-        ofs << "import numpy as np\n";
-        ofs << "try:\n";
-        ofs << "    import talib\n";
-        ofs << "except ImportError:\n";
-        ofs << "    import subprocess, sys\n";
-        ofs << "    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-q', 'TA-Lib'])\n";
-        ofs << "    import talib\n";
+        write_oracle_imports(ofs);
         ofs << python_code;
     }
 
 #ifdef _WIN32
-    std::string cmd = "python \"" + script_path + "\" 2>nul";
+    std::string cmd = std::string("\"\"") + TACUDA_TEST_PYTHON + "\" \"" + script_path + "\"\"";
 #else
-    std::string cmd = "python3 \"" + script_path + "\" 2>/dev/null";
+    std::string cmd = std::string("\"") + TACUDA_TEST_PYTHON + "\" \"" + script_path + "\"";
 #endif
 
+    int child_status = -1;
     FILE* pipe = popen(cmd.c_str(), "r");
     if (pipe) {
         char buf[128];
@@ -162,7 +161,7 @@ std::pair<std::vector<float>, std::vector<float>> run_python_talib_pair(
                 if (idx < b.size()) b[idx++] = v;
             }
         }
-        pclose(pipe);
+        child_status = pclose(pipe);
     }
 
 #ifdef _WIN32
@@ -170,6 +169,8 @@ std::pair<std::vector<float>, std::vector<float>> run_python_talib_pair(
 #else
     unlink(script_path.c_str());
 #endif
+
+    if (child_status != 0) throw std::runtime_error("Pinned TA-Lib oracle process failed; check CMake Python3_EXECUTABLE");
 
     return {a, b};
 }
@@ -200,22 +201,17 @@ std::tuple<std::vector<float>, std::vector<float>, std::vector<float>> run_pytho
     {
         std::ofstream ofs(script_path);
         if (!ofs) return {v1, v2, v3};
-        ofs << "import numpy as np\n";
-        ofs << "try:\n";
-        ofs << "    import talib\n";
-        ofs << "except ImportError:\n";
-        ofs << "    import subprocess, sys\n";
-        ofs << "    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-q', 'TA-Lib'])\n";
-        ofs << "    import talib\n";
+        write_oracle_imports(ofs);
         ofs << python_code;
     }
 
 #ifdef _WIN32
-    std::string cmd = "python \"" + script_path + "\" 2>nul";
+    std::string cmd = std::string("\"\"") + TACUDA_TEST_PYTHON + "\" \"" + script_path + "\"\"";
 #else
-    std::string cmd = "python3 \"" + script_path + "\" 2>/dev/null";
+    std::string cmd = std::string("\"") + TACUDA_TEST_PYTHON + "\" \"" + script_path + "\"";
 #endif
 
+    int child_status = -1;
     FILE* pipe = popen(cmd.c_str(), "r");
     if (pipe) {
         char buf[256];
@@ -232,7 +228,7 @@ std::tuple<std::vector<float>, std::vector<float>, std::vector<float>> run_pytho
             else if (section == 1 && idx < v2.size()) v2[idx++] = v;
             else if (section == 2 && idx < v3.size()) v3[idx++] = v;
         }
-        pclose(pipe);
+        child_status = pclose(pipe);
     }
 
 #ifdef _WIN32
@@ -240,6 +236,8 @@ std::tuple<std::vector<float>, std::vector<float>, std::vector<float>> run_pytho
 #else
     unlink(script_path.c_str());
 #endif
+
+    if (child_status != 0) throw std::runtime_error("Pinned TA-Lib oracle process failed; check CMake Python3_EXECUTABLE");
 
     return {v1, v2, v3};
 }

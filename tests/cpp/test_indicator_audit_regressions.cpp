@@ -10,8 +10,24 @@
 #include <cstdlib>
 #include <cstring>
 #include <memory>
+#include <limits>
 #include <stdexcept>
 #include <string>
+
+TEST(Talib083Finite, McgdHoldsStateOnInfiniteInput) {
+  std::vector<float> input(8, 100.0f), output(8);
+  input[3] = std::numeric_limits<float>::infinity();
+  ASSERT_EQ(ct_mcgd(input.data(), output.data(), 8, 2), CT_STATUS_SUCCESS);
+  EXPECT_TRUE(std::isnan(output[0]));
+  for (int i = 1; i < 8; ++i) EXPECT_FLOAT_EQ(output[i], 100.0f) << i;
+}
+
+TEST(Talib083Finite, VwapSkipsInfinitePriceWithoutLosingState) {
+  std::vector<float> high(8, 100.0f), low(high), close(high), volume(8, 1000.0f), output(8);
+  close[3] = std::numeric_limits<float>::infinity();
+  ASSERT_EQ(ct_vwap(high.data(), low.data(), close.data(), volume.data(), output.data(), 8), CT_STATUS_SUCCESS);
+  for (float value : output) EXPECT_FLOAT_EQ(value, 100.0f);
+}
 
 namespace {
 class FusedMode {

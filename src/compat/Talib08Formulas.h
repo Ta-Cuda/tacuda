@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <climits>
+#include <cfloat>
 #include "../../third_party/ta_lib_0_8_3/ta_defs.h"
 
 #ifdef __CUDACC__
@@ -57,7 +58,9 @@ struct Arena {
 
 template<class T, class U> TA08_HD auto min(T a, U b) { return a < b ? a : b; }
 template<class T, class U> TA08_HD auto max(T a, U b) { return a > b ? a : b; }
-using std::isfinite;
+// MSVC's std::isfinite overload is host-only under NVCC 12.6. Keep this
+// predicate arithmetic so every supported CUDA host compiler emits device code.
+TA08_HD bool finite(double value) { return value <= DBL_MAX && value >= -DBL_MAX; }
 TA08_HD void* memcpy(void* dst, const void* src, size_t bytes) {
     auto* d = static_cast<unsigned char*>(dst);
     const auto* s = static_cast<const unsigned char*>(src);
@@ -75,7 +78,7 @@ TA08_HD void* memmove(void* dst, const void* src, size_t bytes) {
     return dst;
 }
 #define TA_INTERNAL_ERROR(id) TA_UNKNOWN_ERR
-#define TA_IS_FINITE(v) (isfinite(v))
+#define TA_IS_FINITE(v) (finite(v))
 #define TA_EPSILON 1e-14
 #define TA_IS_ZERO(v) ((-TA_EPSILON < (v)) && ((v) < TA_EPSILON))
 #define TA_IS_ZERO_SCALED(v, scale) (fabs(v) <= TA_EPSILON * (scale))

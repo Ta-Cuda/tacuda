@@ -1,9 +1,9 @@
+#!/usr/bin/env python3
 # ============================================================================
 #  TaCuda | GPU-accelerated technical analysis | https://tacuda.com
 #  Copyright (c) 2024-2026 Paul Deecalov <paul@deecalov.com>
 #  SPDX-License-Identifier: Apache-2.0
 # ============================================================================
-#!/usr/bin/env python3
 """Every ct_*_batch_d on a caller's stream: strict CUDA graph capture, replay
 equal to the eager result bit for bit, and (optionally) the same output as a
 reference build of the library.
@@ -130,7 +130,9 @@ class Cuda:
 
         # Honor normal ELF interposition used by the no-pool compatibility
         # test. A handle-specific dlsym would bypass LD_PRELOAD's capability.
-        self._attribute = getattr(ctypes.CDLL(None), "cudaDeviceGetAttribute", lib.cudaDeviceGetAttribute)
+        self._attribute = lib.cudaDeviceGetAttribute
+        if os.name != "nt":
+            self._attribute = getattr(ctypes.CDLL(None), "cudaDeviceGetAttribute", self._attribute)
         self._attribute.argtypes = [ctypes.POINTER(i), i, i]
         self._attribute.restype = ctypes.c_int
 
