@@ -178,11 +178,37 @@ struct Gate {
 class StreamGuard {
 public:
     StreamGuard() { EXPECT_EQ(cudaStreamCreateWithFlags(&s_, cudaStreamNonBlocking), cudaSuccess); }
-    ~StreamGuard() { cudaStreamDestroy(s_); }
+    ~StreamGuard() {
+        cudaStreamCaptureStatus status = cudaStreamCaptureStatusNone;
+        if (cudaStreamIsCapturing(s_, &status) == cudaSuccess && status != cudaStreamCaptureStatusNone) {
+            cudaGraph_t abandoned = nullptr;
+            (void)cudaStreamEndCapture(s_, &abandoned);
+            if (abandoned) (void)cudaGraphDestroy(abandoned);
+        }
+        (void)cudaGetLastError();  // errors belong to this test's discarded capture
+        (void)cudaStreamDestroy(s_);
+        (void)cudaGetLastError();
+    }
     cudaStream_t get() const { return s_; }
 private:
     cudaStream_t s_ = nullptr;
 };
+
+struct GraphGuard {
+    cudaGraph_t graph = nullptr;
+    cudaGraphExec_t exec = nullptr;
+    ~GraphGuard() {
+        if (exec) (void)cudaGraphExecDestroy(exec);
+        if (graph) (void)cudaGraphDestroy(graph);
+    }
+};
+
+bool graph_memory_supported() {
+    int driver = 0, runtime = 0, device = 0, pools = 0;
+    if (cudaDriverGetVersion(&driver) != cudaSuccess || cudaRuntimeGetVersion(&runtime) != cudaSuccess ||
+        driver < 11040 || runtime < 11040 || cudaGetDevice(&device) != cudaSuccess) return false;
+    return cudaDeviceGetAttribute(&pools, cudaDevAttrMemoryPoolsSupported, device) == cudaSuccess && pools != 0;
+}
 
 }  // namespace
 
@@ -224,28 +250,32 @@ TEST(BatchAsyncCapture, GraphCaptureReplaysEagerResult) {
         ASSERT_EQ(cudaStreamSynchronize(stream.get()), cudaSuccess);
         const std::vector<uint32_t> eager = p.download_outputs();
 
-        cudaGraph_t graph = nullptr;
+        GraphGuard graph;
         ASSERT_EQ(cudaStreamBeginCapture(stream.get(), cudaStreamCaptureModeGlobal), cudaSuccess);
         const ctStatus_t st = f.call(p, stream.get());
         const std::string err = last_error();
-        const cudaError_t endErr = cudaStreamEndCapture(stream.get(), &graph);
+        const cudaError_t endErr = cudaStreamEndCapture(stream.get(), &graph.graph);
+        if (st == CT_STATUS_UNSUPPORTED) {
+            EXPECT_FALSE(graph_memory_supported()) << f.name << ": " << err;
+            EXPECT_NE(err.find("cudaDevAttrMemoryPoolsSupported"), std::string::npos) << err;
+            EXPECT_EQ(endErr, cudaSuccess);
+            EXPECT_EQ(cudaPeekAtLastError(), cudaSuccess);
+            continue;  // validated capability refusal; keep testing kernel-only graphs
+        }
         ASSERT_EQ(st, CT_STATUS_SUCCESS) << err;
         ASSERT_EQ(endErr, cudaSuccess) << cudaGetErrorString(endErr);
-        ASSERT_NE(graph, nullptr);
+        ASSERT_NE(graph.graph, nullptr);
 
-        cudaGraphExec_t exec = nullptr;
-        ASSERT_EQ(cudaGraphInstantiate(&exec, graph, 0), cudaSuccess);
+        ASSERT_EQ(cudaGraphInstantiate(&graph.exec, graph.graph, 0), cudaSuccess);
         for (int replay = 0; replay < 2; ++replay) {
             p.poison_outputs(stream.get());
-            ASSERT_EQ(cudaGraphLaunch(exec, stream.get()), cudaSuccess);
+            ASSERT_EQ(cudaGraphLaunch(graph.exec, stream.get()), cudaSuccess);
             ASSERT_EQ(cudaStreamSynchronize(stream.get()), cudaSuccess);
             const std::vector<uint32_t> replayed = p.download_outputs();
             size_t mismatches = 0;
             for (size_t i = 0; i < eager.size(); ++i) mismatches += eager[i] != replayed[i];
             EXPECT_EQ(mismatches, 0u) << "replay " << replay;
         }
-        cudaGraphExecDestroy(exec);
-        cudaGraphDestroy(graph);
     }
 }
 

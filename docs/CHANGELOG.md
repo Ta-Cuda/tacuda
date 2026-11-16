@@ -1,6 +1,64 @@
 Changelog
 =========
 
+0.9.1 — 2026-11-16
+------------------
+TA-Lib 0.8.3 compatibility: 237 functions, typed outputs and numerical corrections.
+
+This patch release adds APIs without changing existing signatures. Existing
+RSI/IMI flat-series values and the other corrections below intentionally change
+numerical results; pin 0.9.0 when reproducing its historical output.
+
+- Pin the Python/native correctness oracle to 0.8.3 and its complete
+  237-function manifest. Add the 76 functions introduced since 0.7.1,
+  reusing NVI/PVI and keeping distinct compatible ASI/kurtosis variants.
+- Extend MA types through ALMA (15), add selectable-MA device/batch variants,
+  and correct recursive composite seeding where the older implementation
+  only approximated the reference.
+- Generate int32 and mixed output APIs and bindings, including four-output
+  functions. Existing C signatures and existing float output types remain.
+- Align flat RSI/IMI with neutral 50, newest-tie index behavior, WILLR range
+  clipping, NATR's scale-invariant zero guard, and leading-NaN NVI/PVI
+  alignment with the new reference. Restore the formerly excluded NATR
+  zero-close dataset now that upstream's write bug is fixed.
+- New reference-backed functions use a CUDA batch baseline in double with
+  stream-owned scratch. Performance of long sequential histories remains a
+  separate optimization target; no universal speedup is claimed.
+
+CUDA Graph compatibility:
+
+- Scratch-backed device and batch capture paths check graph memory-node
+  support before allocating. A device without memory pools now receives
+  `CT_STATUS_UNSUPPORTED` with a capability diagnostic, including mixed-
+  precision wrappers. Ordinary fallback and allocation-free fused graphs
+  remain available; public signatures and ABI symbols are unchanged.
+- Capture tests isolate their own failed captures/runtime errors and validate
+  unsupported paths separately from kernel-only graph replay. Linux CTest
+  covers both behaviors with memory-pool support disabled by an interposer.
+
+Indicator correctness corrections from the 2026-11-15 audit:
+
+- STOCH retains its first valid K/D pair at the minimum sufficient input
+  length, including batch fallback. The lookback guard uses 64-bit arithmetic.
+- CORREL uses rebased local sliding sums instead of differences of long raw
+  prefixes. This fixes low-variance accuracy at large price offsets and makes
+  eager/graph results reproducible. Non-finite suffix behavior is preserved.
+- PVO computes full SMA-seeded volume EMAs and starts at `slowPeriod-1`.
+  The old truncated-window approximation and its extra warm-up bar are removed.
+- NVI/PVI keep price ratios and cumulative products in double and round only
+  public outputs to float32. Fixed-tree scans eliminate scheduling-dependent
+  rounding. BBANDS (including periods above the fused limit) and BETA also use
+  fixed scan trees for reproducible eager execution and CUDA Graph replay.
+- GPU Hilbert DC phase uses build-host sin/cos coefficients and separate
+  multiply/add operations, correcting flat/candle HT_DCPHASE, HT_SINE and
+  HT_TRENDMODE differences. Coefficients are compiled into constant memory;
+  first-use CUDA Graph capture needs no host initialization or transfer.
+- Independent batch/device mathematical corpora, dispatch boundaries, long
+  numerical/repeatability checks and six native regressions now run in CTest.
+
+These corrections change affected results even with `TACUDA_BATCH_FUSED=0`.
+See `docs/TA_LIB_COMPATIBILITY.md` for numerical contracts and validation.
+
 0.9.0 — 2026-11-14
 ------------------
 Fused portfolio batches and CUDA Graph support. The C ABI is unchanged;

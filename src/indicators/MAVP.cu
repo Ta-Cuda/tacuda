@@ -8,6 +8,7 @@
 #include <indicators/MA.h>
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
+#include <utils/Talib08.h>
 
 #include <cmath>
 #include <limits>
@@ -174,13 +175,20 @@ __global__ void mavpKamaFromStartKernel(const float* __restrict__ input,
 
 tacuda::MAVP::MAVP(int minPeriod, int maxPeriod, MAType type)
     : minPeriod(minPeriod), maxPeriod(maxPeriod), type(type) {
-    if (minPeriod <= 0 || maxPeriod <= 0 || minPeriod > maxPeriod) {
+    if (minPeriod < 2 || maxPeriod > 10000 || minPeriod > maxPeriod) {
         throw std::invalid_argument("MAVP: invalid period range");
     }
 }
 
 void tacuda::MAVP::calculate(const float* values, const float* periods, float* output,
                              int size, cudaStream_t stream) noexcept(false) {
+    if ((static_cast<int>(type) >= 9 && static_cast<int>(type) <= 15) ||
+        type == MAType::DEMA || type == MAType::TEMA || type == MAType::MAMA || type == MAType::T3) {
+        const float* ins[] = {values, periods}; void* outs[] = {output};
+        tacuda::talib08::require_success(tacuda::talib08::run_device(tacuda::talib08::Function::MAVP,
+            ins, outs, size, 1, tacuda::talib08::Params{{double(minPeriod), double(maxPeriod), double(static_cast<int>(type))}}, stream));
+        return;
+    }
     if (size <= 0) {
         throw std::invalid_argument("MAVP: invalid size");
     }

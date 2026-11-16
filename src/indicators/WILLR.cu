@@ -25,8 +25,11 @@ __global__ void willrParallelKernel(const float *__restrict__ high,
         if (h > highest) highest = h;
         if (l < lowest)  lowest = l;
     }
-    float denom = highest - lowest;
-    output[i] = denom == 0.0f ? 0.0f : ((highest - close[i]) / denom) * -100.0f;
+    const double denom = static_cast<double>(highest) - lowest;
+    const double value = denom == 0.0 ? 0.0 :
+        ((static_cast<double>(highest) - close[i]) / denom) * -100.0;
+    // 0.8.3 clamps inconsistent OHLC inputs to the oscillator's domain.
+    output[i] = isnan(value) ? nanf("") : static_cast<float>(fmin(0.0, fmax(-100.0, value)));
 }
 
 tacuda::WILLR::WILLR(int period) : period(period) {}

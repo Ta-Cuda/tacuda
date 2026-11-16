@@ -7,6 +7,7 @@
 #include <stdexcept>
 
 #include <indicators/MACDEXT.h>
+#include <utils/Talib08.h>
 #include <utils/AffineScan.cuh>
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
@@ -163,7 +164,9 @@ namespace tacuda {
 
 MACDEXT::MACDEXT(int fastPeriod, int slowPeriod, int signalPeriod, MAType type)
     : fastPeriod(fastPeriod), slowPeriod(slowPeriod), signalPeriod(signalPeriod),
-      fastType(type), slowType(type), signalType(type) {}
+      fastType(type == MAType::DEFAULT ? MAType::EMA : type),
+      slowType(type == MAType::DEFAULT ? MAType::EMA : type),
+      signalType(type == MAType::DEFAULT ? MAType::EMA : type) {}
 
 MACDEXT::MACDEXT(int fastPeriod, MAType fastType, int slowPeriod, MAType slowType,
                  int signalPeriod, MAType signalType)
@@ -209,6 +212,15 @@ void MACDEXT::calculate(const float* input, float* output, int size, cudaStream_
 
 void MACDEXT::calculate(const float* input, float* macd, float* signal, float* hist,
                         int size, cudaStream_t stream) noexcept(false) {
+    const auto window = [](MAType t) { return t == MAType::SMA || t == MAType::WMA || t == MAType::TRIMA; };
+    const bool emaOnly = fastType == MAType::EMA && slowType == MAType::EMA && signalType == MAType::EMA;
+    if (!emaOnly && !(window(fastType) && window(slowType) && window(signalType))) {
+        const float* ins[] = {input}; void* outs[] = {macd, signal, hist};
+        tacuda::talib08::require_success(tacuda::talib08::run_device(tacuda::talib08::Function::MACDEXT,
+            ins, outs, size, 1, tacuda::talib08::Params{{double(fastPeriod),double(static_cast<int>(fastType)),
+                double(slowPeriod),double(static_cast<int>(slowType)),double(signalPeriod),double(static_cast<int>(signalType))}}, stream));
+        return;
+    }
     if (fastPeriod <= 0 || slowPeriod <= 0 || signalPeriod <= 0) {
         throw std::invalid_argument("MACD: invalid periods");
     }

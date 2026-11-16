@@ -16,10 +16,18 @@
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
 #include <stdexcept>
+#include <utils/Talib08.h>
 
 tacuda::MA::MA(int period, tacuda::MAType type) : period(period), type(type) {}
 
 void tacuda::MA::calculate(const float* input, float* output, int size, cudaStream_t stream) noexcept(false) {
+    if (static_cast<int>(type) >= 9 && static_cast<int>(type) <= 15) {
+        const float* ins[] = {input}; void* outs[] = {output};
+        const auto status = tacuda::talib08::run_device(tacuda::talib08::Function::MA,
+            ins, outs, size, 1, tacuda::talib08::Params{{double(period), double(static_cast<int>(type))}}, stream);
+        tacuda::talib08::require_success(status);
+        return;
+    }
     if (period <= 0) {
         throw std::invalid_argument("MA: invalid period");
     }

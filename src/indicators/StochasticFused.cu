@@ -188,8 +188,10 @@ void Stochastic::calculateFused(
         throw std::invalid_argument("Stochastic: size must be positive");
     }
     
-    const int minLookback = kPeriod + 2 * (dPeriod - 1);
-    if (size <= minLookback) {
+    // This is the required input length, not the first output index.
+    // Exactly this many bars already contain one valid K/D pair.
+    const long long minLookback = static_cast<long long>(kPeriod) + 2LL * (dPeriod - 1);
+    if (size < minLookback) {
         // TA-Lib succeeds with zero output elements when the input is
         // shorter than the shared K/D lookback; both lines are NaNs.
         CUDA_CHECK(cudaMemsetAsync(kOut, 0xFF, static_cast<size_t>(size) * sizeof(float), stream));

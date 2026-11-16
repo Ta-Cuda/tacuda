@@ -142,12 +142,12 @@ public static partial class TacudaBatch
         return matrix;
     }
 
-    private static float[][] Split(float[] matrix, int len, int count)
+    private static T[][] Split<T>(T[] matrix, int len, int count)
     {
-        var rows = new float[count][];
+        var rows = new T[count][];
         for (int s = 0; s < count; ++s)
         {
-            rows[s] = new float[len];
+            rows[s] = new T[len];
             Array.Copy(matrix, s * len, rows[s], 0, len);
         }
         return rows;

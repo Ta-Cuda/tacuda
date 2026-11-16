@@ -797,7 +797,12 @@ std::vector<float> ppo_ref(const std::vector<float> &in, int fastP,
 
 std::vector<float> pvo_ref(const std::vector<float> &in, int fastP,
                            int slowP) {
-  return ppo_ref(in, fastP, slowP);
+  std::ostringstream code;
+  code << format_input_array(in);
+  code << "res=talib.PPO(x,fastperiod=" << fastP << ",slowperiod=" << slowP
+       << ",matype=1)\n";
+  code << "print('\\n'.join(str(v) for v in res))\n";
+  return run_python_talib(code.str(), in.size());
 }
 
 std::vector<float> aroonosc_ref(const std::vector<float> &high,

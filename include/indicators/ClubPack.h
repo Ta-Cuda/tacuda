@@ -9,8 +9,9 @@
 /**
  * @file ClubPack.h
  * @brief "Club pack" indicators: constructs from the Omega Research System
- * Trading & Development Club volumes (1997-2000) that have no TA-Lib
- * counterpart. Semantics follow the tacuda-opt EXPERIMENTS strategy pack
+ * Trading & Development Club volumes (1997-2000). These legacy definitions
+ * are independent of similarly named TA-Lib 0.8.x functions (notably ASI
+ * and KURTOSIS). Semantics follow the tacuda-opt EXPERIMENTS strategy pack
  * (tools/optimizer/src/strategy), which is the reference CPU implementation.
  *
  * All recursions run as single-thread device kernels (like SAR); windowed

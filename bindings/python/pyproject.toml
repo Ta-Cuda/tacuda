@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tacuda"
-version = "0.9.0"
-description = "CUDA technical analysis for Python: TA-Lib baseline indicators, fused portfolio batches, CUDA Graph device pipelines, incremental streaming and float16/float32/float64 APIs."
+version = "0.9.1"
+description = "CUDA technical analysis: 237 TA-Lib 0.8.3 functions, typed outputs, fused portfolio batches, CUDA Graph pipelines and incremental streaming."
 readme = "README.md"
 license = {text = "Apache-2.0"}
 requires-python = ">=3.8"
@@ -49,4 +49,4 @@ Changelog = "https://github.com/Ta-Cuda/tacuda/blob/main/docs/CHANGELOG.md"
 include = ["tacuda*"]
 
 [tool.setuptools.package-data]
-tacuda = ["*.pyd", "*.so", "*.dylib", "*.dll"]
+tacuda = ["*.pyd", "*.so", "*.dylib", "*.dll", "THIRD_PARTY_NOTICES.txt"]

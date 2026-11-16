@@ -19,6 +19,13 @@ enum class MAType {
     KAMA = 6,
     MAMA = 7,
     T3 = 8,
+    HMA = 9,
+    DISABLED = 10,
+    DEFAULT = 11,
+    ZLEMA = 12,
+    RMA = 13,
+    VIDYA = 14,
+    ALMA = 15,
 };
 
 class MA : public Indicator {

@@ -8,9 +8,7 @@
 #include <stdexcept>
 #include <utils/CudaUtils.h>
 
-// Exact TA-Lib state machine (ta_MININDEX.c): recompute picks the OLDEST
-// tie (`tmp < lowest`), an incoming bar replaces on equality
-// (`tmp <= lowest`). Path-dependent — walked sequentially by one thread.
+// TA-Lib 0.8.3 names the newest tie, including a stale-window recompute.
 __global__ void minIndexKernel(const float *__restrict__ input,
                                float *__restrict__ output, int period,
                                int size) {
@@ -21,9 +19,9 @@ __global__ void minIndexKernel(const float *__restrict__ input,
   for (int today = period - 1; today < size; ++today, ++trailingIdx) {
     float tmp = input[today];
     if (lowestIdx < trailingIdx) {
-      lowestIdx = trailingIdx;
+      lowestIdx = today;
       lowest = input[lowestIdx];
-      for (int i = lowestIdx + 1; i <= today; ++i) {
+      for (int i = today - 1; i >= trailingIdx; --i) {
         float v = input[i];
         if (v < lowest) {
           lowestIdx = i;

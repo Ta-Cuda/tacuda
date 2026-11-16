@@ -294,7 +294,7 @@ struct RsiState {
   TACUDA_HD int outputs() const { return 1; }
 
   TACUDA_HD float value() const {
-    if (avgL == 0.0) return (avgG == 0.0) ? 0.0f : 100.0f;
+    if (avgL == 0.0) return (avgG == 0.0) ? 50.0f : 100.0f;
     if (avgG == 0.0) return 0.0f;
     const double rs = avgG / avgL;
     return static_cast<float>(100.0 - 100.0 / (1.0 + rs));
@@ -412,7 +412,7 @@ struct AtrState {
 };
 
 /**
- * @brief Mirrors applyAffineNormalizedKernel (NATR.cu): TA-Lib's TA_IS_ZERO
+ * @brief Mirrors applyAffineNormalizedKernel (NATR.cu): exact zero
  * guard on the close, normalization performed in float. Period one is the
  * TA-Lib unnormalized true-range special case.
  */
@@ -435,7 +435,7 @@ struct NatrState {
       return;
     }
     const float c = bar.close;
-    out[0] = (stream_fabsf(c) < 1e-14f) ? 0.0f : 100.0f * atr / c;
+    out[0] = (c == 0.0f) ? 0.0f : 100.0f * atr / c;
   }
 };
 
@@ -667,7 +667,7 @@ struct RsiState {
     }
     const double total = gain + loss;
     out[0] = i < period ? stream_nan()
-             : (total > -1e-14 && total < 1e-14) ? 0.0f
+             : total == 0.0 ? 50.0f
              : static_cast<float>(100.0 * (gain / total));
   }
 };
@@ -715,7 +715,7 @@ struct NatrState {
     atr.step(ring, bar, out);
     if (atr.idx <= atr.period || atr.period == 1) return;
     const double c = bar.close;
-    out[0] = (c > -1e-14 && c < 1e-14) ? 0.0f
+    out[0] = c == 0.0 ? 0.0f
              : static_cast<float>((atr.value / c) * 100.0);
   }
 };

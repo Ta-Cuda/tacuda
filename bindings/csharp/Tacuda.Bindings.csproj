@@ -11,10 +11,10 @@
 
     <!-- NuGet Package Metadata -->
     <PackageId>Tacuda</PackageId>
-    <Version>0.9.0</Version>
+    <Version>0.9.1</Version>
     <Authors>Paul Deecalov</Authors>
     <Company>Ta-Cuda</Company>
-    <Description>CUDA technical analysis for .NET: TA-Lib baseline indicators, fused portfolio batches, CUDA Graph device pipelines, incremental streaming and runtime precision profiles.</Description>
+    <Description>CUDA technical analysis: 237 TA-Lib 0.8.3 functions, typed outputs, fused portfolio batches, CUDA Graph pipelines and incremental streaming.</Description>
     <PackageTags>cuda;gpu;technical-analysis;trading;finance;indicators;ta-lib;macd;rsi;sma;ema;bollinger-bands;candlestick;batch;cuda-graph;streaming</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Ta-Cuda/tacuda</PackageProjectUrl>

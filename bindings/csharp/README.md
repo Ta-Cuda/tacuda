@@ -1,7 +1,15 @@
 # TaCuda — .NET/C# Bindings
 
+Version **0.9.1** covers the **237 TA-Lib 0.8.3 functions** with matching
+native libraries and bindings. It adds MA types through ALMA, real int32 and
+mixed outputs, and four-output HA/ICHIMOKU. Flat RSI/IMI now returns 50;
+other numerical changes and performance limits are documented in the
+[compatibility guide](https://github.com/Ta-Cuda/tacuda/blob/v0.9.1/docs/TA_LIB_COMPATIBILITY.md).
+New streaming families are a separate API surface. Third-party formula
+licenses ship in `THIRD_PARTY_NOTICES.txt`.
+
 Managed bindings for the native `tacuda` CUDA library.
-TA-Lib 0.7.1 baseline coverage (161 functions, 811 native entrypoints incl. the batch API): generated P/Invoke
+TA-Lib 0.8.3 coverage (237 functions, 1129 native entrypoints incl. the batch API): generated P/Invoke
 signatures for host API, device API, MACDEXT, 19 vector math kernels, and typed
 `_ex` entrypoints. The `DllImport` name is platform-neutral (`tacuda`), so the same
 assembly loads `tacuda.dll`, `libtacuda.so`, or `libtacuda.dylib` automatically.
@@ -89,7 +97,7 @@ NativeMethods.ct_device_free(dIn);
 NativeMethods.ct_device_free(dOut);
 ```
 
-## Available Indicators (TA-Lib 0.7.1 baseline coverage)
+## Available Indicators (TA-Lib 0.8.3 coverage)
 
 All indicators are available as static `NativeMethods.ct_*` methods:
 
@@ -162,7 +170,7 @@ from the same release; 0.9.0 also includes precision, input-validation and strea
 correctness fixes. A native older than 0.8.0 does not export the streaming
 functions. See the
 [Streaming API guide](https://github.com/Ta-Cuda/tacuda/blob/main/docs/STREAMING_API.md).
-The 161-function compatibility baseline is native TA-Lib 0.7.1, not TA-Lib 0.8.1.
+The 237-function target is native/Python TA-Lib 0.8.3; install the pinned reference requirements to reproduce validation.
 
 ## Fused portfolio batches (0.9.0)
 
@@ -171,4 +179,4 @@ per call. Supported device batches are CUDA Graph compatible; user-stream
 calls stay asynchronous. `TACUDA_BATCH_FUSED=auto|0|1` controls automatic,
 per-series or forced fused dispatch. Period/shape limits apply, and the
 double internal arithmetic can change the last float32 bits from 0.8.
-See [batch dispatch and migration](https://github.com/Ta-Cuda/tacuda/blob/v0.9.0/docs/BATCH_API.md#fused-execution).
+See [batch dispatch and migration](https://github.com/Ta-Cuda/tacuda/blob/v0.9.1/docs/BATCH_API.md#fused-execution).

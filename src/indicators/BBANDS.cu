@@ -3,7 +3,7 @@
 /*  Copyright (c) 2024-2026 Paul Deecalov <paul@deecalov.com>               */
 /*  SPDX-License-Identifier: Apache-2.0                                     */
 /* ======================================================================== */
-// BBANDS.cu — accelerated Bollinger Bands (batched, seg-scan)
+// BBANDS.cu — Bollinger Bands with a fixed Welford scan tree per series.
 // Public API unchanged.
 
 #include <indicators/BBANDS.h>
@@ -11,11 +11,7 @@
 #include <utils/DeviceBufferPool.h>
 #include <utils/TacudaConfig.h>
 #include <stdexcept>
-#include <thrust/device_ptr.h>
-#include <utils/ThrustPolicy.cuh>
-#include <thrust/execution_policy.h>
-#include <thrust/functional.h>
-#include <thrust/scan.h>
+#include <utils/DeterministicScan.cuh>
 #include <algorithm>
 #include <cstdlib>
 
@@ -74,15 +70,13 @@ __host__ __device__ inline WelfordData subtractMoments(const WelfordData& total,
   return WelfordData{meanRem, m2Rem, remaining};
 }
 
-__global__ void initMomentsAndKeysKernel(const float* __restrict__ in,
+__global__ void initMomentsKernel(const float* __restrict__ in,
                                          WelfordData* __restrict__ moments,
-                                         int* __restrict__ keys,
-                                         int totalSize, int seriesLen) {
+                                         int totalSize) {
   for (int idx = blockIdx.x * blockDim.x + threadIdx.x;
        idx < totalSize;
        idx += blockDim.x * gridDim.x) {
     moments[idx] = makeMoment(static_cast<double>(in[idx]));
-    keys[idx] = idx / seriesLen;
   }
 }
 
@@ -235,31 +229,24 @@ void BBANDS::calculate(const float* input, float* upper, float* middle, float* l
     return;
   }
 
-  // ===== Fast path: series-major + segmented scan by series keys =====
+  // Each series has its own fixed tree. Sharing a segmented device-wide
+  // scan makes Welford rounding depend on which block finishes first.
   auto dMoments = acquireDeviceBufferAsync<WelfordData>(size, stream);
-  auto dKeys = acquireDeviceBufferAsync<int>(size, stream);
 
   // build initial moments and series keys
   {
     dim3 block = defaultBlock();
     dim3 grid  = defaultGrid(size);
-    initMomentsAndKeysKernel<<<grid, block, 0, stream>>>(
-        input, dMoments.get(), dKeys.get(), size, seriesLen);
+    initMomentsKernel<<<grid, block, 0, stream>>>(input, dMoments.get(), size);
     CUDA_CHECK(cudaGetLastError());
   }
 
-  // segmented inclusive scans by series (Welford combine)
-  {
-    thrust::device_ptr<WelfordData> momentsBegin(dMoments.get());
-    thrust::device_ptr<int> keysBegin(dKeys.get());
-    thrust::inclusive_scan_by_key(tacuda::detail::thrust_on(stream),
-                                  keysBegin, keysBegin + size,
-                                  momentsBegin,
-                                  momentsBegin,
-                                  thrust::equal_to<int>(),
-                                  [] __host__ __device__(const WelfordData& a, const WelfordData& b) {
-                                    return combineMoments(a, b);
-                                  });
+  for (int s = 0; s < batchCount; ++s) {
+    WelfordData* row = dMoments.get() + static_cast<size_t>(s) * seriesLen;
+    tacuda::detail::deterministic_inclusive_scan<WelfordData>(row, row, seriesLen,
+        stream, [] __host__ __device__(const WelfordData& a, const WelfordData& b) {
+          return combineMoments(a, b);
+        }, WelfordData{0.0, 0.0, 0.0});
   }
 
   // finalize from prefix sums

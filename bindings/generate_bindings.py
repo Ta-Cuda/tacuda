@@ -193,6 +193,7 @@ def render_python(functions: Sequence[FunctionSpec]) -> str:
     lines.append("    output_types: Tuple[str, ...]") # New: tracking pointer types
     lines.append("    size_param: str | None")
     lines.append("    scalars: Tuple[ScalarParam, ...]")
+    lines.append("    output_dtypes: Tuple[str, ...] = ()")
     lines.append("")
     lines.append("")
     lines.append("FUNCTIONS = {")
@@ -239,6 +240,7 @@ def render_python(functions: Sequence[FunctionSpec]) -> str:
         lines.append(f"        outputs={_format_python_tuple(outputs)},")
         lines.append(f"        input_types={_format_python_tuple(input_types)},")
         lines.append(f"        output_types={_format_python_tuple(output_types)},")
+        lines.append(f"        output_dtypes={_format_python_tuple([repr(p.base_type) for p in func.outputs])},")
         
         if func.size_param:
             lines.append(f"        size_param=\"{func.size_param.name}\",")
@@ -308,12 +310,12 @@ def _csharp_type(param: Parameter) -> str:
         # would corrupt F16/F64 data. Expose them as IntPtr.
         if param.base_type == "void":
             return "IntPtr"
-        # The remaining pointer parameters in the public API are ``float *``.
-        return "float[]"
+        return {"float":"float[]", "int":"int[]", "double":"double[]"}[param.base_type]
 
     mapping = {
         "int": "int",
         "float": "float",
+        "double": "double",
         "size_t": "ulong", # or UIntPtr/IntPtr/long depending on arch, ulong covers 64bit
         "ctMaType_t": "int",
         "cudaStream_t": "IntPtr",

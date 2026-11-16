@@ -6,34 +6,47 @@
 #include <indicators/NVI.h>
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
-#include <thrust/device_ptr.h>
-#include <utils/ThrustPolicy.cuh>
-#include <thrust/execution_policy.h>
-#include <thrust/scan.h>
+#include <utils/DeterministicScan.cuh>
 #include <thrust/functional.h>
 #include <stdexcept>
 
 namespace {
+
+// Match NumPy TA-Lib's leading-NaN input alignment while retaining the
+// deterministic parallel product scan for long histories.
+__global__ void nviPrefixKernel(const float* close, const float* volume, int* prefix, int size) {
+    if (blockIdx.x || threadIdx.x) return;
+    int first = 0;
+    while (first < size - 1 && (isnan(close[first]) || isnan(volume[first]))) ++first;
+    *prefix = first;
+}
 
 // Build per-step multiplicative factors for NVI
 // factor[0] = 1000 (initial NVI value)
 // factor[i] = close[i]/close[i-1] if volume[i] < volume[i-1], else 1.0
 __global__ void nviBuildFactorsKernel(const float* __restrict__ close,
                                       const float* __restrict__ volume,
-                                      float* __restrict__ factors,
+                                      double* __restrict__ factors, const int* prefix,
                                       int size) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx >= size) return;
 
-    if (idx == 0) {
-        factors[0] = 1000.0f;
+    if (idx < *prefix) {
+        factors[idx] = 1.0;
+    } else if (idx == *prefix) {
+        factors[idx] = 1000.0;
     } else {
         if (volume[idx] < volume[idx - 1] && close[idx - 1] != 0.0f) {
-            factors[idx] = close[idx] / close[idx - 1];
+            factors[idx] = static_cast<double>(close[idx]) / static_cast<double>(close[idx - 1]);
         } else {
-            factors[idx] = 1.0f;
+            factors[idx] = 1.0;
         }
     }
+}
+
+__global__ void nviRoundKernel(const double* values, float* output, int size, const int* prefix) {
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < size) output[i] = i < *prefix ? nanf("") : static_cast<float>(values[i]);
 }
 
 } // namespace
@@ -45,23 +58,23 @@ void tacuda::NVI::calculate(const float* close, const float* volume, float* outp
     }
 
     // 1. Build multiplicative factors in parallel
-    auto factors = acquireDeviceBufferAsync<float>(size, stream);
+    auto factors = acquireDeviceBufferAsync<double>(size, stream);
+    auto prefix = acquireDeviceBufferAsync<int>(1, stream);
+    nviPrefixKernel<<<1, 1, 0, stream>>>(close, volume, prefix.get(), size);
+    CUDA_CHECK(cudaGetLastError());
     {
         dim3 block = defaultBlock();
         dim3 grid = defaultGrid(size);
-        nviBuildFactorsKernel<<<grid, block, 0, stream>>>(close, volume, factors.get(), size);
+        nviBuildFactorsKernel<<<grid, block, 0, stream>>>(close, volume, factors.get(), prefix.get(), size);
         CUDA_CHECK(cudaGetLastError());
     }
 
-    // 2. Parallel prefix product (inclusive scan with multiplication)
-    // NVI[i] = factors[0] * factors[1] * ... * factors[i]
-    {
-        thrust::device_ptr<float> in(factors.get());
-        thrust::device_ptr<float> out(output);
-        thrust::inclusive_scan(tacuda::detail::thrust_on(stream),
-                               in, in + size, out,
-                               thrust::multiplies<float>());
-    }
+    // Keep both the ratios and the cumulative state in double. Rounding
+    // near-one ratios to float before multiplication accumulates a bias.
+    tacuda::detail::deterministic_inclusive_scan<double>(factors.get(), factors.get(),
+        size, stream, thrust::multiplies<double>{}, 1.0);
+    nviRoundKernel<<<defaultGrid(size), defaultBlock(), 0, stream>>>(factors.get(), output, size, prefix.get());
+    CUDA_CHECK(cudaGetLastError());
 }
 
 void tacuda::NVI::calculate(const float* input, float* output, int size,

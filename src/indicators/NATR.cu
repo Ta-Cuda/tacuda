@@ -135,9 +135,9 @@ __global__ void applyAffineNormalizedKernel(const AffinePair* __restrict__ pref,
         }
         
         // Normalization: NATR = 100 * ATR / Close.
-        // TA-Lib guards the denominator with TA_IS_ZERO (|c| < 1e-14) -> 0.
+        // TA-Lib 0.8.3 uses exact zero so the result is price-scale invariant.
         const float c = close[i];
-        out[i] = (fabsf(c) < 1e-14f) ? 0.0f : 100.0f * atr / c;
+        out[i] = (c == 0.0f) ? 0.0f : 100.0f * atr / c;
     }
 }
 

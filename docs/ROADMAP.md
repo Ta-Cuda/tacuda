@@ -1,17 +1,17 @@
 # TaCuda Roadmap
 
-Last reviewed: 2026-11-14 (0.9.0 released).
+Last reviewed: 2026-11-16 (0.9.1 release preparation).
 This document tracks where the project stands and what ships next.
 Order inside a milestone is priority order; items move, versions don't slip silently.
 
-## Current release (0.9.0)
+## Current candidate (0.9.1)
 
 | Area | State |
 |------|-------|
-| TA-Lib coverage | 161/161 functions of native TA-Lib 0.7.1; strict differential corpus 165/165 specs green (exact-name coverage enforcement, exact candlestick parity incl. activation fixtures for the rare patterns) |
-| Native ABI | 811 `extern "C"` entrypoints: 559 host, including three introspection functions (incl. `_ex` precision and `_batch`) + 200 `_d` device + 52 streaming; append-only policy ([CONTRIBUTING.md](CONTRIBUTING.md#abi-stability-policy)) |
-| Batch API | 166 indicator families; 17 fused kernels with shape/period-based fallback, host + device variants, CUDA Graph capture on caller streams ([BATCH_API.md](BATCH_API.md)) |
-| Bindings | Python (ctypes), Node.js (koffi), C#/.NET (P/Invoke) — full 811-symbol surface incl. streaming handles, audited in CI (`bindings/audit_bindings.py`) |
+| TA-Lib coverage | 237/237 functions of native/Python TA-Lib 0.8.3; 241 specs, 1928/1928 cells; typed outputs and all MA modes ([contract](TA_LIB_COMPATIBILITY.md)) |
+| Native ABI | 1129 exports: 797 host + 280 device + 52 streaming; all 811 prior symbols retained |
+| Batch API | 246 batch families; 17 fused kernels with shape/period-based fallback, host + device variants, CUDA Graph capture on caller streams ([BATCH_API.md](BATCH_API.md)) |
+| Bindings | Python (ctypes), Node.js (koffi), C#/.NET (P/Invoke) — full 1129-symbol surface incl. streaming handles, audited in CI (`bindings/audit_bindings.py`) |
 | Streaming | Incremental append for 10 families, single-series and portfolio-wide ([STREAMING_API.md](STREAMING_API.md)); parity swept by `benchmarks/streaming_corpus.py` |
 | Memory safety | Stream-ordered buffer pool; buffers may outlive their Context; cross-Context use rejected; lifetime tests in ctest |
 | Packages | PyPI platform wheels, npm tgz, NuGet nupkg (win-x64 + linux-x64) built by the `release-packages` workflow with GPU-gated publishing |
@@ -124,9 +124,8 @@ Moved here from v0.8.0 during release preparation (2026-10-14), not dropped.
 
 - [x] Site section for streaming (published separately at tacuda.com).
 - [ ] Live-trading article.
-- [ ] TA-Lib 0.8.1 migration: add the 40 missing corpus specs, determine which
-      are existing TACUDA extras, resolve IMI/WILLR edge semantics, then run
-      strict parity without widening tolerances. Current coverage names 0.7.1.
+- [x] TA-Lib 0.8.3 migration: 237 names, pinned oracle, MA types 0-15, typed and mixed outputs.
+- [ ] Extend public streaming families, automatic stabilization and display-shift queries separately.
 - [ ] Persistent batch plans — deferred on measurement, not dropped. Batch
       streams already keep device state and I/O buffers resident, so what a
       plan would still buy is one OHLCV upload per tick instead of one per

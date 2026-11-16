@@ -21,6 +21,7 @@
 #include "tacuda_device.h"
 #include <utils/DeviceBufferPool.h>
 #include <utils/ErrorState.h>
+#include <utils/UnsupportedOperation.h>
 #include <utils/Precision.h>
 
 // Include all indicator headers
@@ -84,6 +85,10 @@ namespace {
 // Re-throw current exception, classify it, and store the message.
 static ctStatus_t classify_exception(const char* context = nullptr) {
     try { throw; }
+    catch (const tacuda::detail::UnsupportedOperation& e) {
+        tacuda::detail::set_last_error(e.what());
+        return CT_STATUS_UNSUPPORTED;
+    }
     catch (const std::invalid_argument& e) {
         tacuda::detail::set_last_error(e.what());
         return CT_STATUS_INVALID_ARGUMENT;
@@ -331,6 +336,9 @@ static ctStatus_t acquire_scratch(DeviceBufferPtrAsync<T>& buf, size_t count,
     try {
         buf = acquireDeviceBufferAsync<T>(count, stream);
         return CT_STATUS_SUCCESS;
+    } catch (const tacuda::detail::UnsupportedOperation& e) {
+        tacuda::detail::set_last_error(e.what());
+        return CT_STATUS_UNSUPPORTED;
     } catch (const std::exception& e) {
         tacuda::detail::set_last_error(e.what());
         return CT_STATUS_ALLOC_FAILED;
@@ -382,7 +390,8 @@ ctStatus_t reject_period(const char* message) {
 }
 
 // RSIT holds the semantics the plain float path is tested against (flat window
-// is 0, a NaN poisons the recursion), so the precision path must not restate them.
+// is neutral 50 in TA-Lib 0.8.3, a NaN poisons the recursion), so the precision
+// path must not restate them.
 template <typename T>
 ctStatus_t launch_rsi(const T* in, T* out, int size, int period, cudaStream_t stream) {
     try {
@@ -969,26 +978,17 @@ ctStatus_t ct_macdext_d(const float* d_input, float* d_macd, float* d_signal, fl
                         int size, int fastPeriod, int fastType, int slowPeriod,
                         int slowType, int signalPeriod, int signalType,
                         cudaStream_t stream) {
-    tacuda::detail::clear_last_error();
-    if (!d_input || !d_macd || !d_signal || !d_hist || size <= 0) {
-        tacuda::detail::set_last_error("invalid argument");
-        return CT_STATUS_INVALID_ARGUMENT;
-    }
-    try {
-        tacuda::MACDEXT ind(fastPeriod, static_cast<tacuda::MAType>(fastType),
-                            slowPeriod, static_cast<tacuda::MAType>(slowType),
-                            signalPeriod, static_cast<tacuda::MAType>(signalType));
-        ind.calculate(d_input, d_macd, d_signal, d_hist, size, stream);
-        return CT_STATUS_SUCCESS;
-    } catch (...) {
-        return classify_exception();
-    }
+    const float* inputs[] = {d_input}; void* outputs[] = {d_macd,d_signal,d_hist};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::MACDEXT, inputs, outputs, size, 1,
+        tacuda::talib08::Params{{double(fastPeriod),double(fastType),double(slowPeriod),
+            double(slowType),double(signalPeriod),double(signalType)}}, stream);
 }
 
 ctStatus_t ct_macd_ex_d(const void* d_input, void* d_macd, void* d_signal, void* d_hist,
                         int size, int fastPeriod, int slowPeriod, int signalPeriod,
                         int maType, ctDataType_t storageType, ctDataType_t computeType,
                         cudaStream_t stream) {
+    if (maType == CT_MA_DEFAULT) maType = CT_MA_EMA;
     tacuda::detail::clear_last_error();
     if (!d_input || !d_macd || !d_signal || !d_hist || size <= 0) {
         tacuda::detail::set_last_error("invalid argument");

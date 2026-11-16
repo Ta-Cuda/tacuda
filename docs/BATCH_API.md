@@ -60,6 +60,46 @@ python scripts/generate_batch_api.py   # header + CUDA + Node/C# wrappers
 python bindings/generate_bindings.py   # ctypes / P-Invoke layers
 ```
 
+## TA-Lib 0.8.3 families and typed outputs
+
+Release 0.9.1 covers 237 pinned TA-Lib functions. The
+[compatibility guide](TA_LIB_COMPATIBILITY.md) list the additions,
+compatible aliases and verification. New families have
+single-series host/device and series-major host/device batch APIs. Their
+CUDA backend processes all rows in one kernel with private double scratch;
+`maxConcurrency` is ignored. `TACUDA_BATCH_FUSED` controls the legacy dispatcher
+only and does not disable this backend. Scratch capture requires graph memory
+nodes; these new graphs are not restricted to one node.
+
+Inputs remain float32. Real outputs are float32 and new integer outputs are
+signed int32: FRACTAL flags, SUPERTREND direction, SQZMOM levels, and ZIGZAG
+direction/pivot index. Integer warmup is zero; real warmup is NaN. Each output
+is a separate buffer, with the same row layout. HA and ICHIMOKU have four
+outputs. Legacy float candle/index buffers retain their original types.
+
+Python returns `np.int32`, Node returns `Int32Array`, and C# returns
+`int[]`/`int[][]` for the new integer outputs, including mixed tuples/objects:
+
+```python
+line, trend = tacuda.supertrend_batch(highs, lows, closes, 10, 3.0)
+assert line.dtype == np.float32 and trend.dtype == np.int32
+ha_open, ha_high, ha_low, ha_close = tacuda.ha_batch(opens, highs, lows, closes)
+volume_osc = tacuda.pvo_ma_batch(volumes, 12, 26, 13)  # RMA smoothing
+```
+
+New `MAType` values are 9 HMA, 10 DISABLED, 11 DEFAULT, 12 ZLEMA, 13 RMA,
+14 VIDYA, 15 ALMA. DEFAULT follows the enclosing function; ordinary MACD
+uses EMA. Selectable smoothing is exposed by `pvo_ma`, `bbands_ma`,
+`stochastic_ma`, `stochf_ma` and `stochrsi_ma`, plus the existing APO/PPO
+`_ma` names. Scalar options are explicit; the pinned catalog records oracle
+defaults. Use `asi_wilder` and `kurtosis_unbiased` for the upstream formulas,
+preserving legacy club `asi` and population `kurtosis`.
+
+The baseline reserves approximately 512 bytes per bar per active worker,
+with a 256 MiB worker budget (one long row can exceed it). It establishes
+correctness; long sequential histories and large selection windows can be
+slow. Benchmark the intended shapes before treating it as a performance path.
+
 ## Data layout
 
 All batch entry points take dense **series-major** matrices:
@@ -91,7 +131,8 @@ keep the original implementation and its argument validation.
 `TACUDA_BATCH_FUSED` selects the dispatcher:
 
 - `auto` (default, also used for unrecognized values): the table above.
-- `0`: original per-series dispatcher for every family.
+- `0`: original per-series dispatcher for legacy families. New reference-backed
+  functions keep their shared backend.
 - `1`: force fused execution for supported families, overriding the recurrent
   shape rule. Window limits and supported MACD types still apply. This can be
   much slower for long histories with few series.
@@ -204,6 +245,12 @@ Device-matrix variants (`*_batch_d`) take GPU pointers of
 
 A `*_batch_d` call on a non-null stream can be captured into a CUDA graph
 (any capture mode, `cudaStreamCaptureModeGlobal` included) and replayed.
+Scratch-backed paths require graph memory-node support: CUDA runtime/driver
+11.4+ and a nonzero `cudaDevAttrMemoryPoolsSupported` device attribute. If this
+capability is absent, a call that needs captured scratch returns
+`CT_STATUS_UNSUPPORTED` with an explanation from `ct_get_last_error()`.
+Allocation-free paths, including supported fused calls, do not require memory
+pools. A toolkit version alone does not establish device capability.
 For a fixed pipeline over buffers that never move, a whole pass of many
 calls becomes one graph launch:
 
@@ -230,16 +277,30 @@ g.replay()                           # recomputes `out` from the current h/l/c/v
   graph; outside capture it comes from the library's stream-ordered pool
   (see "Memory contracts" in `docs/api/conventions.md`). CUDA allows at most
   one executable instance of a graph with memory nodes at a time.
+- After any failed library call during capture, finish/discard that capture
+  and its partial graph; do not launch it. A capability refusal does not call
+  an unsupported CUDA allocator or leave that allocator's runtime error for
+  the next call. The capability check does not clear caller-owned CUDA errors.
+- Outside capture, devices without memory-pool support use the event-delayed
+  ordinary buffer pool. Warming that pool cannot enable graph memory nodes;
+  reusing its buffers inside a replayable graph would violate their lifetime.
 - Make one eager call first (as above) so kernel loading and pool growth do
   not happen inside the capture.
-- Replay removes the host cost of submitting the work, not the work: a call
-  still issues its per-series kernels, and thousands of tiny kernels cost
-  the device a few microseconds each.
+- Replay removes the host cost of submitting the work. Legacy fallback
+  paths still issue their per-series kernels; fused and new reference-backed
+  paths process rows in one kernel.
 
 `tests/python/batch_graph_capture_sweep.py` (CTest
 `batch_graph_capture_sweep`) captures every `*_batch_d` family in global
 mode, replays it and requires the eager result bit for bit; with
 `--ref-lib` it also compares against another build of the library.
+On devices without graph memory support it separately counts validated
+`CT_STATUS_UNSUPPORTED` refusals, while continuing to replay allocation-free
+cases. Linux CTest also exercises this capability with a test-only CUDA
+interposer (`scratch_capture_without_memory_pools`,
+`batch_graph_capture_without_memory_pools`, `batch_fused_without_memory_pools`).
+This is capability-path coverage on the available GPU, not physical Maxwell
+hardware acceptance.
 
 ### Error handling
 

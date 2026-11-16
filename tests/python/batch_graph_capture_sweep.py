@@ -1,9 +1,9 @@
-#!/usr/bin/env python3
 # ============================================================================
 #  TaCuda | GPU-accelerated technical analysis | https://tacuda.com
 #  Copyright (c) 2024-2026 Paul Deecalov <paul@deecalov.com>
 #  SPDX-License-Identifier: Apache-2.0
 # ============================================================================
+#!/usr/bin/env python3
 """Every ct_*_batch_d on a caller's stream: strict CUDA graph capture, replay
 equal to the eager result bit for bit, and (optionally) the same output as a
 reference build of the library.
@@ -17,7 +17,9 @@ value in SCALAR_DEFAULTS).
 
 Capture uses cudaStreamCaptureModeGlobal: besides synchronization it rejects
 cudaMalloc/cudaFree and other calls that are unsafe during capture.
-Exit status 0 when every family passes.
+Without graph memory-node support, scratch-backed calls must report a clean
+capability refusal; allocation-free graphs must still replay. Exit status 0
+when every case satisfies its supported or unsupported capability contract.
 """
 
 from __future__ import annotations
@@ -38,6 +40,7 @@ GENERATED = ROOT / "bindings" / "python" / "tacuda" / "_generated.py"
 H2D, D2H = 1, 2
 STREAM_NON_BLOCKING = 1
 CAPTURE_MODE_GLOBAL = 0
+MEMORY_POOLS_SUPPORTED = 115  # cudaDevAttrMemoryPoolsSupported
 
 # One valid value per scalar name used by any *_batch_d family.
 SCALAR_DEFAULTS = {
@@ -56,9 +59,15 @@ SCALAR_DEFAULTS = {
 }
 
 # Extra parameter sets for families whose internal path depends on them.
+sys.path.insert(0, str(ROOT / 'scripts'))
+from talib08_catalog import ENTRIES as TA08_ENTRIES
+for _entry in TA08_ENTRIES:
+    for (_type, _name), _option in zip(_entry['scalars'], _entry['options']):
+        SCALAR_DEFAULTS.setdefault(_name, int(float(_option['default'])) if _type == 'int' else float(_option['default']))
+
 VARIANTS = {
-    "ct_ma_batch_d": [{"maType": t} for t in range(9)],
-    "ct_mavp_batch_d": [{"maType": 0}, {"maType": 1}],
+    "ct_ma_batch_d": [{"maType": t} for t in range(16)],
+    "ct_mavp_batch_d": [{"maType": t} for t in [0,1,9,10,11,12,13,14,15]],
     "ct_macdext_batch_d": [
         {"fastType": 1, "slowType": 1, "signalType": 1},   # all-EMA, device seeds
         {"fastType": 0, "slowType": 0, "signalType": 0},
@@ -109,11 +118,31 @@ class Cuda:
             "cudaGraphLaunch": [vp, vp], "cudaGraphGetNodes": [vp, vp, ctypes.POINTER(sz)],
             "cudaGraphExecDestroy": [vp], "cudaGraphDestroy": [vp],
             "cudaGetLastError": [], "cudaGetErrorName": [i],
+            "cudaGetDevice": [ctypes.POINTER(i)],
+            "cudaDeviceGetAttribute": [ctypes.POINTER(i), i, i],
+            "cudaDriverGetVersion": [ctypes.POINTER(i)],
+            "cudaRuntimeGetVersion": [ctypes.POINTER(i)],
         }
         for name, args in sig.items():
             fn = getattr(lib, name)
             fn.argtypes = args
             fn.restype = ctypes.c_char_p if name == "cudaGetErrorName" else ctypes.c_int
+
+        # Honor normal ELF interposition used by the no-pool compatibility
+        # test. A handle-specific dlsym would bypass LD_PRELOAD's capability.
+        self._attribute = getattr(ctypes.CDLL(None), "cudaDeviceGetAttribute", lib.cudaDeviceGetAttribute)
+        self._attribute.argtypes = [ctypes.POINTER(i), i, i]
+        self._attribute.restype = ctypes.c_int
+
+    def graph_memory_supported(self):
+        driver, runtime, device, pools = (ctypes.c_int() for _ in range(4))
+        self.check(self.cudaDriverGetVersion(ctypes.byref(driver)), "driver version")
+        self.check(self.cudaRuntimeGetVersion(ctypes.byref(runtime)), "runtime version")
+        if min(driver.value, runtime.value) < 11040:
+            return False
+        self.check(self.cudaGetDevice(ctypes.byref(device)), "current device")
+        self.check(self._attribute(ctypes.byref(pools), MEMORY_POOLS_SUPPORTED, device), "memory-pool capability")
+        return pools.value != 0
 
     def __getattr__(self, name):
         return getattr(self.lib, name)
@@ -137,7 +166,7 @@ class Tacuda:
                 continue
             types = [ctypes.c_void_p] * (len(f.inputs) + len(f.outputs))
             for s in f.scalars:
-                types.append({"int": ctypes.c_int, "float": ctypes.c_float}.get(s.ctype, ctypes.c_void_p))
+                types.append({"int": ctypes.c_int, "float": ctypes.c_float, "double":ctypes.c_double}.get(s.ctype, ctypes.c_void_p))
             fn.argtypes = types
             fn.restype = ctypes.c_int
             self.fns[f.c_name] = fn
@@ -269,7 +298,12 @@ def capture(cuda, lib, ws, f, overrides, stream, eager_out):
     st = lib.fns[f.c_name](*make_args(ws, f, overrides, stream))
     err = lib.last_error()
     end = cuda.cudaStreamEndCapture(stream, ctypes.byref(graph))
-    cuda.cudaGetLastError()
+    runtime_error = cuda.cudaGetLastError()
+    if (st == 6 and end == 0 and runtime_error == 0 and
+            "cudaDevAttrMemoryPoolsSupported" in err and not cuda.graph_memory_supported()):
+        if graph.value:
+            cuda.cudaGraphDestroy(graph)
+        return "unsupported (graph scratch requires memory-pool support)"
     if st != 0 or end != 0 or not graph.value:
         if graph.value:
             cuda.cudaGraphDestroy(graph)
@@ -319,7 +353,7 @@ def main():
     cuda.check(cuda.cudaStreamCreateWithFlags(ctypes.byref(stream), STREAM_NON_BLOCKING), "stream")
     ws = Workspace(cuda, args.series, args.len, max(len(f.outputs) for f in specs))
 
-    failures, ref_diffs, cases = [], [], 0
+    failures, ref_diffs, cases, captured, unsupported = [], [], 0, 0, 0
     for f in specs:
         if f.c_name not in lib.fns:
             failures.append(f"{f.c_name}: missing from {args.lib}")
@@ -347,11 +381,20 @@ def main():
                         if nanmm or ulp > args.max_ulp:
                             failures.append(f"{label}: regression vs reference{ref_note}")
             result = capture(cuda, lib, ws, f, overrides, stream, out)
-            if not result.startswith("ok"):
+            if result.startswith("unsupported"):
+                unsupported += 1
+                print(f"UNSUPPORTED {label}: {result}{ref_note}")
+                continue
+            if result.startswith("ok"):
+                captured += 1
+            else:
                 failures.append(f"{label}: {result}")
             print(f"{'ok  ' if result.startswith('ok') else 'FAIL'} {label}: {result}{ref_note}")
 
+    if cases and not captured:
+        failures.append("no allocation-free graph capture was exercised")
     print(f"\n{cases} cases over {len(specs)} families; {len(failures)} failures")
+    print(f"captures replayed: {captured}; capability refusals: {unsupported}")
     if ref is not None:
         print(f"differences from reference: {len(ref_diffs)} cases")
         for label, diff, nanmm, ulp in ref_diffs:

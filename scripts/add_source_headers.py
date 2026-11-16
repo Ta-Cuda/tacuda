@@ -59,6 +59,9 @@ STYLE_BY_EXT = {
 
 # Emitted by generators which stamp the header themselves.
 GENERATED = {
+    "src/compat/talib08_formulas.inc",
+    "src/compat/talib08_dispatch.inc",
+    "include/utils/Talib08Functions.inc",
     "src/api/api_batch_generated.inc",
     "src/api/api_device_generated.inc",
     "src/api/api_device_generated_includes.inc",
@@ -68,7 +71,7 @@ GENERATED = {
     "bindings/python/tacuda/_generated.py",
 }
 
-SKIP_DIRS = {".git", "node_modules", "build", "build-win", "dist", "bin",
+SKIP_DIRS = {"third_party",".git", "node_modules", "build", "build-win", "dist", "bin",
              "obj", "__pycache__", ".vs", "runtimes"}
 
 

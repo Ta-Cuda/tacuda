@@ -2914,4 +2914,1200 @@ public static partial class TacudaBatch
         return Split(output, len, count);
     }
 
+    public static float[][] Ac(float[][] highs, float[][] lows, int fastPeriod, int slowPeriod, int signalPeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_ac_batch(mHighs, mLows, output, len, count, fastPeriod, slowPeriod, signalPeriod, maxConcurrency),
+            nameof(NativeMethods.ct_ac_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Adr(float[][] highs, float[][] lows, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_adr_batch(mHighs, mLows, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_adr_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Alma(float[][] inputs, int period, double sigma, double offset, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_alma_batch(mInputs, output, len, count, period, sigma, offset, maxConcurrency),
+            nameof(NativeMethods.ct_alma_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Ao(float[][] highs, float[][] lows, int fastPeriod, int slowPeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_ao_batch(mHighs, mLows, output, len, count, fastPeriod, slowPeriod, maxConcurrency),
+            nameof(NativeMethods.ct_ao_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] ApoMa(float[][] inputs, int fastPeriod, int slowPeriod, int maType, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_apo_ma_batch(mInputs, output, len, count, fastPeriod, slowPeriod, maType, maxConcurrency),
+            nameof(NativeMethods.ct_apo_ma_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] AsiWilder(float[][] opens, float[][] highs, float[][] lows, float[][] closes, double limitMove, int maxConcurrency = 0)
+    {
+        var (len, count, mOpens) = FlattenRows(opens);
+        var (lenHighs, countHighs, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenHighs != len || countHighs != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_asi_wilder_batch(mOpens, mHighs, mLows, mCloses, output, len, count, limitMove, maxConcurrency),
+            nameof(NativeMethods.ct_asi_wilder_batch));
+        return Split(output, len, count);
+    }
+
+    public static (float[][] RealUpperBand, float[][] RealMiddleBand, float[][] RealLowerBand) BbandsMa(float[][] inputs, int period, double nbDevUp, double nbDevDn, int maType, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var oRealUpperBand = new float[len * count];
+        var oRealMiddleBand = new float[len * count];
+        var oRealLowerBand = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_bbands_ma_batch(mInputs, oRealUpperBand, oRealMiddleBand, oRealLowerBand, len, count, period, nbDevUp, nbDevDn, maType, maxConcurrency),
+            nameof(NativeMethods.ct_bbands_ma_batch));
+        return (Split(oRealUpperBand, len, count), Split(oRealMiddleBand, len, count), Split(oRealLowerBand, len, count));
+    }
+
+    public static float[][] Bbw(float[][] inputs, int period, double nbDevUp, double nbDevDn, int maType, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_bbw_batch(mInputs, output, len, count, period, nbDevUp, nbDevDn, maType, maxConcurrency),
+            nameof(NativeMethods.ct_bbw_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Cg(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_cg_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_cg_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Chop(float[][] highs, float[][] lows, float[][] closes, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_chop_batch(mHighs, mLows, mCloses, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_chop_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Choptr(float[][] highs, float[][] lows, float[][] closes, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_choptr_batch(mHighs, mLows, mCloses, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_choptr_batch));
+        return Split(output, len, count);
+    }
+
+    public static (float[][] HighStop, float[][] LowStop) Cksp(float[][] highs, float[][] lows, float[][] closes, int period, double multiplier, int stopPeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oHighStop = new float[len * count];
+        var oLowStop = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_cksp_batch(mHighs, mLows, mCloses, oHighStop, oLowStop, len, count, period, multiplier, stopPeriod, maxConcurrency),
+            nameof(NativeMethods.ct_cksp_batch));
+        return (Split(oHighStop, len, count), Split(oLowStop, len, count));
+    }
+
+    public static float[][] Cmf(float[][] highs, float[][] lows, float[][] closes, float[][] volumes, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        var (lenVolumes, countVolumes, mVolumes) = FlattenRows(volumes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenVolumes != len || countVolumes != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_cmf_batch(mHighs, mLows, mCloses, mVolumes, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_cmf_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Cmou(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_cmou_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_cmou_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Coppock(float[][] inputs, int wmaPeriod, int roc1Period, int roc2Period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_coppock_batch(mInputs, output, len, count, wmaPeriod, roc1Period, roc2Period, maxConcurrency),
+            nameof(NativeMethods.ct_coppock_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Crsi(float[][] inputs, int period, int streakPeriod, int rankPeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_crsi_batch(mInputs, output, len, count, period, streakPeriod, rankPeriod, maxConcurrency),
+            nameof(NativeMethods.ct_crsi_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Cti(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_cti_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_cti_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Cumsum(float[][] inputs, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_cumsum_batch(mInputs, output, len, count, maxConcurrency),
+            nameof(NativeMethods.ct_cumsum_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Cvi(float[][] highs, float[][] lows, int period, int rocPeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_cvi_batch(mHighs, mLows, output, len, count, period, rocPeriod, maxConcurrency),
+            nameof(NativeMethods.ct_cvi_batch));
+        return Split(output, len, count);
+    }
+
+    public static (float[][] RealUpperBand, float[][] RealMiddleBand, float[][] RealLowerBand) Donchian(float[][] highs, float[][] lows, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oRealUpperBand = new float[len * count];
+        var oRealMiddleBand = new float[len * count];
+        var oRealLowerBand = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_donchian_batch(mHighs, mLows, oRealUpperBand, oRealMiddleBand, oRealLowerBand, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_donchian_batch));
+        return (Split(oRealUpperBand, len, count), Split(oRealMiddleBand, len, count), Split(oRealLowerBand, len, count));
+    }
+
+    public static float[][] Dosc(float[][] inputs, int period, int firstPeriod, int secondPeriod, int signalPeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_dosc_batch(mInputs, output, len, count, period, firstPeriod, secondPeriod, signalPeriod, maxConcurrency),
+            nameof(NativeMethods.ct_dosc_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Dpo(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_dpo_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_dpo_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Efi(float[][] closes, float[][] volumes, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mCloses) = FlattenRows(closes);
+        var (lenVolumes, countVolumes, mVolumes) = FlattenRows(volumes);
+        if (lenVolumes != len || countVolumes != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_efi_batch(mCloses, mVolumes, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_efi_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Emv(float[][] highs, float[][] lows, float[][] volumes, int period, double volumeDivisor, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenVolumes, countVolumes, mVolumes) = FlattenRows(volumes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenVolumes != len || countVolumes != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_emv_batch(mHighs, mLows, mVolumes, output, len, count, period, volumeDivisor, maxConcurrency),
+            nameof(NativeMethods.ct_emv_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Er(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_er_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_er_batch));
+        return Split(output, len, count);
+    }
+
+    public static (float[][] BullPower, float[][] BearPower) Eri(float[][] highs, float[][] lows, float[][] closes, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oBullPower = new float[len * count];
+        var oBearPower = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_eri_batch(mHighs, mLows, mCloses, oBullPower, oBearPower, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_eri_batch));
+        return (Split(oBullPower, len, count), Split(oBearPower, len, count));
+    }
+
+    public static (float[][] Fisher, float[][] Trigger) Fisher(float[][] highs, float[][] lows, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oFisher = new float[len * count];
+        var oTrigger = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_fisher_batch(mHighs, mLows, oFisher, oTrigger, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_fisher_batch));
+        return (Split(oFisher, len, count), Split(oTrigger, len, count));
+    }
+
+    public static float[][] Fosc(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_fosc_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_fosc_batch));
+        return Split(output, len, count);
+    }
+
+    public static (int[][] SwingHigh, int[][] SwingLow) Fractal(float[][] highs, float[][] lows, int leftBars, int rightBars, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oSwingHigh = new int[len * count];
+        var oSwingLow = new int[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_fractal_batch(mHighs, mLows, oSwingHigh, oSwingLow, len, count, leftBars, rightBars, maxConcurrency),
+            nameof(NativeMethods.ct_fractal_batch));
+        return (Split(oSwingHigh, len, count), Split(oSwingLow, len, count));
+    }
+
+    public static float[][] Frama(float[][] highs, float[][] lows, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_frama_batch(mHighs, mLows, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_frama_batch));
+        return Split(output, len, count);
+    }
+
+    public static (float[][] HaOpen, float[][] HaHigh, float[][] HaLow, float[][] HaClose) Ha(float[][] opens, float[][] highs, float[][] lows, float[][] closes, int maxConcurrency = 0)
+    {
+        var (len, count, mOpens) = FlattenRows(opens);
+        var (lenHighs, countHighs, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenHighs != len || countHighs != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oHaOpen = new float[len * count];
+        var oHaHigh = new float[len * count];
+        var oHaLow = new float[len * count];
+        var oHaClose = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_ha_batch(mOpens, mHighs, mLows, mCloses, oHaOpen, oHaHigh, oHaLow, oHaClose, len, count, maxConcurrency),
+            nameof(NativeMethods.ct_ha_batch));
+        return (Split(oHaOpen, len, count), Split(oHaHigh, len, count), Split(oHaLow, len, count), Split(oHaClose, len, count));
+    }
+
+    public static float[][] Hma(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_hma_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_hma_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Ibs(float[][] highs, float[][] lows, float[][] closes, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_ibs_batch(mHighs, mLows, mCloses, output, len, count, maxConcurrency),
+            nameof(NativeMethods.ct_ibs_batch));
+        return Split(output, len, count);
+    }
+
+    public static (float[][] TenkanSen, float[][] KijunSen, float[][] SenkouSpanA, float[][] SenkouSpanB) Ichimoku(float[][] highs, float[][] lows, int tenkanPeriod, int kijunPeriod, int senkouBPeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oTenkanSen = new float[len * count];
+        var oKijunSen = new float[len * count];
+        var oSenkouSpanA = new float[len * count];
+        var oSenkouSpanB = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_ichimoku_batch(mHighs, mLows, oTenkanSen, oKijunSen, oSenkouSpanA, oSenkouSpanB, len, count, tenkanPeriod, kijunPeriod, senkouBPeriod, maxConcurrency),
+            nameof(NativeMethods.ct_ichimoku_batch));
+        return (Split(oTenkanSen, len, count), Split(oKijunSen, len, count), Split(oSenkouSpanA, len, count), Split(oSenkouSpanB, len, count));
+    }
+
+    public static (float[][] RealUpperBand, float[][] RealMiddleBand, float[][] RealLowerBand) Kc(float[][] highs, float[][] lows, float[][] closes, int period, int atrPeriod, double nbDev, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oRealUpperBand = new float[len * count];
+        var oRealMiddleBand = new float[len * count];
+        var oRealLowerBand = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_kc_batch(mHighs, mLows, mCloses, oRealUpperBand, oRealMiddleBand, oRealLowerBand, len, count, period, atrPeriod, nbDev, maxConcurrency),
+            nameof(NativeMethods.ct_kc_batch));
+        return (Split(oRealUpperBand, len, count), Split(oRealMiddleBand, len, count), Split(oRealLowerBand, len, count));
+    }
+
+    public static (float[][] K, float[][] D, float[][] J) Kdj(float[][] highs, float[][] lows, float[][] closes, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oK = new float[len * count];
+        var oD = new float[len * count];
+        var oJ = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_kdj_batch(mHighs, mLows, mCloses, oK, oD, oJ, len, count, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType, maxConcurrency),
+            nameof(NativeMethods.ct_kdj_batch));
+        return (Split(oK, len, count), Split(oD, len, count), Split(oJ, len, count));
+    }
+
+    public static (float[][] Kst, float[][] KstSignal) Kst(float[][] inputs, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int sma1Period, int sma2Period, int sma3Period, int sma4Period, int signalPeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var oKst = new float[len * count];
+        var oKstSignal = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_kst_batch(mInputs, oKst, oKstSignal, len, count, roc1Period, roc2Period, roc3Period, roc4Period, sma1Period, sma2Period, sma3Period, sma4Period, signalPeriod, maxConcurrency),
+            nameof(NativeMethods.ct_kst_batch));
+        return (Split(oKst, len, count), Split(oKstSignal, len, count));
+    }
+
+    public static (float[][] Kst, float[][] KstSignal) Kstext(float[][] inputs, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int ma1Period, int ma2Period, int ma3Period, int ma4Period, int signalPeriod, int rocmaType, int signalMAType, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var oKst = new float[len * count];
+        var oKstSignal = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_kstext_batch(mInputs, oKst, oKstSignal, len, count, roc1Period, roc2Period, roc3Period, roc4Period, ma1Period, ma2Period, ma3Period, ma4Period, signalPeriod, rocmaType, signalMAType, maxConcurrency),
+            nameof(NativeMethods.ct_kstext_batch));
+        return (Split(oKst, len, count), Split(oKstSignal, len, count));
+    }
+
+    public static float[][] KurtosisUnbiased(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_kurtosis_unbiased_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_kurtosis_unbiased_batch));
+        return Split(output, len, count);
+    }
+
+    public static (float[][] Kvo, float[][] KvoSignal) Kvo(float[][] highs, float[][] lows, float[][] closes, float[][] volumes, int fastPeriod, int slowPeriod, int signalPeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        var (lenVolumes, countVolumes, mVolumes) = FlattenRows(volumes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenVolumes != len || countVolumes != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oKvo = new float[len * count];
+        var oKvoSignal = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_kvo_batch(mHighs, mLows, mCloses, mVolumes, oKvo, oKvoSignal, len, count, fastPeriod, slowPeriod, signalPeriod, maxConcurrency),
+            nameof(NativeMethods.ct_kvo_batch));
+        return (Split(oKvo, len, count), Split(oKvoSignal, len, count));
+    }
+
+    public static float[][] Marketfi(float[][] highs, float[][] lows, float[][] volumes, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenVolumes, countVolumes, mVolumes) = FlattenRows(volumes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenVolumes != len || countVolumes != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_marketfi_batch(mHighs, mLows, mVolumes, output, len, count, maxConcurrency),
+            nameof(NativeMethods.ct_marketfi_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Massi(float[][] highs, float[][] lows, int fastPeriod, int slowPeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_massi_batch(mHighs, mLows, output, len, count, fastPeriod, slowPeriod, maxConcurrency),
+            nameof(NativeMethods.ct_massi_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Mcgd(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_mcgd_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_mcgd_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Median(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_median_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_median_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Percentb(float[][] inputs, int period, double nbDevUp, double nbDevDn, int maType, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_percentb_batch(mInputs, output, len, count, period, nbDevUp, nbDevDn, maType, maxConcurrency),
+            nameof(NativeMethods.ct_percentb_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Percentile(float[][] inputs, int period, double percentile, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_percentile_batch(mInputs, output, len, count, period, percentile, maxConcurrency),
+            nameof(NativeMethods.ct_percentile_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Percentrank(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_percentrank_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_percentrank_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] PpoMa(float[][] inputs, int fastPeriod, int slowPeriod, int maType, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_ppo_ma_batch(mInputs, output, len, count, fastPeriod, slowPeriod, maType, maxConcurrency),
+            nameof(NativeMethods.ct_ppo_ma_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Pso(float[][] highs, float[][] lows, float[][] closes, int fastKPeriod, int emaPeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_pso_batch(mHighs, mLows, mCloses, output, len, count, fastKPeriod, emaPeriod, maxConcurrency),
+            nameof(NativeMethods.ct_pso_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] PvoMa(float[][] volumes, int fastPeriod, int slowPeriod, int maType, int maxConcurrency = 0)
+    {
+        var (len, count, mVolumes) = FlattenRows(volumes);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_pvo_ma_batch(mVolumes, output, len, count, fastPeriod, slowPeriod, maType, maxConcurrency),
+            nameof(NativeMethods.ct_pvo_ma_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Pvt(float[][] closes, float[][] volumes, int maxConcurrency = 0)
+    {
+        var (len, count, mCloses) = FlattenRows(closes);
+        var (lenVolumes, countVolumes, mVolumes) = FlattenRows(volumes);
+        if (lenVolumes != len || countVolumes != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_pvt_batch(mCloses, mVolumes, output, len, count, maxConcurrency),
+            nameof(NativeMethods.ct_pvt_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Qstick(float[][] opens, float[][] closes, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mOpens) = FlattenRows(opens);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_qstick_batch(mOpens, mCloses, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_qstick_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Rma(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_rma_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_rma_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Rogerssatchell(float[][] opens, float[][] highs, float[][] lows, float[][] closes, int period, double annualization, int maxConcurrency = 0)
+    {
+        var (len, count, mOpens) = FlattenRows(opens);
+        var (lenHighs, countHighs, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenHighs != len || countHighs != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_rogerssatchell_batch(mOpens, mHighs, mLows, mCloses, output, len, count, period, annualization, maxConcurrency),
+            nameof(NativeMethods.ct_rogerssatchell_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Rvi(float[][] inputs, int period, int stdDevPeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_rvi_batch(mInputs, output, len, count, period, stdDevPeriod, maxConcurrency),
+            nameof(NativeMethods.ct_rvi_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Rvir(float[][] highs, float[][] lows, int period, int stdDevPeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_rvir_batch(mHighs, mLows, output, len, count, period, stdDevPeriod, maxConcurrency),
+            nameof(NativeMethods.ct_rvir_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Rvol(float[][] volumes, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mVolumes) = FlattenRows(volumes);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_rvol_batch(mVolumes, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_rvol_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Si(float[][] opens, float[][] highs, float[][] lows, float[][] closes, double limitMove, int maxConcurrency = 0)
+    {
+        var (len, count, mOpens) = FlattenRows(opens);
+        var (lenHighs, countHighs, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenHighs != len || countHighs != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_si_batch(mOpens, mHighs, mLows, mCloses, output, len, count, limitMove, maxConcurrency),
+            nameof(NativeMethods.ct_si_batch));
+        return Split(output, len, count);
+    }
+
+    public static (float[][] Smi, float[][] SmiSignal) Smi(float[][] highs, float[][] lows, float[][] closes, int period, int fastPeriod, int slowPeriod, int signalPeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oSmi = new float[len * count];
+        var oSmiSignal = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_smi_batch(mHighs, mLows, mCloses, oSmi, oSmiSignal, len, count, period, fastPeriod, slowPeriod, signalPeriod, maxConcurrency),
+            nameof(NativeMethods.ct_smi_batch));
+        return (Split(oSmi, len, count), Split(oSmiSignal, len, count));
+    }
+
+    public static (float[][] Momentum, int[][] Squeeze) Sqzmom(float[][] highs, float[][] lows, float[][] closes, int bbPeriod, double nbDev, int kcPeriod, double factorWide, double factorNormal, double factorNarrow, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oMomentum = new float[len * count];
+        var oSqueeze = new int[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_sqzmom_batch(mHighs, mLows, mCloses, oMomentum, oSqueeze, len, count, bbPeriod, nbDev, kcPeriod, factorWide, factorNormal, factorNarrow, maxConcurrency),
+            nameof(NativeMethods.ct_sqzmom_batch));
+        return (Split(oMomentum, len, count), Split(oSqueeze, len, count));
+    }
+
+    public static float[][] Stc(float[][] inputs, int fastPeriod, int slowPeriod, int cyclePeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_stc_batch(mInputs, output, len, count, fastPeriod, slowPeriod, cyclePeriod, maxConcurrency),
+            nameof(NativeMethods.ct_stc_batch));
+        return Split(output, len, count);
+    }
+
+    public static (float[][] SlowK, float[][] SlowD) StochasticMa(float[][] highs, float[][] lows, float[][] closes, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oSlowK = new float[len * count];
+        var oSlowD = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_stochastic_ma_batch(mHighs, mLows, mCloses, oSlowK, oSlowD, len, count, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType, maxConcurrency),
+            nameof(NativeMethods.ct_stochastic_ma_batch));
+        return (Split(oSlowK, len, count), Split(oSlowD, len, count));
+    }
+
+    public static (float[][] FastK, float[][] FastD) StochfMa(float[][] highs, float[][] lows, float[][] closes, int fastKPeriod, int fastDPeriod, int fastDMAType, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oFastK = new float[len * count];
+        var oFastD = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_stochf_ma_batch(mHighs, mLows, mCloses, oFastK, oFastD, len, count, fastKPeriod, fastDPeriod, fastDMAType, maxConcurrency),
+            nameof(NativeMethods.ct_stochf_ma_batch));
+        return (Split(oFastK, len, count), Split(oFastD, len, count));
+    }
+
+    public static (float[][] FastK, float[][] FastD) StochrsiMa(float[][] inputs, int period, int fastKPeriod, int fastDPeriod, int fastDMAType, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var oFastK = new float[len * count];
+        var oFastD = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_stochrsi_ma_batch(mInputs, oFastK, oFastD, len, count, period, fastKPeriod, fastDPeriod, fastDMAType, maxConcurrency),
+            nameof(NativeMethods.ct_stochrsi_ma_batch));
+        return (Split(oFastK, len, count), Split(oFastD, len, count));
+    }
+
+    public static (float[][] Supertrend, int[][] Trend) Supertrend(float[][] highs, float[][] lows, float[][] closes, int period, double multiplier, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oSupertrend = new float[len * count];
+        var oTrend = new int[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_supertrend_batch(mHighs, mLows, mCloses, oSupertrend, oTrend, len, count, period, multiplier, maxConcurrency),
+            nameof(NativeMethods.ct_supertrend_batch));
+        return (Split(oSupertrend, len, count), Split(oTrend, len, count));
+    }
+
+    public static float[][] Swak2php(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_swak_2php_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_swak_2php_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] SwakBp(float[][] inputs, int period, double delta, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_swak_bp_batch(mInputs, output, len, count, period, delta, maxConcurrency),
+            nameof(NativeMethods.ct_swak_bp_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] SwakButter(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_swak_butter_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_swak_butter_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] SwakGauss(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_swak_gauss_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_swak_gauss_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] SwakHp(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_swak_hp_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_swak_hp_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Tsi(float[][] inputs, int firstPeriod, int secondPeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_tsi_batch(mInputs, output, len, count, firstPeriod, secondPeriod, maxConcurrency),
+            nameof(NativeMethods.ct_tsi_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Vhf(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_vhf_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_vhf_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Vidya(float[][] inputs, int period, int cmoPeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_vidya_batch(mInputs, output, len, count, period, cmoPeriod, maxConcurrency),
+            nameof(NativeMethods.ct_vidya_batch));
+        return Split(output, len, count);
+    }
+
+    public static (float[][] PlusVI, float[][] MinusVI) Vortex(float[][] highs, float[][] lows, float[][] closes, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oPlusVI = new float[len * count];
+        var oMinusVI = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_vortex_batch(mHighs, mLows, mCloses, oPlusVI, oMinusVI, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_vortex_batch));
+        return (Split(oPlusVI, len, count), Split(oMinusVI, len, count));
+    }
+
+    public static float[][] Vwap(float[][] highs, float[][] lows, float[][] closes, float[][] volumes, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        var (lenVolumes, countVolumes, mVolumes) = FlattenRows(volumes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenVolumes != len || countVolumes != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_vwap_batch(mHighs, mLows, mCloses, mVolumes, output, len, count, maxConcurrency),
+            nameof(NativeMethods.ct_vwap_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Vwma(float[][] inputs, float[][] volumes, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var (lenVolumes, countVolumes, mVolumes) = FlattenRows(volumes);
+        if (lenVolumes != len || countVolumes != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_vwma_batch(mInputs, mVolumes, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_vwma_batch));
+        return Split(output, len, count);
+    }
+
+    public static float[][] Wad(float[][] highs, float[][] lows, float[][] closes, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_wad_batch(mHighs, mLows, mCloses, output, len, count, maxConcurrency),
+            nameof(NativeMethods.ct_wad_batch));
+        return Split(output, len, count);
+    }
+
+    public static (float[][] WT1, float[][] WT2) Wavetrend(float[][] highs, float[][] lows, float[][] closes, int channelPeriod, int averagePeriod, int signalPeriod, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        var (lenCloses, countCloses, mCloses) = FlattenRows(closes);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        if (lenCloses != len || countCloses != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oWT1 = new float[len * count];
+        var oWT2 = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_wavetrend_batch(mHighs, mLows, mCloses, oWT1, oWT2, len, count, channelPeriod, averagePeriod, signalPeriod, maxConcurrency),
+            nameof(NativeMethods.ct_wavetrend_batch));
+        return (Split(oWT1, len, count), Split(oWT2, len, count));
+    }
+
+    public static (float[][] ZigZag, int[][] Trend, int[][] PivotIdx) Zigzag(float[][] highs, float[][] lows, double sensitivity, int minTrendLength, int maxConcurrency = 0)
+    {
+        var (len, count, mHighs) = FlattenRows(highs);
+        var (lenLows, countLows, mLows) = FlattenRows(lows);
+        if (lenLows != len || countLows != count)
+        {
+            throw new ArgumentException("all input matrices must have the same shape");
+        }
+        var oZigZag = new float[len * count];
+        var oTrend = new int[len * count];
+        var oPivotIdx = new int[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_zigzag_batch(mHighs, mLows, oZigZag, oTrend, oPivotIdx, len, count, sensitivity, minTrendLength, maxConcurrency),
+            nameof(NativeMethods.ct_zigzag_batch));
+        return (Split(oZigZag, len, count), Split(oTrend, len, count), Split(oPivotIdx, len, count));
+    }
+
+    public static float[][] Zlema(float[][] inputs, int period, int maxConcurrency = 0)
+    {
+        var (len, count, mInputs) = FlattenRows(inputs);
+        var output = new float[len * count];
+        NativeMethods.ThrowOnError(
+            NativeMethods.ct_zlema_batch(mInputs, output, len, count, period, maxConcurrency),
+            nameof(NativeMethods.ct_zlema_batch));
+        return Split(output, len, count);
+    }
+
 }

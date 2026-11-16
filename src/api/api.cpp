@@ -11,6 +11,7 @@
 #include <limits>
 
 #include "tacuda.h"
+#include <utils/Talib08.h>
 #include "tacuda_device.h"
 #include <utils/ErrorState.h>
 #include <utils/Precision.h>
@@ -603,56 +604,9 @@ ctStatus_t ct_mavp(const float *host_input, const float *host_periods,
                    float *host_output, int size, int minPeriod, int maxPeriod,
                    ctMaType_t type, cudaStream_t stream) {
   return api_guard("ct_mavp", [&]() -> ctStatus_t {
-    if (!host_input || !host_periods || !host_output) {
-      tacuda::detail::set_last_error("ct_mavp: null pointer argument");
-      return CT_STATUS_INVALID_ARGUMENT;
-    }
-    if (size <= 0) {
-      tacuda::detail::set_last_error("ct_mavp: non-positive size");
-      return CT_STATUS_INVALID_ARGUMENT;
-    }
-
-  tacuda::MAVP mavp(minPeriod, maxPeriod, static_cast<tacuda::MAType>(type));
-
-  DeviceBuffer d_values{nullptr, PooledDeleter{stream}}, d_periods{nullptr, PooledDeleter{stream}}, d_out{nullptr, PooledDeleter{stream}};
-  if (!acquire_buffer(d_values, size) || !acquire_buffer(d_periods, size) ||
-      !acquire_buffer(d_out, size)) {
-    return CT_STATUS_ALLOC_FAILED;
-  }
-
-  cudaError_t err =
-      cudaMemcpyAsync(d_values.get(), host_input, size * sizeof(float),
-                      cudaMemcpyHostToDevice, stream);
-  if (err != cudaSuccess) {
-    return CT_STATUS_COPY_FAILED;
-  }
-
-  err = cudaMemcpyAsync(d_periods.get(), host_periods, size * sizeof(float),
-                        cudaMemcpyHostToDevice, stream);
-  if (err != cudaSuccess) {
-    return CT_STATUS_COPY_FAILED;
-  }
-
-  try {
-    mavp.calculate(d_values.get(), d_periods.get(), d_out.get(), size, stream);
-  } catch (...) {
-    return classify_exception();
-  }
-
-  err = cudaMemcpyAsync(host_output, d_out.get(), size * sizeof(float),
-                        cudaMemcpyDeviceToHost, stream);
-  if (err != cudaSuccess) {
-    return CT_STATUS_COPY_FAILED;
-  }
-
-  err = cudaStreamSynchronize(stream);
-  if (err != cudaSuccess) {
-    tacuda::detail::set_last_error(cudaGetErrorString(err));
-    return CT_STATUS_DEVICE_ERROR;
-  }
-
-  return CT_STATUS_SUCCESS;
-
+    const float* inputs[] = {host_input, host_periods}; void* outputs[] = {host_output};
+    return tacuda::talib08::run_host(tacuda::talib08::Function::MAVP, inputs, outputs, size, 1,
+        tacuda::talib08::Params{{double(minPeriod),double(maxPeriod),double(type)}}, stream);
   });
 }
 
@@ -1270,31 +1224,10 @@ ctStatus_t ct_macdext(const float *host_input, float *host_macd,
                       ctMaType_t slowType, int signalPeriod,
                       ctMaType_t signalType, cudaStream_t stream) {
   return api_guard("ct_macdext", [&]() -> ctStatus_t {
-    if (!host_input || !host_macd || !host_signal || !host_hist) {
-      tacuda::detail::set_last_error("ct_macdext: null pointer argument");
-      return CT_STATUS_INVALID_ARGUMENT;
-    }
-    if (size <= 0) {
-      tacuda::detail::set_last_error("ct_macdext: non-positive size");
-      return CT_STATUS_INVALID_ARGUMENT;
-    }
-
-  if (!host_input || !host_macd || !host_signal || !host_hist || size <= 0) {
-    tacuda::detail::set_last_error("MACDEXT: invalid arguments");
-    return CT_STATUS_INVALID_ARGUMENT;
-  }
-  tacuda::MACDEXT macd(fastPeriod, static_cast<tacuda::MAType>(fastType),
-                       slowPeriod, static_cast<tacuda::MAType>(slowType),
-                       signalPeriod, static_cast<tacuda::MAType>(signalType));
-  std::vector<float> tmp(3 * static_cast<size_t>(size));
-  ctStatus_t rc = run_indicator(macd, host_input, tmp.data(), size, 3, stream);
-  if (rc != CT_STATUS_SUCCESS)
-    return rc;
-  std::memcpy(host_macd, tmp.data(), size * sizeof(float));
-  std::memcpy(host_signal, tmp.data() + size, size * sizeof(float));
-  std::memcpy(host_hist, tmp.data() + 2 * static_cast<size_t>(size), size * sizeof(float));
-  return CT_STATUS_SUCCESS;
-
+    const float* inputs[] = {host_input}; void* outputs[] = {host_macd,host_signal,host_hist};
+    return tacuda::talib08::run_host(tacuda::talib08::Function::MACDEXT, inputs, outputs, size, 1,
+        tacuda::talib08::Params{{double(fastPeriod),double(fastType),double(slowPeriod),
+            double(slowType),double(signalPeriod),double(signalType)}}, stream);
   });
 }
 
@@ -1396,13 +1329,14 @@ ctStatus_t ct_apo_ma(const float *host_input, float *host_output, int size,
       tacuda::detail::set_last_error("ct_apo_ma: non-positive size");
       return CT_STATUS_INVALID_ARGUMENT;
     }
-    if (type < CT_MA_SMA || type > CT_MA_T3) {
+    if (type < CT_MA_SMA || type > CT_MA_ALMA) {
       tacuda::detail::set_last_error("ct_apo_ma: invalid MA type");
       return CT_STATUS_INVALID_ARGUMENT;
     }
 
-    tacuda::APO apo(fastPeriod, slowPeriod, static_cast<tacuda::MAType>(type));
-    return run_indicator(apo, host_input, host_output, size, 1, stream);
+    const float* inputs[] = {host_input}; void* outputs[] = {host_output};
+    return tacuda::talib08::run_host(tacuda::talib08::Function::APO, inputs, outputs, size, 1,
+        tacuda::talib08::Params{{double(fastPeriod),double(slowPeriod),double(type)}}, stream);
   });
 }
 
@@ -1418,13 +1352,14 @@ ctStatus_t ct_ppo_ma(const float *host_input, float *host_output, int size,
       tacuda::detail::set_last_error("ct_ppo_ma: non-positive size");
       return CT_STATUS_INVALID_ARGUMENT;
     }
-    if (type < CT_MA_SMA || type > CT_MA_T3) {
+    if (type < CT_MA_SMA || type > CT_MA_ALMA) {
       tacuda::detail::set_last_error("ct_ppo_ma: invalid MA type");
       return CT_STATUS_INVALID_ARGUMENT;
     }
 
-    tacuda::PPO ppo(fastPeriod, slowPeriod, static_cast<tacuda::MAType>(type));
-    return run_indicator(ppo, host_input, host_output, size, 1, stream);
+    const float* inputs[] = {host_input}; void* outputs[] = {host_output};
+    return tacuda::talib08::run_host(tacuda::talib08::Function::PPO, inputs, outputs, size, 1,
+        tacuda::talib08::Params{{double(fastPeriod),double(slowPeriod),double(type)}}, stream);
   });
 }
 

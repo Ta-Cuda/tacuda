@@ -234,6 +234,7 @@ def _scalar_ctype(name: str) -> Any:
     mapping: Dict[str, Any] = {
         "int": ctypes.c_int,
         "float": ctypes.c_float,
+        "double": ctypes.c_double,
         "ctMaType_t": ctypes.c_int,
         "ctDataType_t": ctypes.c_int,
         "cudaStream_t": ctypes.c_void_p,
@@ -288,7 +289,7 @@ def _bind_function(name: str, spec: _generated.FunctionSpec) -> None:
                 if type_name == "device" or storage_aware:
                     argtypes.append(ctypes.c_void_p) # Device or dtype-selected pointer
                 else:
-                    argtypes.append(_C_FLOAT_PTR) # Host pointer (float*)
+                    argtypes.append(_C_FLOAT_PTR)
         else:
             # Fallback for old spec format (all float*)
             argtypes.extend([_C_FLOAT_PTR] * len(spec.inputs))
@@ -299,7 +300,8 @@ def _bind_function(name: str, spec: _generated.FunctionSpec) -> None:
                 if type_name == "device" or storage_aware:
                     argtypes.append(ctypes.c_void_p) # Device or dtype-selected pointer
                 else:
-                    argtypes.append(_C_FLOAT_PTR) # Host pointer (float*)
+                    element = getattr(spec, 'output_dtypes', ())
+                    argtypes.append(ctypes.POINTER(ctypes.c_int) if element and element[i] == 'int' else _C_FLOAT_PTR)
         else:
             # Fallback for old spec format (all float*)
             argtypes.extend([_C_FLOAT_PTR] * len(spec.outputs))
@@ -507,8 +509,10 @@ def _bind_function(name: str, spec: _generated.FunctionSpec) -> None:
                      pass
                 
                 # In mixed mode (host input, host output), size comes from input.
-                out_arr = np.zeros(size, dtype=np.float32)
-                _, ptr = _as_float_array(out_arr)
+                element = getattr(spec, 'output_dtypes', ())
+                integer = bool(element) and element[i] == 'int'
+                out_arr = np.zeros(size, dtype=np.int32 if integer else np.float32)
+                ptr = out_arr.ctypes.data_as(ctypes.POINTER(ctypes.c_int) if integer else _C_FLOAT_PTR)
                 c_args_outputs.append(ptr)
                 outputs_to_return.append(out_arr)
 
@@ -922,15 +926,15 @@ def _make_batch_wrapper(py_name: str, spec: _generated.FunctionSpec):
         if kwargs:
             raise TypeError(
                 f"{py_name} got unexpected arguments {sorted(kwargs)}")
-        outs = [np.zeros_like(mats[0]) for _ in range(n_out)]
+        dtypes = getattr(spec, 'output_dtypes', ()) or ('float',) * n_out
+        outs = [np.zeros(mats[0].shape, dtype=np.int32 if t == 'int' else np.float32) for t in dtypes]
 
         c_args: list[Any] = [_batch_ptr(m) for m in mats]
-        c_args += [_batch_ptr(o) for o in outs]
+        c_args += [o.ctypes.data_as(ctypes.POINTER(ctypes.c_int) if t == 'int' else _C_FLOAT_PTR) for o,t in zip(outs,dtypes)]
         c_args += [ctypes.c_int(mats[0].shape[1]),
                    ctypes.c_int(mats[0].shape[0])]
         for s, v in zip(family_scalars, scalar_values):
-            c_args.append(ctypes.c_float(float(v)) if s.ctype == "float"
-                          else ctypes.c_int(int(v)))
+            c_args.append(_scalar_ctype(s.ctype)(float(v) if s.ctype in ('float','double') else int(v)))
         c_args.append(ctypes.c_int(int(max_concurrency)))
         c_args.append(_prepare_stream(stream))
 

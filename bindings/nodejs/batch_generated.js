@@ -331,6 +331,166 @@ module.exports = function registerGeneratedBatch(ctx) {
     const ct_rolling_min_batch_d = lib.func('int ct_rolling_min_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
     const ct_rolling_std_batch = lib.func('int ct_rolling_std_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
     const ct_rolling_std_batch_d = lib.func('int ct_rolling_std_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_ac_batch = lib.func('int ct_ac_batch(const float *highs, const float *lows, float *outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int signalPeriod, int maxConcurrency, void *stream)');
+    const ct_ac_batch_d = lib.func('int ct_ac_batch_d(const void *d_highs, const void *d_lows, void *d_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int signalPeriod, int maxConcurrency, void *stream)');
+    const ct_adr_batch = lib.func('int ct_adr_batch(const float *highs, const float *lows, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_adr_batch_d = lib.func('int ct_adr_batch_d(const void *d_highs, const void *d_lows, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_alma_batch = lib.func('int ct_alma_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, double sigma, double offset, int maxConcurrency, void *stream)');
+    const ct_alma_batch_d = lib.func('int ct_alma_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, double sigma, double offset, int maxConcurrency, void *stream)');
+    const ct_ao_batch = lib.func('int ct_ao_batch(const float *highs, const float *lows, float *outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maxConcurrency, void *stream)');
+    const ct_ao_batch_d = lib.func('int ct_ao_batch_d(const void *d_highs, const void *d_lows, void *d_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maxConcurrency, void *stream)');
+    const ct_apo_ma_batch = lib.func('int ct_apo_ma_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maType, int maxConcurrency, void *stream)');
+    const ct_apo_ma_batch_d = lib.func('int ct_apo_ma_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maType, int maxConcurrency, void *stream)');
+    const ct_asi_wilder_batch = lib.func('int ct_asi_wilder_batch(const float *opens, const float *highs, const float *lows, const float *closes, float *outputs, int seriesLen, int numSeries, double limitMove, int maxConcurrency, void *stream)');
+    const ct_asi_wilder_batch_d = lib.func('int ct_asi_wilder_batch_d(const void *d_opens, const void *d_highs, const void *d_lows, const void *d_closes, void *d_outputs, int seriesLen, int numSeries, double limitMove, int maxConcurrency, void *stream)');
+    const ct_bbands_ma_batch = lib.func('int ct_bbands_ma_batch(const float *inputs, float *realUpperBand, float *realMiddleBand, float *realLowerBand, int seriesLen, int numSeries, int period, double nbDevUp, double nbDevDn, int maType, int maxConcurrency, void *stream)');
+    const ct_bbands_ma_batch_d = lib.func('int ct_bbands_ma_batch_d(const void *d_inputs, void *d_realUpperBand, void *d_realMiddleBand, void *d_realLowerBand, int seriesLen, int numSeries, int period, double nbDevUp, double nbDevDn, int maType, int maxConcurrency, void *stream)');
+    const ct_bbw_batch = lib.func('int ct_bbw_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, double nbDevUp, double nbDevDn, int maType, int maxConcurrency, void *stream)');
+    const ct_bbw_batch_d = lib.func('int ct_bbw_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, double nbDevUp, double nbDevDn, int maType, int maxConcurrency, void *stream)');
+    const ct_cg_batch = lib.func('int ct_cg_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_cg_batch_d = lib.func('int ct_cg_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_chop_batch = lib.func('int ct_chop_batch(const float *highs, const float *lows, const float *closes, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_chop_batch_d = lib.func('int ct_chop_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_choptr_batch = lib.func('int ct_choptr_batch(const float *highs, const float *lows, const float *closes, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_choptr_batch_d = lib.func('int ct_choptr_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_cksp_batch = lib.func('int ct_cksp_batch(const float *highs, const float *lows, const float *closes, float *highStop, float *lowStop, int seriesLen, int numSeries, int period, double multiplier, int stopPeriod, int maxConcurrency, void *stream)');
+    const ct_cksp_batch_d = lib.func('int ct_cksp_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, void *d_highStop, void *d_lowStop, int seriesLen, int numSeries, int period, double multiplier, int stopPeriod, int maxConcurrency, void *stream)');
+    const ct_cmf_batch = lib.func('int ct_cmf_batch(const float *highs, const float *lows, const float *closes, const float *volumes, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_cmf_batch_d = lib.func('int ct_cmf_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, const void *d_volumes, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_cmou_batch = lib.func('int ct_cmou_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_cmou_batch_d = lib.func('int ct_cmou_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_coppock_batch = lib.func('int ct_coppock_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int wmaPeriod, int roc1Period, int roc2Period, int maxConcurrency, void *stream)');
+    const ct_coppock_batch_d = lib.func('int ct_coppock_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int wmaPeriod, int roc1Period, int roc2Period, int maxConcurrency, void *stream)');
+    const ct_crsi_batch = lib.func('int ct_crsi_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int streakPeriod, int rankPeriod, int maxConcurrency, void *stream)');
+    const ct_crsi_batch_d = lib.func('int ct_crsi_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int streakPeriod, int rankPeriod, int maxConcurrency, void *stream)');
+    const ct_cti_batch = lib.func('int ct_cti_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_cti_batch_d = lib.func('int ct_cti_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_cumsum_batch = lib.func('int ct_cumsum_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int maxConcurrency, void *stream)');
+    const ct_cumsum_batch_d = lib.func('int ct_cumsum_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int maxConcurrency, void *stream)');
+    const ct_cvi_batch = lib.func('int ct_cvi_batch(const float *highs, const float *lows, float *outputs, int seriesLen, int numSeries, int period, int rocPeriod, int maxConcurrency, void *stream)');
+    const ct_cvi_batch_d = lib.func('int ct_cvi_batch_d(const void *d_highs, const void *d_lows, void *d_outputs, int seriesLen, int numSeries, int period, int rocPeriod, int maxConcurrency, void *stream)');
+    const ct_donchian_batch = lib.func('int ct_donchian_batch(const float *highs, const float *lows, float *realUpperBand, float *realMiddleBand, float *realLowerBand, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_donchian_batch_d = lib.func('int ct_donchian_batch_d(const void *d_highs, const void *d_lows, void *d_realUpperBand, void *d_realMiddleBand, void *d_realLowerBand, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_dosc_batch = lib.func('int ct_dosc_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int firstPeriod, int secondPeriod, int signalPeriod, int maxConcurrency, void *stream)');
+    const ct_dosc_batch_d = lib.func('int ct_dosc_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int firstPeriod, int secondPeriod, int signalPeriod, int maxConcurrency, void *stream)');
+    const ct_dpo_batch = lib.func('int ct_dpo_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_dpo_batch_d = lib.func('int ct_dpo_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_efi_batch = lib.func('int ct_efi_batch(const float *closes, const float *volumes, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_efi_batch_d = lib.func('int ct_efi_batch_d(const void *d_closes, const void *d_volumes, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_emv_batch = lib.func('int ct_emv_batch(const float *highs, const float *lows, const float *volumes, float *outputs, int seriesLen, int numSeries, int period, double volumeDivisor, int maxConcurrency, void *stream)');
+    const ct_emv_batch_d = lib.func('int ct_emv_batch_d(const void *d_highs, const void *d_lows, const void *d_volumes, void *d_outputs, int seriesLen, int numSeries, int period, double volumeDivisor, int maxConcurrency, void *stream)');
+    const ct_er_batch = lib.func('int ct_er_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_er_batch_d = lib.func('int ct_er_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_eri_batch = lib.func('int ct_eri_batch(const float *highs, const float *lows, const float *closes, float *bullPower, float *bearPower, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_eri_batch_d = lib.func('int ct_eri_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, void *d_bullPower, void *d_bearPower, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_fisher_batch = lib.func('int ct_fisher_batch(const float *highs, const float *lows, float *fisher, float *trigger, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_fisher_batch_d = lib.func('int ct_fisher_batch_d(const void *d_highs, const void *d_lows, void *d_fisher, void *d_trigger, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_fosc_batch = lib.func('int ct_fosc_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_fosc_batch_d = lib.func('int ct_fosc_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_fractal_batch = lib.func('int ct_fractal_batch(const float *highs, const float *lows, int *swingHigh, int *swingLow, int seriesLen, int numSeries, int leftBars, int rightBars, int maxConcurrency, void *stream)');
+    const ct_fractal_batch_d = lib.func('int ct_fractal_batch_d(const void *d_highs, const void *d_lows, void *d_swingHigh, void *d_swingLow, int seriesLen, int numSeries, int leftBars, int rightBars, int maxConcurrency, void *stream)');
+    const ct_frama_batch = lib.func('int ct_frama_batch(const float *highs, const float *lows, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_frama_batch_d = lib.func('int ct_frama_batch_d(const void *d_highs, const void *d_lows, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_ha_batch = lib.func('int ct_ha_batch(const float *opens, const float *highs, const float *lows, const float *closes, float *haOpen, float *haHigh, float *haLow, float *haClose, int seriesLen, int numSeries, int maxConcurrency, void *stream)');
+    const ct_ha_batch_d = lib.func('int ct_ha_batch_d(const void *d_opens, const void *d_highs, const void *d_lows, const void *d_closes, void *d_haOpen, void *d_haHigh, void *d_haLow, void *d_haClose, int seriesLen, int numSeries, int maxConcurrency, void *stream)');
+    const ct_hma_batch = lib.func('int ct_hma_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_hma_batch_d = lib.func('int ct_hma_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_ibs_batch = lib.func('int ct_ibs_batch(const float *highs, const float *lows, const float *closes, float *outputs, int seriesLen, int numSeries, int maxConcurrency, void *stream)');
+    const ct_ibs_batch_d = lib.func('int ct_ibs_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, void *d_outputs, int seriesLen, int numSeries, int maxConcurrency, void *stream)');
+    const ct_ichimoku_batch = lib.func('int ct_ichimoku_batch(const float *highs, const float *lows, float *tenkanSen, float *kijunSen, float *senkouSpanA, float *senkouSpanB, int seriesLen, int numSeries, int tenkanPeriod, int kijunPeriod, int senkouBPeriod, int maxConcurrency, void *stream)');
+    const ct_ichimoku_batch_d = lib.func('int ct_ichimoku_batch_d(const void *d_highs, const void *d_lows, void *d_tenkanSen, void *d_kijunSen, void *d_senkouSpanA, void *d_senkouSpanB, int seriesLen, int numSeries, int tenkanPeriod, int kijunPeriod, int senkouBPeriod, int maxConcurrency, void *stream)');
+    const ct_kc_batch = lib.func('int ct_kc_batch(const float *highs, const float *lows, const float *closes, float *realUpperBand, float *realMiddleBand, float *realLowerBand, int seriesLen, int numSeries, int period, int atrPeriod, double nbDev, int maxConcurrency, void *stream)');
+    const ct_kc_batch_d = lib.func('int ct_kc_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, void *d_realUpperBand, void *d_realMiddleBand, void *d_realLowerBand, int seriesLen, int numSeries, int period, int atrPeriod, double nbDev, int maxConcurrency, void *stream)');
+    const ct_kdj_batch = lib.func('int ct_kdj_batch(const float *highs, const float *lows, const float *closes, float *k, float *d, float *j, int seriesLen, int numSeries, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, int maxConcurrency, void *stream)');
+    const ct_kdj_batch_d = lib.func('int ct_kdj_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, void *d_k, void *d_d, void *d_j, int seriesLen, int numSeries, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, int maxConcurrency, void *stream)');
+    const ct_kst_batch = lib.func('int ct_kst_batch(const float *inputs, float *kst, float *kstSignal, int seriesLen, int numSeries, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int sma1Period, int sma2Period, int sma3Period, int sma4Period, int signalPeriod, int maxConcurrency, void *stream)');
+    const ct_kst_batch_d = lib.func('int ct_kst_batch_d(const void *d_inputs, void *d_kst, void *d_kstSignal, int seriesLen, int numSeries, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int sma1Period, int sma2Period, int sma3Period, int sma4Period, int signalPeriod, int maxConcurrency, void *stream)');
+    const ct_kstext_batch = lib.func('int ct_kstext_batch(const float *inputs, float *kst, float *kstSignal, int seriesLen, int numSeries, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int ma1Period, int ma2Period, int ma3Period, int ma4Period, int signalPeriod, int rocmaType, int signalMAType, int maxConcurrency, void *stream)');
+    const ct_kstext_batch_d = lib.func('int ct_kstext_batch_d(const void *d_inputs, void *d_kst, void *d_kstSignal, int seriesLen, int numSeries, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int ma1Period, int ma2Period, int ma3Period, int ma4Period, int signalPeriod, int rocmaType, int signalMAType, int maxConcurrency, void *stream)');
+    const ct_kurtosis_unbiased_batch = lib.func('int ct_kurtosis_unbiased_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_kurtosis_unbiased_batch_d = lib.func('int ct_kurtosis_unbiased_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_kvo_batch = lib.func('int ct_kvo_batch(const float *highs, const float *lows, const float *closes, const float *volumes, float *kvo, float *kvoSignal, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int signalPeriod, int maxConcurrency, void *stream)');
+    const ct_kvo_batch_d = lib.func('int ct_kvo_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, const void *d_volumes, void *d_kvo, void *d_kvoSignal, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int signalPeriod, int maxConcurrency, void *stream)');
+    const ct_marketfi_batch = lib.func('int ct_marketfi_batch(const float *highs, const float *lows, const float *volumes, float *outputs, int seriesLen, int numSeries, int maxConcurrency, void *stream)');
+    const ct_marketfi_batch_d = lib.func('int ct_marketfi_batch_d(const void *d_highs, const void *d_lows, const void *d_volumes, void *d_outputs, int seriesLen, int numSeries, int maxConcurrency, void *stream)');
+    const ct_massi_batch = lib.func('int ct_massi_batch(const float *highs, const float *lows, float *outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maxConcurrency, void *stream)');
+    const ct_massi_batch_d = lib.func('int ct_massi_batch_d(const void *d_highs, const void *d_lows, void *d_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maxConcurrency, void *stream)');
+    const ct_mcgd_batch = lib.func('int ct_mcgd_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_mcgd_batch_d = lib.func('int ct_mcgd_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_median_batch = lib.func('int ct_median_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_median_batch_d = lib.func('int ct_median_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_percentb_batch = lib.func('int ct_percentb_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, double nbDevUp, double nbDevDn, int maType, int maxConcurrency, void *stream)');
+    const ct_percentb_batch_d = lib.func('int ct_percentb_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, double nbDevUp, double nbDevDn, int maType, int maxConcurrency, void *stream)');
+    const ct_percentile_batch = lib.func('int ct_percentile_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, double percentile, int maxConcurrency, void *stream)');
+    const ct_percentile_batch_d = lib.func('int ct_percentile_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, double percentile, int maxConcurrency, void *stream)');
+    const ct_percentrank_batch = lib.func('int ct_percentrank_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_percentrank_batch_d = lib.func('int ct_percentrank_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_ppo_ma_batch = lib.func('int ct_ppo_ma_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maType, int maxConcurrency, void *stream)');
+    const ct_ppo_ma_batch_d = lib.func('int ct_ppo_ma_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maType, int maxConcurrency, void *stream)');
+    const ct_pso_batch = lib.func('int ct_pso_batch(const float *highs, const float *lows, const float *closes, float *outputs, int seriesLen, int numSeries, int fastKPeriod, int emaPeriod, int maxConcurrency, void *stream)');
+    const ct_pso_batch_d = lib.func('int ct_pso_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, void *d_outputs, int seriesLen, int numSeries, int fastKPeriod, int emaPeriod, int maxConcurrency, void *stream)');
+    const ct_pvo_ma_batch = lib.func('int ct_pvo_ma_batch(const float *volumes, float *outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maType, int maxConcurrency, void *stream)');
+    const ct_pvo_ma_batch_d = lib.func('int ct_pvo_ma_batch_d(const void *d_volumes, void *d_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maType, int maxConcurrency, void *stream)');
+    const ct_pvt_batch = lib.func('int ct_pvt_batch(const float *closes, const float *volumes, float *outputs, int seriesLen, int numSeries, int maxConcurrency, void *stream)');
+    const ct_pvt_batch_d = lib.func('int ct_pvt_batch_d(const void *d_closes, const void *d_volumes, void *d_outputs, int seriesLen, int numSeries, int maxConcurrency, void *stream)');
+    const ct_qstick_batch = lib.func('int ct_qstick_batch(const float *opens, const float *closes, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_qstick_batch_d = lib.func('int ct_qstick_batch_d(const void *d_opens, const void *d_closes, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_rma_batch = lib.func('int ct_rma_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_rma_batch_d = lib.func('int ct_rma_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_rogerssatchell_batch = lib.func('int ct_rogerssatchell_batch(const float *opens, const float *highs, const float *lows, const float *closes, float *outputs, int seriesLen, int numSeries, int period, double annualization, int maxConcurrency, void *stream)');
+    const ct_rogerssatchell_batch_d = lib.func('int ct_rogerssatchell_batch_d(const void *d_opens, const void *d_highs, const void *d_lows, const void *d_closes, void *d_outputs, int seriesLen, int numSeries, int period, double annualization, int maxConcurrency, void *stream)');
+    const ct_rvi_batch = lib.func('int ct_rvi_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int stdDevPeriod, int maxConcurrency, void *stream)');
+    const ct_rvi_batch_d = lib.func('int ct_rvi_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int stdDevPeriod, int maxConcurrency, void *stream)');
+    const ct_rvir_batch = lib.func('int ct_rvir_batch(const float *highs, const float *lows, float *outputs, int seriesLen, int numSeries, int period, int stdDevPeriod, int maxConcurrency, void *stream)');
+    const ct_rvir_batch_d = lib.func('int ct_rvir_batch_d(const void *d_highs, const void *d_lows, void *d_outputs, int seriesLen, int numSeries, int period, int stdDevPeriod, int maxConcurrency, void *stream)');
+    const ct_rvol_batch = lib.func('int ct_rvol_batch(const float *volumes, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_rvol_batch_d = lib.func('int ct_rvol_batch_d(const void *d_volumes, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_si_batch = lib.func('int ct_si_batch(const float *opens, const float *highs, const float *lows, const float *closes, float *outputs, int seriesLen, int numSeries, double limitMove, int maxConcurrency, void *stream)');
+    const ct_si_batch_d = lib.func('int ct_si_batch_d(const void *d_opens, const void *d_highs, const void *d_lows, const void *d_closes, void *d_outputs, int seriesLen, int numSeries, double limitMove, int maxConcurrency, void *stream)');
+    const ct_smi_batch = lib.func('int ct_smi_batch(const float *highs, const float *lows, const float *closes, float *smi, float *smiSignal, int seriesLen, int numSeries, int period, int fastPeriod, int slowPeriod, int signalPeriod, int maxConcurrency, void *stream)');
+    const ct_smi_batch_d = lib.func('int ct_smi_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, void *d_smi, void *d_smiSignal, int seriesLen, int numSeries, int period, int fastPeriod, int slowPeriod, int signalPeriod, int maxConcurrency, void *stream)');
+    const ct_sqzmom_batch = lib.func('int ct_sqzmom_batch(const float *highs, const float *lows, const float *closes, float *momentum, int *squeeze, int seriesLen, int numSeries, int bbPeriod, double nbDev, int kcPeriod, double factorWide, double factorNormal, double factorNarrow, int maxConcurrency, void *stream)');
+    const ct_sqzmom_batch_d = lib.func('int ct_sqzmom_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, void *d_momentum, void *d_squeeze, int seriesLen, int numSeries, int bbPeriod, double nbDev, int kcPeriod, double factorWide, double factorNormal, double factorNarrow, int maxConcurrency, void *stream)');
+    const ct_stc_batch = lib.func('int ct_stc_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int cyclePeriod, int maxConcurrency, void *stream)');
+    const ct_stc_batch_d = lib.func('int ct_stc_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int cyclePeriod, int maxConcurrency, void *stream)');
+    const ct_stochastic_ma_batch = lib.func('int ct_stochastic_ma_batch(const float *highs, const float *lows, const float *closes, float *slowK, float *slowD, int seriesLen, int numSeries, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, int maxConcurrency, void *stream)');
+    const ct_stochastic_ma_batch_d = lib.func('int ct_stochastic_ma_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, void *d_slowK, void *d_slowD, int seriesLen, int numSeries, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, int maxConcurrency, void *stream)');
+    const ct_stochf_ma_batch = lib.func('int ct_stochf_ma_batch(const float *highs, const float *lows, const float *closes, float *fastK, float *fastD, int seriesLen, int numSeries, int fastKPeriod, int fastDPeriod, int fastDMAType, int maxConcurrency, void *stream)');
+    const ct_stochf_ma_batch_d = lib.func('int ct_stochf_ma_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, void *d_fastK, void *d_fastD, int seriesLen, int numSeries, int fastKPeriod, int fastDPeriod, int fastDMAType, int maxConcurrency, void *stream)');
+    const ct_stochrsi_ma_batch = lib.func('int ct_stochrsi_ma_batch(const float *inputs, float *fastK, float *fastD, int seriesLen, int numSeries, int period, int fastKPeriod, int fastDPeriod, int fastDMAType, int maxConcurrency, void *stream)');
+    const ct_stochrsi_ma_batch_d = lib.func('int ct_stochrsi_ma_batch_d(const void *d_inputs, void *d_fastK, void *d_fastD, int seriesLen, int numSeries, int period, int fastKPeriod, int fastDPeriod, int fastDMAType, int maxConcurrency, void *stream)');
+    const ct_supertrend_batch = lib.func('int ct_supertrend_batch(const float *highs, const float *lows, const float *closes, float *supertrend, int *trend, int seriesLen, int numSeries, int period, double multiplier, int maxConcurrency, void *stream)');
+    const ct_supertrend_batch_d = lib.func('int ct_supertrend_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, void *d_supertrend, void *d_trend, int seriesLen, int numSeries, int period, double multiplier, int maxConcurrency, void *stream)');
+    const ct_swak_2php_batch = lib.func('int ct_swak_2php_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_swak_2php_batch_d = lib.func('int ct_swak_2php_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_swak_bp_batch = lib.func('int ct_swak_bp_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, double delta, int maxConcurrency, void *stream)');
+    const ct_swak_bp_batch_d = lib.func('int ct_swak_bp_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, double delta, int maxConcurrency, void *stream)');
+    const ct_swak_butter_batch = lib.func('int ct_swak_butter_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_swak_butter_batch_d = lib.func('int ct_swak_butter_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_swak_gauss_batch = lib.func('int ct_swak_gauss_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_swak_gauss_batch_d = lib.func('int ct_swak_gauss_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_swak_hp_batch = lib.func('int ct_swak_hp_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_swak_hp_batch_d = lib.func('int ct_swak_hp_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_tsi_batch = lib.func('int ct_tsi_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int firstPeriod, int secondPeriod, int maxConcurrency, void *stream)');
+    const ct_tsi_batch_d = lib.func('int ct_tsi_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int firstPeriod, int secondPeriod, int maxConcurrency, void *stream)');
+    const ct_vhf_batch = lib.func('int ct_vhf_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_vhf_batch_d = lib.func('int ct_vhf_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_vidya_batch = lib.func('int ct_vidya_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int cmoPeriod, int maxConcurrency, void *stream)');
+    const ct_vidya_batch_d = lib.func('int ct_vidya_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int cmoPeriod, int maxConcurrency, void *stream)');
+    const ct_vortex_batch = lib.func('int ct_vortex_batch(const float *highs, const float *lows, const float *closes, float *plusVI, float *minusVI, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_vortex_batch_d = lib.func('int ct_vortex_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, void *d_plusVI, void *d_minusVI, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_vwap_batch = lib.func('int ct_vwap_batch(const float *highs, const float *lows, const float *closes, const float *volumes, float *outputs, int seriesLen, int numSeries, int maxConcurrency, void *stream)');
+    const ct_vwap_batch_d = lib.func('int ct_vwap_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, const void *d_volumes, void *d_outputs, int seriesLen, int numSeries, int maxConcurrency, void *stream)');
+    const ct_vwma_batch = lib.func('int ct_vwma_batch(const float *inputs, const float *volumes, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_vwma_batch_d = lib.func('int ct_vwma_batch_d(const void *d_inputs, const void *d_volumes, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_wad_batch = lib.func('int ct_wad_batch(const float *highs, const float *lows, const float *closes, float *outputs, int seriesLen, int numSeries, int maxConcurrency, void *stream)');
+    const ct_wad_batch_d = lib.func('int ct_wad_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, void *d_outputs, int seriesLen, int numSeries, int maxConcurrency, void *stream)');
+    const ct_wavetrend_batch = lib.func('int ct_wavetrend_batch(const float *highs, const float *lows, const float *closes, float *wT1, float *wT2, int seriesLen, int numSeries, int channelPeriod, int averagePeriod, int signalPeriod, int maxConcurrency, void *stream)');
+    const ct_wavetrend_batch_d = lib.func('int ct_wavetrend_batch_d(const void *d_highs, const void *d_lows, const void *d_closes, void *d_wT1, void *d_wT2, int seriesLen, int numSeries, int channelPeriod, int averagePeriod, int signalPeriod, int maxConcurrency, void *stream)');
+    const ct_zigzag_batch = lib.func('int ct_zigzag_batch(const float *highs, const float *lows, float *zigZag, int *trend, int *pivotIdx, int seriesLen, int numSeries, double sensitivity, int minTrendLength, int maxConcurrency, void *stream)');
+    const ct_zigzag_batch_d = lib.func('int ct_zigzag_batch_d(const void *d_highs, const void *d_lows, void *d_zigZag, void *d_trend, void *d_pivotIdx, int seriesLen, int numSeries, double sensitivity, int minTrendLength, int maxConcurrency, void *stream)');
+    const ct_zlema_batch = lib.func('int ct_zlema_batch(const float *inputs, float *outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
+    const ct_zlema_batch_d = lib.func('int ct_zlema_batch_d(const void *d_inputs, void *d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, void *stream)');
 
     host.wmaBatch = function wmaBatch(inputs, period, opts = {}) {
         const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
@@ -2658,6 +2818,1789 @@ module.exports = function registerGeneratedBatch(ctx) {
         deviceCall(ct_rolling_std_batch_d, 'ct_rolling_std_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
     };
 
+    host.acBatch = function acBatch(highs, lows, fastPeriod, slowPeriod, signalPeriod, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const out = new Float32Array(m_highs.matrix.length);
+        call(ct_ac_batch, 'ct_ac_batch', m_highs.matrix, m_lows.matrix, out, seriesLen, numSeries, fastPeriod, slowPeriod, signalPeriod, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.acBatch = function (dHighs, dLows, dOutputs, seriesLen, numSeries, fastPeriod, slowPeriod, signalPeriod, maxConcurrency = 0) {
+        deviceCall(ct_ac_batch_d, 'ct_ac_batch_d', dHighs, dLows, dOutputs, seriesLen, numSeries, fastPeriod, slowPeriod, signalPeriod, maxConcurrency);
+    };
+    ohlcvColumns.acBatch = ['high', 'low'];
+
+    host.adrBatch = function adrBatch(highs, lows, period, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const out = new Float32Array(m_highs.matrix.length);
+        call(ct_adr_batch, 'ct_adr_batch', m_highs.matrix, m_lows.matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.adrBatch = function (dHighs, dLows, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_adr_batch_d, 'ct_adr_batch_d', dHighs, dLows, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+    ohlcvColumns.adrBatch = ['high', 'low'];
+
+    host.almaBatch = function almaBatch(inputs, period, sigma, offset, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_alma_batch, 'ct_alma_batch', matrix, out, seriesLen, numSeries, period, sigma, offset, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.almaBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, sigma, offset, maxConcurrency = 0) {
+        deviceCall(ct_alma_batch_d, 'ct_alma_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, sigma, offset, maxConcurrency);
+    };
+
+    host.aoBatch = function aoBatch(highs, lows, fastPeriod, slowPeriod, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const out = new Float32Array(m_highs.matrix.length);
+        call(ct_ao_batch, 'ct_ao_batch', m_highs.matrix, m_lows.matrix, out, seriesLen, numSeries, fastPeriod, slowPeriod, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.aoBatch = function (dHighs, dLows, dOutputs, seriesLen, numSeries, fastPeriod, slowPeriod, maxConcurrency = 0) {
+        deviceCall(ct_ao_batch_d, 'ct_ao_batch_d', dHighs, dLows, dOutputs, seriesLen, numSeries, fastPeriod, slowPeriod, maxConcurrency);
+    };
+    ohlcvColumns.aoBatch = ['high', 'low'];
+
+    host.apoMaBatch = function apoMaBatch(inputs, fastPeriod, slowPeriod, maType, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_apo_ma_batch, 'ct_apo_ma_batch', matrix, out, seriesLen, numSeries, fastPeriod, slowPeriod, maType, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.apoMaBatch = function (dInputs, dOutputs, seriesLen, numSeries, fastPeriod, slowPeriod, maType, maxConcurrency = 0) {
+        deviceCall(ct_apo_ma_batch_d, 'ct_apo_ma_batch_d', dInputs, dOutputs, seriesLen, numSeries, fastPeriod, slowPeriod, maType, maxConcurrency);
+    };
+
+    host.asiWilderBatch = function asiWilderBatch(opens, highs, lows, closes, limitMove, opts = {}) {
+        const m_opens = toBatchMatrix(opens, opts.seriesLen);
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_highs.seriesLen !== m_opens.seriesLen || m_highs.numSeries !== m_opens.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_lows.seriesLen !== m_opens.seriesLen || m_lows.numSeries !== m_opens.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_opens.seriesLen || m_closes.numSeries !== m_opens.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_opens;
+        const out = new Float32Array(m_opens.matrix.length);
+        call(ct_asi_wilder_batch, 'ct_asi_wilder_batch', m_opens.matrix, m_highs.matrix, m_lows.matrix, m_closes.matrix, out, seriesLen, numSeries, limitMove, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.asiWilderBatch = function (dOpens, dHighs, dLows, dCloses, dOutputs, seriesLen, numSeries, limitMove, maxConcurrency = 0) {
+        deviceCall(ct_asi_wilder_batch_d, 'ct_asi_wilder_batch_d', dOpens, dHighs, dLows, dCloses, dOutputs, seriesLen, numSeries, limitMove, maxConcurrency);
+    };
+    ohlcvColumns.asiWilderBatch = ['open', 'high', 'low', 'close'];
+
+    host.bbandsMaBatch = function bbandsMaBatch(inputs, period, nbDevUp, nbDevDn, maType, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const o_realUpperBand = new Float32Array(matrix.length);
+        const o_realMiddleBand = new Float32Array(matrix.length);
+        const o_realLowerBand = new Float32Array(matrix.length);
+        call(ct_bbands_ma_batch, 'ct_bbands_ma_batch', matrix, o_realUpperBand, o_realMiddleBand, o_realLowerBand, seriesLen, numSeries, period, nbDevUp, nbDevDn, maType, opts.maxConcurrency ?? 0);
+        return { realUpperBand: splitBatchRows(o_realUpperBand, seriesLen, numSeries), realMiddleBand: splitBatchRows(o_realMiddleBand, seriesLen, numSeries), realLowerBand: splitBatchRows(o_realLowerBand, seriesLen, numSeries) };
+    };
+    device.bbandsMaBatch = function (dInputs, dRealUpperBand, dRealMiddleBand, dRealLowerBand, seriesLen, numSeries, period, nbDevUp, nbDevDn, maType, maxConcurrency = 0) {
+        deviceCall(ct_bbands_ma_batch_d, 'ct_bbands_ma_batch_d', dInputs, dRealUpperBand, dRealMiddleBand, dRealLowerBand, seriesLen, numSeries, period, nbDevUp, nbDevDn, maType, maxConcurrency);
+    };
+
+    host.bbwBatch = function bbwBatch(inputs, period, nbDevUp, nbDevDn, maType, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_bbw_batch, 'ct_bbw_batch', matrix, out, seriesLen, numSeries, period, nbDevUp, nbDevDn, maType, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.bbwBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, nbDevUp, nbDevDn, maType, maxConcurrency = 0) {
+        deviceCall(ct_bbw_batch_d, 'ct_bbw_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, nbDevUp, nbDevDn, maType, maxConcurrency);
+    };
+
+    host.cgBatch = function cgBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_cg_batch, 'ct_cg_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.cgBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_cg_batch_d, 'ct_cg_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.chopBatch = function chopBatch(highs, lows, closes, period, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const out = new Float32Array(m_highs.matrix.length);
+        call(ct_chop_batch, 'ct_chop_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.chopBatch = function (dHighs, dLows, dCloses, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_chop_batch_d, 'ct_chop_batch_d', dHighs, dLows, dCloses, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+    ohlcvColumns.chopBatch = ['high', 'low', 'close'];
+
+    host.choptrBatch = function choptrBatch(highs, lows, closes, period, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const out = new Float32Array(m_highs.matrix.length);
+        call(ct_choptr_batch, 'ct_choptr_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.choptrBatch = function (dHighs, dLows, dCloses, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_choptr_batch_d, 'ct_choptr_batch_d', dHighs, dLows, dCloses, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+    ohlcvColumns.choptrBatch = ['high', 'low', 'close'];
+
+    host.ckspBatch = function ckspBatch(highs, lows, closes, period, multiplier, stopPeriod, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const o_highStop = new Float32Array(m_highs.matrix.length);
+        const o_lowStop = new Float32Array(m_highs.matrix.length);
+        call(ct_cksp_batch, 'ct_cksp_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, o_highStop, o_lowStop, seriesLen, numSeries, period, multiplier, stopPeriod, opts.maxConcurrency ?? 0);
+        return { highStop: splitBatchRows(o_highStop, seriesLen, numSeries), lowStop: splitBatchRows(o_lowStop, seriesLen, numSeries) };
+    };
+    device.ckspBatch = function (dHighs, dLows, dCloses, dHighStop, dLowStop, seriesLen, numSeries, period, multiplier, stopPeriod, maxConcurrency = 0) {
+        deviceCall(ct_cksp_batch_d, 'ct_cksp_batch_d', dHighs, dLows, dCloses, dHighStop, dLowStop, seriesLen, numSeries, period, multiplier, stopPeriod, maxConcurrency);
+    };
+    ohlcvColumns.ckspBatch = ['high', 'low', 'close'];
+
+    host.cmfBatch = function cmfBatch(highs, lows, closes, volumes, period, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        const m_volumes = toBatchMatrix(volumes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_volumes.seriesLen !== m_highs.seriesLen || m_volumes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const out = new Float32Array(m_highs.matrix.length);
+        call(ct_cmf_batch, 'ct_cmf_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, m_volumes.matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.cmfBatch = function (dHighs, dLows, dCloses, dVolumes, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_cmf_batch_d, 'ct_cmf_batch_d', dHighs, dLows, dCloses, dVolumes, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+    ohlcvColumns.cmfBatch = ['high', 'low', 'close', 'volume'];
+
+    host.cmouBatch = function cmouBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_cmou_batch, 'ct_cmou_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.cmouBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_cmou_batch_d, 'ct_cmou_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.coppockBatch = function coppockBatch(inputs, wmaPeriod, roc1Period, roc2Period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_coppock_batch, 'ct_coppock_batch', matrix, out, seriesLen, numSeries, wmaPeriod, roc1Period, roc2Period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.coppockBatch = function (dInputs, dOutputs, seriesLen, numSeries, wmaPeriod, roc1Period, roc2Period, maxConcurrency = 0) {
+        deviceCall(ct_coppock_batch_d, 'ct_coppock_batch_d', dInputs, dOutputs, seriesLen, numSeries, wmaPeriod, roc1Period, roc2Period, maxConcurrency);
+    };
+
+    host.crsiBatch = function crsiBatch(inputs, period, streakPeriod, rankPeriod, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_crsi_batch, 'ct_crsi_batch', matrix, out, seriesLen, numSeries, period, streakPeriod, rankPeriod, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.crsiBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, streakPeriod, rankPeriod, maxConcurrency = 0) {
+        deviceCall(ct_crsi_batch_d, 'ct_crsi_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, streakPeriod, rankPeriod, maxConcurrency);
+    };
+
+    host.ctiBatch = function ctiBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_cti_batch, 'ct_cti_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.ctiBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_cti_batch_d, 'ct_cti_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.cumsumBatch = function cumsumBatch(inputs, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_cumsum_batch, 'ct_cumsum_batch', matrix, out, seriesLen, numSeries, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.cumsumBatch = function (dInputs, dOutputs, seriesLen, numSeries, maxConcurrency = 0) {
+        deviceCall(ct_cumsum_batch_d, 'ct_cumsum_batch_d', dInputs, dOutputs, seriesLen, numSeries, maxConcurrency);
+    };
+
+    host.cviBatch = function cviBatch(highs, lows, period, rocPeriod, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const out = new Float32Array(m_highs.matrix.length);
+        call(ct_cvi_batch, 'ct_cvi_batch', m_highs.matrix, m_lows.matrix, out, seriesLen, numSeries, period, rocPeriod, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.cviBatch = function (dHighs, dLows, dOutputs, seriesLen, numSeries, period, rocPeriod, maxConcurrency = 0) {
+        deviceCall(ct_cvi_batch_d, 'ct_cvi_batch_d', dHighs, dLows, dOutputs, seriesLen, numSeries, period, rocPeriod, maxConcurrency);
+    };
+    ohlcvColumns.cviBatch = ['high', 'low'];
+
+    host.donchianBatch = function donchianBatch(highs, lows, period, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const o_realUpperBand = new Float32Array(m_highs.matrix.length);
+        const o_realMiddleBand = new Float32Array(m_highs.matrix.length);
+        const o_realLowerBand = new Float32Array(m_highs.matrix.length);
+        call(ct_donchian_batch, 'ct_donchian_batch', m_highs.matrix, m_lows.matrix, o_realUpperBand, o_realMiddleBand, o_realLowerBand, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return { realUpperBand: splitBatchRows(o_realUpperBand, seriesLen, numSeries), realMiddleBand: splitBatchRows(o_realMiddleBand, seriesLen, numSeries), realLowerBand: splitBatchRows(o_realLowerBand, seriesLen, numSeries) };
+    };
+    device.donchianBatch = function (dHighs, dLows, dRealUpperBand, dRealMiddleBand, dRealLowerBand, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_donchian_batch_d, 'ct_donchian_batch_d', dHighs, dLows, dRealUpperBand, dRealMiddleBand, dRealLowerBand, seriesLen, numSeries, period, maxConcurrency);
+    };
+    ohlcvColumns.donchianBatch = ['high', 'low'];
+
+    host.doscBatch = function doscBatch(inputs, period, firstPeriod, secondPeriod, signalPeriod, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_dosc_batch, 'ct_dosc_batch', matrix, out, seriesLen, numSeries, period, firstPeriod, secondPeriod, signalPeriod, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.doscBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, firstPeriod, secondPeriod, signalPeriod, maxConcurrency = 0) {
+        deviceCall(ct_dosc_batch_d, 'ct_dosc_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, firstPeriod, secondPeriod, signalPeriod, maxConcurrency);
+    };
+
+    host.dpoBatch = function dpoBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_dpo_batch, 'ct_dpo_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.dpoBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_dpo_batch_d, 'ct_dpo_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.efiBatch = function efiBatch(closes, volumes, period, opts = {}) {
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        const m_volumes = toBatchMatrix(volumes, opts.seriesLen);
+        if (m_volumes.seriesLen !== m_closes.seriesLen || m_volumes.numSeries !== m_closes.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_closes;
+        const out = new Float32Array(m_closes.matrix.length);
+        call(ct_efi_batch, 'ct_efi_batch', m_closes.matrix, m_volumes.matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.efiBatch = function (dCloses, dVolumes, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_efi_batch_d, 'ct_efi_batch_d', dCloses, dVolumes, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+    ohlcvColumns.efiBatch = ['close', 'volume'];
+
+    host.emvBatch = function emvBatch(highs, lows, volumes, period, volumeDivisor, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_volumes = toBatchMatrix(volumes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_volumes.seriesLen !== m_highs.seriesLen || m_volumes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const out = new Float32Array(m_highs.matrix.length);
+        call(ct_emv_batch, 'ct_emv_batch', m_highs.matrix, m_lows.matrix, m_volumes.matrix, out, seriesLen, numSeries, period, volumeDivisor, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.emvBatch = function (dHighs, dLows, dVolumes, dOutputs, seriesLen, numSeries, period, volumeDivisor, maxConcurrency = 0) {
+        deviceCall(ct_emv_batch_d, 'ct_emv_batch_d', dHighs, dLows, dVolumes, dOutputs, seriesLen, numSeries, period, volumeDivisor, maxConcurrency);
+    };
+    ohlcvColumns.emvBatch = ['high', 'low', 'volume'];
+
+    host.erBatch = function erBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_er_batch, 'ct_er_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.erBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_er_batch_d, 'ct_er_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.eriBatch = function eriBatch(highs, lows, closes, period, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const o_bullPower = new Float32Array(m_highs.matrix.length);
+        const o_bearPower = new Float32Array(m_highs.matrix.length);
+        call(ct_eri_batch, 'ct_eri_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, o_bullPower, o_bearPower, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return { bullPower: splitBatchRows(o_bullPower, seriesLen, numSeries), bearPower: splitBatchRows(o_bearPower, seriesLen, numSeries) };
+    };
+    device.eriBatch = function (dHighs, dLows, dCloses, dBullPower, dBearPower, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_eri_batch_d, 'ct_eri_batch_d', dHighs, dLows, dCloses, dBullPower, dBearPower, seriesLen, numSeries, period, maxConcurrency);
+    };
+    ohlcvColumns.eriBatch = ['high', 'low', 'close'];
+
+    host.fisherBatch = function fisherBatch(highs, lows, period, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const o_fisher = new Float32Array(m_highs.matrix.length);
+        const o_trigger = new Float32Array(m_highs.matrix.length);
+        call(ct_fisher_batch, 'ct_fisher_batch', m_highs.matrix, m_lows.matrix, o_fisher, o_trigger, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return { fisher: splitBatchRows(o_fisher, seriesLen, numSeries), trigger: splitBatchRows(o_trigger, seriesLen, numSeries) };
+    };
+    device.fisherBatch = function (dHighs, dLows, dFisher, dTrigger, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_fisher_batch_d, 'ct_fisher_batch_d', dHighs, dLows, dFisher, dTrigger, seriesLen, numSeries, period, maxConcurrency);
+    };
+    ohlcvColumns.fisherBatch = ['high', 'low'];
+
+    host.foscBatch = function foscBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_fosc_batch, 'ct_fosc_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.foscBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_fosc_batch_d, 'ct_fosc_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.fractalBatch = function fractalBatch(highs, lows, leftBars, rightBars, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const o_swingHigh = new Int32Array(m_highs.matrix.length);
+        const o_swingLow = new Int32Array(m_highs.matrix.length);
+        call(ct_fractal_batch, 'ct_fractal_batch', m_highs.matrix, m_lows.matrix, o_swingHigh, o_swingLow, seriesLen, numSeries, leftBars, rightBars, opts.maxConcurrency ?? 0);
+        return { swingHigh: splitBatchRows(o_swingHigh, seriesLen, numSeries), swingLow: splitBatchRows(o_swingLow, seriesLen, numSeries) };
+    };
+    device.fractalBatch = function (dHighs, dLows, dSwingHigh, dSwingLow, seriesLen, numSeries, leftBars, rightBars, maxConcurrency = 0) {
+        deviceCall(ct_fractal_batch_d, 'ct_fractal_batch_d', dHighs, dLows, dSwingHigh, dSwingLow, seriesLen, numSeries, leftBars, rightBars, maxConcurrency);
+    };
+    ohlcvColumns.fractalBatch = ['high', 'low'];
+
+    host.framaBatch = function framaBatch(highs, lows, period, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const out = new Float32Array(m_highs.matrix.length);
+        call(ct_frama_batch, 'ct_frama_batch', m_highs.matrix, m_lows.matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.framaBatch = function (dHighs, dLows, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_frama_batch_d, 'ct_frama_batch_d', dHighs, dLows, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+    ohlcvColumns.framaBatch = ['high', 'low'];
+
+    host.haBatch = function haBatch(opens, highs, lows, closes, opts = {}) {
+        const m_opens = toBatchMatrix(opens, opts.seriesLen);
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_highs.seriesLen !== m_opens.seriesLen || m_highs.numSeries !== m_opens.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_lows.seriesLen !== m_opens.seriesLen || m_lows.numSeries !== m_opens.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_opens.seriesLen || m_closes.numSeries !== m_opens.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_opens;
+        const o_haOpen = new Float32Array(m_opens.matrix.length);
+        const o_haHigh = new Float32Array(m_opens.matrix.length);
+        const o_haLow = new Float32Array(m_opens.matrix.length);
+        const o_haClose = new Float32Array(m_opens.matrix.length);
+        call(ct_ha_batch, 'ct_ha_batch', m_opens.matrix, m_highs.matrix, m_lows.matrix, m_closes.matrix, o_haOpen, o_haHigh, o_haLow, o_haClose, seriesLen, numSeries, opts.maxConcurrency ?? 0);
+        return { haOpen: splitBatchRows(o_haOpen, seriesLen, numSeries), haHigh: splitBatchRows(o_haHigh, seriesLen, numSeries), haLow: splitBatchRows(o_haLow, seriesLen, numSeries), haClose: splitBatchRows(o_haClose, seriesLen, numSeries) };
+    };
+    device.haBatch = function (dOpens, dHighs, dLows, dCloses, dHaOpen, dHaHigh, dHaLow, dHaClose, seriesLen, numSeries, maxConcurrency = 0) {
+        deviceCall(ct_ha_batch_d, 'ct_ha_batch_d', dOpens, dHighs, dLows, dCloses, dHaOpen, dHaHigh, dHaLow, dHaClose, seriesLen, numSeries, maxConcurrency);
+    };
+    ohlcvColumns.haBatch = ['open', 'high', 'low', 'close'];
+
+    host.hmaBatch = function hmaBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_hma_batch, 'ct_hma_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.hmaBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_hma_batch_d, 'ct_hma_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.ibsBatch = function ibsBatch(highs, lows, closes, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const out = new Float32Array(m_highs.matrix.length);
+        call(ct_ibs_batch, 'ct_ibs_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, out, seriesLen, numSeries, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.ibsBatch = function (dHighs, dLows, dCloses, dOutputs, seriesLen, numSeries, maxConcurrency = 0) {
+        deviceCall(ct_ibs_batch_d, 'ct_ibs_batch_d', dHighs, dLows, dCloses, dOutputs, seriesLen, numSeries, maxConcurrency);
+    };
+    ohlcvColumns.ibsBatch = ['high', 'low', 'close'];
+
+    host.ichimokuBatch = function ichimokuBatch(highs, lows, tenkanPeriod, kijunPeriod, senkouBPeriod, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const o_tenkanSen = new Float32Array(m_highs.matrix.length);
+        const o_kijunSen = new Float32Array(m_highs.matrix.length);
+        const o_senkouSpanA = new Float32Array(m_highs.matrix.length);
+        const o_senkouSpanB = new Float32Array(m_highs.matrix.length);
+        call(ct_ichimoku_batch, 'ct_ichimoku_batch', m_highs.matrix, m_lows.matrix, o_tenkanSen, o_kijunSen, o_senkouSpanA, o_senkouSpanB, seriesLen, numSeries, tenkanPeriod, kijunPeriod, senkouBPeriod, opts.maxConcurrency ?? 0);
+        return { tenkanSen: splitBatchRows(o_tenkanSen, seriesLen, numSeries), kijunSen: splitBatchRows(o_kijunSen, seriesLen, numSeries), senkouSpanA: splitBatchRows(o_senkouSpanA, seriesLen, numSeries), senkouSpanB: splitBatchRows(o_senkouSpanB, seriesLen, numSeries) };
+    };
+    device.ichimokuBatch = function (dHighs, dLows, dTenkanSen, dKijunSen, dSenkouSpanA, dSenkouSpanB, seriesLen, numSeries, tenkanPeriod, kijunPeriod, senkouBPeriod, maxConcurrency = 0) {
+        deviceCall(ct_ichimoku_batch_d, 'ct_ichimoku_batch_d', dHighs, dLows, dTenkanSen, dKijunSen, dSenkouSpanA, dSenkouSpanB, seriesLen, numSeries, tenkanPeriod, kijunPeriod, senkouBPeriod, maxConcurrency);
+    };
+    ohlcvColumns.ichimokuBatch = ['high', 'low'];
+
+    host.kcBatch = function kcBatch(highs, lows, closes, period, atrPeriod, nbDev, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const o_realUpperBand = new Float32Array(m_highs.matrix.length);
+        const o_realMiddleBand = new Float32Array(m_highs.matrix.length);
+        const o_realLowerBand = new Float32Array(m_highs.matrix.length);
+        call(ct_kc_batch, 'ct_kc_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, o_realUpperBand, o_realMiddleBand, o_realLowerBand, seriesLen, numSeries, period, atrPeriod, nbDev, opts.maxConcurrency ?? 0);
+        return { realUpperBand: splitBatchRows(o_realUpperBand, seriesLen, numSeries), realMiddleBand: splitBatchRows(o_realMiddleBand, seriesLen, numSeries), realLowerBand: splitBatchRows(o_realLowerBand, seriesLen, numSeries) };
+    };
+    device.kcBatch = function (dHighs, dLows, dCloses, dRealUpperBand, dRealMiddleBand, dRealLowerBand, seriesLen, numSeries, period, atrPeriod, nbDev, maxConcurrency = 0) {
+        deviceCall(ct_kc_batch_d, 'ct_kc_batch_d', dHighs, dLows, dCloses, dRealUpperBand, dRealMiddleBand, dRealLowerBand, seriesLen, numSeries, period, atrPeriod, nbDev, maxConcurrency);
+    };
+    ohlcvColumns.kcBatch = ['high', 'low', 'close'];
+
+    host.kdjBatch = function kdjBatch(highs, lows, closes, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const o_k = new Float32Array(m_highs.matrix.length);
+        const o_d = new Float32Array(m_highs.matrix.length);
+        const o_j = new Float32Array(m_highs.matrix.length);
+        call(ct_kdj_batch, 'ct_kdj_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, o_k, o_d, o_j, seriesLen, numSeries, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType, opts.maxConcurrency ?? 0);
+        return { k: splitBatchRows(o_k, seriesLen, numSeries), d: splitBatchRows(o_d, seriesLen, numSeries), j: splitBatchRows(o_j, seriesLen, numSeries) };
+    };
+    device.kdjBatch = function (dHighs, dLows, dCloses, dK, dD, dJ, seriesLen, numSeries, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType, maxConcurrency = 0) {
+        deviceCall(ct_kdj_batch_d, 'ct_kdj_batch_d', dHighs, dLows, dCloses, dK, dD, dJ, seriesLen, numSeries, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType, maxConcurrency);
+    };
+    ohlcvColumns.kdjBatch = ['high', 'low', 'close'];
+
+    host.kstBatch = function kstBatch(inputs, roc1Period, roc2Period, roc3Period, roc4Period, sma1Period, sma2Period, sma3Period, sma4Period, signalPeriod, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const o_kst = new Float32Array(matrix.length);
+        const o_kstSignal = new Float32Array(matrix.length);
+        call(ct_kst_batch, 'ct_kst_batch', matrix, o_kst, o_kstSignal, seriesLen, numSeries, roc1Period, roc2Period, roc3Period, roc4Period, sma1Period, sma2Period, sma3Period, sma4Period, signalPeriod, opts.maxConcurrency ?? 0);
+        return { kst: splitBatchRows(o_kst, seriesLen, numSeries), kstSignal: splitBatchRows(o_kstSignal, seriesLen, numSeries) };
+    };
+    device.kstBatch = function (dInputs, dKst, dKstSignal, seriesLen, numSeries, roc1Period, roc2Period, roc3Period, roc4Period, sma1Period, sma2Period, sma3Period, sma4Period, signalPeriod, maxConcurrency = 0) {
+        deviceCall(ct_kst_batch_d, 'ct_kst_batch_d', dInputs, dKst, dKstSignal, seriesLen, numSeries, roc1Period, roc2Period, roc3Period, roc4Period, sma1Period, sma2Period, sma3Period, sma4Period, signalPeriod, maxConcurrency);
+    };
+
+    host.kstextBatch = function kstextBatch(inputs, roc1Period, roc2Period, roc3Period, roc4Period, ma1Period, ma2Period, ma3Period, ma4Period, signalPeriod, rocmaType, signalMAType, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const o_kst = new Float32Array(matrix.length);
+        const o_kstSignal = new Float32Array(matrix.length);
+        call(ct_kstext_batch, 'ct_kstext_batch', matrix, o_kst, o_kstSignal, seriesLen, numSeries, roc1Period, roc2Period, roc3Period, roc4Period, ma1Period, ma2Period, ma3Period, ma4Period, signalPeriod, rocmaType, signalMAType, opts.maxConcurrency ?? 0);
+        return { kst: splitBatchRows(o_kst, seriesLen, numSeries), kstSignal: splitBatchRows(o_kstSignal, seriesLen, numSeries) };
+    };
+    device.kstextBatch = function (dInputs, dKst, dKstSignal, seriesLen, numSeries, roc1Period, roc2Period, roc3Period, roc4Period, ma1Period, ma2Period, ma3Period, ma4Period, signalPeriod, rocmaType, signalMAType, maxConcurrency = 0) {
+        deviceCall(ct_kstext_batch_d, 'ct_kstext_batch_d', dInputs, dKst, dKstSignal, seriesLen, numSeries, roc1Period, roc2Period, roc3Period, roc4Period, ma1Period, ma2Period, ma3Period, ma4Period, signalPeriod, rocmaType, signalMAType, maxConcurrency);
+    };
+
+    host.kurtosisUnbiasedBatch = function kurtosisUnbiasedBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_kurtosis_unbiased_batch, 'ct_kurtosis_unbiased_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.kurtosisUnbiasedBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_kurtosis_unbiased_batch_d, 'ct_kurtosis_unbiased_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.kvoBatch = function kvoBatch(highs, lows, closes, volumes, fastPeriod, slowPeriod, signalPeriod, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        const m_volumes = toBatchMatrix(volumes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_volumes.seriesLen !== m_highs.seriesLen || m_volumes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const o_kvo = new Float32Array(m_highs.matrix.length);
+        const o_kvoSignal = new Float32Array(m_highs.matrix.length);
+        call(ct_kvo_batch, 'ct_kvo_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, m_volumes.matrix, o_kvo, o_kvoSignal, seriesLen, numSeries, fastPeriod, slowPeriod, signalPeriod, opts.maxConcurrency ?? 0);
+        return { kvo: splitBatchRows(o_kvo, seriesLen, numSeries), kvoSignal: splitBatchRows(o_kvoSignal, seriesLen, numSeries) };
+    };
+    device.kvoBatch = function (dHighs, dLows, dCloses, dVolumes, dKvo, dKvoSignal, seriesLen, numSeries, fastPeriod, slowPeriod, signalPeriod, maxConcurrency = 0) {
+        deviceCall(ct_kvo_batch_d, 'ct_kvo_batch_d', dHighs, dLows, dCloses, dVolumes, dKvo, dKvoSignal, seriesLen, numSeries, fastPeriod, slowPeriod, signalPeriod, maxConcurrency);
+    };
+    ohlcvColumns.kvoBatch = ['high', 'low', 'close', 'volume'];
+
+    host.marketfiBatch = function marketfiBatch(highs, lows, volumes, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_volumes = toBatchMatrix(volumes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_volumes.seriesLen !== m_highs.seriesLen || m_volumes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const out = new Float32Array(m_highs.matrix.length);
+        call(ct_marketfi_batch, 'ct_marketfi_batch', m_highs.matrix, m_lows.matrix, m_volumes.matrix, out, seriesLen, numSeries, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.marketfiBatch = function (dHighs, dLows, dVolumes, dOutputs, seriesLen, numSeries, maxConcurrency = 0) {
+        deviceCall(ct_marketfi_batch_d, 'ct_marketfi_batch_d', dHighs, dLows, dVolumes, dOutputs, seriesLen, numSeries, maxConcurrency);
+    };
+    ohlcvColumns.marketfiBatch = ['high', 'low', 'volume'];
+
+    host.massiBatch = function massiBatch(highs, lows, fastPeriod, slowPeriod, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const out = new Float32Array(m_highs.matrix.length);
+        call(ct_massi_batch, 'ct_massi_batch', m_highs.matrix, m_lows.matrix, out, seriesLen, numSeries, fastPeriod, slowPeriod, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.massiBatch = function (dHighs, dLows, dOutputs, seriesLen, numSeries, fastPeriod, slowPeriod, maxConcurrency = 0) {
+        deviceCall(ct_massi_batch_d, 'ct_massi_batch_d', dHighs, dLows, dOutputs, seriesLen, numSeries, fastPeriod, slowPeriod, maxConcurrency);
+    };
+    ohlcvColumns.massiBatch = ['high', 'low'];
+
+    host.mcgdBatch = function mcgdBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_mcgd_batch, 'ct_mcgd_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.mcgdBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_mcgd_batch_d, 'ct_mcgd_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.medianBatch = function medianBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_median_batch, 'ct_median_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.medianBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_median_batch_d, 'ct_median_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.percentbBatch = function percentbBatch(inputs, period, nbDevUp, nbDevDn, maType, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_percentb_batch, 'ct_percentb_batch', matrix, out, seriesLen, numSeries, period, nbDevUp, nbDevDn, maType, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.percentbBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, nbDevUp, nbDevDn, maType, maxConcurrency = 0) {
+        deviceCall(ct_percentb_batch_d, 'ct_percentb_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, nbDevUp, nbDevDn, maType, maxConcurrency);
+    };
+
+    host.percentileBatch = function percentileBatch(inputs, period, percentile, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_percentile_batch, 'ct_percentile_batch', matrix, out, seriesLen, numSeries, period, percentile, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.percentileBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, percentile, maxConcurrency = 0) {
+        deviceCall(ct_percentile_batch_d, 'ct_percentile_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, percentile, maxConcurrency);
+    };
+
+    host.percentrankBatch = function percentrankBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_percentrank_batch, 'ct_percentrank_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.percentrankBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_percentrank_batch_d, 'ct_percentrank_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.ppoMaBatch = function ppoMaBatch(inputs, fastPeriod, slowPeriod, maType, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_ppo_ma_batch, 'ct_ppo_ma_batch', matrix, out, seriesLen, numSeries, fastPeriod, slowPeriod, maType, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.ppoMaBatch = function (dInputs, dOutputs, seriesLen, numSeries, fastPeriod, slowPeriod, maType, maxConcurrency = 0) {
+        deviceCall(ct_ppo_ma_batch_d, 'ct_ppo_ma_batch_d', dInputs, dOutputs, seriesLen, numSeries, fastPeriod, slowPeriod, maType, maxConcurrency);
+    };
+
+    host.psoBatch = function psoBatch(highs, lows, closes, fastKPeriod, emaPeriod, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const out = new Float32Array(m_highs.matrix.length);
+        call(ct_pso_batch, 'ct_pso_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, out, seriesLen, numSeries, fastKPeriod, emaPeriod, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.psoBatch = function (dHighs, dLows, dCloses, dOutputs, seriesLen, numSeries, fastKPeriod, emaPeriod, maxConcurrency = 0) {
+        deviceCall(ct_pso_batch_d, 'ct_pso_batch_d', dHighs, dLows, dCloses, dOutputs, seriesLen, numSeries, fastKPeriod, emaPeriod, maxConcurrency);
+    };
+    ohlcvColumns.psoBatch = ['high', 'low', 'close'];
+
+    host.pvoMaBatch = function pvoMaBatch(volumes, fastPeriod, slowPeriod, maType, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(volumes, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_pvo_ma_batch, 'ct_pvo_ma_batch', matrix, out, seriesLen, numSeries, fastPeriod, slowPeriod, maType, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.pvoMaBatch = function (dVolumes, dOutputs, seriesLen, numSeries, fastPeriod, slowPeriod, maType, maxConcurrency = 0) {
+        deviceCall(ct_pvo_ma_batch_d, 'ct_pvo_ma_batch_d', dVolumes, dOutputs, seriesLen, numSeries, fastPeriod, slowPeriod, maType, maxConcurrency);
+    };
+    ohlcvColumns.pvoMaBatch = ['volume'];
+
+    host.pvtBatch = function pvtBatch(closes, volumes, opts = {}) {
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        const m_volumes = toBatchMatrix(volumes, opts.seriesLen);
+        if (m_volumes.seriesLen !== m_closes.seriesLen || m_volumes.numSeries !== m_closes.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_closes;
+        const out = new Float32Array(m_closes.matrix.length);
+        call(ct_pvt_batch, 'ct_pvt_batch', m_closes.matrix, m_volumes.matrix, out, seriesLen, numSeries, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.pvtBatch = function (dCloses, dVolumes, dOutputs, seriesLen, numSeries, maxConcurrency = 0) {
+        deviceCall(ct_pvt_batch_d, 'ct_pvt_batch_d', dCloses, dVolumes, dOutputs, seriesLen, numSeries, maxConcurrency);
+    };
+    ohlcvColumns.pvtBatch = ['close', 'volume'];
+
+    host.qstickBatch = function qstickBatch(opens, closes, period, opts = {}) {
+        const m_opens = toBatchMatrix(opens, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_closes.seriesLen !== m_opens.seriesLen || m_closes.numSeries !== m_opens.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_opens;
+        const out = new Float32Array(m_opens.matrix.length);
+        call(ct_qstick_batch, 'ct_qstick_batch', m_opens.matrix, m_closes.matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.qstickBatch = function (dOpens, dCloses, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_qstick_batch_d, 'ct_qstick_batch_d', dOpens, dCloses, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+    ohlcvColumns.qstickBatch = ['open', 'close'];
+
+    host.rmaBatch = function rmaBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_rma_batch, 'ct_rma_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.rmaBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_rma_batch_d, 'ct_rma_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.rogerssatchellBatch = function rogerssatchellBatch(opens, highs, lows, closes, period, annualization, opts = {}) {
+        const m_opens = toBatchMatrix(opens, opts.seriesLen);
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_highs.seriesLen !== m_opens.seriesLen || m_highs.numSeries !== m_opens.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_lows.seriesLen !== m_opens.seriesLen || m_lows.numSeries !== m_opens.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_opens.seriesLen || m_closes.numSeries !== m_opens.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_opens;
+        const out = new Float32Array(m_opens.matrix.length);
+        call(ct_rogerssatchell_batch, 'ct_rogerssatchell_batch', m_opens.matrix, m_highs.matrix, m_lows.matrix, m_closes.matrix, out, seriesLen, numSeries, period, annualization, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.rogerssatchellBatch = function (dOpens, dHighs, dLows, dCloses, dOutputs, seriesLen, numSeries, period, annualization, maxConcurrency = 0) {
+        deviceCall(ct_rogerssatchell_batch_d, 'ct_rogerssatchell_batch_d', dOpens, dHighs, dLows, dCloses, dOutputs, seriesLen, numSeries, period, annualization, maxConcurrency);
+    };
+    ohlcvColumns.rogerssatchellBatch = ['open', 'high', 'low', 'close'];
+
+    host.rviBatch = function rviBatch(inputs, period, stdDevPeriod, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_rvi_batch, 'ct_rvi_batch', matrix, out, seriesLen, numSeries, period, stdDevPeriod, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.rviBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, stdDevPeriod, maxConcurrency = 0) {
+        deviceCall(ct_rvi_batch_d, 'ct_rvi_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, stdDevPeriod, maxConcurrency);
+    };
+
+    host.rvirBatch = function rvirBatch(highs, lows, period, stdDevPeriod, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const out = new Float32Array(m_highs.matrix.length);
+        call(ct_rvir_batch, 'ct_rvir_batch', m_highs.matrix, m_lows.matrix, out, seriesLen, numSeries, period, stdDevPeriod, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.rvirBatch = function (dHighs, dLows, dOutputs, seriesLen, numSeries, period, stdDevPeriod, maxConcurrency = 0) {
+        deviceCall(ct_rvir_batch_d, 'ct_rvir_batch_d', dHighs, dLows, dOutputs, seriesLen, numSeries, period, stdDevPeriod, maxConcurrency);
+    };
+    ohlcvColumns.rvirBatch = ['high', 'low'];
+
+    host.rvolBatch = function rvolBatch(volumes, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(volumes, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_rvol_batch, 'ct_rvol_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.rvolBatch = function (dVolumes, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_rvol_batch_d, 'ct_rvol_batch_d', dVolumes, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+    ohlcvColumns.rvolBatch = ['volume'];
+
+    host.siBatch = function siBatch(opens, highs, lows, closes, limitMove, opts = {}) {
+        const m_opens = toBatchMatrix(opens, opts.seriesLen);
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_highs.seriesLen !== m_opens.seriesLen || m_highs.numSeries !== m_opens.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_lows.seriesLen !== m_opens.seriesLen || m_lows.numSeries !== m_opens.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_opens.seriesLen || m_closes.numSeries !== m_opens.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_opens;
+        const out = new Float32Array(m_opens.matrix.length);
+        call(ct_si_batch, 'ct_si_batch', m_opens.matrix, m_highs.matrix, m_lows.matrix, m_closes.matrix, out, seriesLen, numSeries, limitMove, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.siBatch = function (dOpens, dHighs, dLows, dCloses, dOutputs, seriesLen, numSeries, limitMove, maxConcurrency = 0) {
+        deviceCall(ct_si_batch_d, 'ct_si_batch_d', dOpens, dHighs, dLows, dCloses, dOutputs, seriesLen, numSeries, limitMove, maxConcurrency);
+    };
+    ohlcvColumns.siBatch = ['open', 'high', 'low', 'close'];
+
+    host.smiBatch = function smiBatch(highs, lows, closes, period, fastPeriod, slowPeriod, signalPeriod, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const o_smi = new Float32Array(m_highs.matrix.length);
+        const o_smiSignal = new Float32Array(m_highs.matrix.length);
+        call(ct_smi_batch, 'ct_smi_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, o_smi, o_smiSignal, seriesLen, numSeries, period, fastPeriod, slowPeriod, signalPeriod, opts.maxConcurrency ?? 0);
+        return { smi: splitBatchRows(o_smi, seriesLen, numSeries), smiSignal: splitBatchRows(o_smiSignal, seriesLen, numSeries) };
+    };
+    device.smiBatch = function (dHighs, dLows, dCloses, dSmi, dSmiSignal, seriesLen, numSeries, period, fastPeriod, slowPeriod, signalPeriod, maxConcurrency = 0) {
+        deviceCall(ct_smi_batch_d, 'ct_smi_batch_d', dHighs, dLows, dCloses, dSmi, dSmiSignal, seriesLen, numSeries, period, fastPeriod, slowPeriod, signalPeriod, maxConcurrency);
+    };
+    ohlcvColumns.smiBatch = ['high', 'low', 'close'];
+
+    host.sqzmomBatch = function sqzmomBatch(highs, lows, closes, bbPeriod, nbDev, kcPeriod, factorWide, factorNormal, factorNarrow, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const o_momentum = new Float32Array(m_highs.matrix.length);
+        const o_squeeze = new Int32Array(m_highs.matrix.length);
+        call(ct_sqzmom_batch, 'ct_sqzmom_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, o_momentum, o_squeeze, seriesLen, numSeries, bbPeriod, nbDev, kcPeriod, factorWide, factorNormal, factorNarrow, opts.maxConcurrency ?? 0);
+        return { momentum: splitBatchRows(o_momentum, seriesLen, numSeries), squeeze: splitBatchRows(o_squeeze, seriesLen, numSeries) };
+    };
+    device.sqzmomBatch = function (dHighs, dLows, dCloses, dMomentum, dSqueeze, seriesLen, numSeries, bbPeriod, nbDev, kcPeriod, factorWide, factorNormal, factorNarrow, maxConcurrency = 0) {
+        deviceCall(ct_sqzmom_batch_d, 'ct_sqzmom_batch_d', dHighs, dLows, dCloses, dMomentum, dSqueeze, seriesLen, numSeries, bbPeriod, nbDev, kcPeriod, factorWide, factorNormal, factorNarrow, maxConcurrency);
+    };
+    ohlcvColumns.sqzmomBatch = ['high', 'low', 'close'];
+
+    host.stcBatch = function stcBatch(inputs, fastPeriod, slowPeriod, cyclePeriod, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_stc_batch, 'ct_stc_batch', matrix, out, seriesLen, numSeries, fastPeriod, slowPeriod, cyclePeriod, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.stcBatch = function (dInputs, dOutputs, seriesLen, numSeries, fastPeriod, slowPeriod, cyclePeriod, maxConcurrency = 0) {
+        deviceCall(ct_stc_batch_d, 'ct_stc_batch_d', dInputs, dOutputs, seriesLen, numSeries, fastPeriod, slowPeriod, cyclePeriod, maxConcurrency);
+    };
+
+    host.stochasticMaBatch = function stochasticMaBatch(highs, lows, closes, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const o_slowK = new Float32Array(m_highs.matrix.length);
+        const o_slowD = new Float32Array(m_highs.matrix.length);
+        call(ct_stochastic_ma_batch, 'ct_stochastic_ma_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, o_slowK, o_slowD, seriesLen, numSeries, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType, opts.maxConcurrency ?? 0);
+        return { slowK: splitBatchRows(o_slowK, seriesLen, numSeries), slowD: splitBatchRows(o_slowD, seriesLen, numSeries) };
+    };
+    device.stochasticMaBatch = function (dHighs, dLows, dCloses, dSlowK, dSlowD, seriesLen, numSeries, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType, maxConcurrency = 0) {
+        deviceCall(ct_stochastic_ma_batch_d, 'ct_stochastic_ma_batch_d', dHighs, dLows, dCloses, dSlowK, dSlowD, seriesLen, numSeries, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType, maxConcurrency);
+    };
+    ohlcvColumns.stochasticMaBatch = ['high', 'low', 'close'];
+
+    host.stochfMaBatch = function stochfMaBatch(highs, lows, closes, fastKPeriod, fastDPeriod, fastDMAType, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const o_fastK = new Float32Array(m_highs.matrix.length);
+        const o_fastD = new Float32Array(m_highs.matrix.length);
+        call(ct_stochf_ma_batch, 'ct_stochf_ma_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, o_fastK, o_fastD, seriesLen, numSeries, fastKPeriod, fastDPeriod, fastDMAType, opts.maxConcurrency ?? 0);
+        return { fastK: splitBatchRows(o_fastK, seriesLen, numSeries), fastD: splitBatchRows(o_fastD, seriesLen, numSeries) };
+    };
+    device.stochfMaBatch = function (dHighs, dLows, dCloses, dFastK, dFastD, seriesLen, numSeries, fastKPeriod, fastDPeriod, fastDMAType, maxConcurrency = 0) {
+        deviceCall(ct_stochf_ma_batch_d, 'ct_stochf_ma_batch_d', dHighs, dLows, dCloses, dFastK, dFastD, seriesLen, numSeries, fastKPeriod, fastDPeriod, fastDMAType, maxConcurrency);
+    };
+    ohlcvColumns.stochfMaBatch = ['high', 'low', 'close'];
+
+    host.stochrsiMaBatch = function stochrsiMaBatch(inputs, period, fastKPeriod, fastDPeriod, fastDMAType, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const o_fastK = new Float32Array(matrix.length);
+        const o_fastD = new Float32Array(matrix.length);
+        call(ct_stochrsi_ma_batch, 'ct_stochrsi_ma_batch', matrix, o_fastK, o_fastD, seriesLen, numSeries, period, fastKPeriod, fastDPeriod, fastDMAType, opts.maxConcurrency ?? 0);
+        return { fastK: splitBatchRows(o_fastK, seriesLen, numSeries), fastD: splitBatchRows(o_fastD, seriesLen, numSeries) };
+    };
+    device.stochrsiMaBatch = function (dInputs, dFastK, dFastD, seriesLen, numSeries, period, fastKPeriod, fastDPeriod, fastDMAType, maxConcurrency = 0) {
+        deviceCall(ct_stochrsi_ma_batch_d, 'ct_stochrsi_ma_batch_d', dInputs, dFastK, dFastD, seriesLen, numSeries, period, fastKPeriod, fastDPeriod, fastDMAType, maxConcurrency);
+    };
+
+    host.supertrendBatch = function supertrendBatch(highs, lows, closes, period, multiplier, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const o_supertrend = new Float32Array(m_highs.matrix.length);
+        const o_trend = new Int32Array(m_highs.matrix.length);
+        call(ct_supertrend_batch, 'ct_supertrend_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, o_supertrend, o_trend, seriesLen, numSeries, period, multiplier, opts.maxConcurrency ?? 0);
+        return { supertrend: splitBatchRows(o_supertrend, seriesLen, numSeries), trend: splitBatchRows(o_trend, seriesLen, numSeries) };
+    };
+    device.supertrendBatch = function (dHighs, dLows, dCloses, dSupertrend, dTrend, seriesLen, numSeries, period, multiplier, maxConcurrency = 0) {
+        deviceCall(ct_supertrend_batch_d, 'ct_supertrend_batch_d', dHighs, dLows, dCloses, dSupertrend, dTrend, seriesLen, numSeries, period, multiplier, maxConcurrency);
+    };
+    ohlcvColumns.supertrendBatch = ['high', 'low', 'close'];
+
+    host.swak2phpBatch = function swak2phpBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_swak_2php_batch, 'ct_swak_2php_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.swak2phpBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_swak_2php_batch_d, 'ct_swak_2php_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.swakBpBatch = function swakBpBatch(inputs, period, delta, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_swak_bp_batch, 'ct_swak_bp_batch', matrix, out, seriesLen, numSeries, period, delta, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.swakBpBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, delta, maxConcurrency = 0) {
+        deviceCall(ct_swak_bp_batch_d, 'ct_swak_bp_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, delta, maxConcurrency);
+    };
+
+    host.swakButterBatch = function swakButterBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_swak_butter_batch, 'ct_swak_butter_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.swakButterBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_swak_butter_batch_d, 'ct_swak_butter_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.swakGaussBatch = function swakGaussBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_swak_gauss_batch, 'ct_swak_gauss_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.swakGaussBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_swak_gauss_batch_d, 'ct_swak_gauss_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.swakHpBatch = function swakHpBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_swak_hp_batch, 'ct_swak_hp_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.swakHpBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_swak_hp_batch_d, 'ct_swak_hp_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.tsiBatch = function tsiBatch(inputs, firstPeriod, secondPeriod, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_tsi_batch, 'ct_tsi_batch', matrix, out, seriesLen, numSeries, firstPeriod, secondPeriod, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.tsiBatch = function (dInputs, dOutputs, seriesLen, numSeries, firstPeriod, secondPeriod, maxConcurrency = 0) {
+        deviceCall(ct_tsi_batch_d, 'ct_tsi_batch_d', dInputs, dOutputs, seriesLen, numSeries, firstPeriod, secondPeriod, maxConcurrency);
+    };
+
+    host.vhfBatch = function vhfBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_vhf_batch, 'ct_vhf_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.vhfBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_vhf_batch_d, 'ct_vhf_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.vidyaBatch = function vidyaBatch(inputs, period, cmoPeriod, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_vidya_batch, 'ct_vidya_batch', matrix, out, seriesLen, numSeries, period, cmoPeriod, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.vidyaBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, cmoPeriod, maxConcurrency = 0) {
+        deviceCall(ct_vidya_batch_d, 'ct_vidya_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, cmoPeriod, maxConcurrency);
+    };
+
+    host.vortexBatch = function vortexBatch(highs, lows, closes, period, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const o_plusVI = new Float32Array(m_highs.matrix.length);
+        const o_minusVI = new Float32Array(m_highs.matrix.length);
+        call(ct_vortex_batch, 'ct_vortex_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, o_plusVI, o_minusVI, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return { plusVI: splitBatchRows(o_plusVI, seriesLen, numSeries), minusVI: splitBatchRows(o_minusVI, seriesLen, numSeries) };
+    };
+    device.vortexBatch = function (dHighs, dLows, dCloses, dPlusVI, dMinusVI, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_vortex_batch_d, 'ct_vortex_batch_d', dHighs, dLows, dCloses, dPlusVI, dMinusVI, seriesLen, numSeries, period, maxConcurrency);
+    };
+    ohlcvColumns.vortexBatch = ['high', 'low', 'close'];
+
+    host.vwapBatch = function vwapBatch(highs, lows, closes, volumes, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        const m_volumes = toBatchMatrix(volumes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_volumes.seriesLen !== m_highs.seriesLen || m_volumes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const out = new Float32Array(m_highs.matrix.length);
+        call(ct_vwap_batch, 'ct_vwap_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, m_volumes.matrix, out, seriesLen, numSeries, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.vwapBatch = function (dHighs, dLows, dCloses, dVolumes, dOutputs, seriesLen, numSeries, maxConcurrency = 0) {
+        deviceCall(ct_vwap_batch_d, 'ct_vwap_batch_d', dHighs, dLows, dCloses, dVolumes, dOutputs, seriesLen, numSeries, maxConcurrency);
+    };
+    ohlcvColumns.vwapBatch = ['high', 'low', 'close', 'volume'];
+
+    host.vwmaBatch = function vwmaBatch(inputs, volumes, period, opts = {}) {
+        const m_inputs = toBatchMatrix(inputs, opts.seriesLen);
+        const m_volumes = toBatchMatrix(volumes, opts.seriesLen);
+        if (m_volumes.seriesLen !== m_inputs.seriesLen || m_volumes.numSeries !== m_inputs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_inputs;
+        const out = new Float32Array(m_inputs.matrix.length);
+        call(ct_vwma_batch, 'ct_vwma_batch', m_inputs.matrix, m_volumes.matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.vwmaBatch = function (dInputs, dVolumes, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_vwma_batch_d, 'ct_vwma_batch_d', dInputs, dVolumes, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    host.wadBatch = function wadBatch(highs, lows, closes, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const out = new Float32Array(m_highs.matrix.length);
+        call(ct_wad_batch, 'ct_wad_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, out, seriesLen, numSeries, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.wadBatch = function (dHighs, dLows, dCloses, dOutputs, seriesLen, numSeries, maxConcurrency = 0) {
+        deviceCall(ct_wad_batch_d, 'ct_wad_batch_d', dHighs, dLows, dCloses, dOutputs, seriesLen, numSeries, maxConcurrency);
+    };
+    ohlcvColumns.wadBatch = ['high', 'low', 'close'];
+
+    host.wavetrendBatch = function wavetrendBatch(highs, lows, closes, channelPeriod, averagePeriod, signalPeriod, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        const m_closes = toBatchMatrix(closes, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        if (m_closes.seriesLen !== m_highs.seriesLen || m_closes.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const o_wT1 = new Float32Array(m_highs.matrix.length);
+        const o_wT2 = new Float32Array(m_highs.matrix.length);
+        call(ct_wavetrend_batch, 'ct_wavetrend_batch', m_highs.matrix, m_lows.matrix, m_closes.matrix, o_wT1, o_wT2, seriesLen, numSeries, channelPeriod, averagePeriod, signalPeriod, opts.maxConcurrency ?? 0);
+        return { wT1: splitBatchRows(o_wT1, seriesLen, numSeries), wT2: splitBatchRows(o_wT2, seriesLen, numSeries) };
+    };
+    device.wavetrendBatch = function (dHighs, dLows, dCloses, dWT1, dWT2, seriesLen, numSeries, channelPeriod, averagePeriod, signalPeriod, maxConcurrency = 0) {
+        deviceCall(ct_wavetrend_batch_d, 'ct_wavetrend_batch_d', dHighs, dLows, dCloses, dWT1, dWT2, seriesLen, numSeries, channelPeriod, averagePeriod, signalPeriod, maxConcurrency);
+    };
+    ohlcvColumns.wavetrendBatch = ['high', 'low', 'close'];
+
+    host.zigzagBatch = function zigzagBatch(highs, lows, sensitivity, minTrendLength, opts = {}) {
+        const m_highs = toBatchMatrix(highs, opts.seriesLen);
+        const m_lows = toBatchMatrix(lows, opts.seriesLen);
+        if (m_lows.seriesLen !== m_highs.seriesLen || m_lows.numSeries !== m_highs.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');
+        const { seriesLen, numSeries } = m_highs;
+        const o_zigZag = new Float32Array(m_highs.matrix.length);
+        const o_trend = new Int32Array(m_highs.matrix.length);
+        const o_pivotIdx = new Int32Array(m_highs.matrix.length);
+        call(ct_zigzag_batch, 'ct_zigzag_batch', m_highs.matrix, m_lows.matrix, o_zigZag, o_trend, o_pivotIdx, seriesLen, numSeries, sensitivity, minTrendLength, opts.maxConcurrency ?? 0);
+        return { zigZag: splitBatchRows(o_zigZag, seriesLen, numSeries), trend: splitBatchRows(o_trend, seriesLen, numSeries), pivotIdx: splitBatchRows(o_pivotIdx, seriesLen, numSeries) };
+    };
+    device.zigzagBatch = function (dHighs, dLows, dZigZag, dTrend, dPivotIdx, seriesLen, numSeries, sensitivity, minTrendLength, maxConcurrency = 0) {
+        deviceCall(ct_zigzag_batch_d, 'ct_zigzag_batch_d', dHighs, dLows, dZigZag, dTrend, dPivotIdx, seriesLen, numSeries, sensitivity, minTrendLength, maxConcurrency);
+    };
+    ohlcvColumns.zigzagBatch = ['high', 'low'];
+
+    host.zlemaBatch = function zlemaBatch(inputs, period, opts = {}) {
+        const { matrix, seriesLen, numSeries } = toBatchMatrix(inputs, opts.seriesLen);
+        const out = new Float32Array(matrix.length);
+        call(ct_zlema_batch, 'ct_zlema_batch', matrix, out, seriesLen, numSeries, period, opts.maxConcurrency ?? 0);
+        return splitBatchRows(out, seriesLen, numSeries);
+    };
+    device.zlemaBatch = function (dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency = 0) {
+        deviceCall(ct_zlema_batch_d, 'ct_zlema_batch_d', dInputs, dOutputs, seriesLen, numSeries, period, maxConcurrency);
+    };
+
+    const ct_ac = lib.func('int ct_ac(const float *high, const float *low, float *output, int size, int fastPeriod, int slowPeriod, int signalPeriod, void *stream)');
+    host.ac = function (high, low, fastPeriod, slowPeriod, signalPeriod) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        call(ct_ac, 'ct_ac', m_highs.matrix, m_lows.matrix, output0, m_highs.seriesLen, fastPeriod, slowPeriod, signalPeriod);
+        return output0;
+    };
+    const ct_adr = lib.func('int ct_adr(const float *high, const float *low, float *output, int size, int period, void *stream)');
+    host.adr = function (high, low, period) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        call(ct_adr, 'ct_adr', m_highs.matrix, m_lows.matrix, output0, m_highs.seriesLen, period);
+        return output0;
+    };
+    const ct_alma = lib.func('int ct_alma(const float *input, float *output, int size, int period, double sigma, double offset, void *stream)');
+    host.alma = function (input, period, sigma, offset) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_alma, 'ct_alma', m_inputs.matrix, output0, m_inputs.seriesLen, period, sigma, offset);
+        return output0;
+    };
+    const ct_ao = lib.func('int ct_ao(const float *high, const float *low, float *output, int size, int fastPeriod, int slowPeriod, void *stream)');
+    host.ao = function (high, low, fastPeriod, slowPeriod) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        call(ct_ao, 'ct_ao', m_highs.matrix, m_lows.matrix, output0, m_highs.seriesLen, fastPeriod, slowPeriod);
+        return output0;
+    };
+    const ct_asi_wilder = lib.func('int ct_asi_wilder(const float *open, const float *high, const float *low, const float *close, float *output, int size, double limitMove, void *stream)');
+    host.asiWilder = function (open, high, low, close, limitMove) {
+        const m_opens = toBatchMatrix([open]);
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_highs.seriesLen !== m_opens.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_lows.seriesLen !== m_opens.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_opens.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_opens.seriesLen);
+        call(ct_asi_wilder, 'ct_asi_wilder', m_opens.matrix, m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, m_opens.seriesLen, limitMove);
+        return output0;
+    };
+    const ct_bbands_ma = lib.func('int ct_bbands_ma(const float *input, float *realUpperBand, float *realMiddleBand, float *realLowerBand, int size, int period, double nbDevUp, double nbDevDn, int maType, void *stream)');
+    host.bbandsMa = function (input, period, nbDevUp, nbDevDn, maType) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        const output1 = new Float32Array(m_inputs.seriesLen);
+        const output2 = new Float32Array(m_inputs.seriesLen);
+        call(ct_bbands_ma, 'ct_bbands_ma', m_inputs.matrix, output0, output1, output2, m_inputs.seriesLen, period, nbDevUp, nbDevDn, maType);
+        return {realUpperBand: output0, realMiddleBand: output1, realLowerBand: output2};
+    };
+    const ct_bbw = lib.func('int ct_bbw(const float *input, float *output, int size, int period, double nbDevUp, double nbDevDn, int maType, void *stream)');
+    host.bbw = function (input, period, nbDevUp, nbDevDn, maType) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_bbw, 'ct_bbw', m_inputs.matrix, output0, m_inputs.seriesLen, period, nbDevUp, nbDevDn, maType);
+        return output0;
+    };
+    const ct_cg = lib.func('int ct_cg(const float *input, float *output, int size, int period, void *stream)');
+    host.cg = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_cg, 'ct_cg', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_chop = lib.func('int ct_chop(const float *high, const float *low, const float *close, float *output, int size, int period, void *stream)');
+    host.chop = function (high, low, close, period) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        call(ct_chop, 'ct_chop', m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, m_highs.seriesLen, period);
+        return output0;
+    };
+    const ct_choptr = lib.func('int ct_choptr(const float *high, const float *low, const float *close, float *output, int size, int period, void *stream)');
+    host.choptr = function (high, low, close, period) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        call(ct_choptr, 'ct_choptr', m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, m_highs.seriesLen, period);
+        return output0;
+    };
+    const ct_cksp = lib.func('int ct_cksp(const float *high, const float *low, const float *close, float *highStop, float *lowStop, int size, int period, double multiplier, int stopPeriod, void *stream)');
+    host.cksp = function (high, low, close, period, multiplier, stopPeriod) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        const output1 = new Float32Array(m_highs.seriesLen);
+        call(ct_cksp, 'ct_cksp', m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, output1, m_highs.seriesLen, period, multiplier, stopPeriod);
+        return {highStop: output0, lowStop: output1};
+    };
+    const ct_cmf = lib.func('int ct_cmf(const float *high, const float *low, const float *close, const float *volume, float *output, int size, int period, void *stream)');
+    host.cmf = function (high, low, close, volume, period) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        const m_volumes = toBatchMatrix([volume]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_volumes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        call(ct_cmf, 'ct_cmf', m_highs.matrix, m_lows.matrix, m_closes.matrix, m_volumes.matrix, output0, m_highs.seriesLen, period);
+        return output0;
+    };
+    const ct_cmou = lib.func('int ct_cmou(const float *input, float *output, int size, int period, void *stream)');
+    host.cmou = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_cmou, 'ct_cmou', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_coppock = lib.func('int ct_coppock(const float *input, float *output, int size, int wmaPeriod, int roc1Period, int roc2Period, void *stream)');
+    host.coppock = function (input, wmaPeriod, roc1Period, roc2Period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_coppock, 'ct_coppock', m_inputs.matrix, output0, m_inputs.seriesLen, wmaPeriod, roc1Period, roc2Period);
+        return output0;
+    };
+    const ct_crsi = lib.func('int ct_crsi(const float *input, float *output, int size, int period, int streakPeriod, int rankPeriod, void *stream)');
+    host.crsi = function (input, period, streakPeriod, rankPeriod) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_crsi, 'ct_crsi', m_inputs.matrix, output0, m_inputs.seriesLen, period, streakPeriod, rankPeriod);
+        return output0;
+    };
+    const ct_cti = lib.func('int ct_cti(const float *input, float *output, int size, int period, void *stream)');
+    host.cti = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_cti, 'ct_cti', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_cumsum = lib.func('int ct_cumsum(const float *input, float *output, int size, void *stream)');
+    host.cumsum = function (input) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_cumsum, 'ct_cumsum', m_inputs.matrix, output0, m_inputs.seriesLen);
+        return output0;
+    };
+    const ct_cvi = lib.func('int ct_cvi(const float *high, const float *low, float *output, int size, int period, int rocPeriod, void *stream)');
+    host.cvi = function (high, low, period, rocPeriod) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        call(ct_cvi, 'ct_cvi', m_highs.matrix, m_lows.matrix, output0, m_highs.seriesLen, period, rocPeriod);
+        return output0;
+    };
+    const ct_donchian = lib.func('int ct_donchian(const float *high, const float *low, float *realUpperBand, float *realMiddleBand, float *realLowerBand, int size, int period, void *stream)');
+    host.donchian = function (high, low, period) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        const output1 = new Float32Array(m_highs.seriesLen);
+        const output2 = new Float32Array(m_highs.seriesLen);
+        call(ct_donchian, 'ct_donchian', m_highs.matrix, m_lows.matrix, output0, output1, output2, m_highs.seriesLen, period);
+        return {realUpperBand: output0, realMiddleBand: output1, realLowerBand: output2};
+    };
+    const ct_dosc = lib.func('int ct_dosc(const float *input, float *output, int size, int period, int firstPeriod, int secondPeriod, int signalPeriod, void *stream)');
+    host.dosc = function (input, period, firstPeriod, secondPeriod, signalPeriod) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_dosc, 'ct_dosc', m_inputs.matrix, output0, m_inputs.seriesLen, period, firstPeriod, secondPeriod, signalPeriod);
+        return output0;
+    };
+    const ct_dpo = lib.func('int ct_dpo(const float *input, float *output, int size, int period, void *stream)');
+    host.dpo = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_dpo, 'ct_dpo', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_efi = lib.func('int ct_efi(const float *close, const float *volume, float *output, int size, int period, void *stream)');
+    host.efi = function (close, volume, period) {
+        const m_closes = toBatchMatrix([close]);
+        const m_volumes = toBatchMatrix([volume]);
+        if (m_volumes.seriesLen !== m_closes.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_closes.seriesLen);
+        call(ct_efi, 'ct_efi', m_closes.matrix, m_volumes.matrix, output0, m_closes.seriesLen, period);
+        return output0;
+    };
+    const ct_emv = lib.func('int ct_emv(const float *high, const float *low, const float *volume, float *output, int size, int period, double volumeDivisor, void *stream)');
+    host.emv = function (high, low, volume, period, volumeDivisor) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_volumes = toBatchMatrix([volume]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_volumes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        call(ct_emv, 'ct_emv', m_highs.matrix, m_lows.matrix, m_volumes.matrix, output0, m_highs.seriesLen, period, volumeDivisor);
+        return output0;
+    };
+    const ct_er = lib.func('int ct_er(const float *input, float *output, int size, int period, void *stream)');
+    host.er = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_er, 'ct_er', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_eri = lib.func('int ct_eri(const float *high, const float *low, const float *close, float *bullPower, float *bearPower, int size, int period, void *stream)');
+    host.eri = function (high, low, close, period) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        const output1 = new Float32Array(m_highs.seriesLen);
+        call(ct_eri, 'ct_eri', m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, output1, m_highs.seriesLen, period);
+        return {bullPower: output0, bearPower: output1};
+    };
+    const ct_fisher = lib.func('int ct_fisher(const float *high, const float *low, float *fisher, float *trigger, int size, int period, void *stream)');
+    host.fisher = function (high, low, period) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        const output1 = new Float32Array(m_highs.seriesLen);
+        call(ct_fisher, 'ct_fisher', m_highs.matrix, m_lows.matrix, output0, output1, m_highs.seriesLen, period);
+        return {fisher: output0, trigger: output1};
+    };
+    const ct_fosc = lib.func('int ct_fosc(const float *input, float *output, int size, int period, void *stream)');
+    host.fosc = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_fosc, 'ct_fosc', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_fractal = lib.func('int ct_fractal(const float *high, const float *low, int *swingHigh, int *swingLow, int size, int leftBars, int rightBars, void *stream)');
+    host.fractal = function (high, low, leftBars, rightBars) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Int32Array(m_highs.seriesLen);
+        const output1 = new Int32Array(m_highs.seriesLen);
+        call(ct_fractal, 'ct_fractal', m_highs.matrix, m_lows.matrix, output0, output1, m_highs.seriesLen, leftBars, rightBars);
+        return {swingHigh: output0, swingLow: output1};
+    };
+    const ct_frama = lib.func('int ct_frama(const float *high, const float *low, float *output, int size, int period, void *stream)');
+    host.frama = function (high, low, period) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        call(ct_frama, 'ct_frama', m_highs.matrix, m_lows.matrix, output0, m_highs.seriesLen, period);
+        return output0;
+    };
+    const ct_ha = lib.func('int ct_ha(const float *open, const float *high, const float *low, const float *close, float *haOpen, float *haHigh, float *haLow, float *haClose, int size, void *stream)');
+    host.ha = function (open, high, low, close) {
+        const m_opens = toBatchMatrix([open]);
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_highs.seriesLen !== m_opens.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_lows.seriesLen !== m_opens.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_opens.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_opens.seriesLen);
+        const output1 = new Float32Array(m_opens.seriesLen);
+        const output2 = new Float32Array(m_opens.seriesLen);
+        const output3 = new Float32Array(m_opens.seriesLen);
+        call(ct_ha, 'ct_ha', m_opens.matrix, m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, output1, output2, output3, m_opens.seriesLen);
+        return {haOpen: output0, haHigh: output1, haLow: output2, haClose: output3};
+    };
+    const ct_hma = lib.func('int ct_hma(const float *input, float *output, int size, int period, void *stream)');
+    host.hma = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_hma, 'ct_hma', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_ibs = lib.func('int ct_ibs(const float *high, const float *low, const float *close, float *output, int size, void *stream)');
+    host.ibs = function (high, low, close) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        call(ct_ibs, 'ct_ibs', m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, m_highs.seriesLen);
+        return output0;
+    };
+    const ct_ichimoku = lib.func('int ct_ichimoku(const float *high, const float *low, float *tenkanSen, float *kijunSen, float *senkouSpanA, float *senkouSpanB, int size, int tenkanPeriod, int kijunPeriod, int senkouBPeriod, void *stream)');
+    host.ichimoku = function (high, low, tenkanPeriod, kijunPeriod, senkouBPeriod) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        const output1 = new Float32Array(m_highs.seriesLen);
+        const output2 = new Float32Array(m_highs.seriesLen);
+        const output3 = new Float32Array(m_highs.seriesLen);
+        call(ct_ichimoku, 'ct_ichimoku', m_highs.matrix, m_lows.matrix, output0, output1, output2, output3, m_highs.seriesLen, tenkanPeriod, kijunPeriod, senkouBPeriod);
+        return {tenkanSen: output0, kijunSen: output1, senkouSpanA: output2, senkouSpanB: output3};
+    };
+    const ct_kc = lib.func('int ct_kc(const float *high, const float *low, const float *close, float *realUpperBand, float *realMiddleBand, float *realLowerBand, int size, int period, int atrPeriod, double nbDev, void *stream)');
+    host.kc = function (high, low, close, period, atrPeriod, nbDev) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        const output1 = new Float32Array(m_highs.seriesLen);
+        const output2 = new Float32Array(m_highs.seriesLen);
+        call(ct_kc, 'ct_kc', m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, output1, output2, m_highs.seriesLen, period, atrPeriod, nbDev);
+        return {realUpperBand: output0, realMiddleBand: output1, realLowerBand: output2};
+    };
+    const ct_kdj = lib.func('int ct_kdj(const float *high, const float *low, const float *close, float *k, float *d, float *j, int size, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, void *stream)');
+    host.kdj = function (high, low, close, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        const output1 = new Float32Array(m_highs.seriesLen);
+        const output2 = new Float32Array(m_highs.seriesLen);
+        call(ct_kdj, 'ct_kdj', m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, output1, output2, m_highs.seriesLen, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType);
+        return {k: output0, d: output1, j: output2};
+    };
+    const ct_kst = lib.func('int ct_kst(const float *input, float *kst, float *kstSignal, int size, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int sma1Period, int sma2Period, int sma3Period, int sma4Period, int signalPeriod, void *stream)');
+    host.kst = function (input, roc1Period, roc2Period, roc3Period, roc4Period, sma1Period, sma2Period, sma3Period, sma4Period, signalPeriod) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        const output1 = new Float32Array(m_inputs.seriesLen);
+        call(ct_kst, 'ct_kst', m_inputs.matrix, output0, output1, m_inputs.seriesLen, roc1Period, roc2Period, roc3Period, roc4Period, sma1Period, sma2Period, sma3Period, sma4Period, signalPeriod);
+        return {kst: output0, kstSignal: output1};
+    };
+    const ct_kstext = lib.func('int ct_kstext(const float *input, float *kst, float *kstSignal, int size, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int ma1Period, int ma2Period, int ma3Period, int ma4Period, int signalPeriod, int rocmaType, int signalMAType, void *stream)');
+    host.kstext = function (input, roc1Period, roc2Period, roc3Period, roc4Period, ma1Period, ma2Period, ma3Period, ma4Period, signalPeriod, rocmaType, signalMAType) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        const output1 = new Float32Array(m_inputs.seriesLen);
+        call(ct_kstext, 'ct_kstext', m_inputs.matrix, output0, output1, m_inputs.seriesLen, roc1Period, roc2Period, roc3Period, roc4Period, ma1Period, ma2Period, ma3Period, ma4Period, signalPeriod, rocmaType, signalMAType);
+        return {kst: output0, kstSignal: output1};
+    };
+    const ct_kurtosis_unbiased = lib.func('int ct_kurtosis_unbiased(const float *input, float *output, int size, int period, void *stream)');
+    host.kurtosisUnbiased = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_kurtosis_unbiased, 'ct_kurtosis_unbiased', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_kvo = lib.func('int ct_kvo(const float *high, const float *low, const float *close, const float *volume, float *kvo, float *kvoSignal, int size, int fastPeriod, int slowPeriod, int signalPeriod, void *stream)');
+    host.kvo = function (high, low, close, volume, fastPeriod, slowPeriod, signalPeriod) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        const m_volumes = toBatchMatrix([volume]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_volumes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        const output1 = new Float32Array(m_highs.seriesLen);
+        call(ct_kvo, 'ct_kvo', m_highs.matrix, m_lows.matrix, m_closes.matrix, m_volumes.matrix, output0, output1, m_highs.seriesLen, fastPeriod, slowPeriod, signalPeriod);
+        return {kvo: output0, kvoSignal: output1};
+    };
+    const ct_marketfi = lib.func('int ct_marketfi(const float *high, const float *low, const float *volume, float *output, int size, void *stream)');
+    host.marketfi = function (high, low, volume) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_volumes = toBatchMatrix([volume]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_volumes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        call(ct_marketfi, 'ct_marketfi', m_highs.matrix, m_lows.matrix, m_volumes.matrix, output0, m_highs.seriesLen);
+        return output0;
+    };
+    const ct_massi = lib.func('int ct_massi(const float *high, const float *low, float *output, int size, int fastPeriod, int slowPeriod, void *stream)');
+    host.massi = function (high, low, fastPeriod, slowPeriod) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        call(ct_massi, 'ct_massi', m_highs.matrix, m_lows.matrix, output0, m_highs.seriesLen, fastPeriod, slowPeriod);
+        return output0;
+    };
+    const ct_mcgd = lib.func('int ct_mcgd(const float *input, float *output, int size, int period, void *stream)');
+    host.mcgd = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_mcgd, 'ct_mcgd', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_median = lib.func('int ct_median(const float *input, float *output, int size, int period, void *stream)');
+    host.median = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_median, 'ct_median', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_percentb = lib.func('int ct_percentb(const float *input, float *output, int size, int period, double nbDevUp, double nbDevDn, int maType, void *stream)');
+    host.percentb = function (input, period, nbDevUp, nbDevDn, maType) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_percentb, 'ct_percentb', m_inputs.matrix, output0, m_inputs.seriesLen, period, nbDevUp, nbDevDn, maType);
+        return output0;
+    };
+    const ct_percentile = lib.func('int ct_percentile(const float *input, float *output, int size, int period, double percentile, void *stream)');
+    host.percentile = function (input, period, percentile) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_percentile, 'ct_percentile', m_inputs.matrix, output0, m_inputs.seriesLen, period, percentile);
+        return output0;
+    };
+    const ct_percentrank = lib.func('int ct_percentrank(const float *input, float *output, int size, int period, void *stream)');
+    host.percentrank = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_percentrank, 'ct_percentrank', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_pso = lib.func('int ct_pso(const float *high, const float *low, const float *close, float *output, int size, int fastKPeriod, int emaPeriod, void *stream)');
+    host.pso = function (high, low, close, fastKPeriod, emaPeriod) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        call(ct_pso, 'ct_pso', m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, m_highs.seriesLen, fastKPeriod, emaPeriod);
+        return output0;
+    };
+    const ct_pvo_ma = lib.func('int ct_pvo_ma(const float *volume, float *output, int size, int fastPeriod, int slowPeriod, int maType, void *stream)');
+    host.pvoMa = function (volume, fastPeriod, slowPeriod, maType) {
+        const m_volumes = toBatchMatrix([volume]);
+        const output0 = new Float32Array(m_volumes.seriesLen);
+        call(ct_pvo_ma, 'ct_pvo_ma', m_volumes.matrix, output0, m_volumes.seriesLen, fastPeriod, slowPeriod, maType);
+        return output0;
+    };
+    const ct_pvt = lib.func('int ct_pvt(const float *close, const float *volume, float *output, int size, void *stream)');
+    host.pvt = function (close, volume) {
+        const m_closes = toBatchMatrix([close]);
+        const m_volumes = toBatchMatrix([volume]);
+        if (m_volumes.seriesLen !== m_closes.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_closes.seriesLen);
+        call(ct_pvt, 'ct_pvt', m_closes.matrix, m_volumes.matrix, output0, m_closes.seriesLen);
+        return output0;
+    };
+    const ct_qstick = lib.func('int ct_qstick(const float *open, const float *close, float *output, int size, int period, void *stream)');
+    host.qstick = function (open, close, period) {
+        const m_opens = toBatchMatrix([open]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_closes.seriesLen !== m_opens.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_opens.seriesLen);
+        call(ct_qstick, 'ct_qstick', m_opens.matrix, m_closes.matrix, output0, m_opens.seriesLen, period);
+        return output0;
+    };
+    const ct_rma = lib.func('int ct_rma(const float *input, float *output, int size, int period, void *stream)');
+    host.rma = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_rma, 'ct_rma', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_rogerssatchell = lib.func('int ct_rogerssatchell(const float *open, const float *high, const float *low, const float *close, float *output, int size, int period, double annualization, void *stream)');
+    host.rogerssatchell = function (open, high, low, close, period, annualization) {
+        const m_opens = toBatchMatrix([open]);
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_highs.seriesLen !== m_opens.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_lows.seriesLen !== m_opens.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_opens.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_opens.seriesLen);
+        call(ct_rogerssatchell, 'ct_rogerssatchell', m_opens.matrix, m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, m_opens.seriesLen, period, annualization);
+        return output0;
+    };
+    const ct_rvi = lib.func('int ct_rvi(const float *input, float *output, int size, int period, int stdDevPeriod, void *stream)');
+    host.rvi = function (input, period, stdDevPeriod) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_rvi, 'ct_rvi', m_inputs.matrix, output0, m_inputs.seriesLen, period, stdDevPeriod);
+        return output0;
+    };
+    const ct_rvir = lib.func('int ct_rvir(const float *high, const float *low, float *output, int size, int period, int stdDevPeriod, void *stream)');
+    host.rvir = function (high, low, period, stdDevPeriod) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        call(ct_rvir, 'ct_rvir', m_highs.matrix, m_lows.matrix, output0, m_highs.seriesLen, period, stdDevPeriod);
+        return output0;
+    };
+    const ct_rvol = lib.func('int ct_rvol(const float *volume, float *output, int size, int period, void *stream)');
+    host.rvol = function (volume, period) {
+        const m_volumes = toBatchMatrix([volume]);
+        const output0 = new Float32Array(m_volumes.seriesLen);
+        call(ct_rvol, 'ct_rvol', m_volumes.matrix, output0, m_volumes.seriesLen, period);
+        return output0;
+    };
+    const ct_si = lib.func('int ct_si(const float *open, const float *high, const float *low, const float *close, float *output, int size, double limitMove, void *stream)');
+    host.si = function (open, high, low, close, limitMove) {
+        const m_opens = toBatchMatrix([open]);
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_highs.seriesLen !== m_opens.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_lows.seriesLen !== m_opens.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_opens.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_opens.seriesLen);
+        call(ct_si, 'ct_si', m_opens.matrix, m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, m_opens.seriesLen, limitMove);
+        return output0;
+    };
+    const ct_smi = lib.func('int ct_smi(const float *high, const float *low, const float *close, float *smi, float *smiSignal, int size, int period, int fastPeriod, int slowPeriod, int signalPeriod, void *stream)');
+    host.smi = function (high, low, close, period, fastPeriod, slowPeriod, signalPeriod) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        const output1 = new Float32Array(m_highs.seriesLen);
+        call(ct_smi, 'ct_smi', m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, output1, m_highs.seriesLen, period, fastPeriod, slowPeriod, signalPeriod);
+        return {smi: output0, smiSignal: output1};
+    };
+    const ct_sqzmom = lib.func('int ct_sqzmom(const float *high, const float *low, const float *close, float *momentum, int *squeeze, int size, int bbPeriod, double nbDev, int kcPeriod, double factorWide, double factorNormal, double factorNarrow, void *stream)');
+    host.sqzmom = function (high, low, close, bbPeriod, nbDev, kcPeriod, factorWide, factorNormal, factorNarrow) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        const output1 = new Int32Array(m_highs.seriesLen);
+        call(ct_sqzmom, 'ct_sqzmom', m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, output1, m_highs.seriesLen, bbPeriod, nbDev, kcPeriod, factorWide, factorNormal, factorNarrow);
+        return {momentum: output0, squeeze: output1};
+    };
+    const ct_stc = lib.func('int ct_stc(const float *input, float *output, int size, int fastPeriod, int slowPeriod, int cyclePeriod, void *stream)');
+    host.stc = function (input, fastPeriod, slowPeriod, cyclePeriod) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_stc, 'ct_stc', m_inputs.matrix, output0, m_inputs.seriesLen, fastPeriod, slowPeriod, cyclePeriod);
+        return output0;
+    };
+    const ct_stochastic_ma = lib.func('int ct_stochastic_ma(const float *high, const float *low, const float *close, float *slowK, float *slowD, int size, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, void *stream)');
+    host.stochasticMa = function (high, low, close, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        const output1 = new Float32Array(m_highs.seriesLen);
+        call(ct_stochastic_ma, 'ct_stochastic_ma', m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, output1, m_highs.seriesLen, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType);
+        return {slowK: output0, slowD: output1};
+    };
+    const ct_stochf_ma = lib.func('int ct_stochf_ma(const float *high, const float *low, const float *close, float *fastK, float *fastD, int size, int fastKPeriod, int fastDPeriod, int fastDMAType, void *stream)');
+    host.stochfMa = function (high, low, close, fastKPeriod, fastDPeriod, fastDMAType) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        const output1 = new Float32Array(m_highs.seriesLen);
+        call(ct_stochf_ma, 'ct_stochf_ma', m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, output1, m_highs.seriesLen, fastKPeriod, fastDPeriod, fastDMAType);
+        return {fastK: output0, fastD: output1};
+    };
+    const ct_stochrsi_ma = lib.func('int ct_stochrsi_ma(const float *input, float *fastK, float *fastD, int size, int period, int fastKPeriod, int fastDPeriod, int fastDMAType, void *stream)');
+    host.stochrsiMa = function (input, period, fastKPeriod, fastDPeriod, fastDMAType) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        const output1 = new Float32Array(m_inputs.seriesLen);
+        call(ct_stochrsi_ma, 'ct_stochrsi_ma', m_inputs.matrix, output0, output1, m_inputs.seriesLen, period, fastKPeriod, fastDPeriod, fastDMAType);
+        return {fastK: output0, fastD: output1};
+    };
+    const ct_supertrend = lib.func('int ct_supertrend(const float *high, const float *low, const float *close, float *supertrend, int *trend, int size, int period, double multiplier, void *stream)');
+    host.supertrend = function (high, low, close, period, multiplier) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        const output1 = new Int32Array(m_highs.seriesLen);
+        call(ct_supertrend, 'ct_supertrend', m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, output1, m_highs.seriesLen, period, multiplier);
+        return {supertrend: output0, trend: output1};
+    };
+    const ct_swak_2php = lib.func('int ct_swak_2php(const float *input, float *output, int size, int period, void *stream)');
+    host.swak2php = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_swak_2php, 'ct_swak_2php', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_swak_bp = lib.func('int ct_swak_bp(const float *input, float *output, int size, int period, double delta, void *stream)');
+    host.swakBp = function (input, period, delta) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_swak_bp, 'ct_swak_bp', m_inputs.matrix, output0, m_inputs.seriesLen, period, delta);
+        return output0;
+    };
+    const ct_swak_butter = lib.func('int ct_swak_butter(const float *input, float *output, int size, int period, void *stream)');
+    host.swakButter = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_swak_butter, 'ct_swak_butter', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_swak_gauss = lib.func('int ct_swak_gauss(const float *input, float *output, int size, int period, void *stream)');
+    host.swakGauss = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_swak_gauss, 'ct_swak_gauss', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_swak_hp = lib.func('int ct_swak_hp(const float *input, float *output, int size, int period, void *stream)');
+    host.swakHp = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_swak_hp, 'ct_swak_hp', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_tsi = lib.func('int ct_tsi(const float *input, float *output, int size, int firstPeriod, int secondPeriod, void *stream)');
+    host.tsi = function (input, firstPeriod, secondPeriod) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_tsi, 'ct_tsi', m_inputs.matrix, output0, m_inputs.seriesLen, firstPeriod, secondPeriod);
+        return output0;
+    };
+    const ct_vhf = lib.func('int ct_vhf(const float *input, float *output, int size, int period, void *stream)');
+    host.vhf = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_vhf, 'ct_vhf', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_vidya = lib.func('int ct_vidya(const float *input, float *output, int size, int period, int cmoPeriod, void *stream)');
+    host.vidya = function (input, period, cmoPeriod) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_vidya, 'ct_vidya', m_inputs.matrix, output0, m_inputs.seriesLen, period, cmoPeriod);
+        return output0;
+    };
+    const ct_vortex = lib.func('int ct_vortex(const float *high, const float *low, const float *close, float *plusVI, float *minusVI, int size, int period, void *stream)');
+    host.vortex = function (high, low, close, period) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        const output1 = new Float32Array(m_highs.seriesLen);
+        call(ct_vortex, 'ct_vortex', m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, output1, m_highs.seriesLen, period);
+        return {plusVI: output0, minusVI: output1};
+    };
+    const ct_vwap = lib.func('int ct_vwap(const float *high, const float *low, const float *close, const float *volume, float *output, int size, void *stream)');
+    host.vwap = function (high, low, close, volume) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        const m_volumes = toBatchMatrix([volume]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_volumes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        call(ct_vwap, 'ct_vwap', m_highs.matrix, m_lows.matrix, m_closes.matrix, m_volumes.matrix, output0, m_highs.seriesLen);
+        return output0;
+    };
+    const ct_vwma = lib.func('int ct_vwma(const float *input, const float *volume, float *output, int size, int period, void *stream)');
+    host.vwma = function (input, volume, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const m_volumes = toBatchMatrix([volume]);
+        if (m_volumes.seriesLen !== m_inputs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_vwma, 'ct_vwma', m_inputs.matrix, m_volumes.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
+    const ct_wad = lib.func('int ct_wad(const float *high, const float *low, const float *close, float *output, int size, void *stream)');
+    host.wad = function (high, low, close) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        call(ct_wad, 'ct_wad', m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, m_highs.seriesLen);
+        return output0;
+    };
+    const ct_wavetrend = lib.func('int ct_wavetrend(const float *high, const float *low, const float *close, float *wT1, float *wT2, int size, int channelPeriod, int averagePeriod, int signalPeriod, void *stream)');
+    host.wavetrend = function (high, low, close, channelPeriod, averagePeriod, signalPeriod) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        const m_closes = toBatchMatrix([close]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        if (m_closes.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        const output1 = new Float32Array(m_highs.seriesLen);
+        call(ct_wavetrend, 'ct_wavetrend', m_highs.matrix, m_lows.matrix, m_closes.matrix, output0, output1, m_highs.seriesLen, channelPeriod, averagePeriod, signalPeriod);
+        return {wT1: output0, wT2: output1};
+    };
+    const ct_zigzag = lib.func('int ct_zigzag(const float *high, const float *low, float *zigZag, int *trend, int *pivotIdx, int size, double sensitivity, int minTrendLength, void *stream)');
+    host.zigzag = function (high, low, sensitivity, minTrendLength) {
+        const m_highs = toBatchMatrix([high]);
+        const m_lows = toBatchMatrix([low]);
+        if (m_lows.seriesLen !== m_highs.seriesLen) throw new RangeError('all inputs must have the same length');
+        const output0 = new Float32Array(m_highs.seriesLen);
+        const output1 = new Int32Array(m_highs.seriesLen);
+        const output2 = new Int32Array(m_highs.seriesLen);
+        call(ct_zigzag, 'ct_zigzag', m_highs.matrix, m_lows.matrix, output0, output1, output2, m_highs.seriesLen, sensitivity, minTrendLength);
+        return {zigZag: output0, trend: output1, pivotIdx: output2};
+    };
+    const ct_zlema = lib.func('int ct_zlema(const float *input, float *output, int size, int period, void *stream)');
+    host.zlema = function (input, period) {
+        const m_inputs = toBatchMatrix([input]);
+        const output0 = new Float32Array(m_inputs.seriesLen);
+        call(ct_zlema, 'ct_zlema', m_inputs.matrix, output0, m_inputs.seriesLen, period);
+        return output0;
+    };
     // Generated single-series ct_*_d device wrappers (raw GPU pointers).
     const ct_trix_d = lib.func('int ct_trix_d(const void *d_input, void *d_output, int size, int period, void *stream)');
     device.trix = function (dInput, dOutput, size, period) {
@@ -3114,6 +5057,326 @@ module.exports = function registerGeneratedBatch(ctx) {
     const ct_rolling_std_d = lib.func('int ct_rolling_std_d(const void *d_input, void *d_output, int size, int period, void *stream)');
     device.rollingStd = function (dInput, dOutput, size, period) {
         deviceCall(ct_rolling_std_d, 'ct_rolling_std_d', dInput, dOutput, size, period);
+    };
+    const ct_ac_d = lib.func('int ct_ac_d(const void *d_high, const void *d_low, void *d_output, int size, int fastPeriod, int slowPeriod, int signalPeriod, void *stream)');
+    device.ac = function (dHigh, dLow, dOutput, size, fastPeriod, slowPeriod, signalPeriod) {
+        deviceCall(ct_ac_d, 'ct_ac_d', dHigh, dLow, dOutput, size, fastPeriod, slowPeriod, signalPeriod);
+    };
+    const ct_adr_d = lib.func('int ct_adr_d(const void *d_high, const void *d_low, void *d_output, int size, int period, void *stream)');
+    device.adr = function (dHigh, dLow, dOutput, size, period) {
+        deviceCall(ct_adr_d, 'ct_adr_d', dHigh, dLow, dOutput, size, period);
+    };
+    const ct_alma_d = lib.func('int ct_alma_d(const void *d_input, void *d_output, int size, int period, double sigma, double offset, void *stream)');
+    device.alma = function (dInput, dOutput, size, period, sigma, offset) {
+        deviceCall(ct_alma_d, 'ct_alma_d', dInput, dOutput, size, period, sigma, offset);
+    };
+    const ct_ao_d = lib.func('int ct_ao_d(const void *d_high, const void *d_low, void *d_output, int size, int fastPeriod, int slowPeriod, void *stream)');
+    device.ao = function (dHigh, dLow, dOutput, size, fastPeriod, slowPeriod) {
+        deviceCall(ct_ao_d, 'ct_ao_d', dHigh, dLow, dOutput, size, fastPeriod, slowPeriod);
+    };
+    const ct_apo_ma_d = lib.func('int ct_apo_ma_d(const void *d_input, void *d_output, int size, int fastPeriod, int slowPeriod, int maType, void *stream)');
+    device.apoMa = function (dInput, dOutput, size, fastPeriod, slowPeriod, maType) {
+        deviceCall(ct_apo_ma_d, 'ct_apo_ma_d', dInput, dOutput, size, fastPeriod, slowPeriod, maType);
+    };
+    const ct_asi_wilder_d = lib.func('int ct_asi_wilder_d(const void *d_open, const void *d_high, const void *d_low, const void *d_close, void *d_output, int size, double limitMove, void *stream)');
+    device.asiWilder = function (dOpen, dHigh, dLow, dClose, dOutput, size, limitMove) {
+        deviceCall(ct_asi_wilder_d, 'ct_asi_wilder_d', dOpen, dHigh, dLow, dClose, dOutput, size, limitMove);
+    };
+    const ct_bbands_ma_d = lib.func('int ct_bbands_ma_d(const void *d_input, void *d_realUpperBand, void *d_realMiddleBand, void *d_realLowerBand, int size, int period, double nbDevUp, double nbDevDn, int maType, void *stream)');
+    device.bbandsMa = function (dInput, dRealUpperBand, dRealMiddleBand, dRealLowerBand, size, period, nbDevUp, nbDevDn, maType) {
+        deviceCall(ct_bbands_ma_d, 'ct_bbands_ma_d', dInput, dRealUpperBand, dRealMiddleBand, dRealLowerBand, size, period, nbDevUp, nbDevDn, maType);
+    };
+    const ct_bbw_d = lib.func('int ct_bbw_d(const void *d_input, void *d_output, int size, int period, double nbDevUp, double nbDevDn, int maType, void *stream)');
+    device.bbw = function (dInput, dOutput, size, period, nbDevUp, nbDevDn, maType) {
+        deviceCall(ct_bbw_d, 'ct_bbw_d', dInput, dOutput, size, period, nbDevUp, nbDevDn, maType);
+    };
+    const ct_cg_d = lib.func('int ct_cg_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.cg = function (dInput, dOutput, size, period) {
+        deviceCall(ct_cg_d, 'ct_cg_d', dInput, dOutput, size, period);
+    };
+    const ct_chop_d = lib.func('int ct_chop_d(const void *d_high, const void *d_low, const void *d_close, void *d_output, int size, int period, void *stream)');
+    device.chop = function (dHigh, dLow, dClose, dOutput, size, period) {
+        deviceCall(ct_chop_d, 'ct_chop_d', dHigh, dLow, dClose, dOutput, size, period);
+    };
+    const ct_choptr_d = lib.func('int ct_choptr_d(const void *d_high, const void *d_low, const void *d_close, void *d_output, int size, int period, void *stream)');
+    device.choptr = function (dHigh, dLow, dClose, dOutput, size, period) {
+        deviceCall(ct_choptr_d, 'ct_choptr_d', dHigh, dLow, dClose, dOutput, size, period);
+    };
+    const ct_cksp_d = lib.func('int ct_cksp_d(const void *d_high, const void *d_low, const void *d_close, void *d_highStop, void *d_lowStop, int size, int period, double multiplier, int stopPeriod, void *stream)');
+    device.cksp = function (dHigh, dLow, dClose, dHighStop, dLowStop, size, period, multiplier, stopPeriod) {
+        deviceCall(ct_cksp_d, 'ct_cksp_d', dHigh, dLow, dClose, dHighStop, dLowStop, size, period, multiplier, stopPeriod);
+    };
+    const ct_cmf_d = lib.func('int ct_cmf_d(const void *d_high, const void *d_low, const void *d_close, const void *d_volume, void *d_output, int size, int period, void *stream)');
+    device.cmf = function (dHigh, dLow, dClose, dVolume, dOutput, size, period) {
+        deviceCall(ct_cmf_d, 'ct_cmf_d', dHigh, dLow, dClose, dVolume, dOutput, size, period);
+    };
+    const ct_cmou_d = lib.func('int ct_cmou_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.cmou = function (dInput, dOutput, size, period) {
+        deviceCall(ct_cmou_d, 'ct_cmou_d', dInput, dOutput, size, period);
+    };
+    const ct_coppock_d = lib.func('int ct_coppock_d(const void *d_input, void *d_output, int size, int wmaPeriod, int roc1Period, int roc2Period, void *stream)');
+    device.coppock = function (dInput, dOutput, size, wmaPeriod, roc1Period, roc2Period) {
+        deviceCall(ct_coppock_d, 'ct_coppock_d', dInput, dOutput, size, wmaPeriod, roc1Period, roc2Period);
+    };
+    const ct_crsi_d = lib.func('int ct_crsi_d(const void *d_input, void *d_output, int size, int period, int streakPeriod, int rankPeriod, void *stream)');
+    device.crsi = function (dInput, dOutput, size, period, streakPeriod, rankPeriod) {
+        deviceCall(ct_crsi_d, 'ct_crsi_d', dInput, dOutput, size, period, streakPeriod, rankPeriod);
+    };
+    const ct_cti_d = lib.func('int ct_cti_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.cti = function (dInput, dOutput, size, period) {
+        deviceCall(ct_cti_d, 'ct_cti_d', dInput, dOutput, size, period);
+    };
+    const ct_cumsum_d = lib.func('int ct_cumsum_d(const void *d_input, void *d_output, int size, void *stream)');
+    device.cumsum = function (dInput, dOutput, size) {
+        deviceCall(ct_cumsum_d, 'ct_cumsum_d', dInput, dOutput, size);
+    };
+    const ct_cvi_d = lib.func('int ct_cvi_d(const void *d_high, const void *d_low, void *d_output, int size, int period, int rocPeriod, void *stream)');
+    device.cvi = function (dHigh, dLow, dOutput, size, period, rocPeriod) {
+        deviceCall(ct_cvi_d, 'ct_cvi_d', dHigh, dLow, dOutput, size, period, rocPeriod);
+    };
+    const ct_donchian_d = lib.func('int ct_donchian_d(const void *d_high, const void *d_low, void *d_realUpperBand, void *d_realMiddleBand, void *d_realLowerBand, int size, int period, void *stream)');
+    device.donchian = function (dHigh, dLow, dRealUpperBand, dRealMiddleBand, dRealLowerBand, size, period) {
+        deviceCall(ct_donchian_d, 'ct_donchian_d', dHigh, dLow, dRealUpperBand, dRealMiddleBand, dRealLowerBand, size, period);
+    };
+    const ct_dosc_d = lib.func('int ct_dosc_d(const void *d_input, void *d_output, int size, int period, int firstPeriod, int secondPeriod, int signalPeriod, void *stream)');
+    device.dosc = function (dInput, dOutput, size, period, firstPeriod, secondPeriod, signalPeriod) {
+        deviceCall(ct_dosc_d, 'ct_dosc_d', dInput, dOutput, size, period, firstPeriod, secondPeriod, signalPeriod);
+    };
+    const ct_dpo_d = lib.func('int ct_dpo_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.dpo = function (dInput, dOutput, size, period) {
+        deviceCall(ct_dpo_d, 'ct_dpo_d', dInput, dOutput, size, period);
+    };
+    const ct_efi_d = lib.func('int ct_efi_d(const void *d_close, const void *d_volume, void *d_output, int size, int period, void *stream)');
+    device.efi = function (dClose, dVolume, dOutput, size, period) {
+        deviceCall(ct_efi_d, 'ct_efi_d', dClose, dVolume, dOutput, size, period);
+    };
+    const ct_emv_d = lib.func('int ct_emv_d(const void *d_high, const void *d_low, const void *d_volume, void *d_output, int size, int period, double volumeDivisor, void *stream)');
+    device.emv = function (dHigh, dLow, dVolume, dOutput, size, period, volumeDivisor) {
+        deviceCall(ct_emv_d, 'ct_emv_d', dHigh, dLow, dVolume, dOutput, size, period, volumeDivisor);
+    };
+    const ct_er_d = lib.func('int ct_er_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.er = function (dInput, dOutput, size, period) {
+        deviceCall(ct_er_d, 'ct_er_d', dInput, dOutput, size, period);
+    };
+    const ct_eri_d = lib.func('int ct_eri_d(const void *d_high, const void *d_low, const void *d_close, void *d_bullPower, void *d_bearPower, int size, int period, void *stream)');
+    device.eri = function (dHigh, dLow, dClose, dBullPower, dBearPower, size, period) {
+        deviceCall(ct_eri_d, 'ct_eri_d', dHigh, dLow, dClose, dBullPower, dBearPower, size, period);
+    };
+    const ct_fisher_d = lib.func('int ct_fisher_d(const void *d_high, const void *d_low, void *d_fisher, void *d_trigger, int size, int period, void *stream)');
+    device.fisher = function (dHigh, dLow, dFisher, dTrigger, size, period) {
+        deviceCall(ct_fisher_d, 'ct_fisher_d', dHigh, dLow, dFisher, dTrigger, size, period);
+    };
+    const ct_fosc_d = lib.func('int ct_fosc_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.fosc = function (dInput, dOutput, size, period) {
+        deviceCall(ct_fosc_d, 'ct_fosc_d', dInput, dOutput, size, period);
+    };
+    const ct_fractal_d = lib.func('int ct_fractal_d(const void *d_high, const void *d_low, void *d_swingHigh, void *d_swingLow, int size, int leftBars, int rightBars, void *stream)');
+    device.fractal = function (dHigh, dLow, dSwingHigh, dSwingLow, size, leftBars, rightBars) {
+        deviceCall(ct_fractal_d, 'ct_fractal_d', dHigh, dLow, dSwingHigh, dSwingLow, size, leftBars, rightBars);
+    };
+    const ct_frama_d = lib.func('int ct_frama_d(const void *d_high, const void *d_low, void *d_output, int size, int period, void *stream)');
+    device.frama = function (dHigh, dLow, dOutput, size, period) {
+        deviceCall(ct_frama_d, 'ct_frama_d', dHigh, dLow, dOutput, size, period);
+    };
+    const ct_ha_d = lib.func('int ct_ha_d(const void *d_open, const void *d_high, const void *d_low, const void *d_close, void *d_haOpen, void *d_haHigh, void *d_haLow, void *d_haClose, int size, void *stream)');
+    device.ha = function (dOpen, dHigh, dLow, dClose, dHaOpen, dHaHigh, dHaLow, dHaClose, size) {
+        deviceCall(ct_ha_d, 'ct_ha_d', dOpen, dHigh, dLow, dClose, dHaOpen, dHaHigh, dHaLow, dHaClose, size);
+    };
+    const ct_hma_d = lib.func('int ct_hma_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.hma = function (dInput, dOutput, size, period) {
+        deviceCall(ct_hma_d, 'ct_hma_d', dInput, dOutput, size, period);
+    };
+    const ct_ibs_d = lib.func('int ct_ibs_d(const void *d_high, const void *d_low, const void *d_close, void *d_output, int size, void *stream)');
+    device.ibs = function (dHigh, dLow, dClose, dOutput, size) {
+        deviceCall(ct_ibs_d, 'ct_ibs_d', dHigh, dLow, dClose, dOutput, size);
+    };
+    const ct_ichimoku_d = lib.func('int ct_ichimoku_d(const void *d_high, const void *d_low, void *d_tenkanSen, void *d_kijunSen, void *d_senkouSpanA, void *d_senkouSpanB, int size, int tenkanPeriod, int kijunPeriod, int senkouBPeriod, void *stream)');
+    device.ichimoku = function (dHigh, dLow, dTenkanSen, dKijunSen, dSenkouSpanA, dSenkouSpanB, size, tenkanPeriod, kijunPeriod, senkouBPeriod) {
+        deviceCall(ct_ichimoku_d, 'ct_ichimoku_d', dHigh, dLow, dTenkanSen, dKijunSen, dSenkouSpanA, dSenkouSpanB, size, tenkanPeriod, kijunPeriod, senkouBPeriod);
+    };
+    const ct_kc_d = lib.func('int ct_kc_d(const void *d_high, const void *d_low, const void *d_close, void *d_realUpperBand, void *d_realMiddleBand, void *d_realLowerBand, int size, int period, int atrPeriod, double nbDev, void *stream)');
+    device.kc = function (dHigh, dLow, dClose, dRealUpperBand, dRealMiddleBand, dRealLowerBand, size, period, atrPeriod, nbDev) {
+        deviceCall(ct_kc_d, 'ct_kc_d', dHigh, dLow, dClose, dRealUpperBand, dRealMiddleBand, dRealLowerBand, size, period, atrPeriod, nbDev);
+    };
+    const ct_kdj_d = lib.func('int ct_kdj_d(const void *d_high, const void *d_low, const void *d_close, void *d_k, void *d_d, void *d_j, int size, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, void *stream)');
+    device.kdj = function (dHigh, dLow, dClose, dK, dD, dJ, size, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType) {
+        deviceCall(ct_kdj_d, 'ct_kdj_d', dHigh, dLow, dClose, dK, dD, dJ, size, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType);
+    };
+    const ct_kst_d = lib.func('int ct_kst_d(const void *d_input, void *d_kst, void *d_kstSignal, int size, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int sma1Period, int sma2Period, int sma3Period, int sma4Period, int signalPeriod, void *stream)');
+    device.kst = function (dInput, dKst, dKstSignal, size, roc1Period, roc2Period, roc3Period, roc4Period, sma1Period, sma2Period, sma3Period, sma4Period, signalPeriod) {
+        deviceCall(ct_kst_d, 'ct_kst_d', dInput, dKst, dKstSignal, size, roc1Period, roc2Period, roc3Period, roc4Period, sma1Period, sma2Period, sma3Period, sma4Period, signalPeriod);
+    };
+    const ct_kstext_d = lib.func('int ct_kstext_d(const void *d_input, void *d_kst, void *d_kstSignal, int size, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int ma1Period, int ma2Period, int ma3Period, int ma4Period, int signalPeriod, int rocmaType, int signalMAType, void *stream)');
+    device.kstext = function (dInput, dKst, dKstSignal, size, roc1Period, roc2Period, roc3Period, roc4Period, ma1Period, ma2Period, ma3Period, ma4Period, signalPeriod, rocmaType, signalMAType) {
+        deviceCall(ct_kstext_d, 'ct_kstext_d', dInput, dKst, dKstSignal, size, roc1Period, roc2Period, roc3Period, roc4Period, ma1Period, ma2Period, ma3Period, ma4Period, signalPeriod, rocmaType, signalMAType);
+    };
+    const ct_kurtosis_unbiased_d = lib.func('int ct_kurtosis_unbiased_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.kurtosisUnbiased = function (dInput, dOutput, size, period) {
+        deviceCall(ct_kurtosis_unbiased_d, 'ct_kurtosis_unbiased_d', dInput, dOutput, size, period);
+    };
+    const ct_kvo_d = lib.func('int ct_kvo_d(const void *d_high, const void *d_low, const void *d_close, const void *d_volume, void *d_kvo, void *d_kvoSignal, int size, int fastPeriod, int slowPeriod, int signalPeriod, void *stream)');
+    device.kvo = function (dHigh, dLow, dClose, dVolume, dKvo, dKvoSignal, size, fastPeriod, slowPeriod, signalPeriod) {
+        deviceCall(ct_kvo_d, 'ct_kvo_d', dHigh, dLow, dClose, dVolume, dKvo, dKvoSignal, size, fastPeriod, slowPeriod, signalPeriod);
+    };
+    const ct_marketfi_d = lib.func('int ct_marketfi_d(const void *d_high, const void *d_low, const void *d_volume, void *d_output, int size, void *stream)');
+    device.marketfi = function (dHigh, dLow, dVolume, dOutput, size) {
+        deviceCall(ct_marketfi_d, 'ct_marketfi_d', dHigh, dLow, dVolume, dOutput, size);
+    };
+    const ct_massi_d = lib.func('int ct_massi_d(const void *d_high, const void *d_low, void *d_output, int size, int fastPeriod, int slowPeriod, void *stream)');
+    device.massi = function (dHigh, dLow, dOutput, size, fastPeriod, slowPeriod) {
+        deviceCall(ct_massi_d, 'ct_massi_d', dHigh, dLow, dOutput, size, fastPeriod, slowPeriod);
+    };
+    const ct_mcgd_d = lib.func('int ct_mcgd_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.mcgd = function (dInput, dOutput, size, period) {
+        deviceCall(ct_mcgd_d, 'ct_mcgd_d', dInput, dOutput, size, period);
+    };
+    const ct_median_d = lib.func('int ct_median_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.median = function (dInput, dOutput, size, period) {
+        deviceCall(ct_median_d, 'ct_median_d', dInput, dOutput, size, period);
+    };
+    const ct_percentb_d = lib.func('int ct_percentb_d(const void *d_input, void *d_output, int size, int period, double nbDevUp, double nbDevDn, int maType, void *stream)');
+    device.percentb = function (dInput, dOutput, size, period, nbDevUp, nbDevDn, maType) {
+        deviceCall(ct_percentb_d, 'ct_percentb_d', dInput, dOutput, size, period, nbDevUp, nbDevDn, maType);
+    };
+    const ct_percentile_d = lib.func('int ct_percentile_d(const void *d_input, void *d_output, int size, int period, double percentile, void *stream)');
+    device.percentile = function (dInput, dOutput, size, period, percentile) {
+        deviceCall(ct_percentile_d, 'ct_percentile_d', dInput, dOutput, size, period, percentile);
+    };
+    const ct_percentrank_d = lib.func('int ct_percentrank_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.percentrank = function (dInput, dOutput, size, period) {
+        deviceCall(ct_percentrank_d, 'ct_percentrank_d', dInput, dOutput, size, period);
+    };
+    const ct_ppo_ma_d = lib.func('int ct_ppo_ma_d(const void *d_input, void *d_output, int size, int fastPeriod, int slowPeriod, int maType, void *stream)');
+    device.ppoMa = function (dInput, dOutput, size, fastPeriod, slowPeriod, maType) {
+        deviceCall(ct_ppo_ma_d, 'ct_ppo_ma_d', dInput, dOutput, size, fastPeriod, slowPeriod, maType);
+    };
+    const ct_pso_d = lib.func('int ct_pso_d(const void *d_high, const void *d_low, const void *d_close, void *d_output, int size, int fastKPeriod, int emaPeriod, void *stream)');
+    device.pso = function (dHigh, dLow, dClose, dOutput, size, fastKPeriod, emaPeriod) {
+        deviceCall(ct_pso_d, 'ct_pso_d', dHigh, dLow, dClose, dOutput, size, fastKPeriod, emaPeriod);
+    };
+    const ct_pvo_ma_d = lib.func('int ct_pvo_ma_d(const void *d_volume, void *d_output, int size, int fastPeriod, int slowPeriod, int maType, void *stream)');
+    device.pvoMa = function (dVolume, dOutput, size, fastPeriod, slowPeriod, maType) {
+        deviceCall(ct_pvo_ma_d, 'ct_pvo_ma_d', dVolume, dOutput, size, fastPeriod, slowPeriod, maType);
+    };
+    const ct_pvt_d = lib.func('int ct_pvt_d(const void *d_close, const void *d_volume, void *d_output, int size, void *stream)');
+    device.pvt = function (dClose, dVolume, dOutput, size) {
+        deviceCall(ct_pvt_d, 'ct_pvt_d', dClose, dVolume, dOutput, size);
+    };
+    const ct_qstick_d = lib.func('int ct_qstick_d(const void *d_open, const void *d_close, void *d_output, int size, int period, void *stream)');
+    device.qstick = function (dOpen, dClose, dOutput, size, period) {
+        deviceCall(ct_qstick_d, 'ct_qstick_d', dOpen, dClose, dOutput, size, period);
+    };
+    const ct_rma_d = lib.func('int ct_rma_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.rma = function (dInput, dOutput, size, period) {
+        deviceCall(ct_rma_d, 'ct_rma_d', dInput, dOutput, size, period);
+    };
+    const ct_rogerssatchell_d = lib.func('int ct_rogerssatchell_d(const void *d_open, const void *d_high, const void *d_low, const void *d_close, void *d_output, int size, int period, double annualization, void *stream)');
+    device.rogerssatchell = function (dOpen, dHigh, dLow, dClose, dOutput, size, period, annualization) {
+        deviceCall(ct_rogerssatchell_d, 'ct_rogerssatchell_d', dOpen, dHigh, dLow, dClose, dOutput, size, period, annualization);
+    };
+    const ct_rvi_d = lib.func('int ct_rvi_d(const void *d_input, void *d_output, int size, int period, int stdDevPeriod, void *stream)');
+    device.rvi = function (dInput, dOutput, size, period, stdDevPeriod) {
+        deviceCall(ct_rvi_d, 'ct_rvi_d', dInput, dOutput, size, period, stdDevPeriod);
+    };
+    const ct_rvir_d = lib.func('int ct_rvir_d(const void *d_high, const void *d_low, void *d_output, int size, int period, int stdDevPeriod, void *stream)');
+    device.rvir = function (dHigh, dLow, dOutput, size, period, stdDevPeriod) {
+        deviceCall(ct_rvir_d, 'ct_rvir_d', dHigh, dLow, dOutput, size, period, stdDevPeriod);
+    };
+    const ct_rvol_d = lib.func('int ct_rvol_d(const void *d_volume, void *d_output, int size, int period, void *stream)');
+    device.rvol = function (dVolume, dOutput, size, period) {
+        deviceCall(ct_rvol_d, 'ct_rvol_d', dVolume, dOutput, size, period);
+    };
+    const ct_si_d = lib.func('int ct_si_d(const void *d_open, const void *d_high, const void *d_low, const void *d_close, void *d_output, int size, double limitMove, void *stream)');
+    device.si = function (dOpen, dHigh, dLow, dClose, dOutput, size, limitMove) {
+        deviceCall(ct_si_d, 'ct_si_d', dOpen, dHigh, dLow, dClose, dOutput, size, limitMove);
+    };
+    const ct_smi_d = lib.func('int ct_smi_d(const void *d_high, const void *d_low, const void *d_close, void *d_smi, void *d_smiSignal, int size, int period, int fastPeriod, int slowPeriod, int signalPeriod, void *stream)');
+    device.smi = function (dHigh, dLow, dClose, dSmi, dSmiSignal, size, period, fastPeriod, slowPeriod, signalPeriod) {
+        deviceCall(ct_smi_d, 'ct_smi_d', dHigh, dLow, dClose, dSmi, dSmiSignal, size, period, fastPeriod, slowPeriod, signalPeriod);
+    };
+    const ct_sqzmom_d = lib.func('int ct_sqzmom_d(const void *d_high, const void *d_low, const void *d_close, void *d_momentum, void *d_squeeze, int size, int bbPeriod, double nbDev, int kcPeriod, double factorWide, double factorNormal, double factorNarrow, void *stream)');
+    device.sqzmom = function (dHigh, dLow, dClose, dMomentum, dSqueeze, size, bbPeriod, nbDev, kcPeriod, factorWide, factorNormal, factorNarrow) {
+        deviceCall(ct_sqzmom_d, 'ct_sqzmom_d', dHigh, dLow, dClose, dMomentum, dSqueeze, size, bbPeriod, nbDev, kcPeriod, factorWide, factorNormal, factorNarrow);
+    };
+    const ct_stc_d = lib.func('int ct_stc_d(const void *d_input, void *d_output, int size, int fastPeriod, int slowPeriod, int cyclePeriod, void *stream)');
+    device.stc = function (dInput, dOutput, size, fastPeriod, slowPeriod, cyclePeriod) {
+        deviceCall(ct_stc_d, 'ct_stc_d', dInput, dOutput, size, fastPeriod, slowPeriod, cyclePeriod);
+    };
+    const ct_stochastic_ma_d = lib.func('int ct_stochastic_ma_d(const void *d_high, const void *d_low, const void *d_close, void *d_slowK, void *d_slowD, int size, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, void *stream)');
+    device.stochasticMa = function (dHigh, dLow, dClose, dSlowK, dSlowD, size, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType) {
+        deviceCall(ct_stochastic_ma_d, 'ct_stochastic_ma_d', dHigh, dLow, dClose, dSlowK, dSlowD, size, fastKPeriod, slowKPeriod, slowKMAType, slowDPeriod, slowDMAType);
+    };
+    const ct_stochf_ma_d = lib.func('int ct_stochf_ma_d(const void *d_high, const void *d_low, const void *d_close, void *d_fastK, void *d_fastD, int size, int fastKPeriod, int fastDPeriod, int fastDMAType, void *stream)');
+    device.stochfMa = function (dHigh, dLow, dClose, dFastK, dFastD, size, fastKPeriod, fastDPeriod, fastDMAType) {
+        deviceCall(ct_stochf_ma_d, 'ct_stochf_ma_d', dHigh, dLow, dClose, dFastK, dFastD, size, fastKPeriod, fastDPeriod, fastDMAType);
+    };
+    const ct_stochrsi_ma_d = lib.func('int ct_stochrsi_ma_d(const void *d_input, void *d_fastK, void *d_fastD, int size, int period, int fastKPeriod, int fastDPeriod, int fastDMAType, void *stream)');
+    device.stochrsiMa = function (dInput, dFastK, dFastD, size, period, fastKPeriod, fastDPeriod, fastDMAType) {
+        deviceCall(ct_stochrsi_ma_d, 'ct_stochrsi_ma_d', dInput, dFastK, dFastD, size, period, fastKPeriod, fastDPeriod, fastDMAType);
+    };
+    const ct_supertrend_d = lib.func('int ct_supertrend_d(const void *d_high, const void *d_low, const void *d_close, void *d_supertrend, void *d_trend, int size, int period, double multiplier, void *stream)');
+    device.supertrend = function (dHigh, dLow, dClose, dSupertrend, dTrend, size, period, multiplier) {
+        deviceCall(ct_supertrend_d, 'ct_supertrend_d', dHigh, dLow, dClose, dSupertrend, dTrend, size, period, multiplier);
+    };
+    const ct_swak_2php_d = lib.func('int ct_swak_2php_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.swak2php = function (dInput, dOutput, size, period) {
+        deviceCall(ct_swak_2php_d, 'ct_swak_2php_d', dInput, dOutput, size, period);
+    };
+    const ct_swak_bp_d = lib.func('int ct_swak_bp_d(const void *d_input, void *d_output, int size, int period, double delta, void *stream)');
+    device.swakBp = function (dInput, dOutput, size, period, delta) {
+        deviceCall(ct_swak_bp_d, 'ct_swak_bp_d', dInput, dOutput, size, period, delta);
+    };
+    const ct_swak_butter_d = lib.func('int ct_swak_butter_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.swakButter = function (dInput, dOutput, size, period) {
+        deviceCall(ct_swak_butter_d, 'ct_swak_butter_d', dInput, dOutput, size, period);
+    };
+    const ct_swak_gauss_d = lib.func('int ct_swak_gauss_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.swakGauss = function (dInput, dOutput, size, period) {
+        deviceCall(ct_swak_gauss_d, 'ct_swak_gauss_d', dInput, dOutput, size, period);
+    };
+    const ct_swak_hp_d = lib.func('int ct_swak_hp_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.swakHp = function (dInput, dOutput, size, period) {
+        deviceCall(ct_swak_hp_d, 'ct_swak_hp_d', dInput, dOutput, size, period);
+    };
+    const ct_tsi_d = lib.func('int ct_tsi_d(const void *d_input, void *d_output, int size, int firstPeriod, int secondPeriod, void *stream)');
+    device.tsi = function (dInput, dOutput, size, firstPeriod, secondPeriod) {
+        deviceCall(ct_tsi_d, 'ct_tsi_d', dInput, dOutput, size, firstPeriod, secondPeriod);
+    };
+    const ct_vhf_d = lib.func('int ct_vhf_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.vhf = function (dInput, dOutput, size, period) {
+        deviceCall(ct_vhf_d, 'ct_vhf_d', dInput, dOutput, size, period);
+    };
+    const ct_vidya_d = lib.func('int ct_vidya_d(const void *d_input, void *d_output, int size, int period, int cmoPeriod, void *stream)');
+    device.vidya = function (dInput, dOutput, size, period, cmoPeriod) {
+        deviceCall(ct_vidya_d, 'ct_vidya_d', dInput, dOutput, size, period, cmoPeriod);
+    };
+    const ct_vortex_d = lib.func('int ct_vortex_d(const void *d_high, const void *d_low, const void *d_close, void *d_plusVI, void *d_minusVI, int size, int period, void *stream)');
+    device.vortex = function (dHigh, dLow, dClose, dPlusVI, dMinusVI, size, period) {
+        deviceCall(ct_vortex_d, 'ct_vortex_d', dHigh, dLow, dClose, dPlusVI, dMinusVI, size, period);
+    };
+    const ct_vwap_d = lib.func('int ct_vwap_d(const void *d_high, const void *d_low, const void *d_close, const void *d_volume, void *d_output, int size, void *stream)');
+    device.vwap = function (dHigh, dLow, dClose, dVolume, dOutput, size) {
+        deviceCall(ct_vwap_d, 'ct_vwap_d', dHigh, dLow, dClose, dVolume, dOutput, size);
+    };
+    const ct_vwma_d = lib.func('int ct_vwma_d(const void *d_input, const void *d_volume, void *d_output, int size, int period, void *stream)');
+    device.vwma = function (dInput, dVolume, dOutput, size, period) {
+        deviceCall(ct_vwma_d, 'ct_vwma_d', dInput, dVolume, dOutput, size, period);
+    };
+    const ct_wad_d = lib.func('int ct_wad_d(const void *d_high, const void *d_low, const void *d_close, void *d_output, int size, void *stream)');
+    device.wad = function (dHigh, dLow, dClose, dOutput, size) {
+        deviceCall(ct_wad_d, 'ct_wad_d', dHigh, dLow, dClose, dOutput, size);
+    };
+    const ct_wavetrend_d = lib.func('int ct_wavetrend_d(const void *d_high, const void *d_low, const void *d_close, void *d_wT1, void *d_wT2, int size, int channelPeriod, int averagePeriod, int signalPeriod, void *stream)');
+    device.wavetrend = function (dHigh, dLow, dClose, dWT1, dWT2, size, channelPeriod, averagePeriod, signalPeriod) {
+        deviceCall(ct_wavetrend_d, 'ct_wavetrend_d', dHigh, dLow, dClose, dWT1, dWT2, size, channelPeriod, averagePeriod, signalPeriod);
+    };
+    const ct_zigzag_d = lib.func('int ct_zigzag_d(const void *d_high, const void *d_low, void *d_zigZag, void *d_trend, void *d_pivotIdx, int size, double sensitivity, int minTrendLength, void *stream)');
+    device.zigzag = function (dHigh, dLow, dZigZag, dTrend, dPivotIdx, size, sensitivity, minTrendLength) {
+        deviceCall(ct_zigzag_d, 'ct_zigzag_d', dHigh, dLow, dZigZag, dTrend, dPivotIdx, size, sensitivity, minTrendLength);
+    };
+    const ct_zlema_d = lib.func('int ct_zlema_d(const void *d_input, void *d_output, int size, int period, void *stream)');
+    device.zlema = function (dInput, dOutput, size, period) {
+        deviceCall(ct_zlema_d, 'ct_zlema_d', dInput, dOutput, size, period);
     };
 
     return { host, device, ohlcvColumns };

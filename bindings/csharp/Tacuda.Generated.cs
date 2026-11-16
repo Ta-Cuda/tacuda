@@ -1692,6 +1692,720 @@ public static partial class NativeMethods
     public static extern int ct_rolling_std_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ac(float[] host_high, float[] host_low, float[] host_output, int size, int fastPeriod, int slowPeriod, int signalPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ac_batch(float[] host_highs, float[] host_lows, float[] host_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int signalPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ac_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int signalPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_adr(float[] host_high, float[] host_low, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_adr_batch(float[] host_highs, float[] host_lows, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_adr_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_alma(float[] host_input, float[] host_output, int size, int period, double sigma, double offset, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_alma_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, double sigma, double offset, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_alma_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, double sigma, double offset, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ao(float[] host_high, float[] host_low, float[] host_output, int size, int fastPeriod, int slowPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ao_batch(float[] host_highs, float[] host_lows, float[] host_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ao_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_apo_ma_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_apo_ma_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_asi_wilder(float[] host_open, float[] host_high, float[] host_low, float[] host_close, float[] host_output, int size, double limitMove, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_asi_wilder_batch(float[] host_opens, float[] host_highs, float[] host_lows, float[] host_closes, float[] host_outputs, int seriesLen, int numSeries, double limitMove, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_asi_wilder_batch_d(IntPtr d_opens, IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_outputs, int seriesLen, int numSeries, double limitMove, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_bbands_ma(float[] host_input, float[] host_realUpperBand, float[] host_realMiddleBand, float[] host_realLowerBand, int size, int period, double nbDevUp, double nbDevDn, int maType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_bbands_ma_batch(float[] host_inputs, float[] host_realUpperBand, float[] host_realMiddleBand, float[] host_realLowerBand, int seriesLen, int numSeries, int period, double nbDevUp, double nbDevDn, int maType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_bbands_ma_batch_d(IntPtr d_inputs, IntPtr d_realUpperBand, IntPtr d_realMiddleBand, IntPtr d_realLowerBand, int seriesLen, int numSeries, int period, double nbDevUp, double nbDevDn, int maType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_bbw(float[] host_input, float[] host_output, int size, int period, double nbDevUp, double nbDevDn, int maType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_bbw_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, double nbDevUp, double nbDevDn, int maType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_bbw_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, double nbDevUp, double nbDevDn, int maType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cg(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cg_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cg_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_chop(float[] host_high, float[] host_low, float[] host_close, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_chop_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_chop_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_choptr(float[] host_high, float[] host_low, float[] host_close, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_choptr_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_choptr_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cksp(float[] host_high, float[] host_low, float[] host_close, float[] host_highStop, float[] host_lowStop, int size, int period, double multiplier, int stopPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cksp_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_highStop, float[] host_lowStop, int seriesLen, int numSeries, int period, double multiplier, int stopPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cksp_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_highStop, IntPtr d_lowStop, int seriesLen, int numSeries, int period, double multiplier, int stopPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cmf(float[] host_high, float[] host_low, float[] host_close, float[] host_volume, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cmf_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_volumes, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cmf_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_volumes, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cmou(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cmou_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cmou_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_coppock(float[] host_input, float[] host_output, int size, int wmaPeriod, int roc1Period, int roc2Period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_coppock_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int wmaPeriod, int roc1Period, int roc2Period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_coppock_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int wmaPeriod, int roc1Period, int roc2Period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_crsi(float[] host_input, float[] host_output, int size, int period, int streakPeriod, int rankPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_crsi_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int streakPeriod, int rankPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_crsi_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int streakPeriod, int rankPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cti(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cti_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cti_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cumsum(float[] host_input, float[] host_output, int size, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cumsum_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cumsum_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cvi(float[] host_high, float[] host_low, float[] host_output, int size, int period, int rocPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cvi_batch(float[] host_highs, float[] host_lows, float[] host_outputs, int seriesLen, int numSeries, int period, int rocPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cvi_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_outputs, int seriesLen, int numSeries, int period, int rocPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_donchian(float[] host_high, float[] host_low, float[] host_realUpperBand, float[] host_realMiddleBand, float[] host_realLowerBand, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_donchian_batch(float[] host_highs, float[] host_lows, float[] host_realUpperBand, float[] host_realMiddleBand, float[] host_realLowerBand, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_donchian_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_realUpperBand, IntPtr d_realMiddleBand, IntPtr d_realLowerBand, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_dosc(float[] host_input, float[] host_output, int size, int period, int firstPeriod, int secondPeriod, int signalPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_dosc_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int firstPeriod, int secondPeriod, int signalPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_dosc_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int firstPeriod, int secondPeriod, int signalPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_dpo(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_dpo_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_dpo_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_efi(float[] host_close, float[] host_volume, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_efi_batch(float[] host_closes, float[] host_volumes, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_efi_batch_d(IntPtr d_closes, IntPtr d_volumes, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_emv(float[] host_high, float[] host_low, float[] host_volume, float[] host_output, int size, int period, double volumeDivisor, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_emv_batch(float[] host_highs, float[] host_lows, float[] host_volumes, float[] host_outputs, int seriesLen, int numSeries, int period, double volumeDivisor, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_emv_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_volumes, IntPtr d_outputs, int seriesLen, int numSeries, int period, double volumeDivisor, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_er(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_er_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_er_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_eri(float[] host_high, float[] host_low, float[] host_close, float[] host_bullPower, float[] host_bearPower, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_eri_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_bullPower, float[] host_bearPower, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_eri_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_bullPower, IntPtr d_bearPower, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_fisher(float[] host_high, float[] host_low, float[] host_fisher, float[] host_trigger, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_fisher_batch(float[] host_highs, float[] host_lows, float[] host_fisher, float[] host_trigger, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_fisher_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_fisher, IntPtr d_trigger, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_fosc(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_fosc_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_fosc_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_fractal(float[] host_high, float[] host_low, int[] host_swingHigh, int[] host_swingLow, int size, int leftBars, int rightBars, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_fractal_batch(float[] host_highs, float[] host_lows, int[] host_swingHigh, int[] host_swingLow, int seriesLen, int numSeries, int leftBars, int rightBars, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_fractal_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_swingHigh, IntPtr d_swingLow, int seriesLen, int numSeries, int leftBars, int rightBars, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_frama(float[] host_high, float[] host_low, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_frama_batch(float[] host_highs, float[] host_lows, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_frama_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ha(float[] host_open, float[] host_high, float[] host_low, float[] host_close, float[] host_haOpen, float[] host_haHigh, float[] host_haLow, float[] host_haClose, int size, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ha_batch(float[] host_opens, float[] host_highs, float[] host_lows, float[] host_closes, float[] host_haOpen, float[] host_haHigh, float[] host_haLow, float[] host_haClose, int seriesLen, int numSeries, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ha_batch_d(IntPtr d_opens, IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_haOpen, IntPtr d_haHigh, IntPtr d_haLow, IntPtr d_haClose, int seriesLen, int numSeries, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_hma(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_hma_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_hma_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ibs(float[] host_high, float[] host_low, float[] host_close, float[] host_output, int size, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ibs_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_outputs, int seriesLen, int numSeries, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ibs_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_outputs, int seriesLen, int numSeries, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ichimoku(float[] host_high, float[] host_low, float[] host_tenkanSen, float[] host_kijunSen, float[] host_senkouSpanA, float[] host_senkouSpanB, int size, int tenkanPeriod, int kijunPeriod, int senkouBPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ichimoku_batch(float[] host_highs, float[] host_lows, float[] host_tenkanSen, float[] host_kijunSen, float[] host_senkouSpanA, float[] host_senkouSpanB, int seriesLen, int numSeries, int tenkanPeriod, int kijunPeriod, int senkouBPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ichimoku_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_tenkanSen, IntPtr d_kijunSen, IntPtr d_senkouSpanA, IntPtr d_senkouSpanB, int seriesLen, int numSeries, int tenkanPeriod, int kijunPeriod, int senkouBPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kc(float[] host_high, float[] host_low, float[] host_close, float[] host_realUpperBand, float[] host_realMiddleBand, float[] host_realLowerBand, int size, int period, int atrPeriod, double nbDev, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kc_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_realUpperBand, float[] host_realMiddleBand, float[] host_realLowerBand, int seriesLen, int numSeries, int period, int atrPeriod, double nbDev, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kc_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_realUpperBand, IntPtr d_realMiddleBand, IntPtr d_realLowerBand, int seriesLen, int numSeries, int period, int atrPeriod, double nbDev, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kdj(float[] host_high, float[] host_low, float[] host_close, float[] host_k, float[] host_d, float[] host_j, int size, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kdj_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_k, float[] host_d, float[] host_j, int seriesLen, int numSeries, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kdj_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_k, IntPtr d_d, IntPtr d_j, int seriesLen, int numSeries, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kst(float[] host_input, float[] host_kst, float[] host_kstSignal, int size, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int sma1Period, int sma2Period, int sma3Period, int sma4Period, int signalPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kst_batch(float[] host_inputs, float[] host_kst, float[] host_kstSignal, int seriesLen, int numSeries, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int sma1Period, int sma2Period, int sma3Period, int sma4Period, int signalPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kst_batch_d(IntPtr d_inputs, IntPtr d_kst, IntPtr d_kstSignal, int seriesLen, int numSeries, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int sma1Period, int sma2Period, int sma3Period, int sma4Period, int signalPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kstext(float[] host_input, float[] host_kst, float[] host_kstSignal, int size, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int ma1Period, int ma2Period, int ma3Period, int ma4Period, int signalPeriod, int rocmaType, int signalMAType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kstext_batch(float[] host_inputs, float[] host_kst, float[] host_kstSignal, int seriesLen, int numSeries, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int ma1Period, int ma2Period, int ma3Period, int ma4Period, int signalPeriod, int rocmaType, int signalMAType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kstext_batch_d(IntPtr d_inputs, IntPtr d_kst, IntPtr d_kstSignal, int seriesLen, int numSeries, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int ma1Period, int ma2Period, int ma3Period, int ma4Period, int signalPeriod, int rocmaType, int signalMAType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kurtosis_unbiased(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kurtosis_unbiased_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kurtosis_unbiased_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kvo(float[] host_high, float[] host_low, float[] host_close, float[] host_volume, float[] host_kvo, float[] host_kvoSignal, int size, int fastPeriod, int slowPeriod, int signalPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kvo_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_volumes, float[] host_kvo, float[] host_kvoSignal, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int signalPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kvo_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_volumes, IntPtr d_kvo, IntPtr d_kvoSignal, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int signalPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_marketfi(float[] host_high, float[] host_low, float[] host_volume, float[] host_output, int size, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_marketfi_batch(float[] host_highs, float[] host_lows, float[] host_volumes, float[] host_outputs, int seriesLen, int numSeries, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_marketfi_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_volumes, IntPtr d_outputs, int seriesLen, int numSeries, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_massi(float[] host_high, float[] host_low, float[] host_output, int size, int fastPeriod, int slowPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_massi_batch(float[] host_highs, float[] host_lows, float[] host_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_massi_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_mcgd(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_mcgd_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_mcgd_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_median(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_median_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_median_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_percentb(float[] host_input, float[] host_output, int size, int period, double nbDevUp, double nbDevDn, int maType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_percentb_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, double nbDevUp, double nbDevDn, int maType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_percentb_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, double nbDevUp, double nbDevDn, int maType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_percentile(float[] host_input, float[] host_output, int size, int period, double percentile, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_percentile_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, double percentile, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_percentile_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, double percentile, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_percentrank(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_percentrank_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_percentrank_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ppo_ma_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ppo_ma_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_pso(float[] host_high, float[] host_low, float[] host_close, float[] host_output, int size, int fastKPeriod, int emaPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_pso_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_outputs, int seriesLen, int numSeries, int fastKPeriod, int emaPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_pso_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_outputs, int seriesLen, int numSeries, int fastKPeriod, int emaPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_pvo_ma(float[] host_volume, float[] host_output, int size, int fastPeriod, int slowPeriod, int maType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_pvo_ma_batch(float[] host_volumes, float[] host_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_pvo_ma_batch_d(IntPtr d_volumes, IntPtr d_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int maType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_pvt(float[] host_close, float[] host_volume, float[] host_output, int size, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_pvt_batch(float[] host_closes, float[] host_volumes, float[] host_outputs, int seriesLen, int numSeries, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_pvt_batch_d(IntPtr d_closes, IntPtr d_volumes, IntPtr d_outputs, int seriesLen, int numSeries, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_qstick(float[] host_open, float[] host_close, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_qstick_batch(float[] host_opens, float[] host_closes, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_qstick_batch_d(IntPtr d_opens, IntPtr d_closes, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rma(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rma_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rma_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rogerssatchell(float[] host_open, float[] host_high, float[] host_low, float[] host_close, float[] host_output, int size, int period, double annualization, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rogerssatchell_batch(float[] host_opens, float[] host_highs, float[] host_lows, float[] host_closes, float[] host_outputs, int seriesLen, int numSeries, int period, double annualization, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rogerssatchell_batch_d(IntPtr d_opens, IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_outputs, int seriesLen, int numSeries, int period, double annualization, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rvi(float[] host_input, float[] host_output, int size, int period, int stdDevPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rvi_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int stdDevPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rvi_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int stdDevPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rvir(float[] host_high, float[] host_low, float[] host_output, int size, int period, int stdDevPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rvir_batch(float[] host_highs, float[] host_lows, float[] host_outputs, int seriesLen, int numSeries, int period, int stdDevPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rvir_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_outputs, int seriesLen, int numSeries, int period, int stdDevPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rvol(float[] host_volume, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rvol_batch(float[] host_volumes, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rvol_batch_d(IntPtr d_volumes, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_si(float[] host_open, float[] host_high, float[] host_low, float[] host_close, float[] host_output, int size, double limitMove, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_si_batch(float[] host_opens, float[] host_highs, float[] host_lows, float[] host_closes, float[] host_outputs, int seriesLen, int numSeries, double limitMove, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_si_batch_d(IntPtr d_opens, IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_outputs, int seriesLen, int numSeries, double limitMove, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_smi(float[] host_high, float[] host_low, float[] host_close, float[] host_smi, float[] host_smiSignal, int size, int period, int fastPeriod, int slowPeriod, int signalPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_smi_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_smi, float[] host_smiSignal, int seriesLen, int numSeries, int period, int fastPeriod, int slowPeriod, int signalPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_smi_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_smi, IntPtr d_smiSignal, int seriesLen, int numSeries, int period, int fastPeriod, int slowPeriod, int signalPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_sqzmom(float[] host_high, float[] host_low, float[] host_close, float[] host_momentum, int[] host_squeeze, int size, int bbPeriod, double nbDev, int kcPeriod, double factorWide, double factorNormal, double factorNarrow, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_sqzmom_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_momentum, int[] host_squeeze, int seriesLen, int numSeries, int bbPeriod, double nbDev, int kcPeriod, double factorWide, double factorNormal, double factorNarrow, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_sqzmom_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_momentum, IntPtr d_squeeze, int seriesLen, int numSeries, int bbPeriod, double nbDev, int kcPeriod, double factorWide, double factorNormal, double factorNarrow, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_stc(float[] host_input, float[] host_output, int size, int fastPeriod, int slowPeriod, int cyclePeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_stc_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int cyclePeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_stc_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int fastPeriod, int slowPeriod, int cyclePeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_stochastic_ma(float[] host_high, float[] host_low, float[] host_close, float[] host_slowK, float[] host_slowD, int size, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_stochastic_ma_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_slowK, float[] host_slowD, int seriesLen, int numSeries, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_stochastic_ma_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_slowK, IntPtr d_slowD, int seriesLen, int numSeries, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_stochf_ma(float[] host_high, float[] host_low, float[] host_close, float[] host_fastK, float[] host_fastD, int size, int fastKPeriod, int fastDPeriod, int fastDMAType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_stochf_ma_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_fastK, float[] host_fastD, int seriesLen, int numSeries, int fastKPeriod, int fastDPeriod, int fastDMAType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_stochf_ma_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_fastK, IntPtr d_fastD, int seriesLen, int numSeries, int fastKPeriod, int fastDPeriod, int fastDMAType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_stochrsi_ma(float[] host_input, float[] host_fastK, float[] host_fastD, int size, int period, int fastKPeriod, int fastDPeriod, int fastDMAType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_stochrsi_ma_batch(float[] host_inputs, float[] host_fastK, float[] host_fastD, int seriesLen, int numSeries, int period, int fastKPeriod, int fastDPeriod, int fastDMAType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_stochrsi_ma_batch_d(IntPtr d_inputs, IntPtr d_fastK, IntPtr d_fastD, int seriesLen, int numSeries, int period, int fastKPeriod, int fastDPeriod, int fastDMAType, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_supertrend(float[] host_high, float[] host_low, float[] host_close, float[] host_supertrend, int[] host_trend, int size, int period, double multiplier, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_supertrend_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_supertrend, int[] host_trend, int seriesLen, int numSeries, int period, double multiplier, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_supertrend_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_supertrend, IntPtr d_trend, int seriesLen, int numSeries, int period, double multiplier, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_2php(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_2php_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_2php_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_bp(float[] host_input, float[] host_output, int size, int period, double delta, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_bp_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, double delta, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_bp_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, double delta, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_butter(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_butter_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_butter_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_gauss(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_gauss_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_gauss_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_hp(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_hp_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_hp_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_tsi(float[] host_input, float[] host_output, int size, int firstPeriod, int secondPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_tsi_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int firstPeriod, int secondPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_tsi_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int firstPeriod, int secondPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vhf(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vhf_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vhf_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vidya(float[] host_input, float[] host_output, int size, int period, int cmoPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vidya_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int cmoPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vidya_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int cmoPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vortex(float[] host_high, float[] host_low, float[] host_close, float[] host_plusVI, float[] host_minusVI, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vortex_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_plusVI, float[] host_minusVI, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vortex_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_plusVI, IntPtr d_minusVI, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vwap(float[] host_high, float[] host_low, float[] host_close, float[] host_volume, float[] host_output, int size, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vwap_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_volumes, float[] host_outputs, int seriesLen, int numSeries, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vwap_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_volumes, IntPtr d_outputs, int seriesLen, int numSeries, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vwma(float[] host_input, float[] host_volume, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vwma_batch(float[] host_inputs, float[] host_volumes, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vwma_batch_d(IntPtr d_inputs, IntPtr d_volumes, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_wad(float[] host_high, float[] host_low, float[] host_close, float[] host_output, int size, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_wad_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_outputs, int seriesLen, int numSeries, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_wad_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_outputs, int seriesLen, int numSeries, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_wavetrend(float[] host_high, float[] host_low, float[] host_close, float[] host_wT1, float[] host_wT2, int size, int channelPeriod, int averagePeriod, int signalPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_wavetrend_batch(float[] host_highs, float[] host_lows, float[] host_closes, float[] host_wT1, float[] host_wT2, int seriesLen, int numSeries, int channelPeriod, int averagePeriod, int signalPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_wavetrend_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_closes, IntPtr d_wT1, IntPtr d_wT2, int seriesLen, int numSeries, int channelPeriod, int averagePeriod, int signalPeriod, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_zigzag(float[] host_high, float[] host_low, float[] host_zigZag, int[] host_trend, int[] host_pivotIdx, int size, double sensitivity, int minTrendLength, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_zigzag_batch(float[] host_highs, float[] host_lows, float[] host_zigZag, int[] host_trend, int[] host_pivotIdx, int seriesLen, int numSeries, double sensitivity, int minTrendLength, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_zigzag_batch_d(IntPtr d_highs, IntPtr d_lows, IntPtr d_zigZag, IntPtr d_trend, IntPtr d_pivotIdx, int seriesLen, int numSeries, double sensitivity, int minTrendLength, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_zlema(float[] host_input, float[] host_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_zlema_batch(float[] host_inputs, float[] host_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_zlema_batch_d(IntPtr d_inputs, IntPtr d_outputs, int seriesLen, int numSeries, int period, int maxConcurrency, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     public static extern IntPtr ct_device_alloc(int count);
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
@@ -2290,6 +3004,246 @@ public static partial class NativeMethods
 
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     public static extern int ct_rolling_std_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ac_d(IntPtr d_high, IntPtr d_low, IntPtr d_output, int size, int fastPeriod, int slowPeriod, int signalPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_adr_d(IntPtr d_high, IntPtr d_low, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_alma_d(IntPtr d_input, IntPtr d_output, int size, int period, double sigma, double offset, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ao_d(IntPtr d_high, IntPtr d_low, IntPtr d_output, int size, int fastPeriod, int slowPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_apo_ma_d(IntPtr d_input, IntPtr d_output, int size, int fastPeriod, int slowPeriod, int maType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_asi_wilder_d(IntPtr d_open, IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_output, int size, double limitMove, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_bbands_ma_d(IntPtr d_input, IntPtr d_realUpperBand, IntPtr d_realMiddleBand, IntPtr d_realLowerBand, int size, int period, double nbDevUp, double nbDevDn, int maType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_bbw_d(IntPtr d_input, IntPtr d_output, int size, int period, double nbDevUp, double nbDevDn, int maType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cg_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_chop_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_choptr_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cksp_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_highStop, IntPtr d_lowStop, int size, int period, double multiplier, int stopPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cmf_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_volume, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cmou_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_coppock_d(IntPtr d_input, IntPtr d_output, int size, int wmaPeriod, int roc1Period, int roc2Period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_crsi_d(IntPtr d_input, IntPtr d_output, int size, int period, int streakPeriod, int rankPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cti_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cumsum_d(IntPtr d_input, IntPtr d_output, int size, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_cvi_d(IntPtr d_high, IntPtr d_low, IntPtr d_output, int size, int period, int rocPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_donchian_d(IntPtr d_high, IntPtr d_low, IntPtr d_realUpperBand, IntPtr d_realMiddleBand, IntPtr d_realLowerBand, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_dosc_d(IntPtr d_input, IntPtr d_output, int size, int period, int firstPeriod, int secondPeriod, int signalPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_dpo_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_efi_d(IntPtr d_close, IntPtr d_volume, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_emv_d(IntPtr d_high, IntPtr d_low, IntPtr d_volume, IntPtr d_output, int size, int period, double volumeDivisor, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_er_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_eri_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_bullPower, IntPtr d_bearPower, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_fisher_d(IntPtr d_high, IntPtr d_low, IntPtr d_fisher, IntPtr d_trigger, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_fosc_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_fractal_d(IntPtr d_high, IntPtr d_low, IntPtr d_swingHigh, IntPtr d_swingLow, int size, int leftBars, int rightBars, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_frama_d(IntPtr d_high, IntPtr d_low, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ha_d(IntPtr d_open, IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_haOpen, IntPtr d_haHigh, IntPtr d_haLow, IntPtr d_haClose, int size, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_hma_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ibs_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_output, int size, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ichimoku_d(IntPtr d_high, IntPtr d_low, IntPtr d_tenkanSen, IntPtr d_kijunSen, IntPtr d_senkouSpanA, IntPtr d_senkouSpanB, int size, int tenkanPeriod, int kijunPeriod, int senkouBPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kc_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_realUpperBand, IntPtr d_realMiddleBand, IntPtr d_realLowerBand, int size, int period, int atrPeriod, double nbDev, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kdj_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_k, IntPtr d_d, IntPtr d_j, int size, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kst_d(IntPtr d_input, IntPtr d_kst, IntPtr d_kstSignal, int size, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int sma1Period, int sma2Period, int sma3Period, int sma4Period, int signalPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kstext_d(IntPtr d_input, IntPtr d_kst, IntPtr d_kstSignal, int size, int roc1Period, int roc2Period, int roc3Period, int roc4Period, int ma1Period, int ma2Period, int ma3Period, int ma4Period, int signalPeriod, int rocmaType, int signalMAType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kurtosis_unbiased_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_kvo_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_volume, IntPtr d_kvo, IntPtr d_kvoSignal, int size, int fastPeriod, int slowPeriod, int signalPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_marketfi_d(IntPtr d_high, IntPtr d_low, IntPtr d_volume, IntPtr d_output, int size, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_massi_d(IntPtr d_high, IntPtr d_low, IntPtr d_output, int size, int fastPeriod, int slowPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_mcgd_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_median_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_percentb_d(IntPtr d_input, IntPtr d_output, int size, int period, double nbDevUp, double nbDevDn, int maType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_percentile_d(IntPtr d_input, IntPtr d_output, int size, int period, double percentile, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_percentrank_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_ppo_ma_d(IntPtr d_input, IntPtr d_output, int size, int fastPeriod, int slowPeriod, int maType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_pso_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_output, int size, int fastKPeriod, int emaPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_pvo_ma_d(IntPtr d_volume, IntPtr d_output, int size, int fastPeriod, int slowPeriod, int maType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_pvt_d(IntPtr d_close, IntPtr d_volume, IntPtr d_output, int size, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_qstick_d(IntPtr d_open, IntPtr d_close, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rma_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rogerssatchell_d(IntPtr d_open, IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_output, int size, int period, double annualization, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rvi_d(IntPtr d_input, IntPtr d_output, int size, int period, int stdDevPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rvir_d(IntPtr d_high, IntPtr d_low, IntPtr d_output, int size, int period, int stdDevPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_rvol_d(IntPtr d_volume, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_si_d(IntPtr d_open, IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_output, int size, double limitMove, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_smi_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_smi, IntPtr d_smiSignal, int size, int period, int fastPeriod, int slowPeriod, int signalPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_sqzmom_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_momentum, IntPtr d_squeeze, int size, int bbPeriod, double nbDev, int kcPeriod, double factorWide, double factorNormal, double factorNarrow, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_stc_d(IntPtr d_input, IntPtr d_output, int size, int fastPeriod, int slowPeriod, int cyclePeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_stochastic_ma_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_slowK, IntPtr d_slowD, int size, int fastKPeriod, int slowKPeriod, int slowKMAType, int slowDPeriod, int slowDMAType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_stochf_ma_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_fastK, IntPtr d_fastD, int size, int fastKPeriod, int fastDPeriod, int fastDMAType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_stochrsi_ma_d(IntPtr d_input, IntPtr d_fastK, IntPtr d_fastD, int size, int period, int fastKPeriod, int fastDPeriod, int fastDMAType, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_supertrend_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_supertrend, IntPtr d_trend, int size, int period, double multiplier, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_2php_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_bp_d(IntPtr d_input, IntPtr d_output, int size, int period, double delta, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_butter_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_gauss_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_swak_hp_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_tsi_d(IntPtr d_input, IntPtr d_output, int size, int firstPeriod, int secondPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vhf_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vidya_d(IntPtr d_input, IntPtr d_output, int size, int period, int cmoPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vortex_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_plusVI, IntPtr d_minusVI, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vwap_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_volume, IntPtr d_output, int size, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_vwma_d(IntPtr d_input, IntPtr d_volume, IntPtr d_output, int size, int period, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_wad_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_output, int size, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_wavetrend_d(IntPtr d_high, IntPtr d_low, IntPtr d_close, IntPtr d_wT1, IntPtr d_wT2, int size, int channelPeriod, int averagePeriod, int signalPeriod, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_zigzag_d(IntPtr d_high, IntPtr d_low, IntPtr d_zigZag, IntPtr d_trend, IntPtr d_pivotIdx, int size, double sensitivity, int minTrendLength, IntPtr stream = default);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int ct_zlema_d(IntPtr d_input, IntPtr d_output, int size, int period, IntPtr stream = default);
 
 }
 

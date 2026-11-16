@@ -8,12 +8,7 @@
 #include <stdexcept>
 #include <cmath>
 
-// Exact TA-Lib state machine (ta_MAXINDEX.c). Tie handling is
-// path-dependent there: a stale extremum triggers a left-to-right recompute
-// where the OLDEST tie wins (`tmp > highest`), while an incoming bar
-// replaces on equality (`tmp >= highest`, newest wins). A stateless
-// per-window kernel cannot reproduce this, so the series is walked
-// sequentially by a single thread.
+// TA-Lib 0.8.3 names the newest tie, including a stale-window recompute.
 __global__ void maxIndexKernel(const float* __restrict__ input,
                                float* __restrict__ output,
                                int period, int size) {
@@ -24,9 +19,9 @@ __global__ void maxIndexKernel(const float* __restrict__ input,
     for (int today = period - 1; today < size; ++today, ++trailingIdx) {
         float tmp = input[today];
         if (highestIdx < trailingIdx) {
-            highestIdx = trailingIdx;
+            highestIdx = today;
             highest = input[highestIdx];
-            for (int i = highestIdx + 1; i <= today; ++i) {
+            for (int i = today - 1; i >= trailingIdx; --i) {
                 float v = input[i];
                 if (v > highest) {
                     highestIdx = i;

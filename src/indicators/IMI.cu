@@ -35,7 +35,7 @@ __global__ void intradayDiffKernel(const float* __restrict__ open,
 
 // TA-Lib-style alignment: the window [end-period+1, end] is reported at
 // `end`, with a leading warm-up of period-1 NaNs. Like ta_IMI.c the
-// division is unguarded: a fully flat window yields 0/0 = NaN.
+// TA-Lib 0.8.3 returns the neutral center, 50, for a flat window.
 __global__ void imiKernel(const double* __restrict__ prefixUp,
                           const double* __restrict__ prefixDown,
                           float* __restrict__ output,
@@ -47,7 +47,8 @@ __global__ void imiKernel(const double* __restrict__ prefixUp,
     double downPrev = (start == 0) ? 0.0 : prefixDown[start - 1];
     double sumUp = prefixUp[end] - upPrev;
     double sumDown = prefixDown[end] - downPrev;
-    output[end] = static_cast<float>(100.0 * (sumUp / (sumUp + sumDown)));
+    const double total = sumUp + sumDown;
+    output[end] = total == 0.0 ? 50.0f : static_cast<float>(100.0 * (sumUp / total));
 }
 } // namespace
 

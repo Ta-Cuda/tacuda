@@ -645,18 +645,10 @@ ctStatus_t ct_beta_d(const float* d_x, const float* d_y, float* d_output,
 ctStatus_t ct_mavp_d(const float* d_values, const float* d_periods,
                      float* d_output, int size, int minPeriod, int maxPeriod,
                      int maType, cudaStream_t stream) {
-    tacuda::detail::clear_last_error();
-    if (!d_values || !d_periods || !d_output || size <= 0) {
-        tacuda::detail::set_last_error("ct_mavp_d: null pointer or invalid size");
-        return CT_STATUS_INVALID_ARGUMENT;
-    }
-    try {
-        tacuda::MAVP ind(minPeriod, maxPeriod, static_cast<tacuda::MAType>(maType));
-        ind.calculate(d_values, d_periods, d_output, size, stream);
-        return CT_STATUS_SUCCESS;
-    } catch (...) {
-        return classify_exception();
-    }
+    const float* ins[] = {d_values, d_periods};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::MAVP,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(minPeriod), static_cast<double>(maxPeriod), static_cast<double>(maType)}}, stream);
 }
 
 ctStatus_t ct_bop_d(const float* d_open, const float* d_high,
@@ -2069,4 +2061,724 @@ ctStatus_t ct_rolling_std_d(const float* d_input, float* d_output, int size,
     } catch (...) {
         return classify_exception();
     }
+}
+
+ctStatus_t ct_ac_d(const float* d_high, const float* d_low, float* d_output,
+                   int size, int fastPeriod, int slowPeriod, int signalPeriod,
+                   cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::AC,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(fastPeriod), static_cast<double>(slowPeriod), static_cast<double>(signalPeriod)}}, stream);
+}
+
+ctStatus_t ct_adr_d(const float* d_high, const float* d_low, float* d_output,
+                    int size, int period, cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::ADR,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_alma_d(const float* d_input, float* d_output, int size,
+                     int period, double sigma, double offset,
+                     cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::ALMA,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(sigma), static_cast<double>(offset)}}, stream);
+}
+
+ctStatus_t ct_ao_d(const float* d_high, const float* d_low, float* d_output,
+                   int size, int fastPeriod, int slowPeriod,
+                   cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::AO,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(fastPeriod), static_cast<double>(slowPeriod)}}, stream);
+}
+
+ctStatus_t ct_apo_ma_d(const float* d_input, float* d_output, int size,
+                       int fastPeriod, int slowPeriod, int maType,
+                       cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::APO,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(fastPeriod), static_cast<double>(slowPeriod), static_cast<double>(maType)}}, stream);
+}
+
+ctStatus_t ct_asi_wilder_d(const float* d_open, const float* d_high,
+                           const float* d_low, const float* d_close,
+                           float* d_output, int size, double limitMove,
+                           cudaStream_t stream) {
+    const float* ins[] = {d_open, d_high, d_low, d_close};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::ASI,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(limitMove)}}, stream);
+}
+
+ctStatus_t ct_bbands_ma_d(const float* d_input, float* d_realUpperBand,
+                          float* d_realMiddleBand, float* d_realLowerBand,
+                          int size, int period, double nbDevUp, double nbDevDn,
+                          int maType, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_realUpperBand, d_realMiddleBand, d_realLowerBand};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::BBANDS,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(nbDevUp), static_cast<double>(nbDevDn), static_cast<double>(maType)}}, stream);
+}
+
+ctStatus_t ct_bbw_d(const float* d_input, float* d_output, int size,
+                    int period, double nbDevUp, double nbDevDn, int maType,
+                    cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::BBW,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(nbDevUp), static_cast<double>(nbDevDn), static_cast<double>(maType)}}, stream);
+}
+
+ctStatus_t ct_cg_d(const float* d_input, float* d_output, int size, int period,
+                   cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::CG,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_chop_d(const float* d_high, const float* d_low,
+                     const float* d_close, float* d_output, int size,
+                     int period, cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::CHOP,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_choptr_d(const float* d_high, const float* d_low,
+                       const float* d_close, float* d_output, int size,
+                       int period, cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::CHOPTR,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_cksp_d(const float* d_high, const float* d_low,
+                     const float* d_close, float* d_highStop, float* d_lowStop,
+                     int size, int period, double multiplier, int stopPeriod,
+                     cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close};
+    void* outs[] = {d_highStop, d_lowStop};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::CKSP,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(multiplier), static_cast<double>(stopPeriod)}}, stream);
+}
+
+ctStatus_t ct_cmf_d(const float* d_high, const float* d_low,
+                    const float* d_close, const float* d_volume,
+                    float* d_output, int size, int period, cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close, d_volume};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::CMF,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_cmou_d(const float* d_input, float* d_output, int size,
+                     int period, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::CMOU,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_coppock_d(const float* d_input, float* d_output, int size,
+                        int wmaPeriod, int roc1Period, int roc2Period,
+                        cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::COPPOCK,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(wmaPeriod), static_cast<double>(roc1Period), static_cast<double>(roc2Period)}}, stream);
+}
+
+ctStatus_t ct_crsi_d(const float* d_input, float* d_output, int size,
+                     int period, int streakPeriod, int rankPeriod,
+                     cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::CRSI,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(streakPeriod), static_cast<double>(rankPeriod)}}, stream);
+}
+
+ctStatus_t ct_cti_d(const float* d_input, float* d_output, int size,
+                    int period, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::CTI,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_cumsum_d(const float* d_input, float* d_output, int size,
+                       cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::CUMSUM,
+        ins, outs, size, 1, tacuda::talib08::Params{{}}, stream);
+}
+
+ctStatus_t ct_cvi_d(const float* d_high, const float* d_low, float* d_output,
+                    int size, int period, int rocPeriod, cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::CVI,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(rocPeriod)}}, stream);
+}
+
+ctStatus_t ct_donchian_d(const float* d_high, const float* d_low,
+                         float* d_realUpperBand, float* d_realMiddleBand,
+                         float* d_realLowerBand, int size, int period,
+                         cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low};
+    void* outs[] = {d_realUpperBand, d_realMiddleBand, d_realLowerBand};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::DONCHIAN,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_dosc_d(const float* d_input, float* d_output, int size,
+                     int period, int firstPeriod, int secondPeriod,
+                     int signalPeriod, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::DOSC,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(firstPeriod), static_cast<double>(secondPeriod), static_cast<double>(signalPeriod)}}, stream);
+}
+
+ctStatus_t ct_dpo_d(const float* d_input, float* d_output, int size,
+                    int period, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::DPO,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_efi_d(const float* d_close, const float* d_volume,
+                    float* d_output, int size, int period, cudaStream_t stream) {
+    const float* ins[] = {d_close, d_volume};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::EFI,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_emv_d(const float* d_high, const float* d_low,
+                    const float* d_volume, float* d_output, int size,
+                    int period, double volumeDivisor, cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_volume};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::EMV,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(volumeDivisor)}}, stream);
+}
+
+ctStatus_t ct_er_d(const float* d_input, float* d_output, int size, int period,
+                   cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::ER,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_eri_d(const float* d_high, const float* d_low,
+                    const float* d_close, float* d_bullPower,
+                    float* d_bearPower, int size, int period,
+                    cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close};
+    void* outs[] = {d_bullPower, d_bearPower};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::ERI,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_fisher_d(const float* d_high, const float* d_low,
+                       float* d_fisher, float* d_trigger, int size, int period,
+                       cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low};
+    void* outs[] = {d_fisher, d_trigger};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::FISHER,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_fosc_d(const float* d_input, float* d_output, int size,
+                     int period, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::FOSC,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_fractal_d(const float* d_high, const float* d_low,
+                        int* d_swingHigh, int* d_swingLow, int size,
+                        int leftBars, int rightBars, cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low};
+    void* outs[] = {d_swingHigh, d_swingLow};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::FRACTAL,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(leftBars), static_cast<double>(rightBars)}}, stream);
+}
+
+ctStatus_t ct_frama_d(const float* d_high, const float* d_low, float* d_output,
+                      int size, int period, cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::FRAMA,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_ha_d(const float* d_open, const float* d_high,
+                   const float* d_low, const float* d_close, float* d_haOpen,
+                   float* d_haHigh, float* d_haLow, float* d_haClose, int size,
+                   cudaStream_t stream) {
+    const float* ins[] = {d_open, d_high, d_low, d_close};
+    void* outs[] = {d_haOpen, d_haHigh, d_haLow, d_haClose};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::HA,
+        ins, outs, size, 1, tacuda::talib08::Params{{}}, stream);
+}
+
+ctStatus_t ct_hma_d(const float* d_input, float* d_output, int size,
+                    int period, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::HMA,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_ibs_d(const float* d_high, const float* d_low,
+                    const float* d_close, float* d_output, int size,
+                    cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::IBS,
+        ins, outs, size, 1, tacuda::talib08::Params{{}}, stream);
+}
+
+ctStatus_t ct_ichimoku_d(const float* d_high, const float* d_low,
+                         float* d_tenkanSen, float* d_kijunSen,
+                         float* d_senkouSpanA, float* d_senkouSpanB, int size,
+                         int tenkanPeriod, int kijunPeriod, int senkouBPeriod,
+                         cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low};
+    void* outs[] = {d_tenkanSen, d_kijunSen, d_senkouSpanA, d_senkouSpanB};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::ICHIMOKU,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(tenkanPeriod), static_cast<double>(kijunPeriod), static_cast<double>(senkouBPeriod)}}, stream);
+}
+
+ctStatus_t ct_kc_d(const float* d_high, const float* d_low,
+                   const float* d_close, float* d_realUpperBand,
+                   float* d_realMiddleBand, float* d_realLowerBand, int size,
+                   int period, int atrPeriod, double nbDev,
+                   cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close};
+    void* outs[] = {d_realUpperBand, d_realMiddleBand, d_realLowerBand};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::KC,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(atrPeriod), static_cast<double>(nbDev)}}, stream);
+}
+
+ctStatus_t ct_kdj_d(const float* d_high, const float* d_low,
+                    const float* d_close, float* d_k, float* d_d, float* d_j,
+                    int size, int fastKPeriod, int slowKPeriod,
+                    int slowKMAType, int slowDPeriod, int slowDMAType,
+                    cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close};
+    void* outs[] = {d_k, d_d, d_j};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::KDJ,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(fastKPeriod), static_cast<double>(slowKPeriod), static_cast<double>(slowKMAType), static_cast<double>(slowDPeriod), static_cast<double>(slowDMAType)}}, stream);
+}
+
+ctStatus_t ct_kst_d(const float* d_input, float* d_kst, float* d_kstSignal,
+                    int size, int roc1Period, int roc2Period, int roc3Period,
+                    int roc4Period, int sma1Period, int sma2Period,
+                    int sma3Period, int sma4Period, int signalPeriod,
+                    cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_kst, d_kstSignal};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::KST,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(roc1Period), static_cast<double>(roc2Period), static_cast<double>(roc3Period), static_cast<double>(roc4Period), static_cast<double>(sma1Period), static_cast<double>(sma2Period), static_cast<double>(sma3Period), static_cast<double>(sma4Period), static_cast<double>(signalPeriod)}}, stream);
+}
+
+ctStatus_t ct_kstext_d(const float* d_input, float* d_kst, float* d_kstSignal,
+                       int size, int roc1Period, int roc2Period,
+                       int roc3Period, int roc4Period, int ma1Period,
+                       int ma2Period, int ma3Period, int ma4Period,
+                       int signalPeriod, int rocmaType, int signalMAType,
+                       cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_kst, d_kstSignal};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::KSTEXT,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(roc1Period), static_cast<double>(roc2Period), static_cast<double>(roc3Period), static_cast<double>(roc4Period), static_cast<double>(ma1Period), static_cast<double>(ma2Period), static_cast<double>(ma3Period), static_cast<double>(ma4Period), static_cast<double>(signalPeriod), static_cast<double>(rocmaType), static_cast<double>(signalMAType)}}, stream);
+}
+
+ctStatus_t ct_kurtosis_unbiased_d(const float* d_input, float* d_output,
+                                  int size, int period, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::KURTOSIS,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_kvo_d(const float* d_high, const float* d_low,
+                    const float* d_close, const float* d_volume, float* d_kvo,
+                    float* d_kvoSignal, int size, int fastPeriod,
+                    int slowPeriod, int signalPeriod, cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close, d_volume};
+    void* outs[] = {d_kvo, d_kvoSignal};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::KVO,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(fastPeriod), static_cast<double>(slowPeriod), static_cast<double>(signalPeriod)}}, stream);
+}
+
+ctStatus_t ct_marketfi_d(const float* d_high, const float* d_low,
+                         const float* d_volume, float* d_output, int size,
+                         cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_volume};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::MARKETFI,
+        ins, outs, size, 1, tacuda::talib08::Params{{}}, stream);
+}
+
+ctStatus_t ct_massi_d(const float* d_high, const float* d_low, float* d_output,
+                      int size, int fastPeriod, int slowPeriod,
+                      cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::MASSI,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(fastPeriod), static_cast<double>(slowPeriod)}}, stream);
+}
+
+ctStatus_t ct_mcgd_d(const float* d_input, float* d_output, int size,
+                     int period, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::MCGD,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_median_d(const float* d_input, float* d_output, int size,
+                       int period, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::MEDIAN,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_percentb_d(const float* d_input, float* d_output, int size,
+                         int period, double nbDevUp, double nbDevDn,
+                         int maType, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::PERCENTB,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(nbDevUp), static_cast<double>(nbDevDn), static_cast<double>(maType)}}, stream);
+}
+
+ctStatus_t ct_percentile_d(const float* d_input, float* d_output, int size,
+                           int period, double percentile, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::PERCENTILE,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(percentile)}}, stream);
+}
+
+ctStatus_t ct_percentrank_d(const float* d_input, float* d_output, int size,
+                            int period, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::PERCENTRANK,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_ppo_ma_d(const float* d_input, float* d_output, int size,
+                       int fastPeriod, int slowPeriod, int maType,
+                       cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::PPO,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(fastPeriod), static_cast<double>(slowPeriod), static_cast<double>(maType)}}, stream);
+}
+
+ctStatus_t ct_pso_d(const float* d_high, const float* d_low,
+                    const float* d_close, float* d_output, int size,
+                    int fastKPeriod, int emaPeriod, cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::PSO,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(fastKPeriod), static_cast<double>(emaPeriod)}}, stream);
+}
+
+ctStatus_t ct_pvo_ma_d(const float* d_volume, float* d_output, int size,
+                       int fastPeriod, int slowPeriod, int maType,
+                       cudaStream_t stream) {
+    const float* ins[] = {d_volume};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::PVO,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(fastPeriod), static_cast<double>(slowPeriod), static_cast<double>(maType)}}, stream);
+}
+
+ctStatus_t ct_pvt_d(const float* d_close, const float* d_volume,
+                    float* d_output, int size, cudaStream_t stream) {
+    const float* ins[] = {d_close, d_volume};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::PVT,
+        ins, outs, size, 1, tacuda::talib08::Params{{}}, stream);
+}
+
+ctStatus_t ct_qstick_d(const float* d_open, const float* d_close,
+                       float* d_output, int size, int period,
+                       cudaStream_t stream) {
+    const float* ins[] = {d_open, d_close};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::QSTICK,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_rma_d(const float* d_input, float* d_output, int size,
+                    int period, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::RMA,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_rogerssatchell_d(const float* d_open, const float* d_high,
+                               const float* d_low, const float* d_close,
+                               float* d_output, int size, int period,
+                               double annualization, cudaStream_t stream) {
+    const float* ins[] = {d_open, d_high, d_low, d_close};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::ROGERSSATCHELL,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(annualization)}}, stream);
+}
+
+ctStatus_t ct_rvi_d(const float* d_input, float* d_output, int size,
+                    int period, int stdDevPeriod, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::RVI,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(stdDevPeriod)}}, stream);
+}
+
+ctStatus_t ct_rvir_d(const float* d_high, const float* d_low, float* d_output,
+                     int size, int period, int stdDevPeriod,
+                     cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::RVIR,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(stdDevPeriod)}}, stream);
+}
+
+ctStatus_t ct_rvol_d(const float* d_volume, float* d_output, int size,
+                     int period, cudaStream_t stream) {
+    const float* ins[] = {d_volume};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::RVOL,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_si_d(const float* d_open, const float* d_high,
+                   const float* d_low, const float* d_close, float* d_output,
+                   int size, double limitMove, cudaStream_t stream) {
+    const float* ins[] = {d_open, d_high, d_low, d_close};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::SI,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(limitMove)}}, stream);
+}
+
+ctStatus_t ct_smi_d(const float* d_high, const float* d_low,
+                    const float* d_close, float* d_smi, float* d_smiSignal,
+                    int size, int period, int fastPeriod, int slowPeriod,
+                    int signalPeriod, cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close};
+    void* outs[] = {d_smi, d_smiSignal};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::SMI,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(fastPeriod), static_cast<double>(slowPeriod), static_cast<double>(signalPeriod)}}, stream);
+}
+
+ctStatus_t ct_sqzmom_d(const float* d_high, const float* d_low,
+                       const float* d_close, float* d_momentum, int* d_squeeze,
+                       int size, int bbPeriod, double nbDev, int kcPeriod,
+                       double factorWide, double factorNormal,
+                       double factorNarrow, cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close};
+    void* outs[] = {d_momentum, d_squeeze};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::SQZMOM,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(bbPeriod), static_cast<double>(nbDev), static_cast<double>(kcPeriod), static_cast<double>(factorWide), static_cast<double>(factorNormal), static_cast<double>(factorNarrow)}}, stream);
+}
+
+ctStatus_t ct_stc_d(const float* d_input, float* d_output, int size,
+                    int fastPeriod, int slowPeriod, int cyclePeriod,
+                    cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::STC,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(fastPeriod), static_cast<double>(slowPeriod), static_cast<double>(cyclePeriod)}}, stream);
+}
+
+ctStatus_t ct_stochastic_ma_d(const float* d_high, const float* d_low,
+                              const float* d_close, float* d_slowK,
+                              float* d_slowD, int size, int fastKPeriod,
+                              int slowKPeriod, int slowKMAType,
+                              int slowDPeriod, int slowDMAType,
+                              cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close};
+    void* outs[] = {d_slowK, d_slowD};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::STOCH,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(fastKPeriod), static_cast<double>(slowKPeriod), static_cast<double>(slowKMAType), static_cast<double>(slowDPeriod), static_cast<double>(slowDMAType)}}, stream);
+}
+
+ctStatus_t ct_stochf_ma_d(const float* d_high, const float* d_low,
+                          const float* d_close, float* d_fastK, float* d_fastD,
+                          int size, int fastKPeriod, int fastDPeriod,
+                          int fastDMAType, cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close};
+    void* outs[] = {d_fastK, d_fastD};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::STOCHF,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(fastKPeriod), static_cast<double>(fastDPeriod), static_cast<double>(fastDMAType)}}, stream);
+}
+
+ctStatus_t ct_stochrsi_ma_d(const float* d_input, float* d_fastK,
+                            float* d_fastD, int size, int period,
+                            int fastKPeriod, int fastDPeriod, int fastDMAType,
+                            cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_fastK, d_fastD};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::STOCHRSI,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(fastKPeriod), static_cast<double>(fastDPeriod), static_cast<double>(fastDMAType)}}, stream);
+}
+
+ctStatus_t ct_supertrend_d(const float* d_high, const float* d_low,
+                           const float* d_close, float* d_supertrend,
+                           int* d_trend, int size, int period,
+                           double multiplier, cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close};
+    void* outs[] = {d_supertrend, d_trend};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::SUPERTREND,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(multiplier)}}, stream);
+}
+
+ctStatus_t ct_swak_2php_d(const float* d_input, float* d_output, int size,
+                          int period, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::SWAK_2PHP,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_swak_bp_d(const float* d_input, float* d_output, int size,
+                        int period, double delta, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::SWAK_BP,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(delta)}}, stream);
+}
+
+ctStatus_t ct_swak_butter_d(const float* d_input, float* d_output, int size,
+                            int period, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::SWAK_BUTTER,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_swak_gauss_d(const float* d_input, float* d_output, int size,
+                           int period, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::SWAK_GAUSS,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_swak_hp_d(const float* d_input, float* d_output, int size,
+                        int period, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::SWAK_HP,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_tsi_d(const float* d_input, float* d_output, int size,
+                    int firstPeriod, int secondPeriod, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::TSI,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(firstPeriod), static_cast<double>(secondPeriod)}}, stream);
+}
+
+ctStatus_t ct_vhf_d(const float* d_input, float* d_output, int size,
+                    int period, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::VHF,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_vidya_d(const float* d_input, float* d_output, int size,
+                      int period, int cmoPeriod, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::VIDYA,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period), static_cast<double>(cmoPeriod)}}, stream);
+}
+
+ctStatus_t ct_vortex_d(const float* d_high, const float* d_low,
+                       const float* d_close, float* d_plusVI, float* d_minusVI,
+                       int size, int period, cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close};
+    void* outs[] = {d_plusVI, d_minusVI};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::VORTEX,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_vwap_d(const float* d_high, const float* d_low,
+                     const float* d_close, const float* d_volume,
+                     float* d_output, int size, cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close, d_volume};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::VWAP,
+        ins, outs, size, 1, tacuda::talib08::Params{{}}, stream);
+}
+
+ctStatus_t ct_vwma_d(const float* d_input, const float* d_volume,
+                     float* d_output, int size, int period,
+                     cudaStream_t stream) {
+    const float* ins[] = {d_input, d_volume};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::VWMA,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
+}
+
+ctStatus_t ct_wad_d(const float* d_high, const float* d_low,
+                    const float* d_close, float* d_output, int size,
+                    cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::WAD,
+        ins, outs, size, 1, tacuda::talib08::Params{{}}, stream);
+}
+
+ctStatus_t ct_wavetrend_d(const float* d_high, const float* d_low,
+                          const float* d_close, float* d_wT1, float* d_wT2,
+                          int size, int channelPeriod, int averagePeriod,
+                          int signalPeriod, cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low, d_close};
+    void* outs[] = {d_wT1, d_wT2};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::WAVETREND,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(channelPeriod), static_cast<double>(averagePeriod), static_cast<double>(signalPeriod)}}, stream);
+}
+
+ctStatus_t ct_zigzag_d(const float* d_high, const float* d_low,
+                       float* d_zigZag, int* d_trend, int* d_pivotIdx,
+                       int size, double sensitivity, int minTrendLength,
+                       cudaStream_t stream) {
+    const float* ins[] = {d_high, d_low};
+    void* outs[] = {d_zigZag, d_trend, d_pivotIdx};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::ZIGZAG,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(sensitivity), static_cast<double>(minTrendLength)}}, stream);
+}
+
+ctStatus_t ct_zlema_d(const float* d_input, float* d_output, int size,
+                      int period, cudaStream_t stream) {
+    const float* ins[] = {d_input};
+    void* outs[] = {d_output};
+    return tacuda::talib08::run_device(tacuda::talib08::Function::ZLEMA,
+        ins, outs, size, 1, tacuda::talib08::Params{{static_cast<double>(period)}}, stream);
 }

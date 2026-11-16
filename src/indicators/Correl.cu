@@ -6,123 +6,93 @@
 #include <indicators/Correl.h>
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
-#include <thrust/device_ptr.h>
-#include <utils/ThrustPolicy.cuh>
-#include <thrust/execution_policy.h>
-#include <thrust/scan.h>
+#include <algorithm>
 #include <stdexcept>
 #include <math.h>
 
-// Build double-precision helper arrays
-__global__ void makeDouble(const float* __restrict__ in, double* __restrict__ out, int n) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < n) out[idx] = static_cast<double>(in[idx]);
+namespace {
+__global__ void findInvalidSuffix(const float* x, const float* y, int* suffix, int n) {
+    const int i = blockIdx.x * blockDim.x + threadIdx.x;
+    if (i < n && (!isfinite(x[i]) || !isfinite(y[i]))) atomicMax(suffix, n - i);
 }
 
-__global__ void elementwiseMulDouble(const double* __restrict__ a,
-                                     const double* __restrict__ b,
-                                     double* __restrict__ out,
-                                     int n) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < n) out[idx] = a[idx] * b[idx];
-}
-
-__global__ void squareDouble(const double* __restrict__ in,
-                             double* __restrict__ out,
-                             int n) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx < n) {
-        double v = in[idx];
-        out[idx] = v * v;
+// Rebase sums at the first sample of each short run of windows. No sum
+// contains the entire history, and no arithmetic order depends on scheduling.
+// Reseeding also bounds roundoff from sliding updates. For large periods a
+// thread emits more windows, amortizing the initial O(period) accumulation.
+__global__ void correlWindows(const float* x, const float* y, float* output,
+                               const int* invalidSuffix, int n, int period,
+                               int windowsPerThread) {
+    const size_t first = (static_cast<size_t>(blockIdx.x) * blockDim.x + threadIdx.x)
+                         * windowsPerThread + period - 1;
+    if (first >= static_cast<size_t>(n)) return;
+    const int begin = static_cast<int>(first);
+    const int end = begin + min(windowsPerThread, n - begin);
+    const int firstInvalid = n - *invalidSuffix;
+    // Preserve the original path's non-finite prefix behavior: subsequent
+    // published correlations are zero, without contaminating another row.
+    if (begin >= firstInvalid) {
+        for (int i = begin; i < end; ++i) output[i] = 0.0f;
+        return;
+    }
+    const double originX = x[begin - period + 1];
+    const double originY = y[begin - period + 1];
+    double sx = 0.0, sy = 0.0, sxx = 0.0, syy = 0.0, sxy = 0.0;
+    for (int i = begin - period + 1; i <= begin; ++i) {
+        const double dx = static_cast<double>(x[i]) - originX;
+        const double dy = static_cast<double>(y[i]) - originY;
+        sx += dx; sy += dy;
+        sxx += dx * dx; syy += dy * dy; sxy += dx * dy;
+    }
+    const double p = static_cast<double>(period);
+    for (int i = begin; i < end; ++i) {
+        if (i >= firstInvalid) {
+            output[i] = 0.0f;
+            continue;
+        }
+        const double cov = sxy - sx * sy / p;
+        const double vx = sxx - sx * sx / p;
+        const double vy = syy - sy * sy / p;
+        const double product = vx * vy;
+        output[i] = vx > 0.0 && vy > 0.0 && product > 1e-14
+                      ? static_cast<float>(cov / sqrt(product)) : 0.0f;
+        if (i + 1 < end && i + 1 < firstInvalid) {
+            const double oldX = static_cast<double>(x[i - period + 1]) - originX;
+            const double oldY = static_cast<double>(y[i - period + 1]) - originY;
+            const double newX = static_cast<double>(x[i + 1]) - originX;
+            const double newY = static_cast<double>(y[i + 1]) - originY;
+            sx += newX - oldX; sy += newY - oldY;
+            sxx += newX * newX - oldX * oldX;
+            syy += newY * newY - oldY * oldY;
+            sxy += newX * newY - oldX * oldY;
+        }
     }
 }
-
-// Compute rolling Pearson correlation using double-precision prefix sums
-__global__ void correlFromPrefixesD(const double* __restrict__ preX,
-                                    const double* __restrict__ preY,
-                                    const double* __restrict__ preX2,
-                                    const double* __restrict__ preY2,
-                                    const double* __restrict__ preXY,
-                                    float* __restrict__ out,
-                                    int period, int n) {
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx >= n) return;
-    if (idx < period - 1) return; // warmup stays NaN
-    const int start = idx - period + 1;
-    const double sumX  = preX[idx]  - (start > 0 ? preX[start - 1]  : 0.0);
-    const double sumY  = preY[idx]  - (start > 0 ? preY[start - 1]  : 0.0);
-    const double sumX2 = preX2[idx] - (start > 0 ? preX2[start - 1] : 0.0);
-    const double sumY2 = preY2[idx] - (start > 0 ? preY2[start - 1] : 0.0);
-    const double sumXY = preXY[idx] - (start > 0 ? preXY[start - 1] : 0.0);
-    const double p = static_cast<double>(period);
-    const double meanX = sumX / p;
-    const double meanY = sumY / p;
-    const double cov = sumXY - p * meanX * meanY;
-    const double varX = sumX2 - p * meanX * meanX;
-    const double varY = sumY2 - p * meanY * meanY;
-    // TA-Lib emits 0 for a degenerate window (TA_IS_ZERO_OR_NEG on the
-    // variance product). Prefix-sum cancellation can leave a tiny positive
-    // residue on constant windows, so variances below 1e-10 of the raw
-    // power are treated as zero as well.
-    const bool degenerate = !(varX * varY > 1e-14) ||
-                            varX <= 1e-10 * sumX2 || varY <= 1e-10 * sumY2;
-    out[idx] = degenerate ? 0.0f : static_cast<float>(cov / sqrt(varX * varY));
 }
 
 tacuda::Correl::Correl(int period) : period(period) {}
 
-void tacuda::Correl::calculate(const float* x, const float* y, float* output, int size, cudaStream_t stream) noexcept(false) {
-    if (period <= 0) {
-        throw std::invalid_argument("Correl: invalid period");
-    }
-    if (period > size) {
-        // TA-Lib succeeds with zero output elements when the input is
-        // shorter than the lookback; the whole line is warm-up NaNs.
-        CUDA_CHECK(cudaMemsetAsync(output, 0xFF, static_cast<size_t>(size) * sizeof(float), stream));
-        return;
-    }
-    CUDA_CHECK(cudaMemsetAsync(output, 0xFF, size * sizeof(float), stream));
-
-    // Allocate double buffers and prefixes
-    auto xd = acquireDeviceBufferAsync<double>(size, stream);
-    auto yd = acquireDeviceBufferAsync<double>(size, stream);
-    auto x2 = acquireDeviceBufferAsync<double>(size, stream);
-    auto y2 = acquireDeviceBufferAsync<double>(size, stream);
-    auto xy = acquireDeviceBufferAsync<double>(size, stream);
-
-    dim3 block = defaultBlock();
-    dim3 grid = defaultGrid(size);
-    makeDouble<<<grid, block, 0, stream>>>(x, xd.get(), size);
+void tacuda::Correl::calculate(const float* x, const float* y, float* output,
+                               int size, cudaStream_t stream) noexcept(false) {
+    if (period <= 0) throw std::invalid_argument("Correl: invalid period");
+    CUDA_CHECK(cudaMemsetAsync(output, 0xFF, static_cast<size_t>(size) * sizeof(float), stream));
+    if (period > size) return;
+    auto invalidSuffix = acquireDeviceBufferAsync<int>(1, stream);
+    CUDA_CHECK(cudaMemsetAsync(invalidSuffix.get(), 0, sizeof(int), stream));
+    findInvalidSuffix<<<defaultGrid(size), defaultBlock(), 0, stream>>>(
+        x, y, invalidSuffix.get(), size);
     CUDA_CHECK(cudaGetLastError());
-    makeDouble<<<grid, block, 0, stream>>>(y, yd.get(), size);
-    CUDA_CHECK(cudaGetLastError());
-    squareDouble<<<grid, block, 0, stream>>>(xd.get(), x2.get(), size);
-    CUDA_CHECK(cudaGetLastError());
-    squareDouble<<<grid, block, 0, stream>>>(yd.get(), y2.get(), size);
-    CUDA_CHECK(cudaGetLastError());
-    elementwiseMulDouble<<<grid, block, 0, stream>>>(xd.get(), yd.get(), xy.get(), size);
-    CUDA_CHECK(cudaGetLastError());
-
-    // Inclusive scans to get prefixes
-    thrust::device_ptr<double> px(xd.get());
-    thrust::device_ptr<double> py(yd.get());
-    thrust::device_ptr<double> px2(x2.get());
-    thrust::device_ptr<double> py2(y2.get());
-    thrust::device_ptr<double> pxy(xy.get());
-    thrust::inclusive_scan(tacuda::detail::thrust_on(stream), px, px + size, px);
-    thrust::inclusive_scan(tacuda::detail::thrust_on(stream), py, py + size, py);
-    thrust::inclusive_scan(tacuda::detail::thrust_on(stream), px2, px2 + size, px2);
-    thrust::inclusive_scan(tacuda::detail::thrust_on(stream), py2, py2 + size, py2);
-    thrust::inclusive_scan(tacuda::detail::thrust_on(stream), pxy, pxy + size, pxy);
-
-    // Final rolling correlation
-    correlFromPrefixesD<<<grid, block, 0, stream>>>(px.get(), py.get(), px2.get(), py2.get(), pxy.get(), output, period, size);
+    // Depend on the period only: appending future bars must not change the
+    // summation order of an existing window.
+    const int run = std::max(1, std::min(4096, period / 16));
+    const int windows = size - period + 1;
+    const int threads = static_cast<int>((static_cast<size_t>(windows) + run - 1) / run);
+    correlWindows<<<defaultGrid(threads), defaultBlock(), 0, stream>>>(
+        x, y, output, invalidSuffix.get(), size, period, run);
     CUDA_CHECK(cudaGetLastError());
 }
 
-void tacuda::Correl::calculate(const float* input, float* output, int size, cudaStream_t stream) noexcept(false) {
-    const float* x = input;
-    const float* y = input + size;
-    calculate(x, y, output, size, stream);
+void tacuda::Correl::calculate(const float* input, float* output, int size,
+                               cudaStream_t stream) noexcept(false) {
+    calculate(input, input + size, output, size, stream);
 }
-

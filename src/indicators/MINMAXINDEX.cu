@@ -8,11 +8,7 @@
 #include <stdexcept>
 #include <utils/CudaUtils.h>
 
-// Exact TA-Lib state machine (ta_MINMAXINDEX.c). Tie handling is
-// path-dependent there: a stale extremum triggers a left-to-right recompute
-// where the OLDEST tie wins (strict compare), while an incoming bar replaces
-// on equality (newest wins). A stateless per-window kernel cannot reproduce
-// this, so the series is walked sequentially by a single thread.
+// TA-Lib 0.8.3 names the newest tie, including a stale-window recompute.
 __global__ void minmaxIndexKernel(const float *__restrict__ input,
                                   float *__restrict__ minOut,
                                   float *__restrict__ maxOut, int period,
@@ -24,9 +20,9 @@ __global__ void minmaxIndexKernel(const float *__restrict__ input,
   for (int today = period - 1; today < size; ++today, ++trailingIdx) {
     const float tmp = input[today];
     if (lowestIdx < trailingIdx) {
-      lowestIdx = trailingIdx;
+      lowestIdx = today;
       lowest = input[lowestIdx];
-      for (int i = lowestIdx + 1; i <= today; ++i) {
+      for (int i = today - 1; i >= trailingIdx; --i) {
         float v = input[i];
         if (v < lowest) {
           lowestIdx = i;
@@ -38,9 +34,9 @@ __global__ void minmaxIndexKernel(const float *__restrict__ input,
       lowest = tmp;
     }
     if (highestIdx < trailingIdx) {
-      highestIdx = trailingIdx;
+      highestIdx = today;
       highest = input[highestIdx];
-      for (int i = highestIdx + 1; i <= today; ++i) {
+      for (int i = today - 1; i >= trailingIdx; --i) {
         float v = input[i];
         if (v > highest) {
           highestIdx = i;

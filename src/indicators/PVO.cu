@@ -7,31 +7,57 @@
 #include <stdexcept>
 #include <indicators/PVO.h>
 #include <utils/CudaUtils.h>
+#include <utils/AffineScan.cuh>
+#include <utils/DeterministicScan.cuh>
+#include <thrust/iterator/counting_iterator.h>
+#include <thrust/iterator/transform_iterator.h>
 
-static __device__ float ema_at(const float* __restrict__ x, int idx, int period) {
-  const float k = 2.0f / (period + 1.0f);
-  float weight = 1.0f;
-  float weightedSum = x[idx];
-  float weightSum = 1.0f;
-  int steps = min(period, idx);
-#pragma unroll
-  for (int i = 1; i <= steps; ++i) {
-    weight *= (1.0f - k);
-    weightedSum += x[idx - i] * weight;
-    weightSum += weight;
+namespace {
+using Pair = tacuda::detail::AffineTransform1<double>;
+
+__global__ void pvoSeeds(const float* volume, double* seed, int fast, int slow) {
+  __shared__ double fastSum[256], slowSum[256];
+  const int t = threadIdx.x;
+  double f = 0.0, s = 0.0;
+  for (int i = t; i < slow; i += blockDim.x) {
+    const double value = volume[i];
+    s += value;
+    if (i < fast) f += value;
   }
-  return weightedSum / weightSum;
+  fastSum[t] = f; slowSum[t] = s;
+  __syncthreads();
+  for (int stride = 128; stride; stride >>= 1) {
+    if (t < stride) {
+      fastSum[t] += fastSum[t + stride];
+      slowSum[t] += slowSum[t + stride];
+    }
+    __syncthreads();
+  }
+  if (t == 0) { seed[0] = fastSum[0] / fast; seed[1] = slowSum[0] / slow; }
 }
 
-__global__ void pvoKernel(const float* __restrict__ input,
-                          float* __restrict__ output,
-                          int fastP, int slowP, int size) {
-  int idx = blockIdx.x * blockDim.x + threadIdx.x;
-  if (idx >= slowP && idx < size) {
-    float emaFast = ema_at(input, idx, fastP);
-    float emaSlow = ema_at(input, idx, slowP);
-    output[idx] = emaSlow == 0.0f ? 0.0f : 100.0f * (emaFast - emaSlow) / emaSlow;
+struct EmaTerms {
+  const float* volume;
+  const double* seed;
+  int period, seedIndex;
+  double alpha;
+  __device__ Pair operator()(int i) const {
+    if (i < period - 1) return {1.0, 0.0};
+    if (i == period - 1) return {0.0, seed[seedIndex]};
+    return {1.0 - alpha, alpha * static_cast<double>(volume[i])};
   }
+};
+
+__global__ void pvoKernel(const Pair* __restrict__ fast,
+                          const Pair* __restrict__ slow,
+                          float* __restrict__ output,
+                          int slowP, int size) {
+  int idx = blockIdx.x * blockDim.x + threadIdx.x;
+  if (idx >= slowP - 1 && idx < size) {
+    const double f = fast[idx].b, s = slow[idx].b;
+    output[idx] = fabs(s) < 1e-14 ? 0.0f : static_cast<float>(100.0 * (f - s) / s);
+  }
+}
 }
 
 tacuda::PVO::PVO(int fastPeriod, int slowPeriod)
@@ -46,8 +72,23 @@ void tacuda::PVO::calculate(const float* input, float* output,
     throw std::invalid_argument("PVO: fastPeriod must be < slowPeriod");
   }
   CUDA_CHECK(cudaMemsetAsync(output, 0xFF, size * sizeof(float), stream));
-  dim3 block = defaultBlock();
-  dim3 grid = defaultGrid(size);
-  pvoKernel<<<grid, block, 0, stream>>>(input, output, fastPeriod, slowPeriod, size);
+  if (slowPeriod > size) return;
+  auto seed = acquireDeviceBufferAsync<double>(2, stream);
+  pvoSeeds<<<1, 256, 0, stream>>>(input, seed.get(), fastPeriod, slowPeriod);
+  CUDA_CHECK(cudaGetLastError());
+  auto fast = acquireDeviceBufferAsync<Pair>(size, stream);
+  auto slow = acquireDeviceBufferAsync<Pair>(size, stream);
+  auto indices = thrust::make_counting_iterator<int>(0);
+  auto fastTerms = thrust::make_transform_iterator(indices,
+      EmaTerms{input, seed.get(), fastPeriod, 0, 2.0 / (fastPeriod + 1.0)});
+  auto slowTerms = thrust::make_transform_iterator(indices,
+      EmaTerms{input, seed.get(), slowPeriod, 1, 2.0 / (slowPeriod + 1.0)});
+  using Compose = tacuda::detail::AffineCompose1<double>;
+  tacuda::detail::deterministic_inclusive_scan<Pair>(fastTerms, fast.get(), size,
+      stream, Compose{}, Pair{1.0, 0.0});
+  tacuda::detail::deterministic_inclusive_scan<Pair>(slowTerms, slow.get(), size,
+      stream, Compose{}, Pair{1.0, 0.0});
+  pvoKernel<<<defaultGrid(size), defaultBlock(), 0, stream>>>(
+      fast.get(), slow.get(), output, slowPeriod, size);
   CUDA_CHECK(cudaGetLastError());
 }

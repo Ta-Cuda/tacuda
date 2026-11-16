@@ -151,7 +151,7 @@ double tolerance_for(const Pair &pair) {
 
 double rsi_from(double gain, double loss) {
   if (std::isnan(gain) || std::isnan(loss)) return kNaN;
-  if (loss == 0.0) return gain == 0.0 ? 0.0 : 100.0;
+  if (loss == 0.0) return gain == 0.0 ? 50.0 : 100.0;
   if (gain == 0.0) return 0.0;
   return 100.0 - 100.0 / (1.0 + gain / loss);
 }
@@ -284,11 +284,11 @@ TEST(PrecisionEx, RsiAgreesWithPlainPathAndReference) {
   }
 }
 
-TEST(PrecisionEx, RsiOfFlatSeriesIsZeroNotOneHundred) {
+TEST(PrecisionEx, RsiOfFlatSeriesIsNeutralFifty) {
   for (const Pair &pair : kGenericPairs) {
     const std::vector<double> got = rsi_ex(pair, flat(64), 14);
     for (std::size_t i = 14; i < got.size(); ++i) {
-      ASSERT_EQ(got[i], 0.0) << pair.name << " at " << i;
+      ASSERT_EQ(got[i], 50.0) << pair.name << " at " << i;
     }
   }
 }

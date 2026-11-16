@@ -249,12 +249,9 @@ def build_specs(tacuda: Any, talib: Any, dtype: str = "float32") -> List[Indicat
     _maybe_add(specs, talib, "NATR", IndicatorSpec("NATR(14)", "volatility", "hlc",
         lambda d: tacuda.natr(d["high"].astype(np.float32), d["low"].astype(np.float32), d["close"].astype(np.float32), 14),
         lambda d: talib.NATR(to_talib_f64(d["high"]), to_talib_f64(d["low"]), to_talib_f64(d["close"]), 14),
-        # TA-Lib bug (ta_NATR.c): when a later close is zero it writes the
-        # guard's 0.0 into outReal[0] instead of outReal[outIdx], corrupting
-        # the FIRST output bar. TaCuda emits 0 at the zero-close bar itself
-        # (the obviously intended behavior), so the zero-crossing dataset is
-        # excluded rather than reproducing the out-of-place write.
-        skip_datasets=("zeros",)))
+        # The old reference's zero-close write bug is fixed in 0.8.3;
+        # zero-crossing data belongs in the ordinary acceptance corpus.
+        ))
     _maybe_add(specs, talib, "TRANGE", IndicatorSpec("TRANGE", "volatility", "hlc",
         lambda d: tacuda.trange(d["high"].astype(np.float32), d["low"].astype(np.float32), d["close"].astype(np.float32)),
         lambda d: talib.TRANGE(to_talib_f64(d["high"]), to_talib_f64(d["low"]), to_talib_f64(d["close"]))))
@@ -568,6 +565,29 @@ def build_specs(tacuda: Any, talib: Any, dtype: str = "float32") -> List[Indicat
         lambda d: tacuda.div(high32(d), low32(d)),
         lambda d: talib.DIV(to_talib_f64(d["high"]), to_talib_f64(d["low"]))))
 
+    # Versioned additions and their exact API mapping. This also keeps
+    # similarly named club ASI/population kurtosis out of the TA oracle.
+    import sys
+    from pathlib import Path
+    scripts = str(Path(__file__).resolve().parents[1] / 'scripts')
+    if scripts not in sys.path: sys.path.insert(0, scripts)
+    from talib08_catalog import ENTRIES
+    column = {'inputs':'close','highs':'high','lows':'low','opens':'open',
+              'closes':'close','volumes':'volume','periods':'periods'}
+    for entry in ENTRIES:
+        if entry['legacy'] or not hasattr(talib, entry['name']): continue
+        api = entry['api']
+        if not hasattr(tacuda, api): continue
+        values = tuple(int(float(o['default'])) if typ=='int' else float(o['default'])
+                       for (typ,_),o in zip(entry['scalars'], entry['options']))
+        keys = tuple(column[n] for n in entry['inputs'])
+        ours, theirs = getattr(tacuda,api), getattr(talib,entry['name'])
+        def call_ours(data, fn=ours, keys=keys, values=values):
+            return fn(*(np.asarray(data[k],dtype=np.float32) for k in keys),*values)
+        def call_theirs(data, fn=theirs, keys=keys, values=values):
+            return fn(*(to_talib_f64(data[k]) for k in keys),*values)
+        specs.append(IndicatorSpec(entry['name']+'(0.8.3)', 'talib08', 'ohlcv',
+            call_ours, call_theirs, tolerance=1e-4, talib_name=entry['name']))
     return specs
 
 

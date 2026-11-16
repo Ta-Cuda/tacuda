@@ -148,9 +148,8 @@ __global__ void finalize_rsi_kernel(const tacuda::detail::AffineTransform2<T>* _
   }
 
   T rsi;
-  // TA-Lib: rsi = 100 * avgGain / (avgGain + avgLoss); a fully flat window
-  // (both averages zero) yields 0, not 50.
-  if (avgL == T(0)) rsi = (avgG == T(0)) ? T(0) : T(100);
+  // TA-Lib 0.8.3 defines the zero-total case as neutral 50.
+  if (avgL == T(0)) rsi = (avgG == T(0)) ? T(50) : T(100);
   else if (avgG == T(0)) rsi = T(0);
   else { T rs = avgG / avgL; rsi = T(100) - T(100) / (T(1) + rs); }
 
@@ -180,7 +179,7 @@ void rsi_wilder_one_series(const T* __restrict__ in,
   {
     T rsi;
     // TA-Lib: flat window (both averages zero) yields 0, not 50.
-    if (avgL == 0.0) rsi = (avgG == 0.0) ? T(0) : T(100);
+    if (avgL == 0.0) rsi = (avgG == 0.0) ? T(50) : T(100);
     else if (avgG == 0.0) rsi = T(0);
     else { double rs = avgG / avgL; rsi = static_cast<T>(100.0 - 100.0 / (1.0 + rs)); }
     out[(size_t)period * stride] = rsi;
@@ -197,7 +196,7 @@ void rsi_wilder_one_series(const T* __restrict__ in,
     avgG = (avgG * (period - 1) + g) * invP;
     avgL = (avgL * (period - 1) + l) * invP;
     T rsi;
-    if (avgL == 0.0) rsi = (avgG == 0.0) ? T(0) : T(100);
+    if (avgL == 0.0) rsi = (avgG == 0.0) ? T(50) : T(100);
     else if (avgG == 0.0) rsi = T(0);
     else { double rs = avgG / avgL; rsi = static_cast<T>(100.0 - 100.0 / (1.0 + rs)); }
     out[(size_t)t * stride] = rsi;

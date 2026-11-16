@@ -991,6 +991,344 @@ CTAPI_EXPORT ctStatus_t ct_rolling_min_d(const float* d_input, float* d_output,
 CTAPI_EXPORT ctStatus_t ct_rolling_std_d(const float* d_input, float* d_output,
                                          int size, int period,
                                          cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_ac_d(const float* d_high, const float* d_low,
+                                float* d_output, int size, int fastPeriod,
+                                int slowPeriod, int signalPeriod,
+                                cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_adr_d(const float* d_high, const float* d_low,
+                                 float* d_output, int size, int period,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_alma_d(const float* d_input, float* d_output,
+                                  int size, int period, double sigma,
+                                  double offset,
+                                  cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_ao_d(const float* d_high, const float* d_low,
+                                float* d_output, int size, int fastPeriod,
+                                int slowPeriod,
+                                cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_apo_ma_d(const float* d_input, float* d_output,
+                                    int size, int fastPeriod, int slowPeriod,
+                                    int maType,
+                                    cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_asi_wilder_d(const float* d_open,
+                                        const float* d_high,
+                                        const float* d_low,
+                                        const float* d_close, float* d_output,
+                                        int size, double limitMove,
+                                        cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_bbands_ma_d(const float* d_input,
+                                       float* d_realUpperBand,
+                                       float* d_realMiddleBand,
+                                       float* d_realLowerBand, int size,
+                                       int period, double nbDevUp,
+                                       double nbDevDn, int maType,
+                                       cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_bbw_d(const float* d_input, float* d_output,
+                                 int size, int period, double nbDevUp,
+                                 double nbDevDn, int maType,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_cg_d(const float* d_input, float* d_output,
+                                int size, int period,
+                                cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_chop_d(const float* d_high, const float* d_low,
+                                  const float* d_close, float* d_output,
+                                  int size, int period,
+                                  cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_choptr_d(const float* d_high, const float* d_low,
+                                    const float* d_close, float* d_output,
+                                    int size, int period,
+                                    cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_cksp_d(const float* d_high, const float* d_low,
+                                  const float* d_close, float* d_highStop,
+                                  float* d_lowStop, int size, int period,
+                                  double multiplier, int stopPeriod,
+                                  cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_cmf_d(const float* d_high, const float* d_low,
+                                 const float* d_close, const float* d_volume,
+                                 float* d_output, int size, int period,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_cmou_d(const float* d_input, float* d_output,
+                                  int size, int period,
+                                  cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_coppock_d(const float* d_input, float* d_output,
+                                     int size, int wmaPeriod, int roc1Period,
+                                     int roc2Period,
+                                     cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_crsi_d(const float* d_input, float* d_output,
+                                  int size, int period, int streakPeriod,
+                                  int rankPeriod,
+                                  cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_cti_d(const float* d_input, float* d_output,
+                                 int size, int period,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_cumsum_d(const float* d_input, float* d_output,
+                                    int size,
+                                    cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_cvi_d(const float* d_high, const float* d_low,
+                                 float* d_output, int size, int period,
+                                 int rocPeriod,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_donchian_d(const float* d_high, const float* d_low,
+                                      float* d_realUpperBand,
+                                      float* d_realMiddleBand,
+                                      float* d_realLowerBand, int size,
+                                      int period,
+                                      cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_dosc_d(const float* d_input, float* d_output,
+                                  int size, int period, int firstPeriod,
+                                  int secondPeriod, int signalPeriod,
+                                  cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_dpo_d(const float* d_input, float* d_output,
+                                 int size, int period,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_efi_d(const float* d_close, const float* d_volume,
+                                 float* d_output, int size, int period,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_emv_d(const float* d_high, const float* d_low,
+                                 const float* d_volume, float* d_output,
+                                 int size, int period, double volumeDivisor,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_er_d(const float* d_input, float* d_output,
+                                int size, int period,
+                                cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_eri_d(const float* d_high, const float* d_low,
+                                 const float* d_close, float* d_bullPower,
+                                 float* d_bearPower, int size, int period,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_fisher_d(const float* d_high, const float* d_low,
+                                    float* d_fisher, float* d_trigger,
+                                    int size, int period,
+                                    cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_fosc_d(const float* d_input, float* d_output,
+                                  int size, int period,
+                                  cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_fractal_d(const float* d_high, const float* d_low,
+                                     int* d_swingHigh, int* d_swingLow,
+                                     int size, int leftBars, int rightBars,
+                                     cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_frama_d(const float* d_high, const float* d_low,
+                                   float* d_output, int size, int period,
+                                   cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_ha_d(const float* d_open, const float* d_high,
+                                const float* d_low, const float* d_close,
+                                float* d_haOpen, float* d_haHigh,
+                                float* d_haLow, float* d_haClose, int size,
+                                cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_hma_d(const float* d_input, float* d_output,
+                                 int size, int period,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_ibs_d(const float* d_high, const float* d_low,
+                                 const float* d_close, float* d_output,
+                                 int size,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_ichimoku_d(const float* d_high, const float* d_low,
+                                      float* d_tenkanSen, float* d_kijunSen,
+                                      float* d_senkouSpanA,
+                                      float* d_senkouSpanB, int size,
+                                      int tenkanPeriod, int kijunPeriod,
+                                      int senkouBPeriod,
+                                      cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_kc_d(const float* d_high, const float* d_low,
+                                const float* d_close, float* d_realUpperBand,
+                                float* d_realMiddleBand,
+                                float* d_realLowerBand, int size, int period,
+                                int atrPeriod, double nbDev,
+                                cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_kdj_d(const float* d_high, const float* d_low,
+                                 const float* d_close, float* d_k, float* d_d,
+                                 float* d_j, int size, int fastKPeriod,
+                                 int slowKPeriod, int slowKMAType,
+                                 int slowDPeriod, int slowDMAType,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_kst_d(const float* d_input, float* d_kst,
+                                 float* d_kstSignal, int size, int roc1Period,
+                                 int roc2Period, int roc3Period,
+                                 int roc4Period, int sma1Period,
+                                 int sma2Period, int sma3Period,
+                                 int sma4Period, int signalPeriod,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_kstext_d(const float* d_input, float* d_kst,
+                                    float* d_kstSignal, int size,
+                                    int roc1Period, int roc2Period,
+                                    int roc3Period, int roc4Period,
+                                    int ma1Period, int ma2Period,
+                                    int ma3Period, int ma4Period,
+                                    int signalPeriod, int rocmaType,
+                                    int signalMAType,
+                                    cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_kurtosis_unbiased_d(const float* d_input,
+                                               float* d_output, int size,
+                                               int period,
+                                               cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_kvo_d(const float* d_high, const float* d_low,
+                                 const float* d_close, const float* d_volume,
+                                 float* d_kvo, float* d_kvoSignal, int size,
+                                 int fastPeriod, int slowPeriod,
+                                 int signalPeriod,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_marketfi_d(const float* d_high, const float* d_low,
+                                      const float* d_volume, float* d_output,
+                                      int size,
+                                      cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_massi_d(const float* d_high, const float* d_low,
+                                   float* d_output, int size, int fastPeriod,
+                                   int slowPeriod,
+                                   cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_mcgd_d(const float* d_input, float* d_output,
+                                  int size, int period,
+                                  cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_median_d(const float* d_input, float* d_output,
+                                    int size, int period,
+                                    cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_percentb_d(const float* d_input, float* d_output,
+                                      int size, int period, double nbDevUp,
+                                      double nbDevDn, int maType,
+                                      cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_percentile_d(const float* d_input, float* d_output,
+                                        int size, int period,
+                                        double percentile,
+                                        cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_percentrank_d(const float* d_input, float* d_output,
+                                         int size, int period,
+                                         cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_ppo_ma_d(const float* d_input, float* d_output,
+                                    int size, int fastPeriod, int slowPeriod,
+                                    int maType,
+                                    cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_pso_d(const float* d_high, const float* d_low,
+                                 const float* d_close, float* d_output,
+                                 int size, int fastKPeriod, int emaPeriod,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_pvo_ma_d(const float* d_volume, float* d_output,
+                                    int size, int fastPeriod, int slowPeriod,
+                                    int maType,
+                                    cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_pvt_d(const float* d_close, const float* d_volume,
+                                 float* d_output, int size,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_qstick_d(const float* d_open, const float* d_close,
+                                    float* d_output, int size, int period,
+                                    cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_rma_d(const float* d_input, float* d_output,
+                                 int size, int period,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_rogerssatchell_d(const float* d_open,
+                                            const float* d_high,
+                                            const float* d_low,
+                                            const float* d_close,
+                                            float* d_output, int size,
+                                            int period, double annualization,
+                                            cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_rvi_d(const float* d_input, float* d_output,
+                                 int size, int period, int stdDevPeriod,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_rvir_d(const float* d_high, const float* d_low,
+                                  float* d_output, int size, int period,
+                                  int stdDevPeriod,
+                                  cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_rvol_d(const float* d_volume, float* d_output,
+                                  int size, int period,
+                                  cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_si_d(const float* d_open, const float* d_high,
+                                const float* d_low, const float* d_close,
+                                float* d_output, int size, double limitMove,
+                                cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_smi_d(const float* d_high, const float* d_low,
+                                 const float* d_close, float* d_smi,
+                                 float* d_smiSignal, int size, int period,
+                                 int fastPeriod, int slowPeriod,
+                                 int signalPeriod,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_sqzmom_d(const float* d_high, const float* d_low,
+                                    const float* d_close, float* d_momentum,
+                                    int* d_squeeze, int size, int bbPeriod,
+                                    double nbDev, int kcPeriod,
+                                    double factorWide, double factorNormal,
+                                    double factorNarrow,
+                                    cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_stc_d(const float* d_input, float* d_output,
+                                 int size, int fastPeriod, int slowPeriod,
+                                 int cyclePeriod,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_stochastic_ma_d(const float* d_high,
+                                           const float* d_low,
+                                           const float* d_close,
+                                           float* d_slowK, float* d_slowD,
+                                           int size, int fastKPeriod,
+                                           int slowKPeriod, int slowKMAType,
+                                           int slowDPeriod, int slowDMAType,
+                                           cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_stochf_ma_d(const float* d_high, const float* d_low,
+                                       const float* d_close, float* d_fastK,
+                                       float* d_fastD, int size,
+                                       int fastKPeriod, int fastDPeriod,
+                                       int fastDMAType,
+                                       cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_stochrsi_ma_d(const float* d_input, float* d_fastK,
+                                         float* d_fastD, int size, int period,
+                                         int fastKPeriod, int fastDPeriod,
+                                         int fastDMAType,
+                                         cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_supertrend_d(const float* d_high,
+                                        const float* d_low,
+                                        const float* d_close,
+                                        float* d_supertrend, int* d_trend,
+                                        int size, int period,
+                                        double multiplier,
+                                        cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_swak_2php_d(const float* d_input, float* d_output,
+                                       int size, int period,
+                                       cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_swak_bp_d(const float* d_input, float* d_output,
+                                     int size, int period, double delta,
+                                     cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_swak_butter_d(const float* d_input, float* d_output,
+                                         int size, int period,
+                                         cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_swak_gauss_d(const float* d_input, float* d_output,
+                                        int size, int period,
+                                        cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_swak_hp_d(const float* d_input, float* d_output,
+                                     int size, int period,
+                                     cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_tsi_d(const float* d_input, float* d_output,
+                                 int size, int firstPeriod, int secondPeriod,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_vhf_d(const float* d_input, float* d_output,
+                                 int size, int period,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_vidya_d(const float* d_input, float* d_output,
+                                   int size, int period, int cmoPeriod,
+                                   cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_vortex_d(const float* d_high, const float* d_low,
+                                    const float* d_close, float* d_plusVI,
+                                    float* d_minusVI, int size, int period,
+                                    cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_vwap_d(const float* d_high, const float* d_low,
+                                  const float* d_close, const float* d_volume,
+                                  float* d_output, int size,
+                                  cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_vwma_d(const float* d_input, const float* d_volume,
+                                  float* d_output, int size, int period,
+                                  cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_wad_d(const float* d_high, const float* d_low,
+                                 const float* d_close, float* d_output,
+                                 int size,
+                                 cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_wavetrend_d(const float* d_high, const float* d_low,
+                                       const float* d_close, float* d_wT1,
+                                       float* d_wT2, int size,
+                                       int channelPeriod, int averagePeriod,
+                                       int signalPeriod,
+                                       cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_zigzag_d(const float* d_high, const float* d_low,
+                                    float* d_zigZag, int* d_trend,
+                                    int* d_pivotIdx, int size,
+                                    double sensitivity, int minTrendLength,
+                                    cudaStream_t stream CTAPI_STREAM_DEFAULT);
+CTAPI_EXPORT ctStatus_t ct_zlema_d(const float* d_input, float* d_output,
+                                   int size, int period,
+                                   cudaStream_t stream CTAPI_STREAM_DEFAULT);
 /* --- END GENERATED DEVICE API --- */
 
 #ifdef __cplusplus

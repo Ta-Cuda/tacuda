@@ -16,10 +16,7 @@ TEST(Tacuda, PVO) {
   ctStatus_t rc = ct_pvo(v.data(), out.data(), N, fastP, slowP);
   ASSERT_EQ(rc, CT_STATUS_SUCCESS) << "ct_pvo failed";
   auto ref = pvo_ref(v, fastP, slowP);
-  for (int i = 0; i < slowP && i < N; ++i) {
-    ref[i] = out[i];
-  }
-  expect_approx_equal(out, ref, 2.5e-1f);
+  expect_approx_equal(out, ref, 1e-4f);
   for (int i = 0; i < slowP - 1; ++i)
     EXPECT_TRUE(std::isnan(out[i])) << "expected NaN at head " << i;
 }

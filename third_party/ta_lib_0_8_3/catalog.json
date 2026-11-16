@@ -1,0 +1,6002 @@
+[
+  {
+    "name": "AC",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Fast Period",
+        "type": "Integer",
+        "default": "5",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow Period",
+        "type": "Integer",
+        "default": "34",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Signal Period",
+        "type": "Integer",
+        "default": "5",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_AC( int    startIdx,\n                             int    endIdx,\n                             const double inHigh[],\n                             const double inLow[],\n                             int optInFastPeriod,\n                             int optInSlowPeriod,\n                             int optInSignalPeriod,\n                             int          *outBegIdx,\n                             int          *outNBElement,\n                             double        outReal[] )"
+  },
+  {
+    "name": "ACCBANDS",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outRealUpperBand",
+        "ctype": "float"
+      },
+      {
+        "name": "outRealMiddleBand",
+        "ctype": "float"
+      },
+      {
+        "name": "outRealLowerBand",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "ACOS",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "AD",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close",
+      "Volume"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "ADD",
+    "legacy": true,
+    "inputs": [
+      "inReal0",
+      "inReal1"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "ADOSC",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close",
+      "Volume"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Fast Period",
+        "type": "Integer",
+        "default": "3",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "ADR",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_ADR( int    startIdx,\n                              int    endIdx,\n                              const double inHigh[],\n                              const double inLow[],\n                              int optInTimePeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "ADX",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "ADXR",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "ALMA",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "9",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Sigma",
+        "type": "Double",
+        "default": "6.000000e+0",
+        "minimum": "1.000000e-2",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "Offset",
+        "type": "Double",
+        "default": "8.500000e-1",
+        "minimum": "0.000000e+0",
+        "maximum": "1.000000e+0"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_ALMA( int    startIdx,\n                               int    endIdx,\n                               const double inReal[],\n                               int optInTimePeriod,\n                               double optInSigma,\n                               double optInOffset,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outReal[] )"
+  },
+  {
+    "name": "AO",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Fast Period",
+        "type": "Integer",
+        "default": "5",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow Period",
+        "type": "Integer",
+        "default": "34",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_AO( int    startIdx,\n                             int    endIdx,\n                             const double inHigh[],\n                             const double inLow[],\n                             int optInFastPeriod,\n                             int optInSlowPeriod,\n                             int          *outBegIdx,\n                             int          *outNBElement,\n                             double        outReal[] )"
+  },
+  {
+    "name": "APO",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Fast Period",
+        "type": "Integer",
+        "default": "12",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow Period",
+        "type": "Integer",
+        "default": "26",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "MA Type",
+        "type": "MA Type",
+        "default": "1",
+        "minimum": null,
+        "maximum": null
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_APO( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInFastPeriod,\n                              int optInSlowPeriod,\n                              TA_MAType optInMAType,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "AROON",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outAroonDown",
+        "ctype": "float"
+      },
+      {
+        "name": "outAroonUp",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "AROONOSC",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "ASI",
+    "legacy": false,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Limit Move",
+        "type": "Double",
+        "default": "3.000000e+0",
+        "minimum": "1.000000e-8",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_ASI( int    startIdx,\n                              int    endIdx,\n                              const double inOpen[],\n                              const double inHigh[],\n                              const double inLow[],\n                              const double inClose[],\n                              double optInLimitMove,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "ASIN",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "ATAN",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "ATR",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_ATR( int    startIdx,\n                              int    endIdx,\n                              const double inHigh[],\n                              const double inLow[],\n                              const double inClose[],\n                              int optInTimePeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "AVGDEV",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "AVGPRICE",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "BBANDS",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outRealUpperBand",
+        "ctype": "float"
+      },
+      {
+        "name": "outRealMiddleBand",
+        "ctype": "float"
+      },
+      {
+        "name": "outRealLowerBand",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Deviations up",
+        "type": "Double",
+        "default": "2.000000e+0",
+        "minimum": "-3.000000e+37",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "Deviations down",
+        "type": "Double",
+        "default": "2.000000e+0",
+        "minimum": "-3.000000e+37",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "MA Type",
+        "type": "MA Type",
+        "default": "0",
+        "minimum": null,
+        "maximum": null
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_BBANDS( int    startIdx,\n                                 int    endIdx,\n                                 const double inReal[],\n                                 int optInTimePeriod,\n                                 double optInNbDevUp,\n                                 double optInNbDevDn,\n                                 TA_MAType optInMAType,\n                                 int          *outBegIdx,\n                                 int          *outNBElement,\n                                 double        outRealUpperBand[],\n                                 double        outRealMiddleBand[],\n                                 double        outRealLowerBand[] )"
+  },
+  {
+    "name": "BBW",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Deviations up",
+        "type": "Double",
+        "default": "2.000000e+0",
+        "minimum": "-3.000000e+37",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "Deviations down",
+        "type": "Double",
+        "default": "2.000000e+0",
+        "minimum": "-3.000000e+37",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "MA Type",
+        "type": "MA Type",
+        "default": "0",
+        "minimum": null,
+        "maximum": null
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_BBW( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInTimePeriod,\n                              double optInNbDevUp,\n                              double optInNbDevDn,\n                              TA_MAType optInMAType,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "BETA",
+    "legacy": true,
+    "inputs": [
+      "inReal0",
+      "inReal1"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "5",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "BOP",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CCI",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "CDL2CROWS",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDL3BLACKCROWS",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDL3INSIDE",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDL3LINESTRIKE",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDL3OUTSIDE",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDL3STARSINSOUTH",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDL3WHITESOLDIERS",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLABANDONEDBABY",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [
+      {
+        "name": "Penetration",
+        "type": "Double",
+        "default": "3.000000e-1",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "CDLADVANCEBLOCK",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLBELTHOLD",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLBREAKAWAY",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLCLOSINGMARUBOZU",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLCONCEALBABYSWALL",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLCOUNTERATTACK",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLDARKCLOUDCOVER",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [
+      {
+        "name": "Penetration",
+        "type": "Double",
+        "default": "5.000000e-1",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "CDLDOJI",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLDOJISTAR",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLDRAGONFLYDOJI",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLENGULFING",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLEVENINGDOJISTAR",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [
+      {
+        "name": "Penetration",
+        "type": "Double",
+        "default": "3.000000e-1",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "CDLEVENINGSTAR",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [
+      {
+        "name": "Penetration",
+        "type": "Double",
+        "default": "3.000000e-1",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "CDLGAPSIDESIDEWHITE",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLGRAVESTONEDOJI",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLHAMMER",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLHANGINGMAN",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLHARAMI",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLHARAMICROSS",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLHIGHWAVE",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLHIKKAKE",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLHIKKAKEMOD",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLHOMINGPIGEON",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLIDENTICAL3CROWS",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLINNECK",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLINVERTEDHAMMER",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLKICKING",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLKICKINGBYLENGTH",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLLADDERBOTTOM",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLLONGLEGGEDDOJI",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLLONGLINE",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLMARUBOZU",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLMATCHINGLOW",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLMATHOLD",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [
+      {
+        "name": "Penetration",
+        "type": "Double",
+        "default": "5.000000e-1",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "CDLMORNINGDOJISTAR",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [
+      {
+        "name": "Penetration",
+        "type": "Double",
+        "default": "3.000000e-1",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "CDLMORNINGSTAR",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [
+      {
+        "name": "Penetration",
+        "type": "Double",
+        "default": "3.000000e-1",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "CDLONNECK",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLPIERCING",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLRICKSHAWMAN",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLRISEFALL3METHODS",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLSEPARATINGLINES",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLSHOOTINGSTAR",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLSHORTLINE",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLSPINNINGTOP",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLSTALLEDPATTERN",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLSTICKSANDWICH",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLTAKURI",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLTASUKIGAP",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLTHRUSTING",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLTRISTAR",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLUNIQUE3RIVER",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLUPSIDEGAP2CROWS",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CDLXSIDEGAP3METHODS",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CEIL",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CG",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_CG( int    startIdx,\n                             int    endIdx,\n                             const double inReal[],\n                             int optInTimePeriod,\n                             int          *outBegIdx,\n                             int          *outNBElement,\n                             double        outReal[] )"
+  },
+  {
+    "name": "CHOP",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_CHOP( int    startIdx,\n                               int    endIdx,\n                               const double inHigh[],\n                               const double inLow[],\n                               const double inClose[],\n                               int optInTimePeriod,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outReal[] )"
+  },
+  {
+    "name": "CHOPTR",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_CHOPTR( int    startIdx,\n                                 int    endIdx,\n                                 const double inHigh[],\n                                 const double inLow[],\n                                 const double inClose[],\n                                 int optInTimePeriod,\n                                 int          *outBegIdx,\n                                 int          *outNBElement,\n                                 double        outReal[] )"
+  },
+  {
+    "name": "CKSP",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outHighStop",
+        "ctype": "float"
+      },
+      {
+        "name": "outLowStop",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Multiplier",
+        "type": "Double",
+        "default": "1.000000e+0",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "Stop Period",
+        "type": "Integer",
+        "default": "9",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_CKSP( int    startIdx,\n                               int    endIdx,\n                               const double inHigh[],\n                               const double inLow[],\n                               const double inClose[],\n                               int optInTimePeriod,\n                               double optInMultiplier,\n                               int optInStopPeriod,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outHighStop[],\n                               double        outLowStop[] )"
+  },
+  {
+    "name": "CMF",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Close",
+      "Volume"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_CMF( int    startIdx,\n                              int    endIdx,\n                              const double inHigh[],\n                              const double inLow[],\n                              const double inClose[],\n                              const double inVolume[],\n                              int optInTimePeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "CMO",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "CMOU",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_CMOU( int    startIdx,\n                               int    endIdx,\n                               const double inReal[],\n                               int optInTimePeriod,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outReal[] )"
+  },
+  {
+    "name": "COPPOCK",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "WMA Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "ROC-1 Period",
+        "type": "Integer",
+        "default": "11",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "ROC-2 Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_COPPOCK( int    startIdx,\n                                  int    endIdx,\n                                  const double inReal[],\n                                  int optInWMAPeriod,\n                                  int optInROC1Period,\n                                  int optInROC2Period,\n                                  int          *outBegIdx,\n                                  int          *outNBElement,\n                                  double        outReal[] )"
+  },
+  {
+    "name": "CORREL",
+    "legacy": true,
+    "inputs": [
+      "inReal0",
+      "inReal1"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "COS",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "COSH",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "CRSI",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "3",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Streak Period",
+        "type": "Integer",
+        "default": "2",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Rank Period",
+        "type": "Integer",
+        "default": "100",
+        "minimum": "2",
+        "maximum": "10000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_CRSI( int    startIdx,\n                               int    endIdx,\n                               const double inReal[],\n                               int optInTimePeriod,\n                               int optInStreakPeriod,\n                               int optInRankPeriod,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outReal[] )"
+  },
+  {
+    "name": "CTI",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_CTI( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInTimePeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "CUMSUM",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": "TA_LIB_API TA_RetCode TA_CUMSUM( int    startIdx,\n                                 int    endIdx,\n                                 const double inReal[],\n                                 int          *outBegIdx,\n                                 int          *outNBElement,\n                                 double        outReal[] )"
+  },
+  {
+    "name": "CVI",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "ROC Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_CVI( int    startIdx,\n                              int    endIdx,\n                              const double inHigh[],\n                              const double inLow[],\n                              int optInTimePeriod,\n                              int optInROCPeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "DEMA",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_DEMA( int    startIdx,\n                               int    endIdx,\n                               const double inReal[],\n                               int optInTimePeriod,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outReal[] )"
+  },
+  {
+    "name": "DIV",
+    "legacy": true,
+    "inputs": [
+      "inReal0",
+      "inReal1"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "DONCHIAN",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outRealUpperBand",
+        "ctype": "float"
+      },
+      {
+        "name": "outRealMiddleBand",
+        "ctype": "float"
+      },
+      {
+        "name": "outRealLowerBand",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_DONCHIAN( int    startIdx,\n                                   int    endIdx,\n                                   const double inHigh[],\n                                   const double inLow[],\n                                   int optInTimePeriod,\n                                   int          *outBegIdx,\n                                   int          *outNBElement,\n                                   double        outRealUpperBand[],\n                                   double        outRealMiddleBand[],\n                                   double        outRealLowerBand[] )"
+  },
+  {
+    "name": "DOSC",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "First Smoothing Period",
+        "type": "Integer",
+        "default": "5",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Second Smoothing Period",
+        "type": "Integer",
+        "default": "3",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Signal Period",
+        "type": "Integer",
+        "default": "9",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_DOSC( int    startIdx,\n                               int    endIdx,\n                               const double inReal[],\n                               int optInTimePeriod,\n                               int optInFirstPeriod,\n                               int optInSecondPeriod,\n                               int optInSignalPeriod,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outReal[] )"
+  },
+  {
+    "name": "DPO",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_DPO( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInTimePeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "DX",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "EFI",
+    "legacy": false,
+    "inputs": [
+      "Close",
+      "Volume"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "13",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_EFI( int    startIdx,\n                              int    endIdx,\n                              const double inClose[],\n                              const double inVolume[],\n                              int optInTimePeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "EMA",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_EMA( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInTimePeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "EMV",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Volume"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Volume Divisor",
+        "type": "Double",
+        "default": "1.000000e+4",
+        "minimum": "1.000000e+0",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_EMV( int    startIdx,\n                              int    endIdx,\n                              const double inHigh[],\n                              const double inLow[],\n                              const double inVolume[],\n                              int optInTimePeriod,\n                              double optInVolumeDivisor,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "ER",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_ER( int    startIdx,\n                             int    endIdx,\n                             const double inReal[],\n                             int optInTimePeriod,\n                             int          *outBegIdx,\n                             int          *outNBElement,\n                             double        outReal[] )"
+  },
+  {
+    "name": "ERI",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outBullPower",
+        "ctype": "float"
+      },
+      {
+        "name": "outBearPower",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "13",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_ERI( int    startIdx,\n                              int    endIdx,\n                              const double inHigh[],\n                              const double inLow[],\n                              const double inClose[],\n                              int optInTimePeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outBullPower[],\n                              double        outBearPower[] )"
+  },
+  {
+    "name": "EXP",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "FISHER",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outFisher",
+        "ctype": "float"
+      },
+      {
+        "name": "outTrigger",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_FISHER( int    startIdx,\n                                 int    endIdx,\n                                 const double inHigh[],\n                                 const double inLow[],\n                                 int optInTimePeriod,\n                                 int          *outBegIdx,\n                                 int          *outNBElement,\n                                 double        outFisher[],\n                                 double        outTrigger[] )"
+  },
+  {
+    "name": "FLOOR",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "FOSC",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "5",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_FOSC( int    startIdx,\n                               int    endIdx,\n                               const double inReal[],\n                               int optInTimePeriod,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outReal[] )"
+  },
+  {
+    "name": "FRACTAL",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outSwingHigh",
+        "ctype": "int"
+      },
+      {
+        "name": "outSwingLow",
+        "ctype": "int"
+      }
+    ],
+    "options": [
+      {
+        "name": "Left Bars",
+        "type": "Integer",
+        "default": "2",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Right Bars",
+        "type": "Integer",
+        "default": "2",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_FRACTAL( int    startIdx,\n                                  int    endIdx,\n                                  const double inHigh[],\n                                  const double inLow[],\n                                  int optInLeftBars,\n                                  int optInRightBars,\n                                  int          *outBegIdx,\n                                  int          *outNBElement,\n                                  int        outSwingHigh[],\n                                  int        outSwingLow[] )"
+  },
+  {
+    "name": "FRAMA",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "16",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_FRAMA( int    startIdx,\n                                int    endIdx,\n                                const double inHigh[],\n                                const double inLow[],\n                                int optInTimePeriod,\n                                int          *outBegIdx,\n                                int          *outNBElement,\n                                double        outReal[] )"
+  },
+  {
+    "name": "HA",
+    "legacy": false,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outHAOpen",
+        "ctype": "float"
+      },
+      {
+        "name": "outHAHigh",
+        "ctype": "float"
+      },
+      {
+        "name": "outHALow",
+        "ctype": "float"
+      },
+      {
+        "name": "outHAClose",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": "TA_LIB_API TA_RetCode TA_HA( int    startIdx,\n                             int    endIdx,\n                             const double inOpen[],\n                             const double inHigh[],\n                             const double inLow[],\n                             const double inClose[],\n                             int          *outBegIdx,\n                             int          *outNBElement,\n                             double        outHAOpen[],\n                             double        outHAHigh[],\n                             double        outHALow[],\n                             double        outHAClose[] )"
+  },
+  {
+    "name": "HMA",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_HMA( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInTimePeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "HT_DCPERIOD",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "HT_DCPHASE",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "HT_PHASOR",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outInPhase",
+        "ctype": "float"
+      },
+      {
+        "name": "outQuadrature",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "HT_SINE",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outSine",
+        "ctype": "float"
+      },
+      {
+        "name": "outLeadSine",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "HT_TRENDLINE",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "HT_TRENDMODE",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "IBS",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": "TA_LIB_API TA_RetCode TA_IBS( int    startIdx,\n                              int    endIdx,\n                              const double inHigh[],\n                              const double inLow[],\n                              const double inClose[],\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "ICHIMOKU",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outTenkanSen",
+        "ctype": "float"
+      },
+      {
+        "name": "outKijunSen",
+        "ctype": "float"
+      },
+      {
+        "name": "outSenkouSpanA",
+        "ctype": "float"
+      },
+      {
+        "name": "outSenkouSpanB",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Tenkan Period",
+        "type": "Integer",
+        "default": "9",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Kijun Period",
+        "type": "Integer",
+        "default": "26",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Senkou B Period",
+        "type": "Integer",
+        "default": "52",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_ICHIMOKU( int    startIdx,\n                                   int    endIdx,\n                                   const double inHigh[],\n                                   const double inLow[],\n                                   int optInTenkanPeriod,\n                                   int optInKijunPeriod,\n                                   int optInSenkouBPeriod,\n                                   int          *outBegIdx,\n                                   int          *outNBElement,\n                                   double        outTenkanSen[],\n                                   double        outKijunSen[],\n                                   double        outSenkouSpanA[],\n                                   double        outSenkouSpanB[] )"
+  },
+  {
+    "name": "IMI",
+    "legacy": true,
+    "inputs": [
+      "Open",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "KAMA",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_KAMA( int    startIdx,\n                               int    endIdx,\n                               const double inReal[],\n                               int optInTimePeriod,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outReal[] )"
+  },
+  {
+    "name": "KC",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outRealUpperBand",
+        "ctype": "float"
+      },
+      {
+        "name": "outRealMiddleBand",
+        "ctype": "float"
+      },
+      {
+        "name": "outRealLowerBand",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "ATR Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Deviations",
+        "type": "Double",
+        "default": "2.000000e+0",
+        "minimum": "-3.000000e+37",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_KC( int    startIdx,\n                             int    endIdx,\n                             const double inHigh[],\n                             const double inLow[],\n                             const double inClose[],\n                             int optInTimePeriod,\n                             int optInATRPeriod,\n                             double optInNbDev,\n                             int          *outBegIdx,\n                             int          *outNBElement,\n                             double        outRealUpperBand[],\n                             double        outRealMiddleBand[],\n                             double        outRealLowerBand[] )"
+  },
+  {
+    "name": "KDJ",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outK",
+        "ctype": "float"
+      },
+      {
+        "name": "outD",
+        "ctype": "float"
+      },
+      {
+        "name": "outJ",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Fast-K Period",
+        "type": "Integer",
+        "default": "9",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow-K Period",
+        "type": "Integer",
+        "default": "3",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow-K MA",
+        "type": "MA Type",
+        "default": "13",
+        "minimum": null,
+        "maximum": null
+      },
+      {
+        "name": "Slow-D Period",
+        "type": "Integer",
+        "default": "3",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow-D MA",
+        "type": "MA Type",
+        "default": "13",
+        "minimum": null,
+        "maximum": null
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_KDJ( int    startIdx,\n                              int    endIdx,\n                              const double inHigh[],\n                              const double inLow[],\n                              const double inClose[],\n                              int optInFastK_Period,\n                              int optInSlowK_Period,\n                              TA_MAType optInSlowK_MAType,\n                              int optInSlowD_Period,\n                              TA_MAType optInSlowD_MAType,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outK[],\n                              double        outD[],\n                              double        outJ[] )"
+  },
+  {
+    "name": "KST",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outKST",
+        "ctype": "float"
+      },
+      {
+        "name": "outKSTSignal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "ROC-1 Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "ROC-2 Period",
+        "type": "Integer",
+        "default": "15",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "ROC-3 Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "ROC-4 Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "SMA-1 Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "SMA-2 Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "SMA-3 Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "SMA-4 Period",
+        "type": "Integer",
+        "default": "15",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Signal Period",
+        "type": "Integer",
+        "default": "9",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_KST( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInROC1Period,\n                              int optInROC2Period,\n                              int optInROC3Period,\n                              int optInROC4Period,\n                              int optInSMA1Period,\n                              int optInSMA2Period,\n                              int optInSMA3Period,\n                              int optInSMA4Period,\n                              int optInSignalPeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outKST[],\n                              double        outKSTSignal[] )"
+  },
+  {
+    "name": "KSTEXT",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outKST",
+        "ctype": "float"
+      },
+      {
+        "name": "outKSTSignal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "ROC-1 Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "ROC-2 Period",
+        "type": "Integer",
+        "default": "15",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "ROC-3 Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "ROC-4 Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "MA-1 Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "MA-2 Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "MA-3 Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "MA-4 Period",
+        "type": "Integer",
+        "default": "15",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Signal Period",
+        "type": "Integer",
+        "default": "9",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "ROC MA",
+        "type": "MA Type",
+        "default": "0",
+        "minimum": null,
+        "maximum": null
+      },
+      {
+        "name": "Signal MA",
+        "type": "MA Type",
+        "default": "0",
+        "minimum": null,
+        "maximum": null
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_KSTEXT( int    startIdx,\n                                 int    endIdx,\n                                 const double inReal[],\n                                 int optInROC1Period,\n                                 int optInROC2Period,\n                                 int optInROC3Period,\n                                 int optInROC4Period,\n                                 int optInMA1Period,\n                                 int optInMA2Period,\n                                 int optInMA3Period,\n                                 int optInMA4Period,\n                                 int optInSignalPeriod,\n                                 TA_MAType optInROCMAType,\n                                 TA_MAType optInSignalMAType,\n                                 int          *outBegIdx,\n                                 int          *outNBElement,\n                                 double        outKST[],\n                                 double        outKSTSignal[] )"
+  },
+  {
+    "name": "KURTOSIS",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "4",
+        "maximum": "10000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_KURTOSIS( int    startIdx,\n                                   int    endIdx,\n                                   const double inReal[],\n                                   int optInTimePeriod,\n                                   int          *outBegIdx,\n                                   int          *outNBElement,\n                                   double        outReal[] )"
+  },
+  {
+    "name": "KVO",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Close",
+      "Volume"
+    ],
+    "outputs": [
+      {
+        "name": "outKVO",
+        "ctype": "float"
+      },
+      {
+        "name": "outKVOSignal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Fast Period",
+        "type": "Integer",
+        "default": "34",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow Period",
+        "type": "Integer",
+        "default": "55",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Signal Period",
+        "type": "Integer",
+        "default": "13",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_KVO( int    startIdx,\n                              int    endIdx,\n                              const double inHigh[],\n                              const double inLow[],\n                              const double inClose[],\n                              const double inVolume[],\n                              int optInFastPeriod,\n                              int optInSlowPeriod,\n                              int optInSignalPeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outKVO[],\n                              double        outKVOSignal[] )"
+  },
+  {
+    "name": "LINEARREG",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_LINEARREG( int    startIdx,\n                                    int    endIdx,\n                                    const double inReal[],\n                                    int optInTimePeriod,\n                                    int          *outBegIdx,\n                                    int          *outNBElement,\n                                    double        outReal[] )"
+  },
+  {
+    "name": "LINEARREG_ANGLE",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "LINEARREG_INTERCEPT",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "LINEARREG_SLOPE",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "LN",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "LOG10",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "MA",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "MA Type",
+        "type": "MA Type",
+        "default": "0",
+        "minimum": null,
+        "maximum": null
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_MA( int    startIdx,\n                             int    endIdx,\n                             const double inReal[],\n                             int optInTimePeriod,\n                             TA_MAType optInMAType,\n                             int          *outBegIdx,\n                             int          *outNBElement,\n                             double        outReal[] )"
+  },
+  {
+    "name": "MACD",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outMACD",
+        "ctype": "float"
+      },
+      {
+        "name": "outMACDSignal",
+        "ctype": "float"
+      },
+      {
+        "name": "outMACDHist",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Fast Period",
+        "type": "Integer",
+        "default": "12",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow Period",
+        "type": "Integer",
+        "default": "26",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Signal Period",
+        "type": "Integer",
+        "default": "9",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_MACD( int    startIdx,\n                               int    endIdx,\n                               const double inReal[],\n                               int optInFastPeriod,\n                               int optInSlowPeriod,\n                               int optInSignalPeriod,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outMACD[],\n                               double        outMACDSignal[],\n                               double        outMACDHist[] )"
+  },
+  {
+    "name": "MACDEXT",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outMACD",
+        "ctype": "float"
+      },
+      {
+        "name": "outMACDSignal",
+        "ctype": "float"
+      },
+      {
+        "name": "outMACDHist",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Fast Period",
+        "type": "Integer",
+        "default": "12",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Fast MA",
+        "type": "MA Type",
+        "default": "0",
+        "minimum": null,
+        "maximum": null
+      },
+      {
+        "name": "Slow Period",
+        "type": "Integer",
+        "default": "26",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow MA",
+        "type": "MA Type",
+        "default": "0",
+        "minimum": null,
+        "maximum": null
+      },
+      {
+        "name": "Signal Period",
+        "type": "Integer",
+        "default": "9",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Signal MA",
+        "type": "MA Type",
+        "default": "0",
+        "minimum": null,
+        "maximum": null
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_MACDEXT( int    startIdx,\n                                  int    endIdx,\n                                  const double inReal[],\n                                  int optInFastPeriod,\n                                  TA_MAType optInFastMAType,\n                                  int optInSlowPeriod,\n                                  TA_MAType optInSlowMAType,\n                                  int optInSignalPeriod,\n                                  TA_MAType optInSignalMAType,\n                                  int          *outBegIdx,\n                                  int          *outNBElement,\n                                  double        outMACD[],\n                                  double        outMACDSignal[],\n                                  double        outMACDHist[] )"
+  },
+  {
+    "name": "MACDFIX",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outMACD",
+        "ctype": "float"
+      },
+      {
+        "name": "outMACDSignal",
+        "ctype": "float"
+      },
+      {
+        "name": "outMACDHist",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Signal Period",
+        "type": "Integer",
+        "default": "9",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "MAMA",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outMAMA",
+        "ctype": "float"
+      },
+      {
+        "name": "outFAMA",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Fast Limit",
+        "type": "Double",
+        "default": "5.000000e-1",
+        "minimum": "1.000000e-2",
+        "maximum": "9.900000e-1"
+      },
+      {
+        "name": "Slow Limit",
+        "type": "Double",
+        "default": "5.000000e-2",
+        "minimum": "1.000000e-2",
+        "maximum": "9.900000e-1"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_MAMA( int    startIdx,\n                               int    endIdx,\n                               const double inReal[],\n                               double optInFastLimit,\n                               double optInSlowLimit,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outMAMA[],\n                               double        outFAMA[] )"
+  },
+  {
+    "name": "MARKETFI",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Volume"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": "TA_LIB_API TA_RetCode TA_MARKETFI( int    startIdx,\n                                   int    endIdx,\n                                   const double inHigh[],\n                                   const double inLow[],\n                                   const double inVolume[],\n                                   int          *outBegIdx,\n                                   int          *outNBElement,\n                                   double        outReal[] )"
+  },
+  {
+    "name": "MASSI",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Fast Period",
+        "type": "Integer",
+        "default": "9",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow Period",
+        "type": "Integer",
+        "default": "25",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_MASSI( int    startIdx,\n                                int    endIdx,\n                                const double inHigh[],\n                                const double inLow[],\n                                int optInFastPeriod,\n                                int optInSlowPeriod,\n                                int          *outBegIdx,\n                                int          *outNBElement,\n                                double        outReal[] )"
+  },
+  {
+    "name": "MAVP",
+    "legacy": true,
+    "inputs": [
+      "inReal",
+      "inPeriods"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Minimum Period",
+        "type": "Integer",
+        "default": "2",
+        "minimum": "1",
+        "maximum": "10000"
+      },
+      {
+        "name": "Maximum Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "1",
+        "maximum": "10000"
+      },
+      {
+        "name": "MA Type",
+        "type": "MA Type",
+        "default": "0",
+        "minimum": null,
+        "maximum": null
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_MAVP( int    startIdx,\n                               int    endIdx,\n                               const double inReal[],\n                               const double inPeriods[],\n                               int optInMinPeriod,\n                               int optInMaxPeriod,\n                               TA_MAType optInMAType,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outReal[] )"
+  },
+  {
+    "name": "MAX",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "MAXINDEX",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "MCGD",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_MCGD( int    startIdx,\n                               int    endIdx,\n                               const double inReal[],\n                               int optInTimePeriod,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outReal[] )"
+  },
+  {
+    "name": "MEDIAN",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "2",
+        "maximum": "10000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_MEDIAN( int    startIdx,\n                                 int    endIdx,\n                                 const double inReal[],\n                                 int optInTimePeriod,\n                                 int          *outBegIdx,\n                                 int          *outNBElement,\n                                 double        outReal[] )"
+  },
+  {
+    "name": "MEDPRICE",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": "TA_LIB_API TA_RetCode TA_MEDPRICE( int    startIdx,\n                                   int    endIdx,\n                                   const double inHigh[],\n                                   const double inLow[],\n                                   int          *outBegIdx,\n                                   int          *outNBElement,\n                                   double        outReal[] )"
+  },
+  {
+    "name": "MFI",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close",
+      "Volume"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "MIDPOINT",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "MIDPRICE",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_MIDPRICE( int    startIdx,\n                                   int    endIdx,\n                                   const double inHigh[],\n                                   const double inLow[],\n                                   int optInTimePeriod,\n                                   int          *outBegIdx,\n                                   int          *outNBElement,\n                                   double        outReal[] )"
+  },
+  {
+    "name": "MIN",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "MININDEX",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outInteger",
+        "ctype": "int"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "MINMAX",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outMin",
+        "ctype": "float"
+      },
+      {
+        "name": "outMax",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "MINMAXINDEX",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outMinIdx",
+        "ctype": "int"
+      },
+      {
+        "name": "outMaxIdx",
+        "ctype": "int"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "MINUS_DI",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "MINUS_DM",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "MOM",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "MULT",
+    "legacy": true,
+    "inputs": [
+      "inReal0",
+      "inReal1"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "NATR",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "NVI",
+    "legacy": false,
+    "inputs": [
+      "Close",
+      "Volume"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": "TA_LIB_API TA_RetCode TA_NVI( int    startIdx,\n                              int    endIdx,\n                              const double inClose[],\n                              const double inVolume[],\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "OBV",
+    "legacy": true,
+    "inputs": [
+      "inReal",
+      "Volume"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "PERCENTB",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Deviations up",
+        "type": "Double",
+        "default": "2.000000e+0",
+        "minimum": "-3.000000e+37",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "Deviations down",
+        "type": "Double",
+        "default": "2.000000e+0",
+        "minimum": "-3.000000e+37",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "MA Type",
+        "type": "MA Type",
+        "default": "0",
+        "minimum": null,
+        "maximum": null
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_PERCENTB( int    startIdx,\n                                   int    endIdx,\n                                   const double inReal[],\n                                   int optInTimePeriod,\n                                   double optInNbDevUp,\n                                   double optInNbDevDn,\n                                   TA_MAType optInMAType,\n                                   int          *outBegIdx,\n                                   int          *outNBElement,\n                                   double        outReal[] )"
+  },
+  {
+    "name": "PERCENTILE",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "100",
+        "minimum": "2",
+        "maximum": "10000"
+      },
+      {
+        "name": "Percentile",
+        "type": "Double",
+        "default": "5.000000e+1",
+        "minimum": "0.000000e+0",
+        "maximum": "1.000000e+2"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_PERCENTILE( int    startIdx,\n                                     int    endIdx,\n                                     const double inReal[],\n                                     int optInTimePeriod,\n                                     double optInPercentile,\n                                     int          *outBegIdx,\n                                     int          *outNBElement,\n                                     double        outReal[] )"
+  },
+  {
+    "name": "PERCENTRANK",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "100",
+        "minimum": "2",
+        "maximum": "10000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_PERCENTRANK( int    startIdx,\n                                      int    endIdx,\n                                      const double inReal[],\n                                      int optInTimePeriod,\n                                      int          *outBegIdx,\n                                      int          *outNBElement,\n                                      double        outReal[] )"
+  },
+  {
+    "name": "PLUS_DI",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "PLUS_DM",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "PPO",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Fast Period",
+        "type": "Integer",
+        "default": "12",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow Period",
+        "type": "Integer",
+        "default": "26",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "MA Type",
+        "type": "MA Type",
+        "default": "1",
+        "minimum": null,
+        "maximum": null
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_PPO( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInFastPeriod,\n                              int optInSlowPeriod,\n                              TA_MAType optInMAType,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "PSO",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Fast-K Period",
+        "type": "Integer",
+        "default": "8",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "EMA Period",
+        "type": "Integer",
+        "default": "5",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_PSO( int    startIdx,\n                              int    endIdx,\n                              const double inHigh[],\n                              const double inLow[],\n                              const double inClose[],\n                              int optInFastK_Period,\n                              int optInEMAPeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "PVI",
+    "legacy": false,
+    "inputs": [
+      "Close",
+      "Volume"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": "TA_LIB_API TA_RetCode TA_PVI( int    startIdx,\n                              int    endIdx,\n                              const double inClose[],\n                              const double inVolume[],\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "PVO",
+    "legacy": false,
+    "inputs": [
+      "Volume"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Fast Period",
+        "type": "Integer",
+        "default": "12",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow Period",
+        "type": "Integer",
+        "default": "26",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "MA Type",
+        "type": "MA Type",
+        "default": "1",
+        "minimum": null,
+        "maximum": null
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_PVO( int    startIdx,\n                              int    endIdx,\n                              const double inVolume[],\n                              int optInFastPeriod,\n                              int optInSlowPeriod,\n                              TA_MAType optInMAType,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "PVT",
+    "legacy": false,
+    "inputs": [
+      "Close",
+      "Volume"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": "TA_LIB_API TA_RetCode TA_PVT( int    startIdx,\n                              int    endIdx,\n                              const double inClose[],\n                              const double inVolume[],\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "QSTICK",
+    "legacy": false,
+    "inputs": [
+      "Open",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_QSTICK( int    startIdx,\n                                 int    endIdx,\n                                 const double inOpen[],\n                                 const double inClose[],\n                                 int optInTimePeriod,\n                                 int          *outBegIdx,\n                                 int          *outNBElement,\n                                 double        outReal[] )"
+  },
+  {
+    "name": "RMA",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_RMA( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInTimePeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "ROC",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_ROC( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInTimePeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "ROCP",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_ROCP( int    startIdx,\n                               int    endIdx,\n                               const double inReal[],\n                               int optInTimePeriod,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outReal[] )"
+  },
+  {
+    "name": "ROCR",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "ROCR100",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "ROGERSSATCHELL",
+    "legacy": false,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Annualization",
+        "type": "Double",
+        "default": "2.520000e+2",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_ROGERSSATCHELL( int    startIdx,\n                                         int    endIdx,\n                                         const double inOpen[],\n                                         const double inHigh[],\n                                         const double inLow[],\n                                         const double inClose[],\n                                         int optInTimePeriod,\n                                         double optInAnnualization,\n                                         int          *outBegIdx,\n                                         int          *outNBElement,\n                                         double        outReal[] )"
+  },
+  {
+    "name": "RSI",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_RSI( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInTimePeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "RVI",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "StdDev Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_RVI( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInTimePeriod,\n                              int optInStdDevPeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "RVIR",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "StdDev Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_RVIR( int    startIdx,\n                               int    endIdx,\n                               const double inHigh[],\n                               const double inLow[],\n                               int optInTimePeriod,\n                               int optInStdDevPeriod,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outReal[] )"
+  },
+  {
+    "name": "RVOL",
+    "legacy": false,
+    "inputs": [
+      "Volume"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_RVOL( int    startIdx,\n                               int    endIdx,\n                               const double inVolume[],\n                               int optInTimePeriod,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outReal[] )"
+  },
+  {
+    "name": "SAR",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Acceleration Factor",
+        "type": "Double",
+        "default": "2.000000e-2",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "AF Maximum",
+        "type": "Double",
+        "default": "2.000000e-1",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "SAREXT",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Start Value",
+        "type": "Double",
+        "default": "0.000000e+0",
+        "minimum": "-3.000000e+37",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "Offset on Reverse",
+        "type": "Double",
+        "default": "0.000000e+0",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "AF Init Long",
+        "type": "Double",
+        "default": "2.000000e-2",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "AF Long",
+        "type": "Double",
+        "default": "2.000000e-2",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "AF Max Long",
+        "type": "Double",
+        "default": "2.000000e-1",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "AF Init Short",
+        "type": "Double",
+        "default": "2.000000e-2",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "AF Short",
+        "type": "Double",
+        "default": "2.000000e-2",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "AF Max Short",
+        "type": "Double",
+        "default": "2.000000e-1",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "SI",
+    "legacy": false,
+    "inputs": [
+      "Open",
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Limit Move",
+        "type": "Double",
+        "default": "3.000000e+0",
+        "minimum": "1.000000e-8",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_SI( int    startIdx,\n                             int    endIdx,\n                             const double inOpen[],\n                             const double inHigh[],\n                             const double inLow[],\n                             const double inClose[],\n                             double optInLimitMove,\n                             int          *outBegIdx,\n                             int          *outNBElement,\n                             double        outReal[] )"
+  },
+  {
+    "name": "SIN",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "SINH",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "SMA",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_SMA( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInTimePeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "SMI",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outSMI",
+        "ctype": "float"
+      },
+      {
+        "name": "outSMISignal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "13",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Fast Period",
+        "type": "Integer",
+        "default": "2",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow Period",
+        "type": "Integer",
+        "default": "25",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Signal Period",
+        "type": "Integer",
+        "default": "9",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_SMI( int    startIdx,\n                              int    endIdx,\n                              const double inHigh[],\n                              const double inLow[],\n                              const double inClose[],\n                              int optInTimePeriod,\n                              int optInFastPeriod,\n                              int optInSlowPeriod,\n                              int optInSignalPeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outSMI[],\n                              double        outSMISignal[] )"
+  },
+  {
+    "name": "SQRT",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "SQZMOM",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outMomentum",
+        "ctype": "float"
+      },
+      {
+        "name": "outSqueeze",
+        "ctype": "int"
+      }
+    ],
+    "options": [
+      {
+        "name": "BB Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Deviations",
+        "type": "Double",
+        "default": "2.000000e+0",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "KC Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Wide Factor",
+        "type": "Double",
+        "default": "2.000000e+0",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "Normal Factor",
+        "type": "Double",
+        "default": "1.500000e+0",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      },
+      {
+        "name": "Narrow Factor",
+        "type": "Double",
+        "default": "1.000000e+0",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_SQZMOM( int    startIdx,\n                                 int    endIdx,\n                                 const double inHigh[],\n                                 const double inLow[],\n                                 const double inClose[],\n                                 int optInBBPeriod,\n                                 double optInNbDev,\n                                 int optInKCPeriod,\n                                 double optInFactorWide,\n                                 double optInFactorNormal,\n                                 double optInFactorNarrow,\n                                 int          *outBegIdx,\n                                 int          *outNBElement,\n                                 double        outMomentum[],\n                                 int        outSqueeze[] )"
+  },
+  {
+    "name": "STC",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Fast Period",
+        "type": "Integer",
+        "default": "23",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow Period",
+        "type": "Integer",
+        "default": "50",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Cycle Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_STC( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInFastPeriod,\n                              int optInSlowPeriod,\n                              int optInCyclePeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "STDDEV",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "5",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Deviations",
+        "type": "Double",
+        "default": "1.000000e+0",
+        "minimum": "-3.000000e+37",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_STDDEV( int    startIdx,\n                                 int    endIdx,\n                                 const double inReal[],\n                                 int optInTimePeriod,\n                                 double optInNbDev,\n                                 int          *outBegIdx,\n                                 int          *outNBElement,\n                                 double        outReal[] )"
+  },
+  {
+    "name": "STOCH",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outSlowK",
+        "ctype": "float"
+      },
+      {
+        "name": "outSlowD",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Fast-K Period",
+        "type": "Integer",
+        "default": "5",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow-K Period",
+        "type": "Integer",
+        "default": "3",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow-K MA",
+        "type": "MA Type",
+        "default": "0",
+        "minimum": null,
+        "maximum": null
+      },
+      {
+        "name": "Slow-D Period",
+        "type": "Integer",
+        "default": "3",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Slow-D MA",
+        "type": "MA Type",
+        "default": "0",
+        "minimum": null,
+        "maximum": null
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_STOCH( int    startIdx,\n                                int    endIdx,\n                                const double inHigh[],\n                                const double inLow[],\n                                const double inClose[],\n                                int optInFastK_Period,\n                                int optInSlowK_Period,\n                                TA_MAType optInSlowK_MAType,\n                                int optInSlowD_Period,\n                                TA_MAType optInSlowD_MAType,\n                                int          *outBegIdx,\n                                int          *outNBElement,\n                                double        outSlowK[],\n                                double        outSlowD[] )"
+  },
+  {
+    "name": "STOCHF",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outFastK",
+        "ctype": "float"
+      },
+      {
+        "name": "outFastD",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Fast-K Period",
+        "type": "Integer",
+        "default": "5",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Fast-D Period",
+        "type": "Integer",
+        "default": "3",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Fast-D MA",
+        "type": "MA Type",
+        "default": "0",
+        "minimum": null,
+        "maximum": null
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_STOCHF( int    startIdx,\n                                 int    endIdx,\n                                 const double inHigh[],\n                                 const double inLow[],\n                                 const double inClose[],\n                                 int optInFastK_Period,\n                                 int optInFastD_Period,\n                                 TA_MAType optInFastD_MAType,\n                                 int          *outBegIdx,\n                                 int          *outNBElement,\n                                 double        outFastK[],\n                                 double        outFastD[] )"
+  },
+  {
+    "name": "STOCHRSI",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outFastK",
+        "ctype": "float"
+      },
+      {
+        "name": "outFastD",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Fast-K Period",
+        "type": "Integer",
+        "default": "5",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Fast-D Period",
+        "type": "Integer",
+        "default": "3",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Fast-D MA",
+        "type": "MA Type",
+        "default": "0",
+        "minimum": null,
+        "maximum": null
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_STOCHRSI( int    startIdx,\n                                   int    endIdx,\n                                   const double inReal[],\n                                   int optInTimePeriod,\n                                   int optInFastK_Period,\n                                   int optInFastD_Period,\n                                   TA_MAType optInFastD_MAType,\n                                   int          *outBegIdx,\n                                   int          *outNBElement,\n                                   double        outFastK[],\n                                   double        outFastD[] )"
+  },
+  {
+    "name": "SUB",
+    "legacy": true,
+    "inputs": [
+      "inReal0",
+      "inReal1"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "SUM",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "SUPERTREND",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outSupertrend",
+        "ctype": "float"
+      },
+      {
+        "name": "outTrend",
+        "ctype": "int"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Multiplier",
+        "type": "Double",
+        "default": "3.000000e+0",
+        "minimum": "0.000000e+0",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_SUPERTREND( int    startIdx,\n                                     int    endIdx,\n                                     const double inHigh[],\n                                     const double inLow[],\n                                     const double inClose[],\n                                     int optInTimePeriod,\n                                     double optInMultiplier,\n                                     int          *outBegIdx,\n                                     int          *outNBElement,\n                                     double        outSupertrend[],\n                                     int        outTrend[] )"
+  },
+  {
+    "name": "SWAK_2PHP",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "2",
+        "maximum": "10000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_SWAK_2PHP( int    startIdx,\n                                    int    endIdx,\n                                    const double inReal[],\n                                    int optInTimePeriod,\n                                    int          *outBegIdx,\n                                    int          *outNBElement,\n                                    double        outReal[] )"
+  },
+  {
+    "name": "SWAK_BP",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "5",
+        "maximum": "2000"
+      },
+      {
+        "name": "Delta",
+        "type": "Double",
+        "default": "1.000000e-1",
+        "minimum": "5.000000e-2",
+        "maximum": "5.000000e-1"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_SWAK_BP( int    startIdx,\n                                  int    endIdx,\n                                  const double inReal[],\n                                  int optInTimePeriod,\n                                  double optInDelta,\n                                  int          *outBegIdx,\n                                  int          *outNBElement,\n                                  double        outReal[] )"
+  },
+  {
+    "name": "SWAK_BUTTER",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "2",
+        "maximum": "10000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_SWAK_BUTTER( int    startIdx,\n                                      int    endIdx,\n                                      const double inReal[],\n                                      int optInTimePeriod,\n                                      int          *outBegIdx,\n                                      int          *outNBElement,\n                                      double        outReal[] )"
+  },
+  {
+    "name": "SWAK_GAUSS",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "2",
+        "maximum": "10000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_SWAK_GAUSS( int    startIdx,\n                                     int    endIdx,\n                                     const double inReal[],\n                                     int optInTimePeriod,\n                                     int          *outBegIdx,\n                                     int          *outNBElement,\n                                     double        outReal[] )"
+  },
+  {
+    "name": "SWAK_HP",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "20",
+        "minimum": "5",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_SWAK_HP( int    startIdx,\n                                  int    endIdx,\n                                  const double inReal[],\n                                  int optInTimePeriod,\n                                  int          *outBegIdx,\n                                  int          *outNBElement,\n                                  double        outReal[] )"
+  },
+  {
+    "name": "T3",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "5",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Volume Factor",
+        "type": "Double",
+        "default": "7.000000e-1",
+        "minimum": "0.000000e+0",
+        "maximum": "1.000000e+0"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_T3( int    startIdx,\n                             int    endIdx,\n                             const double inReal[],\n                             int optInTimePeriod,\n                             double optInVFactor,\n                             int          *outBegIdx,\n                             int          *outNBElement,\n                             double        outReal[] )"
+  },
+  {
+    "name": "TAN",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "TANH",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "TEMA",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_TEMA( int    startIdx,\n                               int    endIdx,\n                               const double inReal[],\n                               int optInTimePeriod,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outReal[] )"
+  },
+  {
+    "name": "TRANGE",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": "TA_LIB_API TA_RetCode TA_TRANGE( int    startIdx,\n                                 int    endIdx,\n                                 const double inHigh[],\n                                 const double inLow[],\n                                 const double inClose[],\n                                 int          *outBegIdx,\n                                 int          *outNBElement,\n                                 double        outReal[] )"
+  },
+  {
+    "name": "TRIMA",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_TRIMA( int    startIdx,\n                                int    endIdx,\n                                const double inReal[],\n                                int optInTimePeriod,\n                                int          *outBegIdx,\n                                int          *outNBElement,\n                                double        outReal[] )"
+  },
+  {
+    "name": "TRIX",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "TSF",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "TSI",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "First Smoothing Period",
+        "type": "Integer",
+        "default": "25",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Second Smoothing Period",
+        "type": "Integer",
+        "default": "13",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_TSI( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInFirstPeriod,\n                              int optInSecondPeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "TYPPRICE",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": "TA_LIB_API TA_RetCode TA_TYPPRICE( int    startIdx,\n                                   int    endIdx,\n                                   const double inHigh[],\n                                   const double inLow[],\n                                   const double inClose[],\n                                   int          *outBegIdx,\n                                   int          *outNBElement,\n                                   double        outReal[] )"
+  },
+  {
+    "name": "ULTOSC",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "First Period",
+        "type": "Integer",
+        "default": "7",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Second Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Third Period",
+        "type": "Integer",
+        "default": "28",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "VAR",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "5",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Deviations",
+        "type": "Double",
+        "default": "1.000000e+0",
+        "minimum": "-3.000000e+37",
+        "maximum": "3.000000e+37"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_VAR( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInTimePeriod,\n                              double optInNbDev,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "VHF",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "28",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_VHF( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInTimePeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "VIDYA",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "12",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "CMO Period",
+        "type": "Integer",
+        "default": "9",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_VIDYA( int    startIdx,\n                                int    endIdx,\n                                const double inReal[],\n                                int optInTimePeriod,\n                                int optInCMOPeriod,\n                                int          *outBegIdx,\n                                int          *outNBElement,\n                                double        outReal[] )"
+  },
+  {
+    "name": "VORTEX",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outPlusVI",
+        "ctype": "float"
+      },
+      {
+        "name": "outMinusVI",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_VORTEX( int    startIdx,\n                                 int    endIdx,\n                                 const double inHigh[],\n                                 const double inLow[],\n                                 const double inClose[],\n                                 int optInTimePeriod,\n                                 int          *outBegIdx,\n                                 int          *outNBElement,\n                                 double        outPlusVI[],\n                                 double        outMinusVI[] )"
+  },
+  {
+    "name": "VWAP",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Close",
+      "Volume"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": "TA_LIB_API TA_RetCode TA_VWAP( int    startIdx,\n                               int    endIdx,\n                               const double inHigh[],\n                               const double inLow[],\n                               const double inClose[],\n                               const double inVolume[],\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outReal[] )"
+  },
+  {
+    "name": "VWMA",
+    "legacy": false,
+    "inputs": [
+      "inReal",
+      "Volume"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_VWMA( int    startIdx,\n                               int    endIdx,\n                               const double inReal[],\n                               const double inVolume[],\n                               int optInTimePeriod,\n                               int          *outBegIdx,\n                               int          *outNBElement,\n                               double        outReal[] )"
+  },
+  {
+    "name": "WAD",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": "TA_LIB_API TA_RetCode TA_WAD( int    startIdx,\n                              int    endIdx,\n                              const double inHigh[],\n                              const double inLow[],\n                              const double inClose[],\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "WAVETREND",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outWT1",
+        "ctype": "float"
+      },
+      {
+        "name": "outWT2",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Channel Period",
+        "type": "Integer",
+        "default": "10",
+        "minimum": "2",
+        "maximum": "100000"
+      },
+      {
+        "name": "Average Period",
+        "type": "Integer",
+        "default": "21",
+        "minimum": "1",
+        "maximum": "100000"
+      },
+      {
+        "name": "Signal Period",
+        "type": "Integer",
+        "default": "4",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_WAVETREND( int    startIdx,\n                                    int    endIdx,\n                                    const double inHigh[],\n                                    const double inLow[],\n                                    const double inClose[],\n                                    int optInChannelPeriod,\n                                    int optInAveragePeriod,\n                                    int optInSignalPeriod,\n                                    int          *outBegIdx,\n                                    int          *outNBElement,\n                                    double        outWT1[],\n                                    double        outWT2[] )"
+  },
+  {
+    "name": "WCLPRICE",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [],
+    "signature": ""
+  },
+  {
+    "name": "WILLR",
+    "legacy": true,
+    "inputs": [
+      "High",
+      "Low",
+      "Close"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "14",
+        "minimum": "2",
+        "maximum": "100000"
+      }
+    ],
+    "signature": ""
+  },
+  {
+    "name": "WMA",
+    "legacy": true,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_WMA( int    startIdx,\n                              int    endIdx,\n                              const double inReal[],\n                              int optInTimePeriod,\n                              int          *outBegIdx,\n                              int          *outNBElement,\n                              double        outReal[] )"
+  },
+  {
+    "name": "ZIGZAG",
+    "legacy": false,
+    "inputs": [
+      "High",
+      "Low"
+    ],
+    "outputs": [
+      {
+        "name": "outZigZag",
+        "ctype": "float"
+      },
+      {
+        "name": "outTrend",
+        "ctype": "int"
+      },
+      {
+        "name": "outPivotIdx",
+        "ctype": "int"
+      }
+    ],
+    "options": [
+      {
+        "name": "Sensitivity",
+        "type": "Double",
+        "default": "5.000000e+0",
+        "minimum": "0.000000e+0",
+        "maximum": "1.000000e+2"
+      },
+      {
+        "name": "Minimum Trend Length",
+        "type": "Integer",
+        "default": "1",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_LIB_API TA_RetCode TA_ZIGZAG( int    startIdx,\n                                 int    endIdx,\n                                 const double inHigh[],\n                                 const double inLow[],\n                                 double optInSensitivity,\n                                 int optInMinTrendLength,\n                                 int          *outBegIdx,\n                                 int          *outNBElement,\n                                 double        outZigZag[],\n                                 int        outTrend[],\n                                 int        outPivotIdx[] )"
+  },
+  {
+    "name": "ZLEMA",
+    "legacy": false,
+    "inputs": [
+      "inReal"
+    ],
+    "outputs": [
+      {
+        "name": "outReal",
+        "ctype": "float"
+      }
+    ],
+    "options": [
+      {
+        "name": "Time Period",
+        "type": "Integer",
+        "default": "30",
+        "minimum": "1",
+        "maximum": "100000"
+      }
+    ],
+    "signature": "TA_FMA_MULTIVERSION\nTA_LIB_API TA_RetCode TA_ZLEMA( int    startIdx,\n                                int    endIdx,\n                                const double inReal[],\n                                int optInTimePeriod,\n                                int          *outBegIdx,\n                                int          *outNBElement,\n                                double        outReal[] )"
+  }
+]

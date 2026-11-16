@@ -5,6 +5,7 @@
 # ============================================================================
 cmake_minimum_required(VERSION 3.22)
 project(tacuda LANGUAGES CXX CUDA)
+configure_file(THIRD_PARTY_NOTICES.txt THIRD_PARTY_NOTICES.txt COPYONLY)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CUDA_STANDARD 17)
@@ -196,12 +197,30 @@ set(INDICATOR_SOURCES
     src/indicators/XSideGap3Methods.cu
 )
 
+# Match the host libm used by the reference's degenerate DC-phase calculation.
+# The generated constants are part of the CUDA module, including first-use
+# graph capture: no host initialization or device copy occurs during a call.
+add_executable(tacuda_hilbert_table_generator EXCLUDE_FROM_ALL cmake/GenerateHilbertPhaseTable.cpp)
+if (MSVC)
+  target_compile_options(tacuda_hilbert_table_generator PRIVATE /fp:strict)
+else()
+  target_compile_options(tacuda_hilbert_table_generator PRIVATE -ffp-contract=off)
+endif()
+set(TACUDA_HILBERT_TABLE "${CMAKE_CURRENT_BINARY_DIR}/generated/$<CONFIG>/HilbertPhaseTable.cu")
+add_custom_command(OUTPUT "${TACUDA_HILBERT_TABLE}"
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/generated/$<CONFIG>"
+  COMMAND tacuda_hilbert_table_generator "${TACUDA_HILBERT_TABLE}"
+  DEPENDS tacuda_hilbert_table_generator
+  VERBATIM)
+
 add_library(tacuda SHARED
+    "${TACUDA_HILBERT_TABLE}"
     ${INDICATOR_SOURCES}
     src/api/api.cpp
     src/api/api_device.cu
     src/api/api_vector_math.cu
     src/api/api_batch.cu
+    src/compat/Talib08.cu
     src/api/BatchFused.cu
     src/api/api_stream.cpp
     src/api/api_stream_batch.cu
@@ -264,7 +283,11 @@ target_compile_options(tacuda PRIVATE
 
 # TA-Lib recurrences use distinct multiply/add operations; contracting them
 # into FMA changes the final float32 bits on cancellation-heavy inputs.
-set_source_files_properties(src/api/BatchFused.cu PROPERTIES COMPILE_OPTIONS "--fmad=false")
+set_source_files_properties(src/api/BatchFused.cu
+    src/indicators/HT_DCPERIOD.cu src/indicators/HT_DCPHASE.cu
+    src/indicators/HT_PHASOR.cu src/indicators/HT_SINE.cu
+    src/indicators/HT_TRENDLINE.cu src/indicators/HT_TRENDMODE.cu
+    PROPERTIES COMPILE_OPTIONS "--fmad=false")
 
 add_executable(example_app src/main.cpp)
 target_compile_features(example_app PRIVATE cxx_std_17)
@@ -303,6 +326,22 @@ if (BUILD_TESTING)
   gtest_discover_tests(test_basic)
   gtest_discover_tests(test_typed_outputs)
 
+  # Exercise the real fallback and capture refusal on a modern Linux GPU,
+  # without adding capability overrides or test exports to the library.
+  # Preload cudart too: Python otherwise loads it into a local dlopen scope,
+  # where the interposer cannot resolve its real functions with RTLD_NEXT.
+  if (UNIX AND NOT APPLE)
+    add_library(tacuda_no_memory_pools SHARED tests/gpu/no_memory_pools.cpp)
+    target_compile_features(tacuda_no_memory_pools PRIVATE cxx_std_17)
+    target_include_directories(tacuda_no_memory_pools PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
+    target_link_libraries(tacuda_no_memory_pools PRIVATE ${CMAKE_DL_LIBS})
+    add_test(NAME scratch_capture_without_memory_pools
+      COMMAND ${CMAKE_COMMAND} -E env
+              "LD_PRELOAD=$<TARGET_FILE:tacuda_no_memory_pools>:$<TARGET_FILE:CUDA::cudart>"
+              $<TARGET_FILE:test_basic>
+              "--gtest_filter=ScratchCapture.*:BatchAsyncCapture.*")
+  endif()
+
   add_test(
     NAME bindings_up_to_date
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/bindings/generate_bindings.py --check
@@ -326,6 +365,18 @@ if (BUILD_TESTING)
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/check_release.py)
   add_test(NAME python_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/test_python_contract.py)
+  add_test(NAME talib083_reference
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/talib_reference.py)
+  add_test(NAME talib083_generated
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_talib08.py --check)
+  add_test(NAME batch_generated
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/generate_batch_api.py --check)
+  add_test(NAME talib083_new_functions
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/talib08_corpus.py
+            --lib $<TARGET_FILE:tacuda> --json ${CMAKE_CURRENT_BINARY_DIR}/talib083_new_functions.json)
+  add_test(NAME talib083_batch_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/talib08_batch_contract.py
+            --lib $<TARGET_FILE:tacuda> --json ${CMAKE_CURRENT_BINARY_DIR}/talib083_batch_contract.json)
   # Every *_batch_d on a user stream: strict (global-mode) CUDA graph capture
   # and replay equal to the eager result. Needs a GPU.
   if (WIN32)
@@ -339,9 +390,35 @@ if (BUILD_TESTING)
   add_test(NAME batch_fused
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/batch_fused.py
             --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR})
+  if (TARGET tacuda_no_memory_pools)
+    add_test(NAME batch_graph_capture_without_memory_pools
+      COMMAND ${CMAKE_COMMAND} -E env
+              "LD_PRELOAD=$<TARGET_FILE:tacuda_no_memory_pools>:$<TARGET_FILE:CUDA::cudart>" "TACUDA_BATCH_FUSED=0"
+              ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/batch_graph_capture_sweep.py
+              --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR})
+    add_test(NAME batch_fused_without_memory_pools
+      COMMAND ${CMAKE_COMMAND} -E env
+              "LD_PRELOAD=$<TARGET_FILE:tacuda_no_memory_pools>:$<TARGET_FILE:CUDA::cudart>"
+              ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/batch_fused.py
+              --graph-only --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR})
+  endif()
   add_test(NAME scan_determinism
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/scan_determinism.py
             --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR})
+  # Independent mathematical oracles for device/batch paths. Graph-vs-eager
+  # equality alone cannot detect an error shared by both executions.
+  foreach(audit IN ITEMS batch_indicator_corpus extra_indicator_corpus batch_fused_matrix
+                         batch_invariants batch_long_statistics)
+    add_test(NAME ${audit}
+      COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/${audit}.py
+              --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR}
+              --json ${CMAKE_CURRENT_BINARY_DIR}/${audit}.json)
+  endforeach()
+  add_test(NAME audit_scan_repeatability
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/batch_repeatability.py
+            --only bbands,beta,correl,nvi,pvi,pvo
+            --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR}
+            --json ${CMAKE_CURRENT_BINARY_DIR}/audit_scan_repeatability.json)
   if (TACUDA_ENABLE_ASAN_TEST)
     add_test(NAME stream_lifetime_sanitizer COMMAND stream_lifetime_sanitizer)
   endif()
@@ -359,6 +436,7 @@ install(TARGETS tacuda EXPORT tacudaTargets
         LIBRARY DESTINATION lib
         ARCHIVE DESTINATION lib)
 install(TARGETS example_app RUNTIME DESTINATION bin)
+install(FILES THIRD_PARTY_NOTICES.txt DESTINATION share/tacuda)
 install(DIRECTORY include/ DESTINATION include)
 install(EXPORT tacudaTargets
         FILE tacudaTargets.cmake

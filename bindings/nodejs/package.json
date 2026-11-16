@@ -1,7 +1,7 @@
 {
   "name": "tacuda",
-  "version": "0.9.0",
-  "description": "CUDA technical analysis for Node.js: TA-Lib baseline indicators, fused portfolio batches, CUDA Graph device pipelines and incremental streaming.",
+  "version": "0.9.1",
+  "description": "CUDA technical analysis: 237 TA-Lib 0.8.3 functions, typed outputs, fused portfolio batches, CUDA Graph pipelines and incremental streaming.",
   "main": "index.js",
   "scripts": {
     "test": "node test_pipeline.js"

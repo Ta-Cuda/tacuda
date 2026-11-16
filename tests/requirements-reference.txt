@@ -1,4 +1,2 @@
-# Compatibility baseline: Python TA-Lib 0.7.0 bundles native TA-Lib 0.7.1 (161 functions).
-# TA-Lib 0.8.1 migration is tracked separately; never relax the strict oracle.
-numpy==2.2.6
-TA-Lib==0.7.0
+# Native and Python reference for the 237-function 0.9.1 compatibility target.
+-r requirements-talib083.txt

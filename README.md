@@ -5,32 +5,24 @@
 [![C++](https://img.shields.io/badge/C%2B%2B-17-blue.svg)](https://en.cppreference.com/w/cpp/17)
 [![Python](https://img.shields.io/badge/Python-3.8%2B-yellow.svg)](https://www.python.org/)
 [![.NET](https://img.shields.io/badge/.NET-8.0%2B-purple.svg)](https://dotnet.microsoft.com/)
-[![Functions](https://img.shields.io/badge/TA--Lib_API-161%2F161_functions-orange.svg)](#-comprehensive-indicator-suite-161-functions-from-ta-lib-071)
+[![Functions](https://img.shields.io/badge/TA--Lib_API-237%2F237_functions-orange.svg)](#-comprehensive-indicator-suite-237-functions-from-ta-lib-083)
 [![Website](https://img.shields.io/badge/Website-tacuda.com-blue.svg)](https://tacuda.com)
 
 > **High-Performance CUDA-Accelerated Technical Analysis Library**
 >
-> **⚡ Up to 15.4x faster pipelines than TA-Lib** | **📊 161 functions from TA-Lib 0.7.1** | **🔧 Host / Device / Batch APIs** | 🌐 [tacuda.com](https://tacuda.com)
+> **⚡ Up to 15.4x faster pipelines than TA-Lib** | **📊 237 functions from TA-Lib 0.8.3** | **🔧 Host / Device / Batch APIs** | 🌐 [tacuda.com](https://tacuda.com)
 >
-> Numerical compatibility with TA-Lib is verified per function by a strict
-> differential corpus — identical NaN/Inf masks plus tolerance-bounded
-> values over random walks, trend, flat, zero-crossing and short inputs
-> (`benchmarks/differential_corpus.py`, **165/165 specs green as of 0.7.1**,
-> covering the 161 functions in native TA-Lib 0.7.1 (Python wrapper 0.7.0) with exact-name coverage
-> enforcement; all 61 candlestick patterns match TA-Lib signal-for-signal
-> with no mask and no flip budget, and the report records how many signals
-> each pattern actually produced). The few remaining corner-case notes live
-> in [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md).
+> Numerical compatibility targets **TA-Lib native/Python 0.8.3**: the strict
+> differential corpus covers **237 names, 241 specs and 1928 passing cells**,
+> including exact candle signals and warmup behavior. See the
+> [compatibility guide](docs/TA_LIB_COMPATIBILITY.md) for tolerances, typed
+> outputs, MA types, numerical changes and performance limits.
 
-**Release 0.9.0:** fused portfolio batches for 17 families and CUDA Graph
-device pipelines, with unchanged C signatures. Use native libraries and
-bindings from the same 0.9.0 release. The numerical migration controls are
-in [BATCH_API.md](docs/BATCH_API.md#fused-execution). The 161-function compatibility baseline is
-pinned in `tests/requirements-reference.txt` (Python TA-Lib 0.7.0, whose
-bundled native library reports 0.7.1 on Windows and 0.6.4 on Linux; both
-pass the same strict corpus). TA-Lib 0.8.1 has 201 functions;
-its 40 missing corpus specs and IMI/WILLR edge cases remain migration work,
-not part of the full-coverage claim ([validation](docs/OPERATIONS.md#validation-snapshot--2026-10-07)).
+**Release 0.9.1:** adds the 0.8.x functions, extends MA types through ALMA,
+supports int32/mixed/four-output APIs, and corrects numerical and graph
+capability edge cases. Use matching 0.9.1 natives and bindings. Existing C
+signatures remain unchanged. New reference-backed CUDA formulas establish
+correctness; historical speedups below retain their measured scope.
 
 TACUDA delivers lightning-fast technical analysis indicators powered by NVIDIA CUDA GPUs. Built for quantitative traders, researchers, and financial analysts who demand maximum performance from their computational workflows.
 
@@ -68,7 +60,7 @@ Double recurrences improve TA-Lib agreement and can change final bits from
 - **Batch API** (`ct_*_batch[_d]`, 166 families) for multi-symbol portfolios
 - **Pipelined workloads** with optional `cudaStream_t` support and an internal device buffer pool
 
-### 📊 **Comprehensive Indicator Suite (161 functions from TA-Lib 0.7.1)**
+### 📊 **Comprehensive Indicator Suite (237 functions from TA-Lib 0.8.3)**
 - **Moving Averages**: SMA, EMA, WMA, DEMA, TEMA, TRIMA, KAMA, T3, MAMA
 - **Momentum**: RSI, MACD, MACDEXT (independent MA types), Stochastic, CCI, CMO, MOM, ROC, ROCP, ROCR, WILLR
 - **Volatility**: ATR, NATR, TRANGE, Bollinger Bands, ACCBANDS
@@ -92,7 +84,7 @@ TA-Lib compatible pattern detection — all 61 TA-Lib patterns match signal-for-
 - **Node.js**: `koffi`-based bindings with TypedArray support, `Ohlcv` containers, `*Batch` + `device.*Batch` wrappers
 - **C#**: Native .NET bindings — public `NativeMethods`, `OhlcvSeries` extension methods, `TacudaBatch` helpers
 
-All bindings cover the full native surface (811 entry points: 559 host + 200 device + 52 streaming,
+All bindings cover the full native surface (1129 entry points: 797 host + 280 device + 52 streaming,
 including the batch API and `_ex` precision variants) — verified by
 `bindings/audit_bindings.py`, see [docs/API.md](docs/API.md#bindings).
 
@@ -493,7 +485,7 @@ python benchmarks/benchmark_ema_vs_talib.py
 - **C ABI** (`src/api/*.cu`): thin `extern "C"` wrappers with a uniform error contract (`ctStatus_t` + `ct_get_last_error()`); the batch/device surface is generated from one family table (`scripts/generate_batch_api.py`)
 - **Context / DeviceBuffer** (`include/tacuda/Context.h`): RAII C++ pipeline API; buffers may safely outlive the Context, cross-Context use is rejected
 - **DeviceBufferPool**: allocation cache with stream-ordered release (capped via `ct_device_buffer_pool_set_max_cache_bytes`)
-- **Bindings** (`bindings/`): Python (ctypes) and C# (P/Invoke) generated from the headers; Node.js (koffi) hand-written plus a generated batch/device layer — all audited for 811/811 coverage
+- **Bindings** (`bindings/`): Python (ctypes) and C# (P/Invoke) generated from the headers; Node.js (koffi) hand-written plus a generated batch/device layer — all audited for 1129/1129 coverage
 
 ---
 
@@ -552,11 +544,11 @@ Adding a new indicator touches four places (see
 
 ### ✅ Implemented as of 0.9.0
 
-- [x] **All 161 functions from TA-Lib 0.7.1 implemented** (incl. MACDEXT with independent MA types and 19 element-wise vector math functions); numerical parity is verified per function by the strict differential corpus — 165/165 specs green, remaining corner-case notes in [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md)
+- [x] **All 237 functions from TA-Lib 0.8.3 implemented** (incl. MACDEXT with independent MA types and 19 element-wise vector math functions); numerical parity is verified per function by the strict differential corpus — 165/165 specs green, remaining corner-case notes in [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md)
 - [x] **All 61 candlestick patterns** match TA-Lib signal-for-signal (double-precision literal ports, exact-equality oracle with hand-crafted activation fixtures for the rare patterns)
 - [x] **Device API** (`ct_*_d`, 200 functions) for zero-copy multi-indicator pipelines, with `_ex_d` float16/32/64 precision variants
 - [x] **Batch API**: 166 indicator families, 17 fused kernels with automatic fallback, and CUDA Graph capture on caller streams
-- [x] Python (ctypes), Node.js (koffi) and .NET 8/9 bindings covering the full 811-symbol C ABI (audited in CI)
+- [x] Python (ctypes), Node.js (koffi) and .NET 8/9 bindings covering the full 1129-symbol C ABI (audited in CI)
 - [x] Packaging workflow for PyPI (platform wheels with natives), npm (tgz) and NuGet (nupkg with win-x64 + linux-x64 natives), GPU-gated publishing
 - [x] **SAREXT** bit-for-bit TA-Lib semantics; SAR/SAREXT host API uses a fast CPU path
 - [x] Memory-safety contracts: stream-ordered buffer pool, buffers may outlive their Context, cross-Context rejection — all covered by lifetime tests
@@ -567,7 +559,7 @@ Adding a new indicator touches four places (see
 Current priorities live in **[docs/ROADMAP.md](docs/ROADMAP.md)**:
 
 - extend the streaming line: live-trading guide, the ADX group and STOCH/STOCHF as stream families;
-- TA-Lib 0.8.1 coverage (40 missing corpus specs, IMI/WILLR edge semantics);
+- Additional incremental streaming families and upstream stabilization/shift metadata;
 - persistent batch plans (deferred on measurement — see the roadmap) and multi-GPU dispatch;
 - Conda/Docker/Jetson distribution;
 - **v1.0.0** — ABI freeze, signed releases, GPU test matrix in CI, LTS branch.

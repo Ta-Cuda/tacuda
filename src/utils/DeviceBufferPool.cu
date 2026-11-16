@@ -5,6 +5,7 @@
 /* ======================================================================== */
 #include <utils/DeviceBufferPool.h>
 #include <utils/CudaUtils.h>
+#include <utils/UnsupportedOperation.h>
 
 #include <cstdint>
 #include <exception>
@@ -35,6 +36,27 @@ public:
         cudaMemPool_t pool = create(device);
         pools_[device] = pool;
         return pool;
+    }
+
+    // Capability lookup only: creating a private pool is unnecessary during
+    // capture, whose allocations are owned by the graph. Cache per device,
+    // separately from pool creation (which may fail for unrelated reasons).
+    bool graphMemorySupported(int device) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        const auto found = graphMemorySupport_.find(device);
+        if (found != graphMemorySupport_.end()) return found->second;
+        bool supported = false;
+#if CUDART_VERSION >= 11040
+        int driver = 0;
+        CUDA_CHECK(cudaDriverGetVersion(&driver));
+        if (driver >= 11040) {
+            int pools = 0;
+            CUDA_CHECK(cudaDeviceGetAttribute(&pools, cudaDevAttrMemoryPoolsSupported, device));
+            supported = pools != 0;
+        }
+#endif
+        graphMemorySupport_[device] = supported;
+        return supported;
     }
 
     void trimTo(uint64_t bytes) {
@@ -112,6 +134,7 @@ private:
 
     std::mutex mutex_;
     std::map<int, cudaMemPool_t> pools_;
+    std::map<int, bool> graphMemorySupport_;
     // Like DeviceBufferPool's default cache limit: keep what was reserved.
     uint64_t threshold_ = std::numeric_limits<uint64_t>::max();
 };
@@ -439,6 +462,16 @@ void* scratch_acquire(size_t bytes, cudaStream_t stream, ScratchMode mode) {
 #if CUDART_VERSION >= 11020
     void* ptr = nullptr;
     if (mode == ScratchMode::Graph) {
+        int device = 0;
+        CUDA_CHECK(cudaGetDevice(&device));
+        if (!ScratchPools::instance().graphMemorySupported(device)) {
+            // Do not call an unsupported CUDA allocator: that would leave a
+            // runtime error for the next caller and may invalidate capture.
+            throw UnsupportedOperation(
+                "CUDA Graph scratch allocation requires CUDA 11.4+ and "
+                "cudaDevAttrMemoryPoolsSupported; use a supported fused call "
+                "or execute this scratch-backed call outside capture");
+        }
         CUDA_CHECK(cudaMallocAsync(&ptr, bytes, stream));
         return ptr;
     }

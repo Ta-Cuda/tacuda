@@ -174,6 +174,8 @@ def build_corpus(n: int) -> Dict[str, Dict[str, np.ndarray]]:
 
 
 def main() -> int:
+    from talib_reference import require_reference
+    require_reference(talib)
     ap = argparse.ArgumentParser()
     ap.add_argument("--size", type=int, default=4096)
     ap.add_argument("--json", default="")

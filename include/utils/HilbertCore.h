@@ -7,6 +7,7 @@
 #define HILBERT_CORE_H
 
 #include <cuda_runtime.h>
+#include <utils/HilbertPhaseTable.cuh>
 #include <cmath>
 
 // ============================================================================
@@ -306,7 +307,6 @@ __device__ __forceinline__ void updateDCPhase(
     double& DCPhase
 ) {
     constexpr double rad2Deg = 57.29577951308232;
-    constexpr double constDeg2RadBy360 = 6.283185307179586; // 2*PI
     
     double DCPeriod = smoothPeriod + 0.5;
     int DCPeriodInt = static_cast<int>(DCPeriod);
@@ -314,10 +314,10 @@ __device__ __forceinline__ void updateDCPhase(
     double realPart = 0.0, imagPart = 0.0;
     int idx = smoothPrice_Idx;
     for (int i = 0; i < DCPeriodInt; ++i) {
-        double phase = (static_cast<double>(i) * constDeg2RadBy360) / static_cast<double>(DCPeriodInt);
         double tempPrice = smoothPrice[idx];
-        realPart += sin(phase) * tempPrice;
-        imagPart += cos(phase) * tempPrice;
+        const int weight = DCPeriodInt * (DCPeriodInt - 1) / 2 + i;
+        realPart += phaseSin[weight] * tempPrice;
+        imagPart += phaseCos[weight] * tempPrice;
         if (idx == 0)
             idx = 49; // SMOOTH_PRICE_SIZE - 1
         else

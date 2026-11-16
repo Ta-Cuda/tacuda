@@ -35,6 +35,8 @@
 #include "tacuda_device.h"
 #include <utils/DeviceBufferPool.h>
 #include <utils/ErrorState.h>
+#include <utils/UnsupportedOperation.h>
+#include <utils/Talib08.h>
 #include "BatchFused.h"
 
 namespace {
@@ -49,6 +51,10 @@ constexpr size_t kPinThresholdBytes = 1u << 20;  // pin host memory from 1 MB
 
 ctStatus_t classify_batch_exception(const char* context) {
     try { throw; }
+    catch (const tacuda::detail::UnsupportedOperation& e) {
+        tacuda::detail::set_last_error(e.what());
+        return CT_STATUS_UNSUPPORTED;
+    }
     catch (const std::invalid_argument& e) {
         tacuda::detail::set_last_error(e.what());
         return CT_STATUS_INVALID_ARGUMENT;
@@ -462,6 +468,7 @@ ctStatus_t ct_macd_batch(const float* host_inputs, float* host_macds,
                          int numSeries, int fastPeriod, int slowPeriod,
                          int signalPeriod, int maType, int maxConcurrency,
                          cudaStream_t stream) {
+    if (maType == CT_MA_DEFAULT) maType = CT_MA_EMA;
     const float* ins[1] = {host_inputs};
     float* outs[3] = {host_macds, host_signals, host_hists};
     return run_host_batch(
@@ -562,6 +569,7 @@ ctStatus_t ct_macd_batch_d(const float* d_inputs, float* d_macds,
                            int numSeries, int fastPeriod, int slowPeriod,
                            int signalPeriod, int maType, int maxConcurrency,
                            cudaStream_t stream) {
+    if (maType == CT_MA_DEFAULT) maType = CT_MA_EMA;
     const float* ins[1] = {d_inputs};
     float* outs[3] = {d_macds, d_signals, d_hists};
     return run_device_batch(

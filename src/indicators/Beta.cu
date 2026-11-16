@@ -6,10 +6,7 @@
 #include <indicators/Beta.h>
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
-#include <thrust/device_ptr.h>
-#include <utils/ThrustPolicy.cuh>
-#include <thrust/execution_policy.h>
-#include <thrust/scan.h>
+#include <utils/DeterministicScan.cuh>
 #include <stdexcept>
 #include <math.h>
 
@@ -103,8 +100,7 @@ void tacuda::Beta::calculate(const float* x, const float* y, float* output, int 
     CUDA_CHECK(cudaGetLastError());
 
     auto scanInPlace = [stream](double* ptr, int n) {
-        thrust::device_ptr<double> dev(ptr);
-        thrust::inclusive_scan(tacuda::detail::thrust_on(stream), dev, dev + n, dev);
+        tacuda::detail::deterministic_double_scan(ptr, ptr, n, stream);
     };
 
     scanInPlace(retX.get(), size);

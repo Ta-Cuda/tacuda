@@ -1,15 +1,13 @@
 # Implementation Notes
 
-Semantics that TaCuda mirrors from TA-Lib, the precision decisions behind
-them, and the **known deviations** that remain. The rules below are enforced
-by the strict differential corpus (`benchmarks/differential_corpus.py`):
-identical NaN/Inf masks and a mixed absolute/relative tolerance per function
-across random walks, a trend, a flat series, zero-crossing data and a short
-input. Compatibility here is scoped to native TA-Lib 0.7.1 (Python wrapper
-0.7.0), pinned in `tests/requirements-reference.txt`. A run against TA-Lib
-0.8.1 has 40 missing corpus specifications and differences on IMI/flat and
-WILLR/zero-crossing inputs. These are migration gaps, not tolerance exceptions;
-see [OPERATIONS.md](OPERATIONS.md) for the dated evidence.
+Release **0.9.1** targets **237 functions from native/Python TA-Lib 0.8.3**.
+The [compatibility guide](TA_LIB_COMPATIBILITY.md) defines new output types,
+MA modes, numerical migration and scratch/performance limits. The expanded
+oracle passes 1928/1928 cells with no exclusions; exact integer/candle checks
+and per-formula real tolerances remain distinct from bitwise identity.
+
+Older release notes and implementation details below retain their historical
+context. The former NATR zero-close oracle exclusion is removed in 0.9.1.
 
 ## EMA seeding and warmup (TA-Lib compatibility)
 
@@ -114,27 +112,16 @@ poisons the recursion permanently in bulk and in streaming alike.
   corpus uses relaxed scaled tolerances there (5e-2..2e-3, see
   `benchmarks/talib_compare_helpers.py`).
 
-## Known deviations from TA-Lib (tracked)
+## Corrections in 0.9.1
 
-- **NATR on zero closes**: TA-Lib's `ta_NATR.c` contains a genuine bug —
-  when a later close is exactly zero it writes the guard value `0.0` into
-  `outReal[0]` instead of `outReal[outIdx]`, corrupting the *first* output
-  bar. TaCuda emits 0 at the zero-close bar itself (the intended
-  behavior); the differential corpus skips that one dataset for NATR
-  instead of reproducing the out-of-place write.
-- **`matype` beyond APO/PPO/MACDEXT**: BBANDS/STOCH/STOCHF/STOCHRSI expose
-  TA-Lib's default MA types only (SMA smoothing); the selectable-matype
-  variants of those functions are a planned API extension.
-- **Hilbert phase on constant input, device and batch API only**:
-  HT_DCPHASE, HT_SINE and HT_TRENDMODE through `ct_ht_*_d` and
-  `*_batch_d` disagree with TA-Lib on a constant series and on near-flat
-  stretches (corpus datasets `flat` and `candles`; HT_TRENDMODE flips its
-  flag). There the DC phase is `atan(realPart / imagPart)` of two sums that
-  are analytically zero — rounding noise of about 1e-14 — so TA-Lib's
-  value is glibc's noise. The host API runs the CPU port
-  (`include/utils/HilbertCPU.h`) and reproduces it bit-exactly; the GPU
-  kernel has the same logic but different noise (FMA contraction, libdevice
-  `sin`/`cos`). On every other corpus dataset both paths agree with TA-Lib.
+The older NATR zero-close oracle bug is fixed in TA-Lib 0.8.3, so the
+corresponding corpus dataset is no longer excluded. Selectable MA variants
+are now available for BBANDS/STOCH/STOCHF/STOCHRSI. GPU Hilbert functions use
+build-host libm coefficients and separate multiply/add operations; this
+corrects the former flat/candle phase deviations on the accepted platforms.
+See [the versioned compatibility contract](TA_LIB_COMPATIBILITY.md).
+
+### Historical corrections
 
 Closed in 0.7.1:
 - Buffer/Context lifetime contract, all buffer types: `DeviceBuffer` AND
@@ -158,12 +145,12 @@ Closed in 0.7.0:
   EXACT signal equality with no head mask and no flip budget.
 - ADOSC period roles (ADOSC(10,3) = EMA(10) - EMA(3), lookback from the
   slowest period only), IMI end-of-window alignment with TA-Lib's
-  unguarded division (flat window → NaN), HT_TRENDMODE zero warm-up in
+  unguarded division (flat window → NaN in that older reference; 0.9.1 uses neutral 50), HT_TRENDMODE zero warm-up in
   every path.
 
 Closed in 0.6.0 (previously tracked here):
 - APO/PPO `matype` — exposed via appended `ct_apo_ma`/`ct_ppo_ma`
-  (TA-Lib default SMA verified by the corpus).
+  (older TA-Lib default SMA; 0.8.3 defaults to EMA).
 - Candlestick heuristics — the dead fixed-percentage helpers are removed.
 - Short inputs — indicators now return success with an all-NaN line when
   `size` is below the lookback, like TA-Lib's empty output range.

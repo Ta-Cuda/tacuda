@@ -37,6 +37,7 @@ flattened matrix is already the optimal batch.
 
 from __future__ import annotations
 
+import argparse
 import dataclasses
 import re
 from pathlib import Path
@@ -68,6 +69,8 @@ class Family:
     scalars: Sequence[Scalar] = ()
     host_single: bool = False  # also emit a plain ct_{name} host wrapper
     fused: str = ""           # FusedFamily enumerator; empty keeps legacy dispatch
+    output_dtypes: Sequence[str] = ()  # empty = legacy float outputs
+    reference: str = ""       # pinned TA-Lib 0.8.3 operation, if present
 
 
 @dataclasses.dataclass(frozen=True)
@@ -84,6 +87,8 @@ class DeviceFamily:
     stacked_lines: int = 0     # lines the class writes for stacked/pick0
     header: str = ""           # indicator header (defaults to <cls>.h)
     host_single: bool = False  # club pack: also emit plain ct_{name} host entry
+    output_dtypes: Sequence[str] = ()
+    reference: str = ""
 
 
 IN_SINGLE = ("inputs",)
@@ -139,7 +144,7 @@ BASE_FAMILIES: Sequence[Family] = (
            ("macds", "signals", "hists"),
            (("int", "fastPeriod"), ("int", "fastType"),
             ("int", "slowPeriod"), ("int", "slowType"),
-            ("int", "signalPeriod"), ("int", "signalType"))),
+            ("int", "signalPeriod"), ("int", "signalType")), reference="MACDEXT"),
     Family("accbands", "ct_accbands_d", IN_HLC,
            ("uppers", "middles", "lowers"), PERIOD),
     # --- price transforms / volume ---
@@ -282,7 +287,7 @@ DEVICE_FAMILIES: Sequence[DeviceFamily] = tuple(
                      (("int", "minPeriod"), ("int", "maxPeriod"),
                       ("int", "maType")),
                      "minPeriod, maxPeriod, static_cast<tacuda::MAType>(maType)",
-                     header="MAVP.h"),
+                     header="MAVP.h", reference="MAVP"),
         # --- OHLC ---
         DeviceFamily("bop", "BOP", IN_OHLC, OUT_SINGLE),
     ]
@@ -338,10 +343,17 @@ DEVICE_FAMILIES: Sequence[DeviceFamily] = tuple(
     ]
 )
 
+from talib08_catalog import NEW as TA08_NEW
+DEVICE_FAMILIES = tuple(DEVICE_FAMILIES) + tuple(
+    DeviceFamily(e['api'], '', e['inputs'], e['outputs'], e['scalars'],
+                 host_single=e['name'] not in ['APO','PPO'], output_dtypes=e['output_dtypes'], reference=e['name'])
+    for e in TA08_NEW
+)
+
 # Batch families = base (pre-0.4.0 device functions) + everything generated.
 FAMILIES: Sequence[Family] = tuple(BASE_FAMILIES) + tuple(
     Family(df.name, f"ct_{df.name}_d", df.inputs, df.outputs, df.scalars,
-           host_single=df.host_single)
+           host_single=df.host_single, output_dtypes=df.output_dtypes, reference=df.reference)
     for df in DEVICE_FAMILIES
 )
 
@@ -395,11 +407,43 @@ def camel(name: str) -> str:
 
 
 def pascal(name: str) -> str:
-    return "".join(p.capitalize() for p in name.split("_"))
+    return "".join(p[:1].upper() + p[1:] for p in name.split("_"))
 
 
 def cs_input_name(logical: str) -> str:
     return camel(logical)
+
+
+for _family in FAMILIES:
+    for _output in _family.outputs:
+        JS_OUT_KEYS.setdefault(_output, camel(_output))
+        CS_OUT_KEYS.setdefault(_output, pascal(_output))
+
+
+def output_dtypes(family):
+    return family.output_dtypes or ('float',) * len(family.outputs)
+
+
+def render_reference(family, variant):
+    device = variant.startswith('device')
+    batch = variant.endswith('batch')
+    prefix = 'd_' if device else 'host_'
+    suffix = '_batch_d' if variant=='device_batch' else '_batch' if batch else '_d' if device else ''
+    fn = 'ct_' + family.name + suffix
+    params = decl_params(family, device) if batch else device_decl_params(family) if device else host_single_params(family)
+    params = params.replace(' CTAPI_STREAM_DEFAULT','')
+    head = f'ctStatus_t {fn}('
+    ins = ', '.join(prefix + (n if batch else singular(n)) for n in family.inputs)
+    outs = ', '.join(prefix + (n if batch else singular(n)) for n in family.outputs)
+    packed = ', '.join(f'static_cast<double>({n})' for _,n in family.scalars)
+    shape = 'seriesLen, numSeries' if batch else 'size, 1'
+    runner = 'run_device' if device else 'run_host'
+    return [f'{head}{wrap_decl(params,len(head))}) {{',
+            f'    const float* ins[] = {{{ins}}};',
+            f'    void* outs[] = {{{outs}}};',
+            f'    return tacuda::talib08::{runner}(tacuda::talib08::Function::{family.reference},',
+            f'        ins, outs, {shape}, tacuda::talib08::Params{{{{{packed}}}}}, stream);',
+            '}', '']
 
 
 # ---------------------------------------------------------------------------
@@ -409,7 +453,7 @@ def cs_input_name(logical: str) -> str:
 def decl_params(fam: Family, device: bool) -> str:
     prefix = "d_" if device else "host_"
     parts = [f"const float *{prefix}{n}" for n in fam.inputs]
-    parts += [f"float *{prefix}{n}" for n in fam.outputs]
+    parts += [f"{t} *{prefix}{n}" for t,n in zip(output_dtypes(fam), fam.outputs)]
     parts += ["int seriesLen", "int numSeries"]
     parts += [f"{t} {n}" for t, n in fam.scalars]
     parts += ["int maxConcurrency", "cudaStream_t stream CTAPI_STREAM_DEFAULT"]
@@ -418,7 +462,7 @@ def decl_params(fam: Family, device: bool) -> str:
 
 def host_single_params(fam: Family) -> str:
     parts = [f"const float *host_{singular(n)}" for n in fam.inputs]
-    parts += [f"float *host_{singular(n)}" for n in fam.outputs]
+    parts += [f"{t} *host_{singular(n)}" for t,n in zip(output_dtypes(fam), fam.outputs)]
     parts += ["int size"]
     parts += [f"{t} {n}" for t, n in fam.scalars]
     parts += ["cudaStream_t stream CTAPI_STREAM_DEFAULT"]
@@ -427,7 +471,7 @@ def host_single_params(fam: Family) -> str:
 
 def device_decl_params(df: DeviceFamily) -> str:
     parts = [f"const float* d_{singular(n)}" for n in df.inputs]
-    parts += [f"float* d_{singular(n)}" for n in df.outputs]
+    parts += [f"{t}* d_{singular(n)}" for t,n in zip(output_dtypes(df), df.outputs)]
     parts += ["int size"]
     parts += [f"{t} {n}" for t, n in df.scalars]
     parts += ["cudaStream_t stream CTAPI_STREAM_DEFAULT"]
@@ -486,11 +530,12 @@ def render_device_header() -> str:
 # ---------------------------------------------------------------------------
 
 def render_device_includes() -> str:
-    headers = sorted({df.header or f"{df.cls}.h" for df in DEVICE_FAMILIES})
+    headers = sorted({df.header or f"{df.cls}.h" for df in DEVICE_FAMILIES if not df.reference})
     out = [
         "// Auto-generated by scripts/generate_batch_api.py. Do not edit.",
         "// Indicator class headers used by api_device_generated.inc.",
         "#include <utils/DeviceBufferPool.h>",
+        "#include <utils/Talib08.h>",
     ]
     out += [f"#include <indicators/{h}>" for h in headers]
     return "\n".join(out) + "\n"
@@ -504,6 +549,9 @@ def render_device_impl() -> str:
         "",
     ]
     for df in DEVICE_FAMILIES:
+        if df.reference:
+            out += render_reference(df, 'device')
+            continue
         fn = f"ct_{df.name}_d"
         params = device_decl_params(df).replace(" CTAPI_STREAM_DEFAULT", "")
         head = f"ctStatus_t {fn}("
@@ -553,6 +601,12 @@ def render_impl() -> str:
         "",
     ]
     for fam in FAMILIES:
+        if fam.reference:
+            if fam.host_single:
+                out += render_reference(fam, 'host')
+            out += render_reference(fam, 'host_batch')
+            out += render_reference(fam, 'device_batch')
+            continue
         n_in, n_out = len(fam.inputs), len(fam.outputs)
         scalar_args = "".join(f", {n}" for _, n in fam.scalars)
         for device in (False, True):
@@ -566,6 +620,15 @@ def render_impl() -> str:
             call_ins = ", ".join(f"in[{i}]" for i in range(n_in))
             call_outs = ", ".join(f"out[{i}]" for i in range(n_out))
             out.append(f"{head}{wrap_decl(params, len(head))}) {{")
+            extended = {'ma':('MA','maType >= 9'),
+                        'mavp':('MAVP','maType >= 9 || maType == 3 || maType == 4 || maType == 7 || maType == 8'),
+                        'macdext':('MACDEXT','!((fastType == 1 && slowType == 1 && signalType == 1) || ((fastType == 0 || fastType == 2 || fastType == 5) && (slowType == 0 || slowType == 2 || slowType == 5) && (signalType == 0 || signalType == 2 || signalType == 5)))')}
+            if fam.name in extended:
+                operation, condition = extended[fam.name]
+                out.append(f'    if ({condition}) {{')
+                body = render_reference(dataclasses.replace(fam,reference=operation), 'device_batch' if device else 'host_batch')
+                out.extend('    '+line for line in body[1:-2])
+                out.append('    }')
             out.append(f"    const float* ins[{n_in}] = {{{in_list}}};")
             out.append(f"    float* outs[{n_out}] = {{{out_list}}};")
             out.append(f"    return {runner}(")
@@ -612,7 +675,7 @@ def node_sig(fam: Family, device: bool) -> str:
         parts += [f"void *d_{n}" for n in fam.outputs]
     else:
         parts = [f"const float *{n}" for n in fam.inputs]
-        parts += [f"float *{n}" for n in fam.outputs]
+        parts += [f"{t} *{n}" for t,n in zip(output_dtypes(fam), fam.outputs)]
     parts += ["int seriesLen", "int numSeries"]
     parts += [f"{t} {n}" for t, n in fam.scalars]
     parts += ["int maxConcurrency", "void *stream"]
@@ -661,10 +724,10 @@ def render_node() -> str:
                 out.append(f"        if (m_{camel(n)}.seriesLen !== {base}.seriesLen || m_{camel(n)}.numSeries !== {base}.numSeries) throw new RangeError('all input matrices must have the same shape (seriesLen x numSeries)');")
             out.append(f"        const {{ seriesLen, numSeries }} = {base};")
         outs = []
-        for n in fam.outputs:
+        for t,n in zip(output_dtypes(fam), fam.outputs):
             v = "out" if len(fam.outputs) == 1 else f"o_{camel(n)}"
             src = "matrix.length" if len(fam.inputs) == 1 else f"m_{first}.matrix.length"
-            out.append(f"        const {v} = new Float32Array({src});")
+            out.append(f"        const {v} = new {'Int32Array' if t=='int' else 'Float32Array'}({src});")
             outs.append(v)
         call_args = mats + outs + ["seriesLen", "numSeries"] + scalar_names + ["opts.maxConcurrency ?? 0"]
         out.append(f"        call({fn}, '{fn}', {', '.join(call_args)});")
@@ -696,6 +759,38 @@ def render_node() -> str:
             cols = ", ".join(f"'{col_map[n]}'" for n in fam.inputs)
             out.append(f"    ohlcvColumns.{js} = [{cols}];")
         out.append("")
+
+    # Typed single-series host wrappers for the new reference-backed families.
+    for fam in FAMILIES:
+        if not fam.reference or not fam.host_single:
+            continue
+        fn = f'ct_{fam.name}'
+        parts = [f'const float *{singular(n)}' for n in fam.inputs]
+        parts += [f'{t} *{singular(n)}' for t,n in zip(output_dtypes(fam),fam.outputs)]
+        parts += ['int size'] + [f'{t} {n}' for t,n in fam.scalars] + ['void *stream']
+        out.append(f"    const {fn} = lib.func('int {fn}({', '.join(parts)})');")
+        js = camel(fam.name)
+        args = [camel(singular(n)) for n in fam.inputs] + [n for _,n in fam.scalars]
+        out.append(f"    host.{js} = function ({', '.join(args)}) {{")
+        mats = []
+        for n in fam.inputs:
+            var = 'm_' + camel(n)
+            out.append(f'        const {var} = toBatchMatrix([{camel(singular(n))}]);')
+            mats.append(var)
+        for var in mats[1:]:
+            out.append(f"        if ({var}.seriesLen !== {mats[0]}.seriesLen) throw new RangeError('all inputs must have the same length');")
+        outs = []
+        for i,t in enumerate(output_dtypes(fam)):
+            var = f'output{i}'
+            out.append(f'        const {var} = new {"Int32Array" if t=="int" else "Float32Array"}({mats[0]}.seriesLen);')
+            outs.append(var)
+        native = [v+'.matrix' for v in mats] + outs + [mats[0]+'.seriesLen'] + [n for _,n in fam.scalars]
+        out.append(f"        call({fn}, '{fn}', {', '.join(native)});")
+        if len(outs)==1:
+            out.append('        return output0;')
+        else:
+            out.append('        return {'+', '.join(JS_OUT_KEYS[n]+': '+v for n,v in zip(fam.outputs,outs))+'};')
+        out.append('    };')
 
     # Single-series ct_*_d wrappers over the generated device surface (raw
     # GPU pointers). Completes Node's coverage of the C ABI; index.js merges
@@ -746,10 +841,10 @@ def render_csharp() -> str:
         sig_scalars = f", {scalar_params}" if scalar_params else ""
 
         if len(fam.outputs) == 1:
-            ret = "float[][]"
+            ret = output_dtypes(fam)[0] + "[][]"
         else:
             ret = "(" + ", ".join(
-                f"float[][] {CS_OUT_KEYS[n]}" for n in fam.outputs) + ")"
+                f"{t}[][] {CS_OUT_KEYS[n]}" for t,n in zip(output_dtypes(fam), fam.outputs)) + ")"
 
         out.append(f"    public static {ret} {method}({in_params}{sig_scalars}, int maxConcurrency = 0)")
         out.append("    {")
@@ -765,9 +860,9 @@ def render_csharp() -> str:
             out.append("            throw new ArgumentException(\"all input matrices must have the same shape\");")
             out.append("        }")
         out_vars = []
-        for n in fam.outputs:
+        for t,n in zip(output_dtypes(fam), fam.outputs):
             v = "output" if len(fam.outputs) == 1 else f"o{pascal(n)}"
-            out.append(f"        var {v} = new float[len * count];")
+            out.append(f"        var {v} = new {t}[len * count];")
             out_vars.append(v)
         call_args = ", ".join(mat_vars + out_vars) + ", len, count" + scalar_args + ", maxConcurrency"
         out.append("        NativeMethods.ThrowOnError(")
@@ -807,8 +902,8 @@ def signature(style: str) -> str:
     return "\n".join([bar, *body, bar]) + "\n"
 
 
-def replace_region(path: Path, begin: str, end: str, payload: str,
-                   anchor: str | None = None) -> None:
+def render_region(path: Path, begin: str, end: str, payload: str,
+                  anchor: str | None = None) -> str:
     text = path.read_text(encoding="utf-8")
     if begin in text:
         pattern = re.compile(re.escape(begin) + ".*?" + re.escape(end), re.DOTALL)
@@ -819,27 +914,32 @@ def replace_region(path: Path, begin: str, end: str, payload: str,
         if anchor not in text:
             raise SystemExit(f"anchor not found in {path}")
         text = text.replace(anchor, payload + "\n\n" + anchor)
-    path.write_text(text, encoding="utf-8", newline="\n")
+    return text
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--check', action='store_true', help='check generated files without writing')
+    args = parser.parse_args()
     n_batch = 2 * len(FAMILIES)
     n_dev = len(DEVICE_FAMILIES)
     n_host = sum(1 for f in FAMILIES if f.host_single)
-    replace_region(HEADER, HDR_BEGIN, HDR_END, render_header())
-    replace_region(HEADER_DEVICE, DEV_HDR_BEGIN, DEV_HDR_END,
-                   render_device_header(),
-                   anchor="#ifdef __cplusplus\n}\n#endif")
-    IMPL_INC.write_text(signature("c") + render_impl(),
-                        encoding="utf-8", newline="\n")
-    DEVICE_IMPL_INC.write_text(signature("c") + render_device_impl(),
-                               encoding="utf-8", newline="\n")
-    DEVICE_INCLUDES_INC.write_text(signature("c") + render_device_includes(),
-                                   encoding="utf-8", newline="\n")
-    NODE_OUT.write_text(signature("//") + render_node(),
-                        encoding="utf-8", newline="\n")
-    CSHARP_OUT.write_text(signature("//") + render_csharp(),
-                          encoding="utf-8", newline="\n")
+    payloads = {
+        HEADER: render_region(HEADER, HDR_BEGIN, HDR_END, render_header()),
+        HEADER_DEVICE: render_region(HEADER_DEVICE, DEV_HDR_BEGIN, DEV_HDR_END,
+                                     render_device_header(), anchor="#ifdef __cplusplus\n}\n#endif"),
+        IMPL_INC: signature('c') + render_impl(), DEVICE_IMPL_INC: signature('c') + render_device_impl(),
+        DEVICE_INCLUDES_INC: signature('c') + render_device_includes(), NODE_OUT: signature('//') + render_node(),
+        CSHARP_OUT: signature('//') + render_csharp(),
+    }
+    stale = [p for p, text in payloads.items() if not p.exists() or p.read_text(encoding='utf-8') != text]
+    if args.check:
+        if stale:
+            raise SystemExit('Generated batch files are stale: ' + ', '.join(str(p) for p in stale))
+        print('Batch API generated files: current')
+        return
+    for path in stale:
+        path.write_text(payloads[path], encoding='utf-8', newline='\n')
     print(f"generated {len(FAMILIES)} batch families ({n_batch} symbols), "
           f"{n_dev} device wrappers, {n_host} host single entries")
     print(f"  header       : {HEADER}")
