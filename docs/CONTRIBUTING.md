@@ -9,20 +9,49 @@ workflow; the hard gates a change must pass are the same ones CI enforces.
 git clone https://github.com/Ta-Cuda/tacuda.git
 cd tacuda
 
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r tests/requirements-reference.txt
+python benchmarks/talib_reference.py
+
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON \
+  -DPython3_EXECUTABLE="$VIRTUAL_ENV/bin/python" \
+  -DTACUDA_STREAM_FAULT_INJECTION=ON -DTACUDA_ENABLE_ASAN_TEST=ON
 cmake --build build -j
 ctest --test-dir build --output-on-failure
 ```
 
-Windows: `scripts\build_win_dll.bat` (MSVC + Ninja; set `CUDA_PATH` first).
+The reference check must print `PASS pinned TA-Lib Python/native 0.8.3;
+237 functions`. This is a test dependency, not a runtime dependency of the
+shipped library. With `BUILD_TESTING=ON`, CMake checks it before compiling
+the suite and reports the selected interpreter and install command if it
+is missing or outdated. A library-only build can use `-DBUILD_TESTING=OFF`.
+
+On Windows, create the venv with `py -m venv .venv`, activate it with
+`.venv\Scripts\Activate.ps1`, and pass
+`-DPython3_EXECUTABLE="$env:VIRTUAL_ENV\Scripts\python.exe"` to CMake.
+`scripts\build_win_dll.bat` builds the library without tests (MSVC + Ninja;
+set `CUDA_PATH` first).
 The default configuration also builds the `tacuda-opt` optimizer and
 `example_app` — keep them compiling.
 
-Install `tests/requirements-reference.txt` into an isolated Python environment
-before configuring CMake. With an NVIDIA GPU and the pinned native/Python
-TA-Lib 0.8.3 oracle installed, run the
-strict differential corpus — it is the source of truth for every
-compatibility claim:
+Changing or activating a venv after compilation does not change the Python
+executable embedded in `test_basic`. Re-run CMake with the new
+`Python3_EXECUTABLE`, then rebuild. An error showing `0.6.8/0.6.4, 158 functions`
+means the selected Python is using an older oracle; the numerical comparison
+has not run yet. Do not remove the version/catalog check to make it pass.
+
+CTest sets the checkout's `bindings/python` path for its Python tests, so it
+does not require a shell-level `PYTHONPATH` or an installed `tacuda` package.
+The no-memory-pool hardware case skips on GPUs that support pools; Linux also
+executes that branch through the capability-shim tests. The optimizer's
+optional C TA-Lib backend skips if its shared library is unavailable. To test
+that backend, set `TACUDA_OPT_TALIB` to the standalone TA-Lib shared library;
+installing the Python oracle does not necessarily supply that C library.
+
+For scripts run directly, use the environment below. With an NVIDIA GPU and
+the pinned oracle installed, run the strict differential corpus — it is the
+source of truth for every compatibility claim:
 
 ```bash
 export TACUDA_LIBRARY=$PWD/build/libtacuda.so
@@ -34,8 +63,16 @@ Binding pipelines:
 
 ```bash
 python bindings/python/test_pipeline.py
-node bindings/nodejs/test_pipeline.js          # npm install first
-dotnet run --project bindings/csharp/ConsoleExample -c Release -- --test
+npm ci --prefix bindings/nodejs --no-audit --no-fund
+node bindings/nodejs/test_pipeline.js
+node tests/node/talib08_typed.js
+
+# Linux: make the source-built native available to both managed consumers.
+export LD_LIBRARY_PATH="$PWD/build${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+dotnet run --project bindings/csharp/ConsoleExample -c Release -f net8.0 -- --pipeline
+dotnet run --project bindings/csharp/ConsoleExample -c Release -f net8.0 --no-build -- --test
+dotnet run --project tests/csharp/Talib08Typed -c Release -f net8.0 \
+  -p:TargetFrameworks=net8.0 -- tests/fixtures/talib08_typed.json
 ```
 
 ## Generated code

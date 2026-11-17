@@ -299,6 +299,27 @@ target_link_libraries(example_app PRIVATE tacuda CUDA::cudart)
 if (BUILD_TESTING)
   enable_testing()
   find_package(Python3 COMPONENTS Interpreter REQUIRED)
+  # Every numerical oracle uses this interpreter, including the C++ helpers.
+  # Reject a missing/stale reference once, before compiling the test suite.
+  execute_process(
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/talib_reference.py"
+    RESULT_VARIABLE TACUDA_REFERENCE_STATUS
+    OUTPUT_VARIABLE TACUDA_REFERENCE_OUTPUT
+    ERROR_VARIABLE TACUDA_REFERENCE_ERROR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_STRIP_TRAILING_WHITESPACE)
+  if (NOT TACUDA_REFERENCE_STATUS STREQUAL "0")
+    message(FATAL_ERROR
+      "Correctness tests require the pinned TA-Lib Python/native 0.8.3 reference (237 functions).\n"
+      "Selected Python: ${Python3_EXECUTABLE}\n"
+      "Install the test dependencies with this interpreter:\n"
+      "  \"${Python3_EXECUTABLE}\" -m pip install -r \"${CMAKE_CURRENT_SOURCE_DIR}/tests/requirements-reference.txt\"\n"
+      "Or select a prepared environment with -DPython3_EXECUTABLE=<venv-python>, then reconfigure and rebuild.\n"
+      "For a library-only build, use -DBUILD_TESTING=OFF.\n"
+      "${TACUDA_REFERENCE_OUTPUT}\n${TACUDA_REFERENCE_ERROR}")
+  endif()
+  message(STATUS "Test Python: ${Python3_EXECUTABLE}")
+  message(STATUS "${TACUDA_REFERENCE_OUTPUT}")
   include(FetchContent)
   FetchContent_Declare(
     googletest
@@ -369,6 +390,8 @@ if (BUILD_TESTING)
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/scripts/check_release.py)
   add_test(NAME python_contract
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/test_python_contract.py)
+  add_test(NAME release_tools
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/test_release_tools.py)
   add_test(NAME talib083_reference
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/benchmarks/talib_reference.py)
   add_test(NAME talib083_generated
@@ -426,6 +449,12 @@ if (BUILD_TESTING)
   if (TACUDA_ENABLE_ASAN_TEST)
     add_test(NAME stream_lifetime_sanitizer COMMAND stream_lifetime_sanitizer)
   endif()
+  # Test the checkout's bindings even when Python has another tacuda installed.
+  # CTest must also work without a caller-provided PYTHONPATH (as in the quick
+  # build instructions). CMake uses the correct path separator on each OS.
+  get_property(TACUDA_ROOT_TESTS DIRECTORY PROPERTY TESTS)
+  set_property(TEST ${TACUDA_ROOT_TESTS} APPEND PROPERTY ENVIRONMENT_MODIFICATION
+    "PYTHONPATH=path_list_prepend:${CMAKE_CURRENT_SOURCE_DIR}/bindings/python")
 endif()
 
 # Strategy optimizer tool (tools/optimizer, target: tacuda-opt)

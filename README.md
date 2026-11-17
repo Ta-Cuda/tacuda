@@ -121,7 +121,7 @@ with tacuda.stream.Rsi(14) as rsi:
 
 | Component | Version | Notes |
 |-----------|---------|-------|
-| **NVIDIA GPU** | Compute ≥ 7.5 for prebuilt binaries | Turing or newer; older GPUs (CC 6.0–7.0) work when building from source with `-DCMAKE_CUDA_ARCHITECTURES=<arch>` |
+| **NVIDIA GPU** | Compute ≥ 6.0 | The 0.9.1 prebuilt binaries include SM60/61/70/75/80/86/89/90; source builds can select architectures with `-DTACUDA_CUDA_ARCHITECTURES=<arch>` |
 | **CUDA Toolkit** | 11.x / 12.x | 12.x recommended |
 | **CMake** | ≥ 3.22 | |
 | **Compiler** | C++17 | GCC, Clang, or MSVC |
@@ -137,7 +137,7 @@ git clone https://github.com/Ta-Cuda/tacuda.git
 cd tacuda
 
 # Build core library
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
 cmake --build build -j$(nproc)
 
 # Run example
@@ -492,16 +492,25 @@ python benchmarks/benchmark_ema_vs_talib.py
 ## 🧪 Testing & Quality
 
 ```bash
-# C++ unit tests (391 tests incl. optimizer + lifetime contracts)
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+# Prepare the pinned numerical oracle before configuring tests
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r tests/requirements-reference.txt
+python benchmarks/talib_reference.py
+
+# CTest includes native, Python, optimizer and lifetime contracts
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON \
+  -DPython3_EXECUTABLE="$VIRTUAL_ENV/bin/python" \
+  -DTACUDA_STREAM_FAULT_INJECTION=ON -DTACUDA_ENABLE_ASAN_TEST=ON
 cmake --build build -j && ctest --test-dir build --output-on-failure
 
-# Strict differential corpus vs installed TA-Lib (GPU required)
+# Strict differential corpus vs pinned TA-Lib (GPU required)
 export TACUDA_LIBRARY=$PWD/build/libtacuda.so PYTHONPATH=$PWD/bindings/python
 python benchmarks/differential_corpus.py
 
 # Binding pipelines
 python bindings/python/test_pipeline.py
+npm ci --prefix bindings/nodejs --no-audit --no-fund
 node bindings/nodejs/test_pipeline.js
 dotnet run --project bindings/csharp/ConsoleExample -c Release -- --test
 
@@ -510,7 +519,7 @@ python benchmarks/run_all_benchmarks.py
 ```
 
 **Test Coverage:**
-- ✅ Numerical parity vs TA-Lib: 165/165 corpus specs over 8 datasets (random walks, trend, flat, zeros, short inputs, candle fixtures)
+- ✅ Numerical parity targets all 237 pinned TA-Lib 0.8.3 functions: 241 corpus specs over 8 datasets (random walks, trend, flat, zeros, short inputs, candle fixtures)
 - ✅ Edge cases (short inputs, NaN warm-up, zero denominators, parameter bounds)
 - ✅ Memory safety: RAII buffers, stream-ordered pool, buffer/Context lifetime tests
 - ✅ Binding coverage audit (`bindings/audit_bindings.py`, CI-gated)
@@ -596,7 +605,11 @@ git clone https://github.com/Ta-Cuda/tacuda.git
 cd tacuda
 
 # Build with tests
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r tests/requirements-reference.txt
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON \
+  -DPython3_EXECUTABLE="$VIRTUAL_ENV/bin/python"
 cmake --build build -j$(nproc)
 ctest --test-dir build --output-on-failure
 ```

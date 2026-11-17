@@ -1,0 +1,81 @@
+{
+  "date": "2026-11-17",
+  "version": "0.9.1",
+  "public_base": "416238e05baf6324fe1818d9d73a27af87aac9a7",
+  "candidate": "public base plus the accompanying test-setup changes",
+  "environment": {
+    "os": "Ubuntu 24.04.4 LTS, x86_64",
+    "gpu": "NVIDIA GeForce RTX 3090 Ti",
+    "driver": "590.48.01",
+    "cuda": "12.8.93",
+    "cuda_architectures": [86],
+    "cmake": "3.28.3",
+    "python": "3.12.3",
+    "numpy": "2.5.5",
+    "talib_python": "0.8.3",
+    "talib_native_oracle": "0.8.3",
+    "talib_functions": 237,
+    "node": "22.23.3",
+    "dotnet_sdk": "8.0.426"
+  },
+  "build_options": {
+    "BUILD_TESTING": true,
+    "TACUDA_BUILD_OPTIMIZER": true,
+    "TACUDA_STREAM_FAULT_INJECTION": true,
+    "TACUDA_ENABLE_ASAN_TEST": true
+  },
+  "baseline_ctest": {
+    "total": 524,
+    "passed": 516,
+    "failed": 6,
+    "skipped": 2,
+    "failure": "Six standalone Python corpora could not import checkout bindings without external PYTHONPATH"
+  },
+  "candidate_ctest": {
+    "total": 525,
+    "passed": 523,
+    "failed": 0,
+    "seconds": 102.89,
+    "caller_pythonpath": "unset",
+    "caller_tacuda_library": "unset",
+    "skipped": [
+      "ScratchCapture.MissingPoolsReturnUnsupportedWithoutRuntimeError",
+      "Backends.TalibMatchesReference"
+    ]
+  },
+  "additional_checks": {
+    "python_unit_tests": "24/24 passed",
+    "public_abi": "1129/1129 required declarations exported",
+    "differential_corpus": "1928/1928 cells, 241 specs, 237 functions",
+    "streaming_corpus": "839/839 passed",
+    "batch_corpus": "40686/40686 cells, all 246 families",
+    "extra_formula_corpus": "1656/1656 passed",
+    "new_function_corpus": "1544/1544 passed",
+    "typed_row_graph_contracts": "85/85 families passed",
+    "fused_matrix": "8703/8703 passed",
+    "row_invariants": "738/738 passed",
+    "long_statistics": "90/90 passed",
+    "scan_repeatability": "6/6 families passed",
+    "batch_stress_smoke": "passed, stable output and no allocation-count growth",
+    "python_pipeline": "37/37 passed",
+    "node_pipeline": "203/203 passed",
+    "node_typed_outputs": "passed",
+    "csharp_pipeline": "36/36 passed",
+    "csharp_bindings": "100/100 passed",
+    "csharp_typed_outputs": "passed",
+    "macd_memcheck": "130 host/device calls, 5 storage/compute pairs, zero Compute Sanitizer errors",
+    "optional_optimizer_c_backend": "1/1 passed separately with standalone C TA-Lib 0.6.4; the Python numerical oracle remained 0.8.3",
+    "no_memory_pools": "Linux capability-shim tests passed, including the hardware-conditional branch"
+  },
+  "configuration_regressions": {
+    "old_oracle_0_6_8_0_6_4": "baseline configuration accepted it; candidate rejects it with selected interpreter and install command",
+    "missing_oracle": "candidate rejects it before compiling tests",
+    "library_only_without_oracle": "BUILD_TESTING=OFF configuration succeeds"
+  },
+  "scope": [
+    "No indicator implementation, numerical tolerance, ABI or package version changes",
+    "Source-build validation; released packages were not rebuilt or republished",
+    "Physical Maxwell and Windows were not tested in this run",
+    "The memory-check claim is limited to tests/gpu/macd_memcheck.py"
+  ]
+}
