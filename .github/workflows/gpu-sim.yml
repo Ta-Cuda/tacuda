@@ -1,0 +1,76 @@
+name: GPU Simulator
+
+# Optional, non-required check. The hosted runners have no GPU, so this builds
+# the library and the C++ test suite and runs it on a simulated NVIDIA H100
+# (https://github.com/pantheongpu/pantheonsim). A simulator cannot reproduce
+# hardware-specific behavior or timing, so it complements the real-GPU tests
+# and does not replace them.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "src/**"
+      - "include/**"
+      - "cmake/**"
+      - "tests/cpp/**"
+      - "tests/requirements-*.txt"
+      - "tests/reference/**"
+      - "third_party/**"
+      - "benchmarks/talib_reference.py"
+      - "CMakeLists.txt"
+      - ".github/workflows/gpu-sim.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  cpp-tests:
+    name: C++ tests (CUDA 13.0 and simulated H100)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
+        with:
+          persist-credentials: false
+
+      - name: Set up the simulated GPU and CUDA toolkit
+        uses: pantheongpu/setup-pantheonsim@deff5781e8adfd83dec98dd5242dcbc96a564773 # v0.1.10
+        with:
+          gpu: nvidia/h100
+          cuda-toolkit: "13.0"
+
+      # 90-virtual embeds PTX only, which the simulator runs (the default
+      # architecture list also contains SASS entries). The simulator needs a
+      # shared CUDA runtime.
+      # The test helpers use CMake's selected Python interpreter and the
+      # reference pinned in tests/requirements-reference.txt.
+      - name: Install the TA-Lib reference
+        run: |
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install -r tests/requirements-reference.txt
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
+
+      - name: Check the TA-Lib reference
+        run: |
+          "$RUNNER_TEMP/venv/bin/python" benchmarks/talib_reference.py
+
+      - name: Configure
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DTACUDA_CUDA_ARCHITECTURES=90-virtual \
+            -DCMAKE_CUDA_RUNTIME_LIBRARY=Shared \
+            -DTACUDA_BUILD_OPTIMIZER=OFF \
+            -DPython3_EXECUTABLE="$RUNNER_TEMP/venv/bin/python"
+
+      - name: Build
+        run: cmake --build build --target test_basic -j3
+
+      - name: Test
+        run: vgpu run ./build/test_basic
