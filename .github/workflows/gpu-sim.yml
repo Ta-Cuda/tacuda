@@ -48,8 +48,8 @@ jobs:
       # 90-virtual embeds PTX only, which the simulator runs (the default
       # architecture list also contains SASS entries). The simulator needs a
       # shared CUDA runtime.
-      # The tests compare against Python TA-Lib (called through python3), pinned
-      # by the repository in tests/requirements-reference.txt.
+      # The test helpers use CMake's selected Python interpreter and the
+      # reference pinned in tests/requirements-reference.txt.
       - name: Install the TA-Lib reference
         run: |
           python3 -m venv "$RUNNER_TEMP/venv"
@@ -66,17 +66,11 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release \
             -DTACUDA_CUDA_ARCHITECTURES=90-virtual \
             -DCMAKE_CUDA_RUNTIME_LIBRARY=Shared \
-            -DTACUDA_BUILD_OPTIMIZER=OFF
+            -DTACUDA_BUILD_OPTIMIZER=OFF \
+            -DPython3_EXECUTABLE="$RUNNER_TEMP/venv/bin/python"
 
       - name: Build
         run: cmake --build build --target test_basic -j3
 
-      # The simulator launches kernels asynchronously by default. With that on,
-      # the batch tests (which destroy an event right after cudaStreamWaitEvent)
-      # intermittently read data before the producing stream has finished, so
-      # the simulator is told to launch synchronously. Test results are
-      # unchanged on hardware; this only affects the simulator's scheduling.
       - name: Test
-        env:
-          VGPU_ASYNC_LAUNCH: "0"
         run: vgpu run ./build/test_basic

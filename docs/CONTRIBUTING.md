@@ -212,3 +212,15 @@ A release still needs green hosted Windows/Linux builds, GPU reports,
 installation from the packaged artifacts, and the public tag/release.
 The website is maintained separately and must receive the version, streaming
 section, reference-version qualification and corrected benchmark baselines.
+
+## Optional GPU simulator check
+
+The `GPU Simulator` workflow runs `test_basic` on a simulated H100 using a
+hosted Linux runner, CUDA 13.0 and the pinned TA-Lib reference. It runs for
+relevant pull requests and can be started manually from Actions. It uses the
+simulator's default asynchronous scheduling and remains an optional check.
+
+This is supplementary functional coverage, with no hardware timing model.
+Physical-GPU release tests and the differential corpus remain required; the
+simulator job does not run the optimizer, all CTest guards or the binding
+pipelines.
