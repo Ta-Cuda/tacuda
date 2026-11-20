@@ -38,7 +38,7 @@ Implementation semantics (EMA seeding, warmup NaNs, indexing conventions) are do
 
 ---
 
-Previous release verification: [0.9.1 tag workflow](https://github.com/Ta-Cuda/tacuda/actions/runs/43910079980) · [GPU and package receipts](docs/validation/2026-11-16/tag-validation.json).
+[0.9.2 release workflow](https://github.com/Ta-Cuda/tacuda/actions/runs/44726352021) В· [GPU and package verification](docs/validation/2026-11-20/tag-validation.json).
 
 ## Fused batches in 0.9.0
 
