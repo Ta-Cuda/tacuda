@@ -11,7 +11,10 @@
 #include <cmath>
 
 // ============================================================================
-// Hilbert Transform Core - shared state and device functions for all HT_* indicators
+// Hilbert Transform Core - shared state and functions for all HT_* indicators.
+// The GPU kernels and the host API (utils/HilbertCPU.h) run this same code; the
+// operation order is the literal TA-Lib macro order. Keep host translation
+// units free of FMA contraction, like the --fmad=false HT kernels.
 // ============================================================================
 
 namespace tacuda {
@@ -75,7 +78,7 @@ struct HilbertState {
     double jI;
     double jQ;
     
-    __device__ void init() {
+    __host__ __device__ void init() {
         for (int i = 0; i < 3; ++i) {
             detrender_Odd[i] = 0.0;
             detrender_Even[i] = 0.0;
@@ -113,7 +116,7 @@ struct WMAState {
     double trailingWMAValue;
     int trailingWMAIdx;
     
-    __device__ void init() {
+    __host__ __device__ void init() {
         periodWMASub = 0.0;
         periodWMASum = 0.0;
         trailingWMAValue = 0.0;
@@ -122,7 +125,7 @@ struct WMAState {
 };
 
 // Initialize WMA with first 3 values
-__device__ __forceinline__ void initWMA(WMAState& wma, const float* input, int& today) {
+__host__ __device__ __forceinline__ void initWMA(WMAState& wma, const float* input, int& today) {
     double tempReal = static_cast<double>(input[today++]);
     wma.periodWMASub = tempReal;
     wma.periodWMASum = tempReal;
@@ -136,7 +139,7 @@ __device__ __forceinline__ void initWMA(WMAState& wma, const float* input, int& 
 }
 
 // Compute WMA step
-__device__ __forceinline__ double doWMAStep(WMAState& wma, const float* input, double newPrice) {
+__host__ __device__ __forceinline__ double doWMAStep(WMAState& wma, const float* input, double newPrice) {
     wma.periodWMASub += newPrice;
     wma.periodWMASub -= wma.trailingWMAValue;
     wma.periodWMASum += newPrice * 4.0;
@@ -147,7 +150,7 @@ __device__ __forceinline__ double doWMAStep(WMAState& wma, const float* input, d
 }
 
 // Process one Hilbert step (even or odd bar)
-__device__ __forceinline__ void processHilbertStep(
+__host__ __device__ __forceinline__ void processHilbertStep(
     HilbertState& hs,
     double smoothedValue,
     int today,
@@ -270,7 +273,7 @@ __device__ __forceinline__ void processHilbertStep(
 }
 
 // Update period estimation
-__device__ __forceinline__ void updatePeriod(HilbertState& hs) {
+__host__ __device__ __forceinline__ void updatePeriod(HilbertState& hs) {
     constexpr double rad2Deg = 57.29577951308232; // 180 / PI
     
     hs.Re = (0.2 * ((hs.I2 * hs.prevI2) + (hs.Q2 * hs.prevQ2))) + (0.8 * hs.Re);
@@ -300,7 +303,7 @@ __device__ __forceinline__ void updatePeriod(HilbertState& hs) {
 // top of the carried value. DCPeriodInt is intentionally not clamped and
 // the 360/smoothPeriod lag compensation is unconditional, exactly like
 // TA-Lib (smoothPeriod is never zero once the main loop has run one bar).
-__device__ __forceinline__ void updateDCPhase(
+__host__ __device__ __forceinline__ void updateDCPhase(
     const double* smoothPrice,
     int smoothPrice_Idx,
     double smoothPeriod,
@@ -316,8 +319,8 @@ __device__ __forceinline__ void updateDCPhase(
     for (int i = 0; i < DCPeriodInt; ++i) {
         double tempPrice = smoothPrice[idx];
         const int weight = DCPeriodInt * (DCPeriodInt - 1) / 2 + i;
-        realPart += phaseSin[weight] * tempPrice;
-        imagPart += phaseCos[weight] * tempPrice;
+        realPart += phase_sin(weight) * tempPrice;
+        imagPart += phase_cos(weight) * tempPrice;
         if (idx == 0)
             idx = 49; // SMOOTH_PRICE_SIZE - 1
         else

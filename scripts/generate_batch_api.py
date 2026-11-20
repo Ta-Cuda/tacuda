@@ -22,7 +22,9 @@ running this script, re-run ``bindings/generate_bindings.py`` so the ctypes /
 P-Invoke layers pick up the new symbols.
 
 Families are dispatched per-series to ``ct_*_d`` device functions via the
-generic runners in ``api_batch.cu``. Device functions that did not exist
+generic runners in ``api_batch.cu``, unless they have a fused kernel
+(``fused``) or a row-batched plan (``ROWS``) that computes the whole matrix
+in a fixed number of launches. Device functions that did not exist
 before 0.4.0 (SAR/SAREXT, MAMA, MACDFIX, STOCHRSI, TRIX, NVI/PVI, HT_*,
 APO/PPO/PVO, BOP, IMI, AVGDEV, MIDPOINT/MIDPRICE, +/-DM, MAXINDEX/MININDEX/
 MINMAX(INDEX), CHANGE, MACD_LINE, MA/MAVP, CORREL/BETA, the 63 candlestick
@@ -357,6 +359,143 @@ FAMILIES: Sequence[Family] = tuple(BASE_FAMILIES) + tuple(
     for df in DEVICE_FAMILIES
 )
 
+
+# ---------------------------------------------------------------------------
+# Row-batched legacy families (RowsPlan in api_batch.cu, docs/BATCH_API.md)
+# ---------------------------------------------------------------------------
+
+@dataclasses.dataclass(frozen=True)
+class RowsPlan:
+    """Whole-matrix execution of a legacy family with its own arithmetic.
+
+    "flat": the family's ct_*_d over the flattened matrix, in blocks of
+    whole rows. The family's kernels read only the window that ends at the
+    element they write, so elements at or past the first valid index
+    `warmup` of a row see only that row; the runner restores the elements
+    before it from the block's first row. "rows": `launcher` runs the sequential single-series state
+    machine with one GPU thread per row. `warmup` and `valid` are C++
+    expressions over the family's scalars; `valid` false keeps the
+    per-series dispatcher (and its error reporting). `long_row` overrides
+    the row length from which a flat plan needs 64 rows to pay off.
+    """
+
+    kind: str
+    warmup: str = "0"
+    valid: str = "true"
+    launcher: str = ""
+    long_row: str = ""
+
+
+def _flat(warmup: str, valid: str = "true", long_row: str = "") -> RowsPlan:
+    return RowsPlan("flat", warmup, valid, long_row=long_row)
+
+
+def _rows(launcher: str, valid: str = "true") -> RowsPlan:
+    return RowsPlan("rows", "0", valid, launcher)
+
+
+_P = "static_cast<long long>(period)"
+_P_OK = "period > 0"
+_LAG = ("momentum", "roc", "rocp", "rocr", "rocr100", "change")
+_WINDOW = ("willr", "midprice", "var", "linearreg", "linearreg_slope",
+           "linearreg_intercept", "linearreg_angle", "tsf", "minmax", "cci",
+           "avgdev", "skew", "kurtosis", "rolling_mean", "rolling_max",
+           "rolling_min", "rolling_std")
+_SMA_DIRECT = "tacuda::detail::sma_direct_window"
+_D = "tacuda::detail::"
+
+
+def _candle_warmup(cls: str) -> str:
+    """First valid index of a candlestick kernel: its `lookback` constant."""
+    src = (ROOT / "src" / "indicators" / f"{cls}.cu").read_text(encoding="utf-8")
+    found = re.findall(r"const int lookback = (\d+);", src)
+    if len(found) == 1:
+        return found[0]
+    if not found and "if (idx > 0)" in src:  # engulfing: the previous candle only
+        return "1"
+    raise SystemExit(f"cannot derive the warm-up of candlestick kernel {cls}.cu")
+
+
+ROWS = {
+    **{n: _flat("0") for n in ("typprice", "wclprice", "medprice", "avgprice", "bop")},
+    "trange": _flat("1"),
+    **{n: _flat(_P, _P_OK) for n in _LAG},
+    **{n: _flat(_P + " - 1", _P_OK) for n in _WINDOW},
+    "midpoint": _rows(_D + "midpoint_rows(in[0], out[0], seriesLen, numSeries, period, s)", _P_OK),
+    "aroon": _flat(_P, _P_OK),
+    "aroonosc": _flat(_P, _P_OK),
+    "ultosc": _flat("std::max({period1, period2, period3})",
+                    "period1 > 0 && period2 > 0 && period3 > 0"),
+    "stochf": _flat("static_cast<long long>(kPeriod) + dPeriod - 2",
+                    "kPeriod > 0 && dPeriod > 0"),
+    # SMA composites: their flattened call runs the SMA passes one after
+    # another, without the per-series stream overlap.
+    "trima": _flat(_P + " - 1",
+                   f"period > 0 && {_SMA_DIRECT}((period + 1) / 2) && "
+                   f"{_SMA_DIRECT}(period % 2 == 0 ? (period + 1) / 2 + 1 : (period + 1) / 2)",
+                   long_row="1LL << 14"),
+    "accbands": _flat(_P + " - 1", f"period > 0 && {_SMA_DIRECT}(period)",
+                      long_row="1LL << 14"),
+    "market_strength": _flat(_P, _P_OK),
+    "trendscore": _flat("static_cast<long long>(lookback) + 10", "lookback >= 0"),
+    "refdev": _flat("static_cast<long long>(smaPeriod) + sumPeriod - 2",
+                    "smaPeriod > 0 && sumPeriod > 0"),
+    "pivot_high": _flat("2LL * strength", "strength > 0"),
+    "pivot_low": _flat("2LL * strength", "strength > 0"),
+    **{name: _flat(_candle_warmup(cls)) for name, cls in CDL_PATTERNS},
+    "sar": _rows(_D + "sar_rows(in[0], in[1], out[0], seriesLen, numSeries, "
+                 "step, maxAcceleration, s)"),
+    "sarext": _rows(_D + "sarext_rows(in[0], in[1], out[0], seriesLen, numSeries, "
+                    "startValue, offsetOnReverse, accInitLong, accLong, accMaxLong, "
+                    "accInitShort, accShort, accMaxShort, s)"),
+    "sar_el": _rows(_D + "sar_el_rows(in[0], in[1], in[2], out[0], seriesLen, "
+                    "numSeries, accFact, maxAccel, s)"),
+    "maxindex": _rows(_D + "max_index_rows(in[0], out[0], seriesLen, numSeries, period, s)", _P_OK),
+    "minindex": _rows(_D + "min_index_rows(in[0], out[0], seriesLen, numSeries, period, s)", _P_OK),
+    "minmaxindex": _rows(_D + "min_max_index_rows(in[0], out[0], out[1], seriesLen, "
+                         "numSeries, period, s)", _P_OK),
+    **{name: _rows(_D + f"{name}_rows(in[0], out[0], seriesLen, numSeries, s)")
+       for name in ("ht_dcperiod", "ht_dcphase", "ht_trendline", "ht_trendmode")},
+    "ht_phasor": _rows(_D + "ht_phasor_rows(in[0], out[0], out[1], seriesLen, numSeries, s)"),
+    "ht_sine": _rows(_D + "ht_sine_rows(in[0], out[0], out[1], seriesLen, numSeries, s)"),
+    "mama": _rows(_D + "mama_rows(in[0], out[0], out[1], seriesLen, numSeries, "
+                  "fastLimit, slowLimit, s)"),
+    "macdfix": _rows(_D + "macdfix_rows(in[0], out[0], out[1], out[2], seriesLen, "
+                     "numSeries, signalPeriod, s)", "signalPeriod > 0"),
+}
+
+SHORT_ROWS = {
+    **{n.lower(): (n, 'period > 0', 'period')
+       for n in ('Dema', 'Tema', 'Trix', 'Adx', 'Dx')},
+    **{n: (f, 'period > 0', 'period') for n, f in
+       [('plus_di', 'PlusDi'), ('minus_di', 'MinusDi')]},
+    **{n: (f, f'{_D}short_float_wilder(seriesLen, period)', 'period')
+       for n, f in [('cmo', 'Cmo'), ('plus_dm', 'PlusDm'), ('minus_dm', 'MinusDm')]},
+    **{n.lower(): (n, f'period > 0 && period <= {_D}kShortWindow', 'period')
+       for n in ('Adxr', 'Beta', 'Correl')},
+    't3': ('T3', 'period >= 2', 'period, 0, 0, vFactor'),
+    'kama': ('Kama', f'period > 0 && period <= {_D}kShortWindow && fastPeriod > 0 && slowPeriod > 0',
+             'period, fastPeriod, slowPeriod'),
+    **{n: (f, 'fastPeriod > 0 && slowPeriod > 0', 'fastPeriod, slowPeriod')
+       for n, f in [('apo', 'Apo'), ('ppo', 'Ppo'), ('macd_line', 'MacdLine')]},
+    'pvo': ('Pvo', 'fastPeriod > 0 && fastPeriod < slowPeriod', 'fastPeriod, slowPeriod'),
+    'ma': ('Ma', f'period > 0 && period <= {_D}kShortWindow && maType >= 0 && maType <= 8 && '
+                 'maType != 7 && (maType != 8 || period >= 2)', 'period, maType'),
+    'stochrsi': ('StochRsi', f'rsiPeriod > 0 && kPeriod > 0 && kPeriod <= {_D}kShortWindow && '
+                            f'dPeriod > 0 && dPeriod <= {_D}kShortWindow', 'rsiPeriod, kPeriod, dPeriod'),
+    'imi': ('Imi', f'period >= 2 && period <= {_D}kShortWindow', 'period'),
+    'hpi': ('Hpi', 'factor > 0.0f && factor <= 1.0f', '0, 0, 0, factor'),
+    'xaverage': ('Xaverage', 'period > 0 && period <= seriesLen', 'period'),
+    **{n.lower(): (n, 'true', '') for n in ('Nvi', 'Pvi', 'Asi', 'Obtr', 'Wobv')},
+}
+
+_unknown_rows = sorted((set(ROWS) | set(SHORT_ROWS)) - {f.name for f in FAMILIES})
+if _unknown_rows:
+    raise SystemExit(f"row plans for unknown batch families: {_unknown_rows}")
+_double_plans = sorted(f.name for f in FAMILIES if f.name in ROWS and (f.fused or f.reference))
+if _double_plans:
+    raise SystemExit(f"families with both a row plan and a fused/reference path: {_double_plans}")
+
 # JS object keys for named (multi) outputs.
 JS_OUT_KEYS = {
     "aroon_downs": "down", "aroon_ups": "up",
@@ -635,8 +774,29 @@ def render_impl() -> str:
             out.append(f"        ins, {n_in}, outs, {n_out}, seriesLen, numSeries, maxConcurrency, stream,")
             out.append("        [&](const float* const* in, float* const* out, cudaStream_t s) {")
             out.append(f"            return {fam.d_func}({call_ins}, {call_outs}, seriesLen{scalar_args}, s);")
+            plan = ROWS.get(fam.name)
             if fam.fused:
                 out.append(f"        }}, fused_call(FusedFamily::{fam.fused}{scalar_args}));")
+            elif plan and plan.kind == "flat":
+                long_row = f", {plan.long_row}" if plan.long_row else ""
+                out.append(f"        }}, FusedCall{{}}, rows_flat({plan.valid}, {plan.warmup}{long_row}),")
+                out.append("        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {")
+                out.append(f"            return {fam.d_func}({call_ins}, {call_outs}, n{scalar_args}, s);")
+                out.append("        });")
+            elif plan:
+                out.append(f"        }}, FusedCall{{}}, rows_kernel({plan.valid}),")
+                out.append("        [&](const float* const* in, float* const* out, int, cudaStream_t s) {")
+                out.append(f"            {plan.launcher};")
+                out.append("            return CT_STATUS_SUCCESS;")
+                out.append("        });")
+            elif fam.name in SHORT_ROWS:
+                family, valid, options = SHORT_ROWS[fam.name]
+                out.append(f"        }}, FusedCall{{}}, rows_kernel(({valid}) && {_D}short_batch_shape(seriesLen, numSeries)),")
+                out.append("        [&](const float* const* in, float* const* out, int, cudaStream_t s) {")
+                out.append(f"            {_D}launch_short_rows({_D}ShortFamily::{family}, in, {n_in}, out, {n_out},"
+                           f" seriesLen, numSeries, {{{options}}}, s);")
+                out.append("            return CT_STATUS_SUCCESS;")
+                out.append("        });")
             else:
                 out.append("        });")
             out.append("}")

@@ -8,6 +8,7 @@
 #include <utils/DeviceBufferPool.h>
 #include <utils/TacudaConfig.h>
 #include <utils/AffineScan.cuh>
+#include <utils/LeadingNaN.cuh>
 #include <thrust/device_ptr.h>
 #include <utils/ThrustPolicy.cuh>
 #include <thrust/execution_policy.h>
@@ -34,8 +35,9 @@ static KAMAKernelConfig cfg = []() {
 
 struct AbsDiffFunctor {
   const float* data;
+  const int* first;
   __host__ __device__ double operator()(int i) const {
-    if (i <= 0) return 0.0;
+    if (i <= *first) return 0.0;
     double cur = static_cast<double>(data[i]);
     double prev = static_cast<double>(data[i - 1]);
     double d = cur - prev;
@@ -50,11 +52,11 @@ __global__ void kamaComputeScKernel(const float* __restrict__ input,
                                     int period,
                                     int size,
                                     float fastSC,
-                                    float slowSC) {
+                                    float slowSC, const int* first) {
   int i = blockIdx.x * blockDim.x + threadIdx.x;
   if (i < size) {
     float sc = 0.0f;
-    if (i >= period) {
+    if (i - period >= *first) {
       // TA-Lib efficiency ratio: signed periodROC; er forced to 1 when the
       // volatility sum is <= the signed direction or (almost) zero
       // (TA_IS_ZERO uses 1e-8).
@@ -92,11 +94,11 @@ __global__ void kamaBuildPairsFromScKernel(const float* __restrict__ input,
                                            const float* __restrict__ scBuf,
                                            double2* __restrict__ pairs,
                                            int period,
-                                           int size) {
+                                           int size, const int* first) {
   int j = blockIdx.x * blockDim.x + threadIdx.x;
   int tailLen = size - (period - 1);
   if (j >= tailLen) return;
-  if (j == 0) { pairs[0] = make_double2(1.0, 0.0); return; }
+  if (j <= *first) { pairs[j] = make_double2(1.0, 0.0); return; }
   int i = (period - 1) + j;
   double sc = static_cast<double>(scBuf[i]);
   double a = 1.0 - sc;
@@ -146,12 +148,12 @@ __global__ void kamaFinalizeFromPairsKernel(const double2* __restrict__ pairs,
                                             float* __restrict__ output,
                                             const float* __restrict__ input,
                                             int period,
-                                            int size) {
+                                            int size, const int* first) {
   int j = blockIdx.x * blockDim.x + threadIdx.x;
   int tailLen = size - (period - 1);
   if (j >= tailLen) return;
-  if (j == 0) return; // keep output[period-1] as NaN for parity
-  const float y0 = input[period - 1];
+  if (j <= *first) return;
+  const float y0 = input[*first + period - 1];
   double2 t = pairs[j];
   double y = t.x * static_cast<double>(y0) + t.y;
   int outIdx = (period - 1) + j;
@@ -180,11 +182,14 @@ void KAMA::calculate(const float *input, float *output,
   // Initialize output with NaNs so warmup remain NaN
   CUDA_CHECK(cudaMemsetAsync(output, 0xFF, size * sizeof(float), stream));
 
+  auto first = acquireDeviceBufferAsync<int>(1, stream);
+  detail::launch_leading_nan_count(input, size, first.get(), stream);
+
   // Fused build of prefix |Δ| via transform iterator
   auto absPrefix = acquireDeviceBufferAsync<double>(size, stream);
   {
     thrust::counting_iterator<int> begin(0), end(size);
-    AbsDiffFunctor f{input};
+    AbsDiffFunctor f{input, first.get()};
     auto it = thrust::make_transform_iterator(begin, f);
     thrust::inclusive_scan(tacuda::detail::thrust_on(stream), it, it + size, thrust::device_pointer_cast(absPrefix.get()));
   }
@@ -199,11 +204,11 @@ void KAMA::calculate(const float *input, float *output,
   // (blockSize, warpThreshold].)
   if (tailLen <= cfg.blockSize) {
     auto scBuf = acquireDeviceBufferAsync<float>(size, stream);
-    kamaComputeScKernel<<<defaultGrid(size), defaultBlock(), 0, stream>>>(input, absPrefix.get(), scBuf.get(), period, size, fastSC, slowSC);
+    kamaComputeScKernel<<<defaultGrid(size), defaultBlock(), 0, stream>>>(input, absPrefix.get(), scBuf.get(), period, size, fastSC, slowSC, first.get());
     CUDA_CHECK(cudaGetLastError());
 
     auto pairs = acquireDeviceBufferAsync<double2>(tailLen, stream);
-    kamaBuildPairsFromScKernel<<<defaultGrid(tailLen), defaultBlock(), 0, stream>>>(input, scBuf.get(), pairs.get(), period, size);
+    kamaBuildPairsFromScKernel<<<defaultGrid(tailLen), defaultBlock(), 0, stream>>>(input, scBuf.get(), pairs.get(), period, size, first.get());
     CUDA_CHECK(cudaGetLastError());
 
     int blockSize = cfg.blockSize;
@@ -212,18 +217,18 @@ void KAMA::calculate(const float *input, float *output,
     kamaBlockScanKernel<<<gridSize, blockSize, shm, stream>>>(pairs.get(), pairs.get(), nullptr, tailLen);
     CUDA_CHECK(cudaGetLastError());
 
-    kamaFinalizeFromPairsKernel<<<defaultGrid(tailLen), defaultBlock(), 0, stream>>>(pairs.get(), output, input, period, size);
+    kamaFinalizeFromPairsKernel<<<defaultGrid(tailLen), defaultBlock(), 0, stream>>>(pairs.get(), output, input, period, size, first.get());
     CUDA_CHECK(cudaGetLastError());
     return;
   }
 
   // Larger tails: segmented block scan + block prefix scan (reduces thrust to small array)
   auto scBuf = acquireDeviceBufferAsync<float>(size, stream);
-  kamaComputeScKernel<<<defaultGrid(size), defaultBlock(), 0, stream>>>(input, absPrefix.get(), scBuf.get(), period, size, fastSC, slowSC);
+  kamaComputeScKernel<<<defaultGrid(size), defaultBlock(), 0, stream>>>(input, absPrefix.get(), scBuf.get(), period, size, fastSC, slowSC, first.get());
   CUDA_CHECK(cudaGetLastError());
 
   auto pairs = acquireDeviceBufferAsync<double2>(tailLen, stream);
-  kamaBuildPairsFromScKernel<<<defaultGrid(tailLen), defaultBlock(), 0, stream>>>(input, scBuf.get(), pairs.get(), period, size);
+  kamaBuildPairsFromScKernel<<<defaultGrid(tailLen), defaultBlock(), 0, stream>>>(input, scBuf.get(), pairs.get(), period, size, first.get());
   CUDA_CHECK(cudaGetLastError());
 
   int blockSize = cfg.blockSize;
@@ -245,7 +250,7 @@ void KAMA::calculate(const float *input, float *output,
   CUDA_CHECK(cudaGetLastError());
 
   // Finalize values
-  kamaFinalizeFromPairsKernel<<<defaultGrid(tailLen), defaultBlock(), 0, stream>>>(pairs.get(), output, input, period, size);
+  kamaFinalizeFromPairsKernel<<<defaultGrid(tailLen), defaultBlock(), 0, stream>>>(pairs.get(), output, input, period, size, first.get());
   CUDA_CHECK(cudaGetLastError());
 }
 

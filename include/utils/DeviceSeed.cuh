@@ -32,10 +32,16 @@ namespace detail {
 template <typename T>
 __global__ void seedSumKernel(const T* __restrict__ x, int begin, int count,
                               double divisor, double* __restrict__ seedOut,
-                              float* __restrict__ y, int yIdx) {
+                              float* __restrict__ y, int yIdx,
+                              const int* first, int size) {
+    const int offset = first ? *first : 0;
+    if (first && (size - begin < count || offset > size - begin - count)) {
+        if (threadIdx.x == 0) *seedOut = nan("");
+        return;
+    }
     double s = 0.0;
     for (int i = threadIdx.x; i < count; i += warpSize) {
-        s += static_cast<double>(x[begin + i]);
+        s += static_cast<double>(x[offset + begin + i]);
     }
     for (int offset = warpSize / 2; offset > 0; offset >>= 1) {
         s += __shfl_down_sync(0xffffffffu, s, offset);
@@ -43,14 +49,14 @@ __global__ void seedSumKernel(const T* __restrict__ x, int begin, int count,
     if (threadIdx.x == 0) {
         const double seed = s / divisor;
         *seedOut = seed;
-        if (y) y[yIdx] = static_cast<float>(seed);
+        if (y) y[offset + yIdx] = static_cast<float>(seed);
     }
 }
 
 inline void launch_seed_sum(const float* x, int begin, int count, double divisor,
                             double* seedOut, float* y, int yIdx,
-                            cudaStream_t stream) {
-    seedSumKernel<float><<<1, 32, 0, stream>>>(x, begin, count, divisor, seedOut, y, yIdx);
+                            cudaStream_t stream, const int* first = nullptr, int size = 0) {
+    seedSumKernel<float><<<1, 32, 0, stream>>>(x, begin, count, divisor, seedOut, y, yIdx, first, size);
     CUDA_CHECK(cudaGetLastError());
 }
 

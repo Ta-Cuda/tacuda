@@ -246,13 +246,30 @@ def _scalar_ctype(name: str) -> Any:
         raise KeyError(f"Unsupported scalar type '{name}' in tacuda bindings") from exc
 
 
+# 0 is the legacy default stream, 1 cudaStreamLegacy, 2 cudaStreamPerThread.
+# Any other stream handle is a pointer, and neither Linux nor Windows maps the
+# lowest 64 KiB, so a smaller integer is a misplaced scalar. The usual case is
+# a TA-Lib-style positional MA type, as in apo(x, 12, 26, matype): stream is
+# the fourth parameter there, and the driver would dereference the number.
+_SPECIAL_STREAMS = (0, 1, 2)
+_MIN_STREAM_POINTER = 0x10000
+
+
 def _prepare_stream(value: Any) -> ctypes.c_void_p:
     if value is None:
         return ctypes.c_void_p(0)
     if isinstance(value, ctypes.c_void_p):
         return value
+    if isinstance(value, bool):
+        raise TypeError("Stream parameters must be integers or ctypes.c_void_p instances, not bool")
     if isinstance(value, int):
-        return ctypes.c_void_p(value)
+        if value in _SPECIAL_STREAMS or value >= _MIN_STREAM_POINTER:
+            return ctypes.c_void_p(value)
+        raise ValueError(
+            f"stream={value} is not a CUDA stream handle: pass None, 0, 1 (cudaStreamLegacy), "
+            "2 (cudaStreamPerThread) or a stream pointer. Indicator scalars precede the "
+            "stream; select an MA type with the *_ma variant (for example apo_ma)."
+        )
     raise TypeError("Stream parameters must be integers or ctypes.c_void_p instances")
 
 

@@ -7,16 +7,34 @@
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
 #include <utils/AffineScan.cuh>
-#include <thrust/device_ptr.h>
-#include <utils/ThrustPolicy.cuh>
-#include <thrust/execution_policy.h>
-#include <thrust/scan.h>
+#include <utils/LeadingNaN.cuh>
 #include <stdexcept>
 
 namespace {
 
 using Affine2 = tacuda::detail::AffineTransform2<float>;
 using AffineCompose2 = tacuda::detail::AffineCompose2<float>;
+
+struct CmoSeed {
+    int index;
+    float gain;
+    float loss;
+};
+
+__global__ void cmoSeedKernel(const float* input, const float* gains, const float* losses,
+                              CmoSeed* seed, int period, int size) {
+    const int first = tacuda::detail::leading_nan_count(input, size);
+    if (period >= size - first) {
+        *seed = {size, 0.0f, 0.0f};
+        return;
+    }
+    double gain = 0.0, loss = 0.0;
+    for (int i = first + 1; i <= first + period; ++i) {
+        gain += gains[i];
+        loss += losses[i];
+    }
+    *seed = {first + period, static_cast<float>(gain / period), static_cast<float>(loss / period)};
+}
 
 // Build per-step gains/losses in float
 __global__ void cmoBuildGainLoss(const float* __restrict__ input,
@@ -39,13 +57,13 @@ __global__ void cmoBuildGainLoss(const float* __restrict__ input,
 __global__ void cmoBuildTransformsKernel(const float* __restrict__ gains,
                                           const float* __restrict__ losses,
                                           Affine2* __restrict__ transforms,
-                                          int period, int size) {
+                                          int period, int size, const CmoSeed* seed) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx >= size) return;
 
     float invP = 1.0f / static_cast<float>(period);
     Affine2 v;
-    if (idx <= period) {
+    if (idx <= seed->index) {
         // Identity before and at seed index
         v.A = 1.0f; v.bG = 0.0f; v.bL = 0.0f;
     } else {
@@ -57,24 +75,20 @@ __global__ void cmoBuildTransformsKernel(const float* __restrict__ gains,
     transforms[idx] = v;
 }
 
-// Compute seed averages from prefix sums and produce final CMO values
 __global__ void cmoFinalizeKernel(const Affine2* __restrict__ prefix,
-                                   const float* __restrict__ gainPrefix,
-                                   const float* __restrict__ lossPrefix,
+                                   const CmoSeed* __restrict__ seed,
                                    float* __restrict__ output,
-                                   int period, int size) {
+                                   int size) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     if (idx >= size) return;
 
-    if (idx < period) {
+    if (idx < seed->index) {
         output[idx] = nanf("");
     } else {
-        // Seed = average of gains/losses from indices [1..period]
-        float avgG0 = (gainPrefix[period] - gainPrefix[0]) / static_cast<float>(period);
-        float avgL0 = (lossPrefix[period] - lossPrefix[0]) / static_cast<float>(period);
-
+        const float avgG0 = seed->gain;
+        const float avgL0 = seed->loss;
         float avgG, avgL;
-        if (idx == period) {
+        if (idx == seed->index) {
             avgG = avgG0;
             avgL = avgL0;
         } else {
@@ -101,52 +115,21 @@ void tacuda::CMO::calculate(const float* input, float* output, int size, cudaStr
         CUDA_CHECK(cudaMemsetAsync(output, 0xFF, static_cast<size_t>(size) * sizeof(float), stream));
         return;
     }
-    CUDA_CHECK(cudaMemsetAsync(output, 0xFF, size * sizeof(float), stream));
-
-    // 1) Build gains/losses arrays
     auto gains = acquireDeviceBufferAsync<float>(size, stream);
     auto losses = acquireDeviceBufferAsync<float>(size, stream);
-    {
-        dim3 block = defaultBlock();
-        dim3 grid = defaultGrid(size);
-        cmoBuildGainLoss<<<grid, block, 0, stream>>>(input, gains.get(), losses.get(), size);
-        CUDA_CHECK(cudaGetLastError());
-    }
-
-    // 2) Inclusive prefix sums for seed computation
-    {
-        thrust::device_ptr<float> gPtr(gains.get());
-        thrust::device_ptr<float> lPtr(losses.get());
-        // Make copies for prefix sums since we need originals for transforms
-        auto gainPfx = acquireDeviceBufferAsync<float>(size, stream);
-        auto lossPfx = acquireDeviceBufferAsync<float>(size, stream);
-        thrust::inclusive_scan(tacuda::detail::thrust_on(stream), gPtr, gPtr + size,
-                               thrust::device_pointer_cast(gainPfx.get()));
-        thrust::inclusive_scan(tacuda::detail::thrust_on(stream), lPtr, lPtr + size,
-                               thrust::device_pointer_cast(lossPfx.get()));
-
-        // 3) Build affine transforms
-        auto transforms = acquireDeviceBufferAsync<Affine2>(size, stream);
-        auto prefix = acquireDeviceBufferAsync<Affine2>(size, stream);
-        {
-            dim3 block = defaultBlock();
-            dim3 grid = defaultGrid(size);
-            cmoBuildTransformsKernel<<<grid, block, 0, stream>>>(
-                gains.get(), losses.get(), transforms.get(), period, size);
-            CUDA_CHECK(cudaGetLastError());
-        }
-
-        // 4) Parallel affine scan
-        tacuda::detail::affine_inclusive_scan<Affine2, AffineCompose2>(
-            transforms.get(), prefix.get(), size, stream);
-
-        // 5) Finalize CMO values
-        {
-            dim3 block = defaultBlock();
-            dim3 grid = defaultGrid(size);
-            cmoFinalizeKernel<<<grid, block, 0, stream>>>(
-                prefix.get(), gainPfx.get(), lossPfx.get(), output, period, size);
-            CUDA_CHECK(cudaGetLastError());
-        }
-    }
+    auto seed = acquireDeviceBufferAsync<CmoSeed>(1, stream);
+    auto transforms = acquireDeviceBufferAsync<Affine2>(size, stream);
+    const dim3 block = defaultBlock();
+    const dim3 grid = defaultGrid(size);
+    cmoBuildGainLoss<<<grid, block, 0, stream>>>(input, gains.get(), losses.get(), size);
+    CUDA_CHECK(cudaGetLastError());
+    cmoSeedKernel<<<1, 1, 0, stream>>>(input, gains.get(), losses.get(), seed.get(), period, size);
+    CUDA_CHECK(cudaGetLastError());
+    cmoBuildTransformsKernel<<<grid, block, 0, stream>>>(
+        gains.get(), losses.get(), transforms.get(), period, size, seed.get());
+    CUDA_CHECK(cudaGetLastError());
+    tacuda::detail::affine_inclusive_scan<Affine2, AffineCompose2>(
+        transforms.get(), transforms.get(), size, stream);
+    cmoFinalizeKernel<<<grid, block, 0, stream>>>(transforms.get(), seed.get(), output, size);
+    CUDA_CHECK(cudaGetLastError());
 }

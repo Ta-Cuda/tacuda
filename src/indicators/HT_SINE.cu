@@ -4,6 +4,7 @@
 /*  SPDX-License-Identifier: Apache-2.0                                     */
 /* ======================================================================== */
 #include <indicators/HT_SINE.h>
+#include <utils/BatchRows.h>
 #include <utils/CudaUtils.h>
 #include <utils/HilbertCore.h>
 #include <cuda_runtime.h>
@@ -13,20 +14,16 @@ using namespace tacuda::hilbert;
 
 // Single-threaded GPU kernel
 // Output: [sine[0..size-1], leadSine[0..size-1]]
-__global__ void htSineKernel(
+__device__ __forceinline__ void ht_sine_row(
     const float* __restrict__ input,
-    float* __restrict__ output,
+    float* __restrict__ outSine,
+    float* __restrict__ outLeadSine,
     int size
 ) {
-    if (blockIdx.x != 0 || threadIdx.x != 0) return;
-    
     const int lookbackTotal = 63;
     if (size <= lookbackTotal) return;
     
     constexpr double deg2Rad = 0.017453292519943295; // PI / 180
-    
-    float* outSine = output;
-    float* outLeadSine = output + size;
     
     // Initialize state
     HilbertState hs;
@@ -82,6 +79,35 @@ __global__ void htSineKernel(
             smoothPrice_Idx = 0;
         today++;
     }
+}
+
+__global__ void htSineKernel(
+    const float* __restrict__ input,
+    float* __restrict__ output,
+    int size
+) {
+    if (blockIdx.x != 0 || threadIdx.x != 0) return;
+    ht_sine_row(input, output, output + size, size);
+}
+
+// Batch path: the same single-series state machine, one GPU thread per row.
+__global__ void htSineRowsKernel(const float* __restrict__ input, float* __restrict__ outSine, float* __restrict__ outLeadSine, int length, int series) {
+    for (size_t r = static_cast<size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+         r < static_cast<size_t>(series);
+         r += static_cast<size_t>(gridDim.x) * blockDim.x) {
+        const size_t off = r * static_cast<size_t>(length);
+        ht_sine_row(input + off, outSine + off, outLeadSine + off, length);
+    }
+}
+
+void tacuda::detail::ht_sine_rows(const float* in, float* sine, float* leadSine, int length, int series,
+        cudaStream_t stream) {
+    if (length <= 0 || series <= 0) return;
+    const size_t bytes = static_cast<size_t>(length) * series * sizeof(float);
+    CUDA_CHECK(cudaMemsetAsync(sine, 0xFF, bytes, stream));
+    CUDA_CHECK(cudaMemsetAsync(leadSine, 0xFF, bytes, stream));
+    htSineRowsKernel<<<row_blocks(series), kRowThreads, 0, stream>>>(in, sine, leadSine, length, series);
+    CUDA_CHECK(cudaGetLastError());
 }
 
 void tacuda::HT_SINE::calculate(const float* input, float* output, int size, cudaStream_t stream) noexcept(false) {

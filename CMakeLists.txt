@@ -222,6 +222,8 @@ add_library(tacuda SHARED
     src/api/api_batch.cu
     src/compat/Talib08.cu
     src/api/BatchFused.cu
+    src/api/BatchRows.cu
+    src/api/BatchShort.cu
     src/api/api_stream.cpp
     src/api/api_stream_batch.cu
     src/utils/DeviceBufferPool.cu
@@ -288,6 +290,12 @@ set_source_files_properties(src/api/BatchFused.cu
     src/indicators/HT_PHASOR.cu src/indicators/HT_SINE.cu
     src/indicators/HT_TRENDLINE.cu src/indicators/HT_TRENDMODE.cu
     PROPERTIES COMPILE_OPTIONS "--fmad=false")
+# The host HT_* API in api.cpp runs the same Hilbert core (utils/HilbertCore.h).
+# GCC and Clang contract by default when the target has FMA (-march=native,
+# AArch64); MSVC 2022 does not contract under /fp:precise.
+if (NOT MSVC)
+  set_source_files_properties(src/api/api.cpp PROPERTIES COMPILE_OPTIONS "-ffp-contract=off")
+endif()
 
 add_executable(example_app src/main.cpp)
 target_compile_features(example_app PRIVATE cxx_std_17)
@@ -417,6 +425,12 @@ if (BUILD_TESTING)
   add_test(NAME batch_fused
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/batch_fused.py
             --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR})
+  # Row-batched legacy families: whole-matrix execution, bit-identical to
+  # the per-series dispatcher and to single-series calls.
+  add_test(NAME batch_rows
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/batch_rows.py
+            --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR}
+            --json ${CMAKE_CURRENT_BINARY_DIR}/batch_rows.json)
   if (TARGET tacuda_no_memory_pools)
     add_test(NAME batch_graph_capture_without_memory_pools
       COMMAND ${CMAKE_COMMAND} -E env
@@ -428,10 +442,35 @@ if (BUILD_TESTING)
               "LD_PRELOAD=$<TARGET_FILE:tacuda_no_memory_pools>:$<TARGET_FILE:CUDA::cudart>"
               ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/batch_fused.py
               --graph-only --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR})
+    add_test(NAME batch_rows_without_memory_pools
+      COMMAND ${CMAKE_COMMAND} -E env
+              "LD_PRELOAD=$<TARGET_FILE:tacuda_no_memory_pools>:$<TARGET_FILE:CUDA::cudart>"
+              ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/batch_rows.py
+              --quick --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR})
   endif()
   add_test(NAME scan_determinism
     COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/scan_determinism.py
             --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR})
+  add_test(NAME indicator_nan_contract
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/indicator_nan_contract.py
+            --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR})
+  # Host HT_* results must not depend on the math library's FMA dispatch: the
+  # test runs itself with and without FMA in libm and skips (77) when the
+  # setting changes nothing on the host CPU.
+  add_test(NAME hilbert_libm_fma
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/hilbert_libm_fma.py
+            --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR})
+  set_tests_properties(hilbert_libm_fma PROPERTIES SKIP_RETURN_CODE 77)
+  add_test(NAME batch_short
+    COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/batch_short.py
+            --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR})
+  if (TARGET tacuda_no_memory_pools)
+    add_test(NAME batch_short_without_memory_pools
+      COMMAND ${CMAKE_COMMAND} -E env
+              "LD_PRELOAD=$<TARGET_FILE:tacuda_no_memory_pools>:$<TARGET_FILE:CUDA::cudart>"
+              ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tests/python/batch_short.py
+              --graph-only --lib $<TARGET_FILE:tacuda> --cudart-dir ${TACUDA_CUDART_DIR})
+  endif()
   # Independent mathematical oracles for device/batch paths. Graph-vs-eager
   # equality alone cannot detect an error shared by both executions.
   foreach(audit IN ITEMS batch_indicator_corpus extra_indicator_corpus batch_fused_matrix

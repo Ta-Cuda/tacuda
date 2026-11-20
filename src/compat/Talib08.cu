@@ -21,15 +21,35 @@ namespace tacuda { namespace talib08 {
 
 namespace {
 constexpr size_t kScratchBudget = 256u << 20;
-constexpr size_t kDoublesPerBar = 64;
 static_assert(sizeof(int) == 4, "TA integer outputs require signed 32-bit storage");
 
 struct Columns { const float* in[6] = {}; void* out[4] = {}; };
 
+size_t worker_bytes(Info info, int length, const Params& params) {
+    int ints = info.scratchInts;
+    for (int j = 0; j < info.outputs; ++j) ints += (info.integerMask >> j) & 1;
+    const int doubles = info.inputs + info.outputs + info.scratchDoubles
+                        - (ints - info.scratchInts);
+    // Each allocation adds a header and can introduce up to 15 padding bytes.
+    const size_t perAllocation = sizeof(ref::Arena::Block) + 16;
+    size_t bytes = static_cast<size_t>(length) * (doubles * sizeof(double) + ints * sizeof(int));
+    bytes += (doubles + ints + info.periodBuckets) * perAllocation;
+    if (info.periodBuckets) {
+        // MAVP clamps data-derived periods to its validated min/max scalars.
+        const int lo = static_cast<int>(params.value[0]);
+        const int hi = static_cast<int>(params.value[1]);
+        const int span = (hi == TA_INTEGER_DEFAULT ? 30 : hi)
+                       - (lo == TA_INTEGER_DEFAULT ? 2 : lo) + 2;
+        bytes += static_cast<size_t>(std::max(0, span)) * sizeof(int) * info.periodBuckets;
+    }
+    return (bytes + 15) & ~size_t(15);
+}
+
 __global__ void calculate(Function function, Columns columns, Params params,
                            int length, int series, Info info,
-                           unsigned char* workspace, size_t stride, int workers) {
-    const int worker = blockIdx.x * blockDim.x + threadIdx.x;
+                           unsigned char* workspace, size_t stride, int workers,
+                           bool spreadWorkers) {
+    const int worker = spreadWorkers ? blockIdx.x : blockIdx.x * blockDim.x + threadIdx.x;
     if (worker >= workers) return;
     for (size_t row = worker; row < static_cast<size_t>(series); row += workers) {
         ref::Arena arena{workspace + static_cast<size_t>(worker) * stride, stride};
@@ -109,15 +129,18 @@ ctStatus_t run_device(Function function, const float* const* inputs,
         return CT_STATUS_INVALID_ARGUMENT;
     }
     try {
-        const size_t rowBytes = (static_cast<size_t>(length) * kDoublesPerBar + 512) * sizeof(double);
+        const Info info = infos[static_cast<int>(function)];
+        const size_t rowBytes = worker_bytes(info, length, params);
         const int workers = static_cast<int>(std::min<size_t>(series, std::max<size_t>(1, kScratchBudget / rowBytes)));
         auto workspace = acquireDeviceBufferAsync<unsigned char>(rowBytes * workers, stream);
-        const Info info = infos[static_cast<int>(function)];
         Columns columns;
         for (int i = 0; i < info.inputs; ++i) columns.in[i] = inputs[i];
         for (int i = 0; i < info.outputs; ++i) columns.out[i] = outputs[i];
-        calculate<<<(workers + 31) / 32, 32, 0, stream>>>(function, columns, params, length, series,
-                                                         info, workspace.get(), rowBytes, workers);
+        // A block of 32 long rows consumes one SM even when these are the
+        // only workers. Spread long, sparse workloads across SMs.
+        const bool spread = length >= 4096 && workers <= 256;
+        calculate<<<spread ? workers : (workers + 31) / 32, spread ? 1 : 32, 0, stream>>>(
+            function, columns, params, length, series, info, workspace.get(), rowBytes, workers, spread);
         cudaError_t error = cudaPeekAtLastError();
         if (error == cudaSuccess && stream == nullptr) error = cudaStreamSynchronize(stream);
         if (error != cudaSuccess) {

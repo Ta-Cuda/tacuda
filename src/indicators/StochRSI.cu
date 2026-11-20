@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
+#include "../api/BatchShort.h"
 
 __global__ void stochRsiFromRsiKernel(const float *__restrict__ rsi,
                                float *__restrict__ kOut,
@@ -73,10 +74,18 @@ void tacuda::StochRSI::calculate(const float *input, float *output,
   if (rsiPeriod <= 0 || kPeriod <= 0 || dPeriod <= 0 || size <= 0) {
     throw std::invalid_argument("StochRSI: invalid parameters");
   }
-  if (size <= rsiPeriod + kPeriod + dPeriod - 2) {
+  if (size <= static_cast<long long>(rsiPeriod) + kPeriod + dPeriod - 2) {
     // TA-Lib succeeds with zero output elements when the input is shorter
     // than the shared K/D lookback; both lines are NaNs.
     CUDA_CHECK(cudaMemsetAsync(output, 0xFF, 2 * static_cast<size_t>(size) * sizeof(float), stream));
+    return;
+  }
+  if (size <= tacuda::detail::kShortLength && kPeriod <= tacuda::detail::kShortWindow &&
+      dPeriod <= tacuda::detail::kShortWindow) {
+    const float* in[] = {input};
+    float* out[] = {output, output + size};
+    tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::StochRsi, in, 1, out, 2, size, 1,
+                                     {rsiPeriod, kPeriod, dPeriod}, stream);
     return;
   }
   auto rsi = acquireDeviceBufferAsync<float>(size, stream);

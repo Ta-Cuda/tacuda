@@ -10,6 +10,12 @@
 
 namespace tacuda { namespace detail {
 
+/// TACUDA_BATCH_FUSED, read on every call: "0" keeps the per-series
+/// dispatcher for every legacy family, "1" forces fused recurrences past the
+/// shape rule, anything else (or unset) selects automatically.
+enum class BatchMode { Auto, Off, Force };
+BatchMode batch_mode();
+
 enum class FusedFamily {
     None, Sma, Ema, Rsi, Atr, Macd, Bbands, Stochastic,
     Wma, Natr, Stddev, Sum, Min, Max, Obv, Mfi, Ad, Adosc

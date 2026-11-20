@@ -62,6 +62,7 @@
 #include <indicators/OBV.h>
 #include <indicators/MFI.h>
 #include <indicators/StdDev.h>
+#include <utils/LeadingNaN.cuh>
 #include <indicators/VAR.h>
 #include <indicators/SUM.h>
 #include <indicators/MAX.h>
@@ -204,10 +205,18 @@ __global__ void smaKernelCompute(const T* input, T* output, int size, int period
 template <typename T>
 __global__ void emaKernelCompute(const T* input, T* output, int size, int period) {
     if (threadIdx.x != 0 || blockIdx.x != 0) return;
+    if (period == 1) {
+        for (int i = 0; i < size; ++i) output[i] = input[i];
+        return;
+    }
     const T qnan = std::numeric_limits<T>::quiet_NaN();
     if (size <= 0 || period <= 0) return;
     for (int i = 0; i < size; ++i) output[i] = qnan;
-    if (size < period) return;
+    const int first = tacuda::detail::leading_nan_count(input, size);
+    if (size - first < period) return;
+    input += first;
+    output += first;
+    size -= first;
     T seed = static_cast<T>(0);
     for (int i = 0; i < period; ++i) seed += input[i];
     seed /= static_cast<T>(period);
@@ -290,9 +299,15 @@ __global__ void macdKernelCompute(const T* input, T* macd, T* signal, T* hist, i
     for (int i = 0; i < size; ++i) {
         macd[i] = signal[i] = hist[i] = qnan;
     }
+    const int first = tacuda::detail::leading_nan_count(input, size);
     const int macdLookback = slowPeriod - 1;
+    if (static_cast<long long>(macdLookback) + signalPeriod - 1 >= size - first) return;
     const int signalLookback = macdLookback + signalPeriod - 1;
-    if (signalLookback >= size) return;
+    input += first;
+    macd += first;
+    signal += first;
+    hist += first;
+    size -= first;
 
     T fast = static_cast<T>(0);
     for (int i = macdLookback - fastPeriod + 1; i <= macdLookback; ++i) fast += input[i];

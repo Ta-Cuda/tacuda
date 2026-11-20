@@ -1,6 +1,24 @@
 Changelog
 =========
 
+0.9.2 — 2026-11-20
+------------------
+- All six host Hilbert indicators now use the GPU's Hilbert core and the same
+  build-generated phase weights. This fixes a nearly 25-degree phase difference
+  and a trend-mode change on flat input when glibc selected different FMA paths.
+- The batch dispatcher processes 118 more legacy indicator families across rows.
+  It also runs eligible short histories for the remaining 29 legacy families in
+  one launch. Set `TACUDA_BATCH_FUSED=0` to select the per-series legacy path.
+  TA-Lib 0.8.3 formulas now size scratch per formula and distribute long batches
+  across CUDA blocks.
+- STDDEV uses centered window moments. SUM and STDDEV recover after a missing
+  sample leaves the window. Leading NaNs and row-local warm-up now agree across
+  affected host, device and batch indicators, including MIDPOINT.
+- Python rejects invalid CUDA stream handles with `ValueError` before calling
+  the driver. Use `apo_ma` or `ppo_ma` to select a moving-average type.
+- Added regression coverage for Hilbert FMA dispatch, batch row isolation,
+  short-series dispatch, NaN handling and Python stream validation.
+
 0.9.1 — 2026-11-16
 ------------------
 TA-Lib 0.8.3 compatibility: 237 functions, typed outputs and numerical corrections.

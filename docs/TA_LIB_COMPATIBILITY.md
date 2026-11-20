@@ -1,6 +1,6 @@
-# TA-Lib 0.8.3 compatibility in TaCuda 0.9.1
+# TA-Lib 0.8.3 compatibility in TaCuda 0.9.2
 
-TaCuda 0.9.1 targets **237 functions from TA-Lib 0.8.3**. The native and
+TaCuda 0.9.2 targets **237 functions from TA-Lib 0.8.3**. The native and
 Python oracle versions are pinned in `tests/requirements-reference.txt` and
 `tests/reference/talib-0.8.3.json`, against upstream commit
 [`62021c1d14ef5499505af5547384cab509adf3fc`](https://github.com/TA-Lib/ta-lib/tree/62021c1d14ef5499505af5547384cab509adf3fc).
@@ -57,6 +57,15 @@ Names with different historical definitions remain separate:
 | ASI with limit-move scaling | `asi_wilder(..., limitMove)` | Club `asi` |
 | Sample-adjusted Fisher kurtosis | `kurtosis_unbiased(..., period)` | Population `kurtosis` |
 | Selectable-MA volume oscillator | `pvo_ma(..., fastPeriod, slowPeriod, maType)` | EMA `pvo` |
+
+## Numerical changes in 0.9.2
+
+All six Hilbert functions share build-generated phase weights across the host
+and device. On flat input, a tiny change in the weights can move DC phase by
+many degrees and flip HT_TRENDMODE. The regression compares host outputs bit
+for bit across libm FMA modes and checks GPU agreement per indicator.
+SUM and STDDEV recover after a NaN exits the rolling window. STDDEV uses
+centered moments to preserve small variations around a large offset.
 
 ## Numerical migration from 0.9.0
 

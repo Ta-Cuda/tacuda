@@ -5,6 +5,7 @@
 /* ======================================================================== */
 #include <indicators/MAX.h>
 #include <utils/CudaUtils.h>
+#include <utils/LeadingNaN.cuh>
 #include <stdexcept>
 #include <cmath>
 
@@ -21,6 +22,8 @@ __global__ void maxKernel(const float* __restrict__ input,
         float m = input[idx];
         for (int k = 1; k < period; ++k)
             m = fmaxf(m, input[idx + k]);
+        if (!isnan(m) && isnan(input[idx]) &&
+            tacuda::detail::in_leading_nan_prefix(input, idx)) m = nanf("");
         // Write result at idx + period - 1 to match TA-Lib behavior
         output[idx + period - 1] = m;
     }

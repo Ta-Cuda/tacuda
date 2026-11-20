@@ -6,7 +6,9 @@
 #include "BatchFused.h"
 
 #include <utils/ErrorState.h>
+#include <utils/LeadingNaN.cuh>
 #include <utils/StreamStates.h>
+#include <utils/WindowStdDev.cuh>
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
@@ -28,7 +30,15 @@ __global__ void recurrent(Matrices m, int length, int series, State initial) {
          s < static_cast<size_t>(series); s += static_cast<size_t>(gridDim.x) * blockDim.x) {
         State state = initial;
         const size_t row = s * length;
-        for (int t = 0; t < length; ++t) {
+        int first = 0;
+        // EMA, RSI and MACD accept the warm-up output of an earlier indicator.
+        if constexpr (NI == 1) {
+            first = leading_nan_count(m.in[0] + row, length);
+            for (int j = 0; j < NO; ++j) {
+                for (int t = 0; t < first; ++t) m.out[j][row + t] = stream_nan();
+            }
+        }
+        for (int t = first; t < length; ++t) {
             const size_t i = row + t;
             StreamBar b{};
             if constexpr (NI == 1) b.close = m.in[0][i];
@@ -102,7 +112,11 @@ __global__ void window(Matrices m, int length, size_t total, FusedCall c) {
                 if constexpr (Family == F::Max) value = fmaxf(value, m.in[0][start + k]);
                 else value = fminf(value, m.in[0][start + k]);
             }
+            if (!isnan(value) && isnan(m.in[0][start]) &&
+                in_leading_nan_prefix(m.in[0] + i - t, t - (c.p - 1))) value = stream_nan();
             m.out[0][i] = value;
+        } else if constexpr (Family == F::Stddev) {
+            m.out[0][i] = direct_window_stddev(m.in[0] + i - (c.p - 1), c.p);
         } else {
             double sum = 0, squares = 0;
             const size_t start = i - (c.p - 1);
@@ -110,22 +124,19 @@ __global__ void window(Matrices m, int length, size_t total, FusedCall c) {
                 const double x = m.in[0][start + k];
                 if constexpr (Family == F::Wma) sum += x * (k + 1.0);
                 else sum += x;
-                if constexpr (Family == F::Stddev || Family == F::Bbands) squares += x * x;
+                if constexpr (Family == F::Bbands) squares += x * x;
             }
             if constexpr (Family == F::Sum) m.out[0][i] = static_cast<float>(sum);
             if constexpr (Family == F::Sma) m.out[0][i] = static_cast<float>(sum / c.p);
             if constexpr (Family == F::Wma) m.out[0][i] = static_cast<float>(sum / (0.5 * c.p * (c.p + 1.0)));
-            if constexpr (Family == F::Stddev || Family == F::Bbands) {
+            if constexpr (Family == F::Bbands) {
                 const double mean = sum / c.p;
                 double var = squares / c.p - mean * mean;
                 if (var < 0) var = 0;
                 const double sd = sqrt(var);
-                if constexpr (Family == F::Stddev) m.out[0][i] = static_cast<float>(sd);
-                else {
-                    m.out[0][i] = static_cast<float>(mean + c.up * sd);
-                    m.out[1][i] = static_cast<float>(mean);
-                    m.out[2][i] = static_cast<float>(mean - c.down * sd);
-                }
+                m.out[0][i] = static_cast<float>(mean + c.up * sd);
+                m.out[1][i] = static_cast<float>(mean);
+                m.out[2][i] = static_cast<float>(mean - c.down * sd);
             }
         }
     }
@@ -137,13 +148,21 @@ bool is_window(F f) {
 }
 }
 
-bool FusedCall::enabled(int length, int series) const {
+BatchMode batch_mode() {
     const char* mode = std::getenv("TACUDA_BATCH_FUSED");
-    if (family == F::None || (mode && std::strcmp(mode, "0") == 0)) return false;
-    const bool force = mode && std::strcmp(mode, "1") == 0;
+    if (mode && std::strcmp(mode, "0") == 0) return BatchMode::Off;
+    if (mode && std::strcmp(mode, "1") == 0) return BatchMode::Force;
+    return BatchMode::Auto;
+}
+
+bool FusedCall::enabled(int length, int series) const {
+    if (family == F::None) return false;
+    const BatchMode mode = batch_mode();
+    if (mode == BatchMode::Off) return false;
+    const bool force = mode == BatchMode::Force;
     // Invalid parameters go through the existing entry point's validation.
     if (is_window(family)) {
-        if (p <= 0 || p > kWindowLimit) return false;
+        if (p <= 0 || p > (family == F::Stddev ? kDirectStdDevPeriod : kWindowLimit)) return false;
         if (family == F::Stochastic && (q <= 0 || q > kWindowLimit ||
             static_cast<long long>(2 * q - 1) * p + q * q > 1024)) return false;
         return true;

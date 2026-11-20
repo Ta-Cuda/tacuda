@@ -4,6 +4,7 @@
 /*  SPDX-License-Identifier: Apache-2.0                                     */
 /* ======================================================================== */
 #include <indicators/SMA.h>
+#include <utils/BatchRows.h>
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
 #include <utils/TacudaConfig.h>
@@ -302,5 +303,24 @@ void SMA::calculate(const float* input, float* output, int size, cudaStream_t st
 // Force template class instantiation so vtable & typeinfo are emitted
 template class SMAT<float>;
 template class SMAT<double>;
+
+namespace detail {
+
+// Mirrors the float strategy selection of sma_calculate_impl. Every strategy
+// except the prefix sum reads only the window of the element it writes, so
+// one call over a flattened multi-row matrix reproduces each row exactly; the
+// prefix-sum scan would run across rows and round differently.
+bool sma_direct_window(int period) {
+    if (period <= 0) return false;
+    if (period == 1) return true;  // device copy
+    const bool forcePrefix = (period >= cfg.prefixPreferThreshold) && cfg.preferPrefixForLarge;
+    if (forcePrefix) return false;
+    const size_t shm = static_cast<size_t>(cfg.blockSize + period - 1) * sizeof(float);
+    if (period <= cfg.smallWindowThreshold && static_cast<int>(shm) <= cfg.maxSharedBytes) return true;
+    if (cfg.enableWarp && period <= cfg.warpWindowThreshold && (cfg.blockSize >> 5) > 0) return true;
+    return !cfg.preferPrefixForLarge && period < cfg.prefixPreferThreshold;
+}
+
+} // namespace detail
 
 } // namespace tacuda

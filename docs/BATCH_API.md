@@ -45,9 +45,7 @@ GPU on its own. Genuinely sequential state machines (SAR, SAREXT,
 SAR_EL, MAMA, HT_*) still run one GPU thread over a series; their
 throughput comes from batching many series, not from parallelizing one.
 
-The first fused batch families and their dispatch rules are described below.
-Other families still loop over series, each with its own launch sequence,
-spread over the stream pool or ordered on the caller's stream.
+The dispatcher also supports [row-batched families](#row-batched-legacy-families) and a [short-series path](#short-series-path). Remaining workloads use the per-series dispatcher.
 
 Vector-math functions (SIN, ADD, ...) are intentionally not batched:
 element-wise kernels are shape-agnostic, so calling e.g. `ct_sin` on the
@@ -185,6 +183,105 @@ including million-element inputs. This fix also applies with the fused
 dispatcher disabled: `0` cannot reproduce the old scan's nondeterministic
 choice of rounding. See the GPU validation commands in
 [the performance guide](PERFORMANCE.md#fused-batch-validation).
+
+## Row-batched legacy families
+
+Unreleased (after 0.9.1). 118 more families compute a batch call in a fixed
+number of operations, independent of `numSeries`, **with their own
+single-series kernels**. Every row is bit-identical to the per-series
+dispatcher in the same build, including NaN payloads.
+
+| Plan | Families | How |
+| ---- | -------- | --- |
+| Flat (103) | AVGPRICE, MEDPRICE, TYPPRICE, WCLPRICE, BOP, TRANGE; MOMENTUM, ROC, ROCP, ROCR, ROCR100, CHANGE; WILLR, CCI, VAR, AVGDEV, LINEARREG, LINEARREG_SLOPE, LINEARREG_INTERCEPT, LINEARREG_ANGLE, TSF, MIDPRICE, MINMAX, AROON, AROONOSC, ULTOSC, STOCHF, TRIMA, ACCBANDS; all 63 candlestick patterns; club MARKET_STRENGTH, TRENDSCORE, REFDEV, SKEW, KURTOSIS, PIVOT_HIGH, PIVOT_LOW, ROLLING_MEAN/MAX/MIN/STD | The family's `ct_*_d` runs over the flattened `numSeries * seriesLen` matrix as if it were one series, in blocks of whole rows of up to 2^22 elements (one row if a row is longer). Its kernels read only the window that ends at the element they write, so each element at or past its row's first valid index sees only its own row. One more kernel per block copies the block's first row's leading warm-up elements over those the other rows computed from the previous row's tail. |
+| Rows (14) | SAR, SAREXT, SAR_EL, MAXINDEX, MININDEX, MINMAXINDEX, HT_DCPERIOD, HT_DCPHASE, HT_PHASOR, HT_SINE, HT_TRENDLINE, HT_TRENDMODE, MAMA, MACDFIX | One GPU thread per row runs the family's sequential single-series state machine: the same device function as the single-thread kernel, in the same translation unit, with the same compile flags. The SAR and index families branch on the data (trend flips, window rescans), and rows sharing a warp would run those branches one after another, so while rows are few each row gets a warp of its own: up to the device's resident warps for SAR_EL and the index families, up to 6 rows per SM for SAR and SAREXT, whose double arithmetic occupies the FP64 pipeline for a full warp either way. More rows, and the other families, pack 64 rows per block. |
+| Window (1) | MIDPOINT | One thread per output, with row-local window bounds and NaN warm-up. |
+
+The warm-up copy preserves the flattened paths' bits: depending
+on the family the per-series path leaves `0xFFFFFFFF` NaNs from a memset,
+`nanf("")` NaNs written by a kernel, or zeros (candlesticks). A block's first
+row holds exactly those values because warm-up does not depend on the data.
+The block size bounds the scratch that the stacked single-series wrappers
+allocate (up to three `float` matrices of the block), which on the
+per-series path was a few kilobytes per row.
+
+A call takes the batched path when all of these hold; otherwise it keeps the
+per-series dispatcher, which also reports invalid parameters with the
+original status and message:
+
+- `numSeries >= 2` and `TACUDA_BATCH_FUSED` is not `0`;
+- the parameters are valid for the plan (positive periods, MACDFIX
+  `signalPeriod > 0`);
+- flat plans: every row has a valid element, i.e. `seriesLen` exceeds the
+  first valid index (`period - 1` for WILLR, `period` for ROC, the pattern's
+  lookback for candlesticks), and `seriesLen <= INT_MAX / 4`, because the
+  single-series kernels index with `int`;
+- flat plans: `numSeries >= 64` or `seriesLen < 65536` (16384 for ACCBANDS
+  and TRIMA). Flattening only removes launches; a few long rows already fill
+  the GPU per series, and the flat call would add its warm-up copy (up to 7%
+  slower at 8 × 250000 on an RTX 3090 Ti). The SMA composites also lose the
+  per-series stream overlap of their passes (ACCBANDS 13% slower at
+  32 × 62500);
+- TRIMA and ACCBANDS: every SMA pass uses a direct window kernel (by default
+  periods below 96, see `TACUDA_SMA_PREFIX_T`); the prefix-sum SMA would
+  scan across rows and round differently.
+
+Streams behave as for fused calls: `maxConcurrency` is ignored, stream `0`
+runs on the legacy default stream and returns when done, a caller's stream
+only receives enqueued work and can be captured. Up to 2^22 elements, a
+captured call has 1 to 3 nodes for most families; each further block of
+rows repeats a flat family's nodes. STOCHF, TRIMA, ACCBANDS, AROON and
+MINMAX reuse single-series wrappers that allocate scratch and copy stacked
+outputs (7 to 18 nodes per block), so like their per-series path they need
+graph memory nodes to be captured. The row-thread families write their outputs directly and need no
+scratch, unlike the stacked per-series MAMA, MACDFIX, MINMAXINDEX, HT_PHASOR
+and HT_SINE wrappers.
+
+Plans live in `scripts/generate_batch_api.py` (`ROWS`). Candlestick warm-ups
+are read from each kernel's `lookback` constant, so changing one regenerates
+the plan; CTest `batch_generated` fails until the generated file is current.
+`tests/python/batch_rows.py` (CTest `batch_rows`, and
+`batch_rows_without_memory_pools` on Linux) checks every plan against the
+per-series dispatcher and direct single-series calls across shapes,
+parameters and non-finite data, the path choice, graph capture and replay,
+the host and stream-0 entry points and error statuses; with `--ref-lib` it
+also compares against another build. Measurements are in
+[the performance guide](performance/README.md#row-batched-families).
+
+## Short-series path
+
+DEMA, TEMA, T3, KAMA, TRIX, CMO, ADX, ADXR, DX, PLUS_DI, MINUS_DI,
+PLUS_DM, MINUS_DM, APO, PPO, PVO, MA, MACD_LINE, STOCHRSI, IMI, NVI,
+PVI, CORREL, BETA, ASI, OBTR, WOBV, HPI and XAVERAGE can each submit
+one kernel for the batch. A thread owns a row for recurrences.
+CORREL and windowed MA distribute independent windows among threads.
+Calls use no graph allocation nodes on this path.
+
+In `auto`, this path requires at least 32 rows, at most 1024 bars per
+row, and `seriesLen <= 4*numSeries`. Mode `1` allows smaller batches
+with at least two rows. The 1024-bar and parameter limits still apply.
+ADXR, BETA, CORREL, IMI, KAMA, and MA limit their window to 64.
+STOCHRSI limits its K and D windows to 64. MA type MAMA uses the
+existing implementation; extended MA types use the reference backend.
+CMO and PLUS_DM/MINUS_DM keep the original float scan when
+`period < 2` or `seriesLen > 80*(period-1)`. In those cases the scan
+and recurrence can round differently after extended flat or non-finite
+inputs, even if their update equations agree.
+The original dispatcher handles lengths and parameters outside these
+conditions and remains available through `TACUDA_BATCH_FUSED=0`.
+
+The short-series kernels use the existing formulas with a different
+arithmetic order. Compare numeric results with tolerance. For supported
+short STOCHRSI, single-series and batch calls share the same RSI recurrence
+so the dispatcher agrees even when the stochastic range is nearly zero.
+This can change the historical signal on those windows, including in
+mode `0`. The short path keeps each row's output independent of its
+position and its neighbors.
+
+CTest `batch_short` checks all 29 families against the per-series
+dispatcher on finite, flat and non-finite fixtures. It verifies host
+results and single-node graph replay. The Linux capability shim also
+runs the allocation-free graph cases.
 
 ## Native C API
 

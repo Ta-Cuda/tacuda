@@ -4,6 +4,7 @@
 /*  SPDX-License-Identifier: Apache-2.0                                     */
 /* ======================================================================== */
 #include <indicators/MACDFIX.h>
+#include <utils/BatchRows.h>
 #include <utils/CudaUtils.h>
 #include <stdexcept>
 #include <cmath>
@@ -19,16 +20,15 @@ namespace {
 //   5) Signal EMA uses standard k = 2/(signalPeriod+1), SMA-seeded from first
 //      signalPeriod MACD values.
 //   6) All outputs NaN before signalLookback = slowPeriod + signalPeriod - 2.
-__global__ void macdfix_sequential_kernel(const float* __restrict__ input,
-                                           float* __restrict__ macd,
-                                           float* __restrict__ signal,
-                                           float* __restrict__ hist,
-                                           int size,
-                                           int fastPeriod,
-                                           int slowPeriod,
-                                           int signalPeriod)
+__device__ __forceinline__ void macdfix_row(const float* __restrict__ input,
+                                            float* __restrict__ macd,
+                                            float* __restrict__ signal,
+                                            float* __restrict__ hist,
+                                            int size,
+                                            int fastPeriod,
+                                            int slowPeriod,
+                                            int signalPeriod)
 {
-    if (blockIdx.x != 0 || threadIdx.x != 0) return;
     if (size <= 0) return;
 
     const int macdLookback   = slowPeriod - 1;                      // 25
@@ -110,6 +110,36 @@ __global__ void macdfix_sequential_kernel(const float* __restrict__ input,
     }
 }
 
+__global__ void macdfix_sequential_kernel(const float* __restrict__ input,
+                                           float* __restrict__ macd,
+                                           float* __restrict__ signal,
+                                           float* __restrict__ hist,
+                                           int size,
+                                           int fastPeriod,
+                                           int slowPeriod,
+                                           int signalPeriod)
+{
+    if (blockIdx.x != 0 || threadIdx.x != 0) return;
+    macdfix_row(input, macd, signal, hist, size, fastPeriod, slowPeriod, signalPeriod);
+}
+
+// Batch path: the same sequential pass, one GPU thread per row.
+__global__ void macdfix_rows_kernel(const float* __restrict__ input,
+                                    float* __restrict__ macd,
+                                    float* __restrict__ signal,
+                                    float* __restrict__ hist,
+                                    int length, int series,
+                                    int fastPeriod, int slowPeriod, int signalPeriod)
+{
+    for (size_t r = static_cast<size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+         r < static_cast<size_t>(series);
+         r += static_cast<size_t>(gridDim.x) * blockDim.x) {
+        const size_t off = r * static_cast<size_t>(length);
+        macdfix_row(input + off, macd + off, signal + off, hist + off, length,
+                    fastPeriod, slowPeriod, signalPeriod);
+    }
+}
+
 } // namespace
 
 namespace tacuda {
@@ -131,6 +161,17 @@ void MACDFIX::calculate(const float* input, float* output, int size, cudaStream_
     macdfix_sequential_kernel<<<1, 1, 0, stream>>>(
         input, macdOut, signalOut, histOut, size,
         fastPeriod, slowPeriod, signalPeriod);
+    CUDA_CHECK(cudaGetLastError());
+}
+
+void detail::macdfix_rows(const float* in, float* macd, float* signal, float* hist,
+                          int length, int series, int signalPeriod,
+                          cudaStream_t stream) {
+    if (signalPeriod <= 0) {
+        throw std::invalid_argument("MACDFIX: invalid signalPeriod");
+    }
+    macdfix_rows_kernel<<<row_blocks(series), kRowThreads, 0, stream>>>(
+        in, macd, signal, hist, length, series, 12, 26, signalPeriod);
     CUDA_CHECK(cudaGetLastError());
 }
 

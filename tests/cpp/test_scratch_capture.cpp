@@ -109,6 +109,48 @@ TEST(ScratchCapture, EagerFallbackPreservesOutput) {
     EXPECT_EQ(in.output(), baseline);
 }
 
+TEST(ScratchCapture, ReferenceCumsumFitsThirtyTwoKiB) {
+#if CUDART_VERSION >= 11040
+    if (!graph_memory_supported()) GTEST_SKIP() << "Requires graph allocation nodes";
+    Inputs in;
+    Capture capture(in.stream);
+    ASSERT_EQ(capture.begin(), cudaSuccess);
+    const auto status = ct_cumsum_batch_d(in.p[0], in.p[4], kLength, kSeries, 0, in.stream);
+    ASSERT_EQ(capture.end(), cudaSuccess);
+    ASSERT_EQ(status, CT_STATUS_SUCCESS) << ct_get_last_error();
+    size_t count = 0;
+    ASSERT_EQ(cudaGraphGetNodes(capture.graph, nullptr, &count), cudaSuccess);
+    std::vector<cudaGraphNode_t> nodes(count);
+    ASSERT_EQ(cudaGraphGetNodes(capture.graph, nodes.data(), &count), cudaSuccess);
+    size_t bytes = 0;
+    for (auto node : nodes) {
+        cudaGraphNodeType type;
+        ASSERT_EQ(cudaGraphNodeGetType(node, &type), cudaSuccess);
+        if (type == cudaGraphNodeTypeMemAlloc) {
+            cudaMemAllocNodeParams params{};
+            ASSERT_EQ(cudaGraphMemAllocNodeGetParams(node, &params), cudaSuccess);
+            bytes += params.bytesize;
+        }
+    }
+    EXPECT_GT(bytes, 0u);
+    EXPECT_LE(bytes, 32u * 1024u);
+#else
+    GTEST_SKIP() << "Requires CUDA 11.4 or newer headers";
+#endif
+}
+
+TEST(ScratchCapture, ReferenceMavpSupportsWidePeriodBucketsOnShortRows) {
+    constexpr int length = 12, series = 3;
+    std::vector<float> x(length * series), period(x.size()), result(x.size());
+    for (size_t i = 0; i < x.size(); ++i) {
+        x[i] = static_cast<float>(i) / 3.0f;
+        period[i] = i % 2 ? 10000.0f : 1.0f;
+    }
+    ASSERT_EQ(ct_mavp_batch(x.data(), period.data(), result.data(), length, series,
+                            1, 10000, CT_MA_DISABLED, 0, nullptr), CT_STATUS_SUCCESS) << ct_get_last_error();
+    EXPECT_EQ(result, x);
+}
+
 TEST(ScratchCapture, MissingPoolsReturnUnsupportedWithoutRuntimeError) {
     if (graph_memory_supported()) GTEST_SKIP() << "Requires a legacy device or the no-memory-pools shim";
     DispatchMode mode("0");

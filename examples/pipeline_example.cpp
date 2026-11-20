@@ -14,6 +14,7 @@
  */
 
 #include <tacuda/Context.h>
+#include <algorithm>
 #include <iostream>
 #include <vector>
 #include <chrono>

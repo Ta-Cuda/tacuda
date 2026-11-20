@@ -4,6 +4,7 @@
 /*  SPDX-License-Identifier: Apache-2.0                                     */
 /* ======================================================================== */
 #include <indicators/HT_DCPERIOD.h>
+#include <utils/BatchRows.h>
 #include <utils/CudaUtils.h>
 #include <utils/HilbertCore.h>
 #include <cuda_runtime.h>
@@ -12,13 +13,11 @@
 using namespace tacuda::hilbert;
 
 // Single-threaded GPU kernel - avoids CPU<->GPU data transfer overhead
-__global__ void htDCPeriodKernel(
+__device__ __forceinline__ void ht_dcperiod_row(
     const float* __restrict__ input,
     float* __restrict__ output,
     int size
 ) {
-    if (blockIdx.x != 0 || threadIdx.x != 0) return;
-    
     const int lookbackTotal = 32;
     if (size <= lookbackTotal) return;
     
@@ -63,6 +62,34 @@ __global__ void htDCPeriodKernel(
         
         today++;
     }
+}
+
+__global__ void htDCPeriodKernel(
+    const float* __restrict__ input,
+    float* __restrict__ output,
+    int size
+) {
+    if (blockIdx.x != 0 || threadIdx.x != 0) return;
+    ht_dcperiod_row(input, output, size);
+}
+
+// Batch path: the same single-series state machine, one GPU thread per row.
+__global__ void htDCPeriodRowsKernel(const float* __restrict__ input, float* __restrict__ output, int length, int series) {
+    for (size_t r = static_cast<size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+         r < static_cast<size_t>(series);
+         r += static_cast<size_t>(gridDim.x) * blockDim.x) {
+        const size_t off = r * static_cast<size_t>(length);
+        ht_dcperiod_row(input + off, output + off, length);
+    }
+}
+
+void tacuda::detail::ht_dcperiod_rows(const float* in, float* out, int length, int series,
+        cudaStream_t stream) {
+    if (length <= 0 || series <= 0) return;
+    const size_t bytes = static_cast<size_t>(length) * series * sizeof(float);
+    CUDA_CHECK(cudaMemsetAsync(out, 0xFF, bytes, stream));
+    htDCPeriodRowsKernel<<<row_blocks(series), kRowThreads, 0, stream>>>(in, out, length, series);
+    CUDA_CHECK(cudaGetLastError());
 }
 
 void tacuda::HT_DCPERIOD::calculate(const float* input, float* output, int size, cudaStream_t stream) noexcept(false) {

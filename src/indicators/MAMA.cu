@@ -6,6 +6,7 @@
 // MAMA (CUDA, sm_86-tuned) — API preserved
 #include <indicators/MAMA.h>
 #include <utils/CudaUtils.h>
+#include <utils/BatchRows.h>
 #include <utils/TacudaConfig.h>
 #include <stdexcept>
 #include <cmath>
@@ -368,6 +369,26 @@ void MAMA::calculate(const float* input, float* output, int size, cudaStream_t s
 
     mamaManySeriesKernel<<<grid, block, 0, stream>>>(
         input, mama, fama, seriesLength, batchCount, fastLimit, slowLimit);
+    CUDA_CHECK(cudaGetLastError());
+}
+
+// Batch path: the kernel above already runs one thread per series-major row;
+// launching it once for every row gives each row its single-series result.
+void detail::mama_rows(const float* in, float* mama, float* fama, int length,
+                       int series, float fastLimit, float slowLimit,
+                       cudaStream_t stream) {
+    if (length <= 0 || series <= 0) throw std::invalid_argument("MAMA: invalid size");
+    int minGrid = 0, block = 0;
+    CUDA_CHECK(cudaOccupancyMaxPotentialBlockSize(
+        &minGrid, &block, mamaManySeriesKernel, 0, 0));
+    block = std::min(std::max(128, ((block + 31) / 32) * 32), 256);
+    int grid = (series + block - 1) / block;
+    int dev = 0, sms = 0;
+    CUDA_CHECK(cudaGetDevice(&dev));
+    CUDA_CHECK(cudaDeviceGetAttribute(&sms, cudaDevAttrMultiProcessorCount, dev));
+    grid = std::max(1, std::min(grid, sms * 4));
+    mamaManySeriesKernel<<<grid, block, 0, stream>>>(
+        in, mama, fama, length, series, fastLimit, slowLimit);
     CUDA_CHECK(cudaGetLastError());
 }
 

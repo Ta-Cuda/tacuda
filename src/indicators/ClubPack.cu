@@ -14,6 +14,7 @@
 
 #include <indicators/ClubPack.h>
 #include <utils/AffineScan.cuh>
+#include <utils/BatchRows.h>
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
 #include <thrust/device_ptr.h>
@@ -202,12 +203,11 @@ __global__ void xaverageFinalizeKernel(const float* __restrict__ in,
 // only club recursion that stays on a single GPU thread, like SAR.
 // ---------------------------------------------------------------------------
 
-__global__ void sarElKernel(const float* __restrict__ high,
-                            const float* __restrict__ low,
-                            const float* __restrict__ close,
-                            float* __restrict__ out, int size,
-                            float accFact, float maxAf) {
-    if (blockIdx.x != 0 || threadIdx.x != 0) return;
+__device__ __forceinline__ void sar_el_row(const float* __restrict__ high,
+                                           const float* __restrict__ low,
+                                           const float* __restrict__ close,
+                                           float* __restrict__ out, int size,
+                                           float accFact, float maxAf) {
     if (size < 2) return;
     bool isLong = close[1] >= close[0];
     float af = accFact;
@@ -240,6 +240,30 @@ __global__ void sarElKernel(const float* __restrict__ high,
             }
         }
         out[i] = sar;
+    }
+}
+
+__global__ void sarElKernel(const float* __restrict__ high,
+                            const float* __restrict__ low,
+                            const float* __restrict__ close,
+                            float* __restrict__ out, int size,
+                            float accFact, float maxAf) {
+    if (blockIdx.x != 0 || threadIdx.x != 0) return;
+    sar_el_row(high, low, close, out, size, accFact, maxAf);
+}
+
+// Batch path: the same state machine, one GPU thread per row.
+__global__ void sarElRowsKernel(const float* __restrict__ high,
+                                const float* __restrict__ low,
+                                const float* __restrict__ close,
+                                float* __restrict__ out, int length,
+                                int series, float accFact, float maxAf, int spread) {
+    size_t r = 0, step = 0;
+    if (!tacuda::detail::row_slot(spread, r, step)) return;
+    for (; r < static_cast<size_t>(series); r += step) {
+        const size_t off = r * static_cast<size_t>(length);
+        sar_el_row(high + off, low + off, close + off, out + off, length,
+                   accFact, maxAf);
     }
 }
 
@@ -437,6 +461,17 @@ void SAREL::calculate(const float* high, const float* low, const float* close,
 void SAREL::calculate(const float* input, float* output, int size,
                       cudaStream_t stream) noexcept(false) {
     calculate(input, input + size, input + 2 * size, output, size, stream);
+}
+
+void detail::sar_el_rows(const float* high, const float* low, const float* close,
+                         float* out, int length, int series, float accFact,
+                         float maxAccel, cudaStream_t stream) {
+    if (length <= 0 || series <= 0) throw std::invalid_argument("SAREL: invalid size");
+    CUDA_CHECK(cudaMemsetAsync(out, 0xFF, static_cast<size_t>(length) * series * sizeof(float), stream));
+    const RowLaunch launch = divergent_row_launch(series, /*fp64=*/false);
+    sarElRowsKernel<<<launch.blocks, launch.threads, 0, stream>>>(
+        high, low, close, out, length, series, accFact, maxAccel, launch.spread);
+    CUDA_CHECK(cudaGetLastError());
 }
 
 // --- OBTR ------------------------------------------------------------------

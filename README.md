@@ -18,11 +18,10 @@
 > [compatibility guide](docs/TA_LIB_COMPATIBILITY.md) for tolerances, typed
 > outputs, MA types, numerical changes and performance limits.
 
-**Release 0.9.1:** adds the 0.8.x functions, extends MA types through ALMA,
-supports int32/mixed/four-output APIs, and corrects numerical and graph
-capability edge cases. Use matching 0.9.1 natives and bindings. Existing C
-signatures remain unchanged. New reference-backed CUDA formulas establish
-correctness; historical speedups below retain their measured scope.
+**Release 0.9.2** makes host Hilbert results reproducible across libm FMA modes,
+adds batched execution across rows and short histories, and corrects rolling
+STDDEV, SUM and NaN warm-up. Use matching 0.9.2 natives and bindings.
+See the [release notes](docs/CHANGELOG.md) for numerical and dispatch changes.
 
 TACUDA delivers lightning-fast technical analysis indicators powered by NVIDIA CUDA GPUs. Built for quantitative traders, researchers, and financial analysts who demand maximum performance from their computational workflows.
 
@@ -39,7 +38,7 @@ Implementation semantics (EMA seeding, warmup NaNs, indexing conventions) are do
 
 ---
 
-Release verification: [0.9.1 tag workflow](https://github.com/Ta-Cuda/tacuda/actions/runs/43910079980) · [GPU and package receipts](docs/validation/2026-11-16/tag-validation.json).
+Previous release verification: [0.9.1 tag workflow](https://github.com/Ta-Cuda/tacuda/actions/runs/43910079980) · [GPU and package receipts](docs/validation/2026-11-16/tag-validation.json).
 
 ## Fused batches in 0.9.0
 
@@ -121,7 +120,7 @@ with tacuda.stream.Rsi(14) as rsi:
 
 | Component | Version | Notes |
 |-----------|---------|-------|
-| **NVIDIA GPU** | Compute ≥ 6.0 | The 0.9.1 prebuilt binaries include SM60/61/70/75/80/86/89/90; source builds can select architectures with `-DTACUDA_CUDA_ARCHITECTURES=<arch>` |
+| **NVIDIA GPU** | Compute ≥ 6.0 | The 0.9.2 prebuilt binaries include SM60/61/70/75/80/86/89/90; source builds can select architectures with `-DTACUDA_CUDA_ARCHITECTURES=<arch>` |
 | **CUDA Toolkit** | 11.x / 12.x | 12.x recommended |
 | **CMake** | ≥ 3.22 | |
 | **Compiler** | C++17 | GCC, Clang, or MSVC |
@@ -212,7 +211,7 @@ prices = np.random.randn(1_000_000).cumsum().astype(np.float32) + 1000
 
 sma = tacuda.sma(prices, 20)
 rsi = tacuda.rsi(prices, 14)
-macd = tacuda.macd(prices)                     # dict: macd / signal / hist
+macd, signal, hist = tacuda.macd(prices, 12, 26, 9)
 
 # Structured OHLCV inputs and multi-symbol batches
 # ohlcv = tacuda.OHLCV.from_columns(o, h, l, c, v)
@@ -264,8 +263,8 @@ outputs are leading `NaN`; integer signal functions use zero. See
 #include "tacuda.h"
 
 int main() {
-    float input[1000000];
-    float output[1000000];
+    static float input[1000000];
+    static float output[1000000];
     
     // Host API: simple, transfers data each call
     ct_sma(input, output, 1000000, 20, NULL);
@@ -551,7 +550,7 @@ Adding a new indicator touches four places (see
 
 ## ✅ Status & TODO
 
-### ✅ Implemented as of 0.9.1
+### ✅ Implemented as of 0.9.2
 
 - [x] **All 237 functions from TA-Lib 0.8.3 implemented** (incl. MACDEXT with independent MA types and 19 element-wise vector math functions); numerical parity is verified per function by the strict differential corpus — 241/241 specs and 1928/1928 cells passed, remaining corner-case notes in [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md)
 - [x] **All 61 candlestick patterns** match TA-Lib signal-for-signal (double-precision literal ports, exact-equality oracle with hand-crafted activation fixtures for the rare patterns)

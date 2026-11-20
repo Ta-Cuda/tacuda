@@ -40,6 +40,10 @@ ctStatus_t ct_dema_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_dema_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Dema, in, 1, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -52,6 +56,10 @@ ctStatus_t ct_dema_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_dema_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Dema, in, 1, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -64,6 +72,10 @@ ctStatus_t ct_tema_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_tema_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Tema, in, 1, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -76,6 +88,10 @@ ctStatus_t ct_tema_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_tema_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Tema, in, 1, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -88,6 +104,9 @@ ctStatus_t ct_trima_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_trima_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0 && tacuda::detail::sma_direct_window((period + 1) / 2) && tacuda::detail::sma_direct_window(period % 2 == 0 ? (period + 1) / 2 + 1 : (period + 1) / 2), static_cast<long long>(period) - 1, 1LL << 14),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_trima_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -100,6 +119,9 @@ ctStatus_t ct_trima_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_trima_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0 && tacuda::detail::sma_direct_window((period + 1) / 2) && tacuda::detail::sma_direct_window(period % 2 == 0 ? (period + 1) / 2 + 1 : (period + 1) / 2), static_cast<long long>(period) - 1, 1LL << 14),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_trima_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -112,6 +134,9 @@ ctStatus_t ct_momentum_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_momentum_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_momentum_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -124,6 +149,9 @@ ctStatus_t ct_momentum_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_momentum_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_momentum_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -136,6 +164,9 @@ ctStatus_t ct_roc_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_roc_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_roc_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -148,6 +179,9 @@ ctStatus_t ct_roc_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_roc_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_roc_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -160,6 +194,9 @@ ctStatus_t ct_rocp_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_rocp_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_rocp_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -172,6 +209,9 @@ ctStatus_t ct_rocp_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_rocp_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_rocp_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -184,6 +224,9 @@ ctStatus_t ct_rocr_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_rocr_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_rocr_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -196,6 +239,9 @@ ctStatus_t ct_rocr_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_rocr_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_rocr_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -208,6 +254,9 @@ ctStatus_t ct_rocr100_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_rocr100_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_rocr100_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -220,6 +269,9 @@ ctStatus_t ct_rocr100_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_rocr100_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_rocr100_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -232,6 +284,10 @@ ctStatus_t ct_cmo_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cmo_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((tacuda::detail::short_float_wilder(seriesLen, period)) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Cmo, in, 1, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -244,6 +300,10 @@ ctStatus_t ct_cmo_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cmo_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((tacuda::detail::short_float_wilder(seriesLen, period)) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Cmo, in, 1, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -280,6 +340,9 @@ ctStatus_t ct_var_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_var_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_var_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -292,6 +355,9 @@ ctStatus_t ct_var_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_var_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_var_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -376,6 +442,9 @@ ctStatus_t ct_linearreg_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_linearreg_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_linearreg_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -388,6 +457,9 @@ ctStatus_t ct_linearreg_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_linearreg_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_linearreg_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -401,6 +473,9 @@ ctStatus_t ct_linearreg_slope_batch(const float *host_inputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_linearreg_slope_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_linearreg_slope_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -413,6 +488,9 @@ ctStatus_t ct_linearreg_slope_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_linearreg_slope_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_linearreg_slope_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -427,6 +505,9 @@ ctStatus_t ct_linearreg_intercept_batch(const float *host_inputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_linearreg_intercept_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_linearreg_intercept_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -441,6 +522,9 @@ ctStatus_t ct_linearreg_intercept_batch_d(const float *d_inputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_linearreg_intercept_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_linearreg_intercept_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -454,6 +538,9 @@ ctStatus_t ct_linearreg_angle_batch(const float *host_inputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_linearreg_angle_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_linearreg_angle_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -466,6 +553,9 @@ ctStatus_t ct_linearreg_angle_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_linearreg_angle_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_linearreg_angle_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -478,6 +568,9 @@ ctStatus_t ct_tsf_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_tsf_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_tsf_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -490,6 +583,9 @@ ctStatus_t ct_tsf_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_tsf_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_tsf_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -503,6 +599,10 @@ ctStatus_t ct_kama_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_kama_d(in[0], out[0], seriesLen, period, fastPeriod, slowPeriod, s);
+        }, FusedCall{}, rows_kernel((period > 0 && period <= tacuda::detail::kShortWindow && fastPeriod > 0 && slowPeriod > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Kama, in, 1, out, 1, seriesLen, numSeries, {period, fastPeriod, slowPeriod}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -516,6 +616,10 @@ ctStatus_t ct_kama_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_kama_d(in[0], out[0], seriesLen, period, fastPeriod, slowPeriod, s);
+        }, FusedCall{}, rows_kernel((period > 0 && period <= tacuda::detail::kShortWindow && fastPeriod > 0 && slowPeriod > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Kama, in, 1, out, 1, seriesLen, numSeries, {period, fastPeriod, slowPeriod}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -528,6 +632,10 @@ ctStatus_t ct_t3_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_t3_d(in[0], out[0], seriesLen, period, vFactor, s);
+        }, FusedCall{}, rows_kernel((period >= 2) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::T3, in, 1, out, 1, seriesLen, numSeries, {period, 0, 0, vFactor}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -541,6 +649,10 @@ ctStatus_t ct_t3_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_t3_d(in[0], out[0], seriesLen, period, vFactor, s);
+        }, FusedCall{}, rows_kernel((period >= 2) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::T3, in, 1, out, 1, seriesLen, numSeries, {period, 0, 0, vFactor}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -580,6 +692,10 @@ ctStatus_t ct_adx_batch(const float *host_highs, const float *host_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_adx_d(in[0], in[1], in[2], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Adx, in, 3, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -593,6 +709,10 @@ ctStatus_t ct_adx_batch_d(const float *d_highs, const float *d_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_adx_d(in[0], in[1], in[2], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Adx, in, 3, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -606,6 +726,10 @@ ctStatus_t ct_adxr_batch(const float *host_highs, const float *host_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_adxr_d(in[0], in[1], in[2], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0 && period <= tacuda::detail::kShortWindow) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Adxr, in, 3, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -619,6 +743,10 @@ ctStatus_t ct_adxr_batch_d(const float *d_highs, const float *d_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_adxr_d(in[0], in[1], in[2], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0 && period <= tacuda::detail::kShortWindow) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Adxr, in, 3, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -632,6 +760,10 @@ ctStatus_t ct_dx_batch(const float *host_highs, const float *host_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_dx_d(in[0], in[1], in[2], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Dx, in, 3, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -645,6 +777,10 @@ ctStatus_t ct_dx_batch_d(const float *d_highs, const float *d_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_dx_d(in[0], in[1], in[2], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Dx, in, 3, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -658,6 +794,10 @@ ctStatus_t ct_plus_di_batch(const float *host_highs, const float *host_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_plus_di_d(in[0], in[1], in[2], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::PlusDi, in, 3, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -671,6 +811,10 @@ ctStatus_t ct_plus_di_batch_d(const float *d_highs, const float *d_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_plus_di_d(in[0], in[1], in[2], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::PlusDi, in, 3, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -684,6 +828,10 @@ ctStatus_t ct_minus_di_batch(const float *host_highs, const float *host_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_minus_di_d(in[0], in[1], in[2], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::MinusDi, in, 3, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -697,6 +845,10 @@ ctStatus_t ct_minus_di_batch_d(const float *d_highs, const float *d_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_minus_di_d(in[0], in[1], in[2], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::MinusDi, in, 3, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -710,6 +862,9 @@ ctStatus_t ct_willr_batch(const float *host_highs, const float *host_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_willr_d(in[0], in[1], in[2], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_willr_d(in[0], in[1], in[2], out[0], n, period, s);
         });
 }
 
@@ -723,6 +878,9 @@ ctStatus_t ct_willr_batch_d(const float *d_highs, const float *d_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_willr_d(in[0], in[1], in[2], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_willr_d(in[0], in[1], in[2], out[0], n, period, s);
         });
 }
 
@@ -736,6 +894,9 @@ ctStatus_t ct_cci_batch(const float *host_highs, const float *host_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cci_d(in[0], in[1], in[2], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cci_d(in[0], in[1], in[2], out[0], n, period, s);
         });
 }
 
@@ -749,6 +910,9 @@ ctStatus_t ct_cci_batch_d(const float *d_highs, const float *d_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cci_d(in[0], in[1], in[2], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cci_d(in[0], in[1], in[2], out[0], n, period, s);
         });
 }
 
@@ -762,6 +926,9 @@ ctStatus_t ct_trange_batch(const float *host_highs, const float *host_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_trange_d(in[0], in[1], in[2], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_trange_d(in[0], in[1], in[2], out[0], n, s);
         });
 }
 
@@ -775,6 +942,9 @@ ctStatus_t ct_trange_batch_d(const float *d_highs, const float *d_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_trange_d(in[0], in[1], in[2], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_trange_d(in[0], in[1], in[2], out[0], n, s);
         });
 }
 
@@ -788,6 +958,9 @@ ctStatus_t ct_typprice_batch(const float *host_highs, const float *host_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_typprice_d(in[0], in[1], in[2], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 0),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_typprice_d(in[0], in[1], in[2], out[0], n, s);
         });
 }
 
@@ -801,6 +974,9 @@ ctStatus_t ct_typprice_batch_d(const float *d_highs, const float *d_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_typprice_d(in[0], in[1], in[2], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 0),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_typprice_d(in[0], in[1], in[2], out[0], n, s);
         });
 }
 
@@ -814,6 +990,9 @@ ctStatus_t ct_wclprice_batch(const float *host_highs, const float *host_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_wclprice_d(in[0], in[1], in[2], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 0),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_wclprice_d(in[0], in[1], in[2], out[0], n, s);
         });
 }
 
@@ -827,6 +1006,9 @@ ctStatus_t ct_wclprice_batch_d(const float *d_highs, const float *d_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_wclprice_d(in[0], in[1], in[2], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 0),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_wclprice_d(in[0], in[1], in[2], out[0], n, s);
         });
 }
 
@@ -841,6 +1023,9 @@ ctStatus_t ct_ultosc_batch(const float *host_highs, const float *host_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ultosc_d(in[0], in[1], in[2], out[0], seriesLen, period1, period2, period3, s);
+        }, FusedCall{}, rows_flat(period1 > 0 && period2 > 0 && period3 > 0, std::max({period1, period2, period3})),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_ultosc_d(in[0], in[1], in[2], out[0], n, period1, period2, period3, s);
         });
 }
 
@@ -855,6 +1040,9 @@ ctStatus_t ct_ultosc_batch_d(const float *d_highs, const float *d_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ultosc_d(in[0], in[1], in[2], out[0], seriesLen, period1, period2, period3, s);
+        }, FusedCall{}, rows_flat(period1 > 0 && period2 > 0 && period3 > 0, std::max({period1, period2, period3})),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_ultosc_d(in[0], in[1], in[2], out[0], n, period1, period2, period3, s);
         });
 }
 
@@ -867,6 +1055,9 @@ ctStatus_t ct_medprice_batch(const float *host_highs, const float *host_lows,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_medprice_d(in[0], in[1], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 0),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_medprice_d(in[0], in[1], out[0], n, s);
         });
 }
 
@@ -879,6 +1070,9 @@ ctStatus_t ct_medprice_batch_d(const float *d_highs, const float *d_lows,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_medprice_d(in[0], in[1], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 0),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_medprice_d(in[0], in[1], out[0], n, s);
         });
 }
 
@@ -892,6 +1086,9 @@ ctStatus_t ct_aroonosc_batch(const float *host_highs, const float *host_lows,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_aroonosc_d(in[0], in[1], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_aroonosc_d(in[0], in[1], out[0], n, period, s);
         });
 }
 
@@ -905,6 +1102,9 @@ ctStatus_t ct_aroonosc_batch_d(const float *d_highs, const float *d_lows,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_aroonosc_d(in[0], in[1], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_aroonosc_d(in[0], in[1], out[0], n, period, s);
         });
 }
 
@@ -918,6 +1118,9 @@ ctStatus_t ct_aroon_batch(const float *host_highs, const float *host_lows,
         ins, 2, outs, 2, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_aroon_d(in[0], in[1], out[0], out[1], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_aroon_d(in[0], in[1], out[0], out[1], n, period, s);
         });
 }
 
@@ -931,6 +1134,9 @@ ctStatus_t ct_aroon_batch_d(const float *d_highs, const float *d_lows,
         ins, 2, outs, 2, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_aroon_d(in[0], in[1], out[0], out[1], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_aroon_d(in[0], in[1], out[0], out[1], n, period, s);
         });
 }
 
@@ -945,6 +1151,9 @@ ctStatus_t ct_stochf_batch(const float *host_highs, const float *host_lows,
         ins, 3, outs, 2, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_stochastic_fast_d(in[0], in[1], in[2], out[0], out[1], seriesLen, kPeriod, dPeriod, dMaType, s);
+        }, FusedCall{}, rows_flat(kPeriod > 0 && dPeriod > 0, static_cast<long long>(kPeriod) + dPeriod - 2),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_stochastic_fast_d(in[0], in[1], in[2], out[0], out[1], n, kPeriod, dPeriod, dMaType, s);
         });
 }
 
@@ -959,6 +1168,9 @@ ctStatus_t ct_stochf_batch_d(const float *d_highs, const float *d_lows,
         ins, 3, outs, 2, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_stochastic_fast_d(in[0], in[1], in[2], out[0], out[1], seriesLen, kPeriod, dPeriod, dMaType, s);
+        }, FusedCall{}, rows_flat(kPeriod > 0 && dPeriod > 0, static_cast<long long>(kPeriod) + dPeriod - 2),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_stochastic_fast_d(in[0], in[1], in[2], out[0], out[1], n, kPeriod, dPeriod, dMaType, s);
         });
 }
 
@@ -997,6 +1209,9 @@ ctStatus_t ct_accbands_batch(const float *host_highs, const float *host_lows,
         ins, 3, outs, 3, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_accbands_d(in[0], in[1], in[2], out[0], out[1], out[2], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0 && tacuda::detail::sma_direct_window(period), static_cast<long long>(period) - 1, 1LL << 14),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_accbands_d(in[0], in[1], in[2], out[0], out[1], out[2], n, period, s);
         });
 }
 
@@ -1011,6 +1226,9 @@ ctStatus_t ct_accbands_batch_d(const float *d_highs, const float *d_lows,
         ins, 3, outs, 3, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_accbands_d(in[0], in[1], in[2], out[0], out[1], out[2], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0 && tacuda::detail::sma_direct_window(period), static_cast<long long>(period) - 1, 1LL << 14),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_accbands_d(in[0], in[1], in[2], out[0], out[1], out[2], n, period, s);
         });
 }
 
@@ -1024,6 +1242,9 @@ ctStatus_t ct_avgprice_batch(const float *host_opens, const float *host_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_avgprice_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 0),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_avgprice_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -1037,6 +1258,9 @@ ctStatus_t ct_avgprice_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_avgprice_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 0),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_avgprice_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -1153,6 +1377,10 @@ ctStatus_t ct_trix_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_trix_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Trix, in, 1, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1165,6 +1393,10 @@ ctStatus_t ct_trix_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_trix_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Trix, in, 1, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1177,6 +1409,9 @@ ctStatus_t ct_change_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_change_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_change_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -1189,6 +1424,9 @@ ctStatus_t ct_change_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_change_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_change_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -1201,6 +1439,10 @@ ctStatus_t ct_midpoint_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_midpoint_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel(period > 0),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::midpoint_rows(in[0], out[0], seriesLen, numSeries, period, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1213,6 +1455,10 @@ ctStatus_t ct_midpoint_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_midpoint_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel(period > 0),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::midpoint_rows(in[0], out[0], seriesLen, numSeries, period, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1225,6 +1471,9 @@ ctStatus_t ct_avgdev_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_avgdev_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_avgdev_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -1237,6 +1486,9 @@ ctStatus_t ct_avgdev_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_avgdev_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_avgdev_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -1249,6 +1501,10 @@ ctStatus_t ct_maxindex_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_maxindex_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel(period > 0),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::max_index_rows(in[0], out[0], seriesLen, numSeries, period, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1261,6 +1517,10 @@ ctStatus_t ct_maxindex_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_maxindex_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel(period > 0),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::max_index_rows(in[0], out[0], seriesLen, numSeries, period, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1273,6 +1533,10 @@ ctStatus_t ct_minindex_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_minindex_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel(period > 0),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::min_index_rows(in[0], out[0], seriesLen, numSeries, period, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1285,6 +1549,10 @@ ctStatus_t ct_minindex_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_minindex_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel(period > 0),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::min_index_rows(in[0], out[0], seriesLen, numSeries, period, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1298,6 +1566,10 @@ ctStatus_t ct_apo_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_apo_d(in[0], out[0], seriesLen, fastPeriod, slowPeriod, s);
+        }, FusedCall{}, rows_kernel((fastPeriod > 0 && slowPeriod > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Apo, in, 1, out, 1, seriesLen, numSeries, {fastPeriod, slowPeriod}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1311,6 +1583,10 @@ ctStatus_t ct_apo_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_apo_d(in[0], out[0], seriesLen, fastPeriod, slowPeriod, s);
+        }, FusedCall{}, rows_kernel((fastPeriod > 0 && slowPeriod > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Apo, in, 1, out, 1, seriesLen, numSeries, {fastPeriod, slowPeriod}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1324,6 +1600,10 @@ ctStatus_t ct_ppo_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ppo_d(in[0], out[0], seriesLen, fastPeriod, slowPeriod, s);
+        }, FusedCall{}, rows_kernel((fastPeriod > 0 && slowPeriod > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Ppo, in, 1, out, 1, seriesLen, numSeries, {fastPeriod, slowPeriod}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1337,6 +1617,10 @@ ctStatus_t ct_ppo_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ppo_d(in[0], out[0], seriesLen, fastPeriod, slowPeriod, s);
+        }, FusedCall{}, rows_kernel((fastPeriod > 0 && slowPeriod > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Ppo, in, 1, out, 1, seriesLen, numSeries, {fastPeriod, slowPeriod}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1350,6 +1634,10 @@ ctStatus_t ct_pvo_batch(const float *host_volumes, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_pvo_d(in[0], out[0], seriesLen, fastPeriod, slowPeriod, s);
+        }, FusedCall{}, rows_kernel((fastPeriod > 0 && fastPeriod < slowPeriod) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Pvo, in, 1, out, 1, seriesLen, numSeries, {fastPeriod, slowPeriod}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1363,6 +1651,10 @@ ctStatus_t ct_pvo_batch_d(const float *d_volumes, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_pvo_d(in[0], out[0], seriesLen, fastPeriod, slowPeriod, s);
+        }, FusedCall{}, rows_kernel((fastPeriod > 0 && fastPeriod < slowPeriod) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Pvo, in, 1, out, 1, seriesLen, numSeries, {fastPeriod, slowPeriod}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1381,6 +1673,10 @@ ctStatus_t ct_ma_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ma_d(in[0], out[0], seriesLen, period, maType, s);
+        }, FusedCall{}, rows_kernel((period > 0 && period <= tacuda::detail::kShortWindow && maType >= 0 && maType <= 8 && maType != 7 && (maType != 8 || period >= 2)) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Ma, in, 1, out, 1, seriesLen, numSeries, {period, maType}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1399,6 +1695,10 @@ ctStatus_t ct_ma_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ma_d(in[0], out[0], seriesLen, period, maType, s);
+        }, FusedCall{}, rows_kernel((period > 0 && period <= tacuda::detail::kShortWindow && maType >= 0 && maType <= 8 && maType != 7 && (maType != 8 || period >= 2)) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Ma, in, 1, out, 1, seriesLen, numSeries, {period, maType}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1411,6 +1711,10 @@ ctStatus_t ct_ht_dcperiod_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ht_dcperiod_d(in[0], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::ht_dcperiod_rows(in[0], out[0], seriesLen, numSeries, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1423,6 +1727,10 @@ ctStatus_t ct_ht_dcperiod_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ht_dcperiod_d(in[0], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::ht_dcperiod_rows(in[0], out[0], seriesLen, numSeries, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1435,6 +1743,10 @@ ctStatus_t ct_ht_dcphase_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ht_dcphase_d(in[0], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::ht_dcphase_rows(in[0], out[0], seriesLen, numSeries, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1447,6 +1759,10 @@ ctStatus_t ct_ht_dcphase_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ht_dcphase_d(in[0], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::ht_dcphase_rows(in[0], out[0], seriesLen, numSeries, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1459,6 +1775,10 @@ ctStatus_t ct_ht_trendline_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ht_trendline_d(in[0], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::ht_trendline_rows(in[0], out[0], seriesLen, numSeries, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1471,6 +1791,10 @@ ctStatus_t ct_ht_trendline_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ht_trendline_d(in[0], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::ht_trendline_rows(in[0], out[0], seriesLen, numSeries, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1483,6 +1807,10 @@ ctStatus_t ct_ht_trendmode_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ht_trendmode_d(in[0], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::ht_trendmode_rows(in[0], out[0], seriesLen, numSeries, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1495,6 +1823,10 @@ ctStatus_t ct_ht_trendmode_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ht_trendmode_d(in[0], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::ht_trendmode_rows(in[0], out[0], seriesLen, numSeries, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1508,6 +1840,10 @@ ctStatus_t ct_stochrsi_batch(const float *host_inputs, float *host_fast_ks,
         ins, 1, outs, 2, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_stochrsi_d(in[0], out[0], out[1], seriesLen, rsiPeriod, kPeriod, dPeriod, s);
+        }, FusedCall{}, rows_kernel((rsiPeriod > 0 && kPeriod > 0 && kPeriod <= tacuda::detail::kShortWindow && dPeriod > 0 && dPeriod <= tacuda::detail::kShortWindow) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::StochRsi, in, 1, out, 2, seriesLen, numSeries, {rsiPeriod, kPeriod, dPeriod}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1521,6 +1857,10 @@ ctStatus_t ct_stochrsi_batch_d(const float *d_inputs, float *d_fast_ks,
         ins, 1, outs, 2, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_stochrsi_d(in[0], out[0], out[1], seriesLen, rsiPeriod, kPeriod, dPeriod, s);
+        }, FusedCall{}, rows_kernel((rsiPeriod > 0 && kPeriod > 0 && kPeriod <= tacuda::detail::kShortWindow && dPeriod > 0 && dPeriod <= tacuda::detail::kShortWindow) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::StochRsi, in, 1, out, 2, seriesLen, numSeries, {rsiPeriod, kPeriod, dPeriod}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1534,6 +1874,10 @@ ctStatus_t ct_macdfix_batch(const float *host_inputs, float *host_macds,
         ins, 1, outs, 3, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_macdfix_d(in[0], out[0], out[1], out[2], seriesLen, signalPeriod, s);
+        }, FusedCall{}, rows_kernel(signalPeriod > 0),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::macdfix_rows(in[0], out[0], out[1], out[2], seriesLen, numSeries, signalPeriod, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1547,6 +1891,10 @@ ctStatus_t ct_macdfix_batch_d(const float *d_inputs, float *d_macds,
         ins, 1, outs, 3, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_macdfix_d(in[0], out[0], out[1], out[2], seriesLen, signalPeriod, s);
+        }, FusedCall{}, rows_kernel(signalPeriod > 0),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::macdfix_rows(in[0], out[0], out[1], out[2], seriesLen, numSeries, signalPeriod, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1560,6 +1908,10 @@ ctStatus_t ct_mama_batch(const float *host_inputs, float *host_mamas,
         ins, 1, outs, 2, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_mama_d(in[0], out[0], out[1], seriesLen, fastLimit, slowLimit, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::mama_rows(in[0], out[0], out[1], seriesLen, numSeries, fastLimit, slowLimit, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1573,6 +1925,10 @@ ctStatus_t ct_mama_batch_d(const float *d_inputs, float *d_mamas,
         ins, 1, outs, 2, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_mama_d(in[0], out[0], out[1], seriesLen, fastLimit, slowLimit, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::mama_rows(in[0], out[0], out[1], seriesLen, numSeries, fastLimit, slowLimit, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1585,6 +1941,9 @@ ctStatus_t ct_minmax_batch(const float *host_inputs, float *host_mins,
         ins, 1, outs, 2, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_minmax_d(in[0], out[0], out[1], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_minmax_d(in[0], out[0], out[1], n, period, s);
         });
 }
 
@@ -1598,6 +1957,9 @@ ctStatus_t ct_minmax_batch_d(const float *d_inputs, float *d_mins,
         ins, 1, outs, 2, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_minmax_d(in[0], out[0], out[1], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_minmax_d(in[0], out[0], out[1], n, period, s);
         });
 }
 
@@ -1611,6 +1973,10 @@ ctStatus_t ct_minmaxindex_batch(const float *host_inputs, float *host_minidxs,
         ins, 1, outs, 2, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_minmaxindex_d(in[0], out[0], out[1], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel(period > 0),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::min_max_index_rows(in[0], out[0], out[1], seriesLen, numSeries, period, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1624,6 +1990,10 @@ ctStatus_t ct_minmaxindex_batch_d(const float *d_inputs, float *d_minidxs,
         ins, 1, outs, 2, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_minmaxindex_d(in[0], out[0], out[1], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel(period > 0),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::min_max_index_rows(in[0], out[0], out[1], seriesLen, numSeries, period, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1637,6 +2007,10 @@ ctStatus_t ct_ht_phasor_batch(const float *host_inputs, float *host_inphases,
         ins, 1, outs, 2, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ht_phasor_d(in[0], out[0], out[1], seriesLen, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::ht_phasor_rows(in[0], out[0], out[1], seriesLen, numSeries, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1650,6 +2024,10 @@ ctStatus_t ct_ht_phasor_batch_d(const float *d_inputs, float *d_inphases,
         ins, 1, outs, 2, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ht_phasor_d(in[0], out[0], out[1], seriesLen, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::ht_phasor_rows(in[0], out[0], out[1], seriesLen, numSeries, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1663,6 +2041,10 @@ ctStatus_t ct_ht_sine_batch(const float *host_inputs, float *host_sines,
         ins, 1, outs, 2, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ht_sine_d(in[0], out[0], out[1], seriesLen, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::ht_sine_rows(in[0], out[0], out[1], seriesLen, numSeries, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1675,6 +2057,10 @@ ctStatus_t ct_ht_sine_batch_d(const float *d_inputs, float *d_sines,
         ins, 1, outs, 2, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_ht_sine_d(in[0], out[0], out[1], seriesLen, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::ht_sine_rows(in[0], out[0], out[1], seriesLen, numSeries, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1688,6 +2074,10 @@ ctStatus_t ct_macd_line_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_macd_line_d(in[0], out[0], seriesLen, fastPeriod, slowPeriod, s);
+        }, FusedCall{}, rows_kernel((fastPeriod > 0 && slowPeriod > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::MacdLine, in, 1, out, 1, seriesLen, numSeries, {fastPeriod, slowPeriod}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1701,6 +2091,10 @@ ctStatus_t ct_macd_line_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_macd_line_d(in[0], out[0], seriesLen, fastPeriod, slowPeriod, s);
+        }, FusedCall{}, rows_kernel((fastPeriod > 0 && slowPeriod > 0) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::MacdLine, in, 1, out, 1, seriesLen, numSeries, {fastPeriod, slowPeriod}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1714,6 +2108,9 @@ ctStatus_t ct_midprice_batch(const float *host_highs, const float *host_lows,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_midprice_d(in[0], in[1], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_midprice_d(in[0], in[1], out[0], n, period, s);
         });
 }
 
@@ -1727,6 +2124,9 @@ ctStatus_t ct_midprice_batch_d(const float *d_highs, const float *d_lows,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_midprice_d(in[0], in[1], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_midprice_d(in[0], in[1], out[0], n, period, s);
         });
 }
 
@@ -1740,6 +2140,10 @@ ctStatus_t ct_plus_dm_batch(const float *host_highs, const float *host_lows,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_plus_dm_d(in[0], in[1], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((tacuda::detail::short_float_wilder(seriesLen, period)) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::PlusDm, in, 2, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1753,6 +2157,10 @@ ctStatus_t ct_plus_dm_batch_d(const float *d_highs, const float *d_lows,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_plus_dm_d(in[0], in[1], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((tacuda::detail::short_float_wilder(seriesLen, period)) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::PlusDm, in, 2, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1766,6 +2174,10 @@ ctStatus_t ct_minus_dm_batch(const float *host_highs, const float *host_lows,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_minus_dm_d(in[0], in[1], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((tacuda::detail::short_float_wilder(seriesLen, period)) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::MinusDm, in, 2, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1779,6 +2191,10 @@ ctStatus_t ct_minus_dm_batch_d(const float *d_highs, const float *d_lows,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_minus_dm_d(in[0], in[1], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((tacuda::detail::short_float_wilder(seriesLen, period)) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::MinusDm, in, 2, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1792,6 +2208,10 @@ ctStatus_t ct_sar_batch(const float *host_highs, const float *host_lows,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_sar_d(in[0], in[1], out[0], seriesLen, step, maxAcceleration, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::sar_rows(in[0], in[1], out[0], seriesLen, numSeries, step, maxAcceleration, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1805,6 +2225,10 @@ ctStatus_t ct_sar_batch_d(const float *d_highs, const float *d_lows,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_sar_d(in[0], in[1], out[0], seriesLen, step, maxAcceleration, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::sar_rows(in[0], in[1], out[0], seriesLen, numSeries, step, maxAcceleration, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1821,6 +2245,10 @@ ctStatus_t ct_sarext_batch(const float *host_highs, const float *host_lows,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_sarext_d(in[0], in[1], out[0], seriesLen, startValue, offsetOnReverse, accInitLong, accLong, accMaxLong, accInitShort, accShort, accMaxShort, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::sarext_rows(in[0], in[1], out[0], seriesLen, numSeries, startValue, offsetOnReverse, accInitLong, accLong, accMaxLong, accInitShort, accShort, accMaxShort, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1837,6 +2265,10 @@ ctStatus_t ct_sarext_batch_d(const float *d_highs, const float *d_lows,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_sarext_d(in[0], in[1], out[0], seriesLen, startValue, offsetOnReverse, accInitLong, accLong, accMaxLong, accInitShort, accShort, accMaxShort, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::sarext_rows(in[0], in[1], out[0], seriesLen, numSeries, startValue, offsetOnReverse, accInitLong, accLong, accMaxLong, accInitShort, accShort, accMaxShort, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1849,6 +2281,10 @@ ctStatus_t ct_imi_batch(const float *host_opens, const float *host_closes,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_imi_d(in[0], in[1], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period >= 2 && period <= tacuda::detail::kShortWindow) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Imi, in, 2, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1861,6 +2297,10 @@ ctStatus_t ct_imi_batch_d(const float *d_opens, const float *d_closes,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_imi_d(in[0], in[1], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period >= 2 && period <= tacuda::detail::kShortWindow) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Imi, in, 2, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1873,6 +2313,10 @@ ctStatus_t ct_nvi_batch(const float *host_closes, const float *host_volumes,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_nvi_d(in[0], in[1], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel((true) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Nvi, in, 2, out, 1, seriesLen, numSeries, {}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1885,6 +2329,10 @@ ctStatus_t ct_nvi_batch_d(const float *d_closes, const float *d_volumes,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_nvi_d(in[0], in[1], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel((true) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Nvi, in, 2, out, 1, seriesLen, numSeries, {}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1897,6 +2345,10 @@ ctStatus_t ct_pvi_batch(const float *host_closes, const float *host_volumes,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_pvi_d(in[0], in[1], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel((true) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Pvi, in, 2, out, 1, seriesLen, numSeries, {}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1909,6 +2361,10 @@ ctStatus_t ct_pvi_batch_d(const float *d_closes, const float *d_volumes,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_pvi_d(in[0], in[1], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel((true) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Pvi, in, 2, out, 1, seriesLen, numSeries, {}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1921,6 +2377,10 @@ ctStatus_t ct_correl_batch(const float *host_xs, const float *host_ys,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_correl_d(in[0], in[1], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0 && period <= tacuda::detail::kShortWindow) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Correl, in, 2, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1934,6 +2394,10 @@ ctStatus_t ct_correl_batch_d(const float *d_xs, const float *d_ys,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_correl_d(in[0], in[1], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0 && period <= tacuda::detail::kShortWindow) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Correl, in, 2, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1946,6 +2410,10 @@ ctStatus_t ct_beta_batch(const float *host_xs, const float *host_ys,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_beta_d(in[0], in[1], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0 && period <= tacuda::detail::kShortWindow) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Beta, in, 2, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1958,6 +2426,10 @@ ctStatus_t ct_beta_batch_d(const float *d_xs, const float *d_ys,
         ins, 2, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_beta_d(in[0], in[1], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0 && period <= tacuda::detail::kShortWindow) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Beta, in, 2, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -1991,6 +2463,9 @@ ctStatus_t ct_bop_batch(const float *host_opens, const float *host_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_bop_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 0),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_bop_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2004,6 +2479,9 @@ ctStatus_t ct_bop_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_bop_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 0),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_bop_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2017,6 +2495,9 @@ ctStatus_t ct_cdl_doji_batch(const float *host_opens, const float *host_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_doji_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_doji_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2030,6 +2511,9 @@ ctStatus_t ct_cdl_doji_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_doji_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_doji_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2044,6 +2528,9 @@ ctStatus_t ct_cdl_hammer_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_hammer_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_hammer_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2058,6 +2545,9 @@ ctStatus_t ct_cdl_hammer_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_hammer_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_hammer_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2074,6 +2564,9 @@ ctStatus_t ct_cdl_inverted_hammer_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_inverted_hammer_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_inverted_hammer_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2090,6 +2583,9 @@ ctStatus_t ct_cdl_inverted_hammer_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_inverted_hammer_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_inverted_hammer_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2106,6 +2602,9 @@ ctStatus_t ct_cdl_bullish_engulfing_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_bullish_engulfing_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_bullish_engulfing_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2122,6 +2621,9 @@ ctStatus_t ct_cdl_bullish_engulfing_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_bullish_engulfing_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_bullish_engulfing_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2138,6 +2640,9 @@ ctStatus_t ct_cdl_bearish_engulfing_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_bearish_engulfing_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_bearish_engulfing_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2154,6 +2659,9 @@ ctStatus_t ct_cdl_bearish_engulfing_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_bearish_engulfing_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_bearish_engulfing_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2171,6 +2679,9 @@ ctStatus_t ct_cdl_three_white_soldiers_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_three_white_soldiers_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_three_white_soldiers_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2188,6 +2699,9 @@ ctStatus_t ct_cdl_three_white_soldiers_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_three_white_soldiers_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_three_white_soldiers_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2204,6 +2718,9 @@ ctStatus_t ct_cdl_abandoned_baby_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_abandoned_baby_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_abandoned_baby_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2220,6 +2737,9 @@ ctStatus_t ct_cdl_abandoned_baby_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_abandoned_baby_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_abandoned_baby_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2236,6 +2756,9 @@ ctStatus_t ct_cdl_advance_block_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_advance_block_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_advance_block_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2252,6 +2775,9 @@ ctStatus_t ct_cdl_advance_block_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_advance_block_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_advance_block_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2268,6 +2794,9 @@ ctStatus_t ct_cdl_belt_hold_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_belt_hold_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_belt_hold_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2282,6 +2811,9 @@ ctStatus_t ct_cdl_belt_hold_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_belt_hold_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_belt_hold_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2298,6 +2830,9 @@ ctStatus_t ct_cdl_breakaway_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_breakaway_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 14),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_breakaway_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2312,6 +2847,9 @@ ctStatus_t ct_cdl_breakaway_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_breakaway_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 14),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_breakaway_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2328,6 +2866,9 @@ ctStatus_t ct_cdl_two_crows_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_two_crows_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_two_crows_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2342,6 +2883,9 @@ ctStatus_t ct_cdl_two_crows_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_two_crows_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_two_crows_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2358,6 +2902,9 @@ ctStatus_t ct_cdl_three_black_crows_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_three_black_crows_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 13),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_three_black_crows_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2374,6 +2921,9 @@ ctStatus_t ct_cdl_three_black_crows_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_three_black_crows_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 13),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_three_black_crows_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2390,6 +2940,9 @@ ctStatus_t ct_cdl_three_inside_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_three_inside_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_three_inside_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2405,6 +2958,9 @@ ctStatus_t ct_cdl_three_inside_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_three_inside_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_three_inside_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2421,6 +2977,9 @@ ctStatus_t ct_cdl_three_outside_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_three_outside_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 3),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_three_outside_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2437,6 +2996,9 @@ ctStatus_t ct_cdl_three_outside_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_three_outside_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 3),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_three_outside_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2453,6 +3015,9 @@ ctStatus_t ct_cdl_three_line_strike_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_three_line_strike_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 8),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_three_line_strike_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2469,6 +3034,9 @@ ctStatus_t ct_cdl_three_line_strike_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_three_line_strike_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 8),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_three_line_strike_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2486,6 +3054,9 @@ ctStatus_t ct_cdl_three_stars_in_south_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_three_stars_in_south_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_three_stars_in_south_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2503,6 +3074,9 @@ ctStatus_t ct_cdl_three_stars_in_south_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_three_stars_in_south_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_three_stars_in_south_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2519,6 +3093,9 @@ ctStatus_t ct_cdl_closing_marubozu_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_closing_marubozu_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_closing_marubozu_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2535,6 +3112,9 @@ ctStatus_t ct_cdl_closing_marubozu_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_closing_marubozu_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_closing_marubozu_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2552,6 +3132,9 @@ ctStatus_t ct_cdl_conceal_baby_swallow_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_conceal_baby_swallow_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 13),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_conceal_baby_swallow_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2569,6 +3152,9 @@ ctStatus_t ct_cdl_conceal_baby_swallow_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_conceal_baby_swallow_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 13),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_conceal_baby_swallow_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2585,6 +3171,9 @@ ctStatus_t ct_cdl_counterattack_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_counterattack_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_counterattack_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2601,6 +3190,9 @@ ctStatus_t ct_cdl_counterattack_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_counterattack_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_counterattack_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2617,6 +3209,9 @@ ctStatus_t ct_cdl_dark_cloud_cover_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_dark_cloud_cover_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_dark_cloud_cover_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2633,6 +3228,9 @@ ctStatus_t ct_cdl_dark_cloud_cover_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_dark_cloud_cover_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_dark_cloud_cover_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2649,6 +3247,9 @@ ctStatus_t ct_cdl_doji_star_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_doji_star_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_doji_star_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2663,6 +3264,9 @@ ctStatus_t ct_cdl_doji_star_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_doji_star_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_doji_star_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2679,6 +3283,9 @@ ctStatus_t ct_cdl_dragonfly_doji_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_dragonfly_doji_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_dragonfly_doji_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2695,6 +3302,9 @@ ctStatus_t ct_cdl_dragonfly_doji_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_dragonfly_doji_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_dragonfly_doji_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2711,6 +3321,9 @@ ctStatus_t ct_cdl_engulfing_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_engulfing_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 2),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_engulfing_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2725,6 +3338,9 @@ ctStatus_t ct_cdl_engulfing_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_engulfing_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 2),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_engulfing_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2741,6 +3357,9 @@ ctStatus_t ct_cdl_evening_doji_star_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_evening_doji_star_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_evening_doji_star_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2757,6 +3376,9 @@ ctStatus_t ct_cdl_evening_doji_star_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_evening_doji_star_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_evening_doji_star_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2773,6 +3395,9 @@ ctStatus_t ct_cdl_evening_star_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_evening_star_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_evening_star_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2788,6 +3413,9 @@ ctStatus_t ct_cdl_evening_star_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_evening_star_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_evening_star_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2804,6 +3432,9 @@ ctStatus_t ct_cdl_gap_side_side_white_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_gap_side_side_white_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 7),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_gap_side_side_white_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2821,6 +3452,9 @@ ctStatus_t ct_cdl_gap_side_side_white_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_gap_side_side_white_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 7),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_gap_side_side_white_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2837,6 +3471,9 @@ ctStatus_t ct_cdl_gravestone_doji_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_gravestone_doji_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_gravestone_doji_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2853,6 +3490,9 @@ ctStatus_t ct_cdl_gravestone_doji_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_gravestone_doji_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_gravestone_doji_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2869,6 +3509,9 @@ ctStatus_t ct_cdl_hanging_man_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_hanging_man_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_hanging_man_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2884,6 +3527,9 @@ ctStatus_t ct_cdl_hanging_man_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_hanging_man_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_hanging_man_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2898,6 +3544,9 @@ ctStatus_t ct_cdl_harami_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_harami_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_harami_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2912,6 +3561,9 @@ ctStatus_t ct_cdl_harami_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_harami_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_harami_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2928,6 +3580,9 @@ ctStatus_t ct_cdl_harami_cross_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_harami_cross_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_harami_cross_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2943,6 +3598,9 @@ ctStatus_t ct_cdl_harami_cross_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_harami_cross_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_harami_cross_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2959,6 +3617,9 @@ ctStatus_t ct_cdl_high_wave_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_high_wave_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_high_wave_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2973,6 +3634,9 @@ ctStatus_t ct_cdl_high_wave_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_high_wave_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_high_wave_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -2988,6 +3652,9 @@ ctStatus_t ct_cdl_hikkake_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_hikkake_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 5),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_hikkake_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3002,6 +3669,9 @@ ctStatus_t ct_cdl_hikkake_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_hikkake_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 5),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_hikkake_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3018,6 +3688,9 @@ ctStatus_t ct_cdl_hikkake_mod_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_hikkake_mod_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_hikkake_mod_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3033,6 +3706,9 @@ ctStatus_t ct_cdl_hikkake_mod_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_hikkake_mod_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_hikkake_mod_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3049,6 +3725,9 @@ ctStatus_t ct_cdl_homing_pigeon_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_homing_pigeon_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_homing_pigeon_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3065,6 +3744,9 @@ ctStatus_t ct_cdl_homing_pigeon_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_homing_pigeon_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_homing_pigeon_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3082,6 +3764,9 @@ ctStatus_t ct_cdl_identical_three_crows_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_identical_three_crows_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_identical_three_crows_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3099,6 +3784,9 @@ ctStatus_t ct_cdl_identical_three_crows_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_identical_three_crows_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_identical_three_crows_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3114,6 +3802,9 @@ ctStatus_t ct_cdl_in_neck_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_in_neck_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_in_neck_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3128,6 +3819,9 @@ ctStatus_t ct_cdl_in_neck_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_in_neck_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_in_neck_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3143,6 +3837,9 @@ ctStatus_t ct_cdl_kicking_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_kicking_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_kicking_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3157,6 +3854,9 @@ ctStatus_t ct_cdl_kicking_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_kicking_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_kicking_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3173,6 +3873,9 @@ ctStatus_t ct_cdl_kicking_by_length_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_kicking_by_length_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_kicking_by_length_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3189,6 +3892,9 @@ ctStatus_t ct_cdl_kicking_by_length_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_kicking_by_length_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_kicking_by_length_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3205,6 +3911,9 @@ ctStatus_t ct_cdl_ladder_bottom_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_ladder_bottom_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 14),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_ladder_bottom_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3221,6 +3930,9 @@ ctStatus_t ct_cdl_ladder_bottom_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_ladder_bottom_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 14),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_ladder_bottom_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3237,6 +3949,9 @@ ctStatus_t ct_cdl_long_legged_doji_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_long_legged_doji_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_long_legged_doji_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3253,6 +3968,9 @@ ctStatus_t ct_cdl_long_legged_doji_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_long_legged_doji_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_long_legged_doji_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3269,6 +3987,9 @@ ctStatus_t ct_cdl_long_line_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_long_line_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_long_line_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3283,6 +4004,9 @@ ctStatus_t ct_cdl_long_line_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_long_line_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_long_line_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3298,6 +4022,9 @@ ctStatus_t ct_cdl_marubozu_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_marubozu_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_marubozu_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3312,6 +4039,9 @@ ctStatus_t ct_cdl_marubozu_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_marubozu_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_marubozu_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3328,6 +4058,9 @@ ctStatus_t ct_cdl_matching_low_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_matching_low_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 6),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_matching_low_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3343,6 +4076,9 @@ ctStatus_t ct_cdl_matching_low_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_matching_low_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 6),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_matching_low_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3358,6 +4094,9 @@ ctStatus_t ct_cdl_mat_hold_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_mat_hold_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 14),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_mat_hold_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3372,6 +4111,9 @@ ctStatus_t ct_cdl_mat_hold_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_mat_hold_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 14),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_mat_hold_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3388,6 +4130,9 @@ ctStatus_t ct_cdl_morning_doji_star_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_morning_doji_star_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_morning_doji_star_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3404,6 +4149,9 @@ ctStatus_t ct_cdl_morning_doji_star_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_morning_doji_star_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_morning_doji_star_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3420,6 +4168,9 @@ ctStatus_t ct_cdl_morning_star_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_morning_star_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_morning_star_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3435,6 +4186,9 @@ ctStatus_t ct_cdl_morning_star_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_morning_star_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_morning_star_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3450,6 +4204,9 @@ ctStatus_t ct_cdl_on_neck_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_on_neck_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_on_neck_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3464,6 +4221,9 @@ ctStatus_t ct_cdl_on_neck_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_on_neck_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_on_neck_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3479,6 +4239,9 @@ ctStatus_t ct_cdl_piercing_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_piercing_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_piercing_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3493,6 +4256,9 @@ ctStatus_t ct_cdl_piercing_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_piercing_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_piercing_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3509,6 +4275,9 @@ ctStatus_t ct_cdl_rickshaw_man_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_rickshaw_man_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_rickshaw_man_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3524,6 +4293,9 @@ ctStatus_t ct_cdl_rickshaw_man_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_rickshaw_man_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_rickshaw_man_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3540,6 +4312,9 @@ ctStatus_t ct_cdl_rise_fall3_methods_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_rise_fall3_methods_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 14),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_rise_fall3_methods_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3556,6 +4331,9 @@ ctStatus_t ct_cdl_rise_fall3_methods_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_rise_fall3_methods_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 14),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_rise_fall3_methods_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3572,6 +4350,9 @@ ctStatus_t ct_cdl_separating_lines_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_separating_lines_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_separating_lines_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3588,6 +4369,9 @@ ctStatus_t ct_cdl_separating_lines_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_separating_lines_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_separating_lines_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3604,6 +4388,9 @@ ctStatus_t ct_cdl_shooting_star_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_shooting_star_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_shooting_star_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3620,6 +4407,9 @@ ctStatus_t ct_cdl_shooting_star_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_shooting_star_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_shooting_star_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3636,6 +4426,9 @@ ctStatus_t ct_cdl_short_line_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_short_line_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_short_line_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3650,6 +4443,9 @@ ctStatus_t ct_cdl_short_line_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_short_line_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_short_line_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3666,6 +4462,9 @@ ctStatus_t ct_cdl_spinning_top_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_spinning_top_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_spinning_top_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3681,6 +4480,9 @@ ctStatus_t ct_cdl_spinning_top_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_spinning_top_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_spinning_top_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3697,6 +4499,9 @@ ctStatus_t ct_cdl_stalled_pattern_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_stalled_pattern_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_stalled_pattern_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3713,6 +4518,9 @@ ctStatus_t ct_cdl_stalled_pattern_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_stalled_pattern_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_stalled_pattern_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3729,6 +4537,9 @@ ctStatus_t ct_cdl_stick_sandwich_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_stick_sandwich_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 7),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_stick_sandwich_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3745,6 +4556,9 @@ ctStatus_t ct_cdl_stick_sandwich_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_stick_sandwich_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 7),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_stick_sandwich_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3759,6 +4573,9 @@ ctStatus_t ct_cdl_takuri_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_takuri_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_takuri_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3773,6 +4590,9 @@ ctStatus_t ct_cdl_takuri_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_takuri_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_takuri_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3789,6 +4609,9 @@ ctStatus_t ct_cdl_tasuki_gap_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_tasuki_gap_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 7),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_tasuki_gap_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3803,6 +4626,9 @@ ctStatus_t ct_cdl_tasuki_gap_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_tasuki_gap_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 7),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_tasuki_gap_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3819,6 +4645,9 @@ ctStatus_t ct_cdl_thrusting_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_thrusting_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_thrusting_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3833,6 +4662,9 @@ ctStatus_t ct_cdl_thrusting_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_thrusting_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 11),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_thrusting_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3848,6 +4680,9 @@ ctStatus_t ct_cdl_tristar_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_tristar_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_tristar_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3862,6 +4697,9 @@ ctStatus_t ct_cdl_tristar_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_tristar_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_tristar_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3878,6 +4716,9 @@ ctStatus_t ct_cdl_unique_3_river_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_unique_3_river_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_unique_3_river_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3894,6 +4735,9 @@ ctStatus_t ct_cdl_unique_3_river_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_unique_3_river_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_unique_3_river_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3910,6 +4754,9 @@ ctStatus_t ct_cdl_upside_gap_2_crows_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_upside_gap_2_crows_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_upside_gap_2_crows_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3926,6 +4773,9 @@ ctStatus_t ct_cdl_upside_gap_2_crows_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_upside_gap_2_crows_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 12),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_upside_gap_2_crows_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3942,6 +4792,9 @@ ctStatus_t ct_cdl_xside_gap_3_methods_batch(const float *host_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_xside_gap_3_methods_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 2),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_xside_gap_3_methods_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3959,6 +4812,9 @@ ctStatus_t ct_cdl_xside_gap_3_methods_batch_d(const float *d_opens,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_cdl_xside_gap_3_methods_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_flat(true, 2),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_cdl_xside_gap_3_methods_d(in[0], in[1], in[2], in[3], out[0], n, s);
         });
 }
 
@@ -3972,6 +4828,10 @@ ctStatus_t ct_asi_batch(const float *host_opens, const float *host_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_asi_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel((true) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Asi, in, 4, out, 1, seriesLen, numSeries, {}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -3985,6 +4845,10 @@ ctStatus_t ct_asi_batch_d(const float *d_opens, const float *d_highs,
         ins, 4, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_asi_d(in[0], in[1], in[2], in[3], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel((true) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Asi, in, 4, out, 1, seriesLen, numSeries, {}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -4011,6 +4875,10 @@ ctStatus_t ct_sar_el_batch(const float *host_highs, const float *host_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_sar_el_d(in[0], in[1], in[2], out[0], seriesLen, accFact, maxAccel, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::sar_el_rows(in[0], in[1], in[2], out[0], seriesLen, numSeries, accFact, maxAccel, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -4025,6 +4893,10 @@ ctStatus_t ct_sar_el_batch_d(const float *d_highs, const float *d_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_sar_el_d(in[0], in[1], in[2], out[0], seriesLen, accFact, maxAccel, s);
+        }, FusedCall{}, rows_kernel(true),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::sar_el_rows(in[0], in[1], in[2], out[0], seriesLen, numSeries, accFact, maxAccel, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -4050,6 +4922,10 @@ ctStatus_t ct_obtr_batch(const float *host_highs, const float *host_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_obtr_d(in[0], in[1], in[2], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel((true) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Obtr, in, 3, out, 1, seriesLen, numSeries, {}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -4063,6 +4939,10 @@ ctStatus_t ct_obtr_batch_d(const float *d_highs, const float *d_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_obtr_d(in[0], in[1], in[2], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel((true) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Obtr, in, 3, out, 1, seriesLen, numSeries, {}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -4089,6 +4969,10 @@ ctStatus_t ct_wobv_batch(const float *host_opens, const float *host_highs,
         ins, 5, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_wobv_d(in[0], in[1], in[2], in[3], in[4], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel((true) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Wobv, in, 5, out, 1, seriesLen, numSeries, {}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -4103,6 +4987,10 @@ ctStatus_t ct_wobv_batch_d(const float *d_opens, const float *d_highs,
         ins, 5, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_wobv_d(in[0], in[1], in[2], in[3], in[4], out[0], seriesLen, s);
+        }, FusedCall{}, rows_kernel((true) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Wobv, in, 5, out, 1, seriesLen, numSeries, {}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -4129,6 +5017,10 @@ ctStatus_t ct_hpi_batch(const float *host_highs, const float *host_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_hpi_d(in[0], in[1], in[2], out[0], seriesLen, factor, s);
+        }, FusedCall{}, rows_kernel((factor > 0.0f && factor <= 1.0f) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Hpi, in, 3, out, 1, seriesLen, numSeries, {0, 0, 0, factor}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -4142,6 +5034,10 @@ ctStatus_t ct_hpi_batch_d(const float *d_highs, const float *d_lows,
         ins, 3, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_hpi_d(in[0], in[1], in[2], out[0], seriesLen, factor, s);
+        }, FusedCall{}, rows_kernel((factor > 0.0f && factor <= 1.0f) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Hpi, in, 3, out, 1, seriesLen, numSeries, {0, 0, 0, factor}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -4167,6 +5063,9 @@ ctStatus_t ct_market_strength_batch(const float *host_inputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_market_strength_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_market_strength_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -4179,6 +5078,9 @@ ctStatus_t ct_market_strength_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_market_strength_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period)),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_market_strength_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -4202,6 +5104,9 @@ ctStatus_t ct_trendscore_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_trendscore_d(in[0], out[0], seriesLen, lookback, s);
+        }, FusedCall{}, rows_flat(lookback >= 0, static_cast<long long>(lookback) + 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_trendscore_d(in[0], out[0], n, lookback, s);
         });
 }
 
@@ -4214,6 +5119,9 @@ ctStatus_t ct_trendscore_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_trendscore_d(in[0], out[0], seriesLen, lookback, s);
+        }, FusedCall{}, rows_flat(lookback >= 0, static_cast<long long>(lookback) + 10),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_trendscore_d(in[0], out[0], n, lookback, s);
         });
 }
 
@@ -4238,6 +5146,9 @@ ctStatus_t ct_refdev_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_refdev_d(in[0], out[0], seriesLen, smaPeriod, sumPeriod, s);
+        }, FusedCall{}, rows_flat(smaPeriod > 0 && sumPeriod > 0, static_cast<long long>(smaPeriod) + sumPeriod - 2),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_refdev_d(in[0], out[0], n, smaPeriod, sumPeriod, s);
         });
 }
 
@@ -4251,6 +5162,9 @@ ctStatus_t ct_refdev_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_refdev_d(in[0], out[0], seriesLen, smaPeriod, sumPeriod, s);
+        }, FusedCall{}, rows_flat(smaPeriod > 0 && sumPeriod > 0, static_cast<long long>(smaPeriod) + sumPeriod - 2),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_refdev_d(in[0], out[0], n, smaPeriod, sumPeriod, s);
         });
 }
 
@@ -4274,6 +5188,9 @@ ctStatus_t ct_skew_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_skew_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_skew_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -4286,6 +5203,9 @@ ctStatus_t ct_skew_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_skew_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_skew_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -4309,6 +5229,9 @@ ctStatus_t ct_kurtosis_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_kurtosis_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_kurtosis_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -4321,6 +5244,9 @@ ctStatus_t ct_kurtosis_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_kurtosis_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_kurtosis_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -4344,6 +5270,9 @@ ctStatus_t ct_pivot_high_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_pivot_high_d(in[0], out[0], seriesLen, strength, s);
+        }, FusedCall{}, rows_flat(strength > 0, 2LL * strength),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_pivot_high_d(in[0], out[0], n, strength, s);
         });
 }
 
@@ -4356,6 +5285,9 @@ ctStatus_t ct_pivot_high_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_pivot_high_d(in[0], out[0], seriesLen, strength, s);
+        }, FusedCall{}, rows_flat(strength > 0, 2LL * strength),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_pivot_high_d(in[0], out[0], n, strength, s);
         });
 }
 
@@ -4379,6 +5311,9 @@ ctStatus_t ct_pivot_low_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_pivot_low_d(in[0], out[0], seriesLen, strength, s);
+        }, FusedCall{}, rows_flat(strength > 0, 2LL * strength),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_pivot_low_d(in[0], out[0], n, strength, s);
         });
 }
 
@@ -4391,6 +5326,9 @@ ctStatus_t ct_pivot_low_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_pivot_low_d(in[0], out[0], seriesLen, strength, s);
+        }, FusedCall{}, rows_flat(strength > 0, 2LL * strength),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_pivot_low_d(in[0], out[0], n, strength, s);
         });
 }
 
@@ -4414,6 +5352,10 @@ ctStatus_t ct_xaverage_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_xaverage_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0 && period <= seriesLen) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Xaverage, in, 1, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -4426,6 +5368,10 @@ ctStatus_t ct_xaverage_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_xaverage_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_kernel((period > 0 && period <= seriesLen) && tacuda::detail::short_batch_shape(seriesLen, numSeries)),
+        [&](const float* const* in, float* const* out, int, cudaStream_t s) {
+            tacuda::detail::launch_short_rows(tacuda::detail::ShortFamily::Xaverage, in, 1, out, 1, seriesLen, numSeries, {period}, s);
+            return CT_STATUS_SUCCESS;
         });
 }
 
@@ -4449,6 +5395,9 @@ ctStatus_t ct_rolling_mean_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_rolling_mean_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_rolling_mean_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -4461,6 +5410,9 @@ ctStatus_t ct_rolling_mean_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_rolling_mean_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_rolling_mean_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -4484,6 +5436,9 @@ ctStatus_t ct_rolling_max_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_rolling_max_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_rolling_max_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -4496,6 +5451,9 @@ ctStatus_t ct_rolling_max_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_rolling_max_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_rolling_max_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -4519,6 +5477,9 @@ ctStatus_t ct_rolling_min_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_rolling_min_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_rolling_min_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -4531,6 +5492,9 @@ ctStatus_t ct_rolling_min_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_rolling_min_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_rolling_min_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -4554,6 +5518,9 @@ ctStatus_t ct_rolling_std_batch(const float *host_inputs, float *host_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_rolling_std_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_rolling_std_d(in[0], out[0], n, period, s);
         });
 }
 
@@ -4566,6 +5533,9 @@ ctStatus_t ct_rolling_std_batch_d(const float *d_inputs, float *d_outputs,
         ins, 1, outs, 1, seriesLen, numSeries, maxConcurrency, stream,
         [&](const float* const* in, float* const* out, cudaStream_t s) {
             return ct_rolling_std_d(in[0], out[0], seriesLen, period, s);
+        }, FusedCall{}, rows_flat(period > 0, static_cast<long long>(period) - 1),
+        [&](const float* const* in, float* const* out, int n, cudaStream_t s) {
+            return ct_rolling_std_d(in[0], out[0], n, period, s);
         });
 }
 

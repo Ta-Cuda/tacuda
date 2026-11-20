@@ -7,6 +7,7 @@
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
 #include <utils/AffineScan.cuh>
+#include <utils/LeadingNaN.cuh>
 #include <utils/TacudaConfig.h>
 #include <stdexcept>
 #include <cstdlib>
@@ -16,6 +17,7 @@
 
 // Affine pair type — always double for accumulation precision
 using AffinePairD = tacuda::detail::AffineTransform1<double>;
+// Share the transform allocation: its leading slot holds seed index and value.
 
 namespace {
 
@@ -50,20 +52,26 @@ static EMAKernelConfig& getCfg() {
 
 // ===================== Templated kernels =====================
 
-// TA-Lib compatible EMA seed: SMA of the first `period` samples written at
-// index (period-1). Subsequent samples follow the standard EMA recurrence.
+// Compute the SMA seed and its position without reading the input on the host.
 template<typename T>
 __global__ void emaInitSmaSeedKernel(const T* __restrict__ input,
-                                     T* __restrict__ output,
+                                     AffinePairD* __restrict__ seed,
                                      int period,
                                      int size) {
     extern __shared__ char smem_raw[];
     double* ssum = reinterpret_cast<double*>(smem_raw);
+    __shared__ int first;
     int tid = threadIdx.x;
+    if (tid == 0) first = tacuda::detail::leading_nan_count(input, size);
+    __syncthreads();
+    if (period > size - first) {
+        if (tid == 0) *seed = {static_cast<double>(size), 0.0};
+        return;
+    }
 
     double partial = 0.0;
-    for (int i = tid; i < period && i < size; i += blockDim.x) {
-        partial += static_cast<double>(input[i]);
+    for (int i = tid; i < period; i += blockDim.x) {
+        partial += static_cast<double>(input[first + i]);
     }
     ssum[tid] = partial;
     __syncthreads();
@@ -75,17 +83,18 @@ __global__ void emaInitSmaSeedKernel(const T* __restrict__ input,
         __syncthreads();
     }
 
-    if (tid == 0 && period <= size) {
-        output[period - 1] = static_cast<T>(ssum[0] / static_cast<double>(period));
+    if (tid == 0) {
+        *seed = {static_cast<double>(first + period - 1),
+                 static_cast<T>(ssum[0] / static_cast<double>(period))};
     }
 }
 
-// Build transforms (A,b) for EMA recurrence per index starting at (period-1)
-// pairs[0] = (1,0) identity keeps SMA seed; for j>=1, i = period-1 + j
-// pairs[j] = (1-alpha, alpha * x[i])
+// Keep transforms indexed from the nominal lookback for the parallel scan.
+// Until the row's actual seed index the transform is the identity.
 template<typename T>
 __global__ void emaBuildTransformsKernel(const T* __restrict__ input,
                                          AffinePairD* __restrict__ pairs,
+                                         const AffinePairD* __restrict__ seed,
                                          int period,
                                          int size,
                                          double alpha) {
@@ -93,11 +102,11 @@ __global__ void emaBuildTransformsKernel(const T* __restrict__ input,
     int tailLen = size - (period - 1);
     if (tailLen <= 0) return;
     if (tid >= tailLen) return;
-    if (tid == 0) {
-        pairs[0] = {1.0, 0.0};
+    const int i = period - 1 + tid;
+    if (i <= static_cast<int>(seed->A)) {
+        pairs[tid] = {1.0, 0.0};
         return;
     }
-    int i = (period - 1) + tid;
     double A = 1.0 - alpha;
     double b = alpha * static_cast<double>(input[i]);
     pairs[tid] = {A, b};
@@ -106,18 +115,18 @@ __global__ void emaBuildTransformsKernel(const T* __restrict__ input,
 // After inclusive scan over pairs with composition, finalize outputs
 template<typename T>
 __global__ void emaFinalizeFromPairsKernel(const AffinePairD* __restrict__ pairs,
+                                           const AffinePairD* __restrict__ seed,
                                            T* __restrict__ output,
                                            int period,
                                            int size) {
-    int tid = blockIdx.x * blockDim.x + threadIdx.x;
-    int tailLen = size - (period - 1);
-    if (tailLen <= 0) return;
-    if (tid >= tailLen) return;
-    double y0 = static_cast<double>(output[period - 1]);
-    AffinePairD pc = pairs[tid];
-    double y = pc.A * y0 + pc.b;
-    int i = (period - 1) + tid;
-    output[i] = static_cast<T>(y);
+    const size_t i = static_cast<size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+    if (i >= static_cast<size_t>(size)) return;
+    if (i < static_cast<size_t>(seed->A)) {
+        output[i] = static_cast<T>(nanf(""));
+        return;
+    }
+    const AffinePairD pc = pairs[i - (period - 1)];
+    output[i] = static_cast<T>(pc.A * seed->b + pc.b);
 }
 
 // ===================== Templated implementation =====================
@@ -134,20 +143,21 @@ void ema_calculate_impl(int period, const T* input, T* output, int size, cudaStr
         return;
     }
 
-    // Initialize warmup to NaN
-    CUDA_CHECK(cudaMemsetAsync(output, 0xFF, size * sizeof(T), stream));
-
     if (period == 1) {
         CUDA_CHECK(cudaMemcpyAsync(output, input, size * sizeof(T), cudaMemcpyDeviceToDevice, stream));
         return;
     }
 
-    // Seed with SMA of first 'period' values at index (period-1) (TA-Lib compatible)
+    const int tailLen = size - (period - 1);
+    auto storage = acquireDeviceBufferAsync<AffinePairD>(static_cast<size_t>(tailLen) + 1, stream);
+    auto* seed = storage.get();
+    auto* pairs = seed + 1;
+
     {
         dim3 block(getCfg().blockSize);
         dim3 grid(1);
         size_t shm = static_cast<size_t>(block.x) * sizeof(double);
-        emaInitSmaSeedKernel<T><<<grid, block, shm, stream>>>(input, output, period, size);
+        emaInitSmaSeedKernel<T><<<grid, block, shm, stream>>>(input, seed, period, size);
         CUDA_CHECK(cudaGetLastError());
     }
 
@@ -155,18 +165,15 @@ void ema_calculate_impl(int period, const T* input, T* output, int size, cudaStr
     double alpha = 2.0 / (static_cast<double>(period) + 1.0);
 
     {
-        int tailLen = size - (period - 1);
-        if (tailLen <= 0) return;
-        auto pairsBuf = acquireDeviceBufferAsync<AffinePairD>(tailLen, stream);
         dim3 b = defaultBlock();
         dim3 g = defaultGrid(tailLen);
-        emaBuildTransformsKernel<T><<<g, b, 0, stream>>>(input, pairsBuf.get(), period, size, alpha);
+        emaBuildTransformsKernel<T><<<g, b, 0, stream>>>(input, pairs, seed, period, size, alpha);
         CUDA_CHECK(cudaGetLastError());
 
         tacuda::detail::affine_inclusive_scan<AffinePairD, tacuda::detail::AffineCompose1<double>>(
-            pairsBuf.get(), pairsBuf.get(), tailLen, stream);
+            pairs, pairs, tailLen, stream);
 
-        emaFinalizeFromPairsKernel<T><<<g, b, 0, stream>>>(pairsBuf.get(), output, period, size);
+        emaFinalizeFromPairsKernel<T><<<defaultGrid(size), b, 0, stream>>>(pairs, seed, output, period, size);
         CUDA_CHECK(cudaGetLastError());
     }
 }

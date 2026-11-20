@@ -191,5 +191,39 @@ class SingleSeriesShapeTests(ContractTest):
         self.last_call("ct_sma_batch")
 
 
+class StreamHandleTests(ContractTest):
+    SERIES = [1.0, 2.0, 3.0, 4.0]
+
+    def test_ta_lib_style_ma_type_never_reaches_native(self):
+        # apo(real, fastperiod, slowperiod, matype) in TA-Lib; here the fourth
+        # parameter is the stream, and 3 used to crash the process.
+        for bad in (3, 8, 4095, 0xFFFF, -1):
+            with self.subTest(bad=bad), self.assertRaisesRegex(ValueError, "apo_ma"):
+                self.tacuda.apo(self.SERIES, 2, 3, bad)
+        self.assert_no_native_call()
+
+    def test_every_wrapper_kind_checks_the_handle(self):
+        calls = {
+            "generated": lambda: self.tacuda.apo(self.SERIES, 2, 3, stream=5),
+            "hand-written f32": lambda: self.tacuda.sma(self.SERIES, 2, stream=5),
+            "hand-written f64": lambda: self.tacuda.sma(self.SERIES, 2, stream=5, dtype="float64"),
+            "batch": lambda: self.tacuda.sma_batch([self.SERIES, self.SERIES], 2, stream=5),
+        }
+        for label, call in calls.items():
+            with self.subTest(label), self.assertRaises(ValueError):
+                call()
+        with self.assertRaises(TypeError):
+            self.tacuda.sma(self.SERIES, 2, stream=True)
+        self.assert_no_native_call()
+
+    def test_valid_handles_pass_through(self):
+        for handle in (None, 0, 1, 2, 0x10000, 0x7F00_0000_1000, ctypes.c_void_p(0x7F00_0000_2000)):
+            with self.subTest(handle=handle):
+                self.recorder.calls.clear()
+                self.tacuda.apo(self.SERIES, 2, 3, handle)
+                expected = scalar(handle) or None
+                self.assertEqual(scalar(self.last_call("ct_apo")[-1]), expected)
+
+
 if __name__ == "__main__":
     unittest.main()

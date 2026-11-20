@@ -4,6 +4,7 @@
 /*  SPDX-License-Identifier: Apache-2.0                                     */
 /* ======================================================================== */
 #include <indicators/HT_PHASOR.h>
+#include <utils/BatchRows.h>
 #include <utils/CudaUtils.h>
 #include <utils/HilbertCore.h>
 #include <cuda_runtime.h>
@@ -13,18 +14,14 @@ using namespace tacuda::hilbert;
 
 // Single-threaded GPU kernel - avoids CPU<->GPU data transfer overhead
 // Output: [inPhase[0..size-1], quadrature[0..size-1]]
-__global__ void htPhasorKernel(
+__device__ __forceinline__ void ht_phasor_row(
     const float* __restrict__ input,
-    float* __restrict__ output,  // [inPhase, quadrature] interleaved by size
+    float* __restrict__ outInPhase,
+    float* __restrict__ outQuadrature,
     int size
 ) {
-    if (blockIdx.x != 0 || threadIdx.x != 0) return;
-    
     const int lookbackTotal = 32;
     if (size <= lookbackTotal) return;
-    
-    float* outInPhase = output;
-    float* outQuadrature = output + size;
     
     // Initialize state
     HilbertState hs;
@@ -69,6 +66,35 @@ __global__ void htPhasorKernel(
         
         today++;
     }
+}
+
+__global__ void htPhasorKernel(
+    const float* __restrict__ input,
+    float* __restrict__ output,
+    int size
+) {
+    if (blockIdx.x != 0 || threadIdx.x != 0) return;
+    ht_phasor_row(input, output, output + size, size);
+}
+
+// Batch path: the same single-series state machine, one GPU thread per row.
+__global__ void htPhasorRowsKernel(const float* __restrict__ input, float* __restrict__ outInPhase, float* __restrict__ outQuadrature, int length, int series) {
+    for (size_t r = static_cast<size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+         r < static_cast<size_t>(series);
+         r += static_cast<size_t>(gridDim.x) * blockDim.x) {
+        const size_t off = r * static_cast<size_t>(length);
+        ht_phasor_row(input + off, outInPhase + off, outQuadrature + off, length);
+    }
+}
+
+void tacuda::detail::ht_phasor_rows(const float* in, float* inPhase, float* quadrature, int length, int series,
+        cudaStream_t stream) {
+    if (length <= 0 || series <= 0) return;
+    const size_t bytes = static_cast<size_t>(length) * series * sizeof(float);
+    CUDA_CHECK(cudaMemsetAsync(inPhase, 0xFF, bytes, stream));
+    CUDA_CHECK(cudaMemsetAsync(quadrature, 0xFF, bytes, stream));
+    htPhasorRowsKernel<<<row_blocks(series), kRowThreads, 0, stream>>>(in, inPhase, quadrature, length, series);
+    CUDA_CHECK(cudaGetLastError());
 }
 
 void tacuda::HT_PHASOR::calculate(const float* input, float* output, int size, cudaStream_t stream) noexcept(false) {

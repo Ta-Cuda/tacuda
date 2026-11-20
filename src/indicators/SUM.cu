@@ -4,70 +4,71 @@
 /*  SPDX-License-Identifier: Apache-2.0                                     */
 /* ======================================================================== */
 #include <indicators/SUM.h>
-#include <stdexcept>
-#include <thrust/device_ptr.h>
-#include <utils/ThrustPolicy.cuh>
-#include <thrust/execution_policy.h>
-#include <thrust/scan.h>
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
+#include <utils/DeterministicScan.cuh>
+#include <thrust/iterator/transform_iterator.h>
+#include <cfloat>
+#include <math_constants.h>
+#include <stdexcept>
 
-__global__ void castToDoubleKernel(const float *__restrict__ input,
-                                   double *__restrict__ out,
-                                   int size) {
-  int idx = blockIdx.x * blockDim.x + threadIdx.x;
-  if (idx < size) {
-    out[idx] = static_cast<double>(input[idx]);
-  }
+namespace {
+
+struct WindowSum {
+    double sum;
+    int nans;
+    int positiveInf;
+    int negativeInf;
+};
+
+struct ToWindowSum {
+    __host__ __device__ WindowSum operator()(float x) const {
+        if (x != x) return {0.0, 1, 0, 0};
+        if (x > FLT_MAX) return {0.0, 0, 1, 0};
+        if (x < -FLT_MAX) return {0.0, 0, 0, 1};
+        return {x, 0, 0, 0};
+    }
+};
+
+struct AddWindowSum {
+    __host__ __device__ WindowSum operator()(const WindowSum& a, const WindowSum& b) const {
+        return {a.sum + b.sum, a.nans + b.nans, a.positiveInf + b.positiveInf,
+                a.negativeInf + b.negativeInf};
+    }
+};
+
+__global__ void finishSum(const WindowSum* prefix, float* output, int period, int size) {
+    const size_t end = static_cast<size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+    if (end >= static_cast<size_t>(size)) return;
+    if (end < static_cast<size_t>(period - 1)) {
+        output[end] = __int_as_float(0xFFFFFFFF);
+        return;
+    }
+    const WindowSum a = prefix[end];
+    const WindowSum b = end >= static_cast<size_t>(period) ? prefix[end - period] : WindowSum{};
+    const bool positive = a.positiveInf != b.positiveInf;
+    const bool negative = a.negativeInf != b.negativeInf;
+    if (a.nans != b.nans || (positive && negative)) output[end] = nanf("");
+    else if (positive) output[end] = CUDART_INF_F;
+    else if (negative) output[end] = -CUDART_INF_F;
+    else output[end] = static_cast<float>(a.sum - b.sum);
 }
 
-// Double-precision variant to reduce accumulation error in long windows.
-// TA-Lib convention: the sum over [end-period+1, end] is reported at `end`,
-// with a leading warm-up of period-1 NaNs.
-__global__ void sumKernelPrefixD(const double *__restrict__ prefix,
-                                 float *__restrict__ output, int period,
-                                 int size) {
-  int end = blockIdx.x * blockDim.x + threadIdx.x;
-  if (end >= size) return;
-  if (end < period - 1) {
-    // Warm-up NaN written here instead of a separate memset (same pattern).
-    output[end] = __int_as_float(0xFFFFFFFF);
-    return;
-  }
-  int j = end - period + 1;
-  double prev = (j == 0) ? 0.0 : prefix[j - 1];
-  double sum = prefix[end] - prev;
-  output[end] = static_cast<float>(sum);
-}
+}  // namespace
 
 tacuda::SUM::SUM(int period) : period(period) {}
 
-void tacuda::SUM::calculate(const float *input, float *output,
-                    int size, cudaStream_t stream) noexcept(false) {
-  if (period <= 0) {
-      throw std::invalid_argument("SUM: invalid period");
-  }
-  if (period > size) {
-      // TA-Lib succeeds with zero output elements when the input is
-      // shorter than the lookback; the whole line is warm-up NaNs.
-      CUDA_CHECK(cudaMemsetAsync(output, 0xFF, static_cast<size_t>(size) * sizeof(float), stream));
-      return;
-  }
-  // No NaN pre-fill: sumKernelPrefixD writes every element.
+void tacuda::SUM::calculate(const float* input, float* output, int size, cudaStream_t stream) noexcept(false) {
+    if (period <= 0) throw std::invalid_argument("SUM: invalid period");
+    if (period > size) {
+        CUDA_CHECK(cudaMemsetAsync(output, 0xFF, static_cast<size_t>(size) * sizeof(float), stream));
+        return;
+    }
 
-  // Compute prefix in double via explicit cast to avoid float-accumulation drift
-  auto prefixD = acquireDeviceBufferAsync<double>(size, stream);
-  {
-    dim3 block = defaultBlock();
-    dim3 grid = defaultGrid(size);
-    castToDoubleKernel<<<grid, block, 0, stream>>>(input, prefixD.get(), size);
+    auto prefix = acquireDeviceBufferAsync<WindowSum>(size, stream);
+    auto values = thrust::make_transform_iterator(input, ToWindowSum{});
+    detail::deterministic_inclusive_scan<WindowSum>(
+        values, prefix.get(), size, stream, AddWindowSum{}, WindowSum{});
+    finishSum<<<defaultGrid(size), defaultBlock(), 0, stream>>>(prefix.get(), output, period, size);
     CUDA_CHECK(cudaGetLastError());
-  }
-  thrust::device_ptr<double> preD(prefixD.get());
-  thrust::inclusive_scan(tacuda::detail::thrust_on(stream), preD, preD + size, preD);
-
-  dim3 block = defaultBlock();
-  dim3 grid = defaultGrid(size);
-  sumKernelPrefixD<<<grid, block, 0, stream>>>(prefixD.get(), output, period, size);
-  CUDA_CHECK(cudaGetLastError());
 }

@@ -4,6 +4,7 @@
 /*  SPDX-License-Identifier: Apache-2.0                                     */
 /* ======================================================================== */
 #include <indicators/HT_TRENDMODE.h>
+#include <utils/BatchRows.h>
 #include <utils/CudaUtils.h>
 #include <utils/HilbertCore.h>
 #include <cuda_runtime.h>
@@ -13,13 +14,11 @@ using namespace tacuda::hilbert;
 
 // Single-threaded GPU kernel
 // Output: integer trend mode (0 or 1) as float
-__global__ void htTrendModeKernel(
+__device__ __forceinline__ void ht_trendmode_row(
     const float* __restrict__ input,
     float* __restrict__ output,
     int size
 ) {
-    if (blockIdx.x != 0 || threadIdx.x != 0) return;
-    
     const int lookbackTotal = 63;
     if (size <= lookbackTotal) return;
     
@@ -127,6 +126,34 @@ __global__ void htTrendModeKernel(
             smoothPrice_Idx = 0;
         today++;
     }
+}
+
+__global__ void htTrendModeKernel(
+    const float* __restrict__ input,
+    float* __restrict__ output,
+    int size
+) {
+    if (blockIdx.x != 0 || threadIdx.x != 0) return;
+    ht_trendmode_row(input, output, size);
+}
+
+// Batch path: the same single-series state machine, one GPU thread per row.
+__global__ void htTrendModeRowsKernel(const float* __restrict__ input, float* __restrict__ output, int length, int series) {
+    for (size_t r = static_cast<size_t>(blockIdx.x) * blockDim.x + threadIdx.x;
+         r < static_cast<size_t>(series);
+         r += static_cast<size_t>(gridDim.x) * blockDim.x) {
+        const size_t off = r * static_cast<size_t>(length);
+        ht_trendmode_row(input + off, output + off, length);
+    }
+}
+
+void tacuda::detail::ht_trendmode_rows(const float* in, float* out, int length, int series,
+        cudaStream_t stream) {
+    if (length <= 0 || series <= 0) return;
+    const size_t bytes = static_cast<size_t>(length) * series * sizeof(float);
+    CUDA_CHECK(cudaMemsetAsync(out, 0x00, bytes, stream));
+    htTrendModeRowsKernel<<<row_blocks(series), kRowThreads, 0, stream>>>(in, out, length, series);
+    CUDA_CHECK(cudaGetLastError());
 }
 
 void tacuda::HT_TRENDMODE::calculate(const float* input, float* output, int size, cudaStream_t stream) noexcept(false) {

@@ -8,6 +8,7 @@
 #include <utils/CudaUtils.h>
 #include <utils/DeviceBufferPool.h>
 #include <utils/AffineScan.cuh>
+#include <utils/LeadingNaN.cuh>
 #include <utils/TacudaConfig.h>
 #include <thrust/device_ptr.h>
 #include <thrust/execution_policy.h>
@@ -74,8 +75,10 @@ __global__ void diffs_gain_loss_kernel(const T* __restrict__ in,
 template<typename T>
 __global__ void initial_avg_kernel(const T* __restrict__ gain,
                                    const T* __restrict__ loss,
+                                   const T* __restrict__ input,
                                    T* __restrict__ avgG0,
                                    T* __restrict__ avgL0,
+                                   int* __restrict__ seedIndex,
                                    int seriesLen, int batchCount, int period)
 {
   int s = blockIdx.x * blockDim.x + threadIdx.x;
@@ -83,10 +86,13 @@ __global__ void initial_avg_kernel(const T* __restrict__ gain,
 
   const T* g = gain + (size_t)s * seriesLen;
   const T* l = loss + (size_t)s * seriesLen;
+  const int first = tacuda::detail::leading_nan_count(input + (size_t)s * seriesLen, seriesLen);
+  seedIndex[s] = period < seriesLen - first ? first + period : seriesLen;
 
   double sumG = 0.0, sumL = 0.0;
-  int last = min(seriesLen - 1, period);
-  for (int i = 1; i <= last; ++i) { sumG += static_cast<double>(g[i]); sumL += static_cast<double>(l[i]); }
+  for (int i = first; i < seedIndex[s] && i < seriesLen - 1; ++i) {
+    sumG += static_cast<double>(g[i + 1]); sumL += static_cast<double>(l[i + 1]);
+  }
 
   avgG0[s] = static_cast<T>(sumG / static_cast<double>(period));
   avgL0[s] = static_cast<T>(sumL / static_cast<double>(period));
@@ -98,7 +104,7 @@ __global__ void build_transforms_kernel(const T* __restrict__ gain,
                                         const T* __restrict__ loss,
                                         tacuda::detail::AffineTransform2<T>* __restrict__ trans,
                                         int* __restrict__ keys,
-                                        int seriesLen, int batchCount, int period,
+                                        int seriesLen, int batchCount, const int* seedIndex,
                                         T a, T invP)
 {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -110,7 +116,7 @@ __global__ void build_transforms_kernel(const T* __restrict__ gain,
   keys[idx] = s;
 
   tacuda::detail::AffineTransform2<T> v;
-  if (t <= period) {
+  if (t <= seedIndex[s]) {
     v.A = T(1); v.bG = T(0); v.bL = T(0);
   } else {
     v.A  = a;
@@ -126,7 +132,7 @@ __global__ void finalize_rsi_kernel(const tacuda::detail::AffineTransform2<T>* _
                                     const T* __restrict__ avgG0,
                                     const T* __restrict__ avgL0,
                                     T* __restrict__ out,
-                                    int seriesLen, int batchCount, int period)
+                                    int seriesLen, int batchCount, const int* seedIndex)
 {
   int idx = blockIdx.x * blockDim.x + threadIdx.x;
   int N   = seriesLen * batchCount;
@@ -135,10 +141,10 @@ __global__ void finalize_rsi_kernel(const tacuda::detail::AffineTransform2<T>* _
   int s = idx / seriesLen;
   int t = idx - s * seriesLen;
 
-  if (t < period) { out[idx] = T(nanf("")); return; }
+  if (t < seedIndex[s]) { out[idx] = T(nanf("")); return; }
 
   T avgG, avgL;
-  if (t == period) {
+  if (t == seedIndex[s]) {
     avgG = avgG0[s];
     avgL = avgL0[s];
   } else {
@@ -163,6 +169,12 @@ void rsi_wilder_one_series(const T* __restrict__ in,
                            T* __restrict__ out,
                            int n, int period, int stride)
 {
+  const int first = tacuda::detail::leading_nan_count(in, n, stride);
+  for (int i = 0; i < first; ++i) out[(size_t)i * stride] = T(nanf(""));
+  if (first == n) return;
+  in += (size_t)first * stride;
+  out += (size_t)first * stride;
+  n -= first;
   for (int i = 0; i < period && i < n; ++i) out[(size_t)i * stride] = T(nanf(""));
   if (n <= period) return;
 
@@ -263,6 +275,7 @@ void rsi_calculate_impl(int period, const T* input, T* output, int size, cudaStr
   auto dLoss  = acquireDeviceBufferAsync<T>(size, stream);
   auto dAvgG0 = acquireDeviceBufferAsync<T>(batchCount, stream);
   auto dAvgL0 = acquireDeviceBufferAsync<T>(batchCount, stream);
+  auto dSeedIndex = acquireDeviceBufferAsync<int>(batchCount, stream);
   auto dTrans = acquireDeviceBufferAsync<Affine2>(size, stream);
   auto dKeys  = acquireDeviceBufferAsync<int>(size, stream);
   auto dPref  = acquireDeviceBufferAsync<Affine2>(size, stream);
@@ -279,7 +292,7 @@ void rsi_calculate_impl(int period, const T* input, T* output, int size, cudaStr
   {
     int block = 128;
     int grid  = (batchCount + block - 1) / block;
-    initial_avg_kernel<T><<<grid, block, 0, stream>>>(dGain.get(), dLoss.get(), dAvgG0.get(), dAvgL0.get(),
+    initial_avg_kernel<T><<<grid, block, 0, stream>>>(dGain.get(), dLoss.get(), input, dAvgG0.get(), dAvgL0.get(), dSeedIndex.get(),
                                                    seriesLen, batchCount, period);
     CUDA_CHECK(cudaGetLastError());
   }
@@ -291,7 +304,7 @@ void rsi_calculate_impl(int period, const T* input, T* output, int size, cudaStr
     dim3 block = defaultBlock();
     dim3 grid  = defaultGrid(size);
     build_transforms_kernel<T><<<grid, block, 0, stream>>>(dGain.get(), dLoss.get(), dTrans.get(), dKeys.get(),
-                                                        seriesLen, batchCount, period, a, invP);
+                                                        seriesLen, batchCount, dSeedIndex.get(), a, invP);
     CUDA_CHECK(cudaGetLastError());
   }
 
@@ -306,7 +319,7 @@ void rsi_calculate_impl(int period, const T* input, T* output, int size, cudaStr
     dim3 block = defaultBlock();
     dim3 grid  = defaultGrid(size);
     finalize_rsi_kernel<T><<<grid, block, 0, stream>>>(dPref.get(), dAvgG0.get(), dAvgL0.get(),
-                                                    output, seriesLen, batchCount, period);
+                                                    output, seriesLen, batchCount, dSeedIndex.get());
     CUDA_CHECK(cudaGetLastError());
   }
 }

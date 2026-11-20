@@ -61,8 +61,8 @@ CTAPI_EXPORT const char* ct_get_last_error(void);
  */
 #define CT_VERSION_MAJOR 0
 #define CT_VERSION_MINOR 9
-#define CT_VERSION_PATCH 1
-#define CT_VERSION_STRING "0.9.1"
+#define CT_VERSION_PATCH 2
+#define CT_VERSION_STRING "0.9.2"
 
 /**
  * @brief Return the library version as "MAJOR.MINOR.PATCH".
