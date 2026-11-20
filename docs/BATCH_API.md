@@ -5,7 +5,7 @@ full indicator surface (166 families, including the 63 candlestick
 patterns and the STAD club pack) in v0.4.0. The batch API computes the
 same indicator over many independent series (symbols) in one call,
 using a fused kernel for eligible legacy workloads and a stream pool for
-their fallback. Release 0.9.1 provides **246 batch families**; its new
+their fallback. Release 0.9.2 provides **246 batch families**; its new
 reference-backed families use a shared CUDA kernel with caller-stream
 scratch. See the current coverage and capture limits below.
 
@@ -62,8 +62,8 @@ python bindings/generate_bindings.py   # ctypes / P-Invoke layers
 
 ## TA-Lib 0.8.3 families and typed outputs
 
-Release 0.9.1 covers 237 pinned TA-Lib functions. The
-[compatibility guide](TA_LIB_COMPATIBILITY.md) list the additions,
+Release 0.9.2 covers 237 pinned TA-Lib functions. The
+[compatibility guide](TA_LIB_COMPATIBILITY.md) lists the additions,
 compatible aliases and verification. New families have
 single-series host/device and series-major host/device batch APIs. Their
 CUDA backend processes all rows in one kernel with private double scratch;
@@ -246,7 +246,7 @@ per-series dispatcher and direct single-series calls across shapes,
 parameters and non-finite data, the path choice, graph capture and replay,
 the host and stream-0 entry points and error statuses; with `--ref-lib` it
 also compares against another build. Measurements are in
-[the performance guide](performance/README.md#row-batched-families).
+[the performance guide](PERFORMANCE.md#row-batched-families).
 
 ## Short-series path
 

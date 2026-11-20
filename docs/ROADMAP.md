@@ -1,10 +1,14 @@
 # TaCuda Roadmap
 
-Last reviewed: 2026-11-16 (0.9.1 released).
+Last reviewed: 2026-11-20 for 0.9.2.
 This document tracks where the project stands and what ships next.
 Order inside a milestone is priority order; items move, versions don't slip silently.
 
-## Current release (0.9.1)
+## Current release (0.9.2)
+
+Release 0.9.2 adds row-batched and short-history dispatch, shared Hilbert
+phase weights, rolling-window corrections and Python stream validation.
+See the [changelog](CHANGELOG.md) and [dispatch rules](BATCH_API.md).
 
 | Area | State |
 |------|-------|

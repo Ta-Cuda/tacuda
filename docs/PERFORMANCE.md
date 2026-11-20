@@ -168,5 +168,16 @@ Dispatch and migration/rollback controls are in
 [BATCH_API.md](BATCH_API.md#fused-execution). In particular,
 `auto` can change the last bits when a shape crosses into the original
 recurrent path; force `1` to keep the fused row contract at every batch size.
-Fixed-tree scans fix reproducibility, but do not eliminate the cancellation
-limit of long-prefix differences on the original STDDEV path.
+In 0.9.2 STDDEV uses centered window moments for short and wide windows.
+
+## Row-batched families
+
+On 2026-11-17, an RTX 3090 Ti with CUDA 12.8 and driver 590.48.01 ran
+all 118 row-batched families on GPU-resident data. For 4000 series of
+234 bars, their combined time fell from 8484.5 ms in per-series mode to
+58.53 ms in the default mode. Each time is the sum of per-family medians
+from five synchronized calls after warm-up. These measurements predate
+the 0.9.2 NaN and STDDEV corrections.
+
+See [dispatch rules](BATCH_API.md#row-batched-legacy-families) and
+[the timing harness](../benchmarks/benchmark_batch_rows.py).

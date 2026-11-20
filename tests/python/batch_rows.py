@@ -183,6 +183,9 @@ class Run:
         self.bytes = self.s * self.t * 4
         self.ptrs = []
         self.ins = [self.alloc(xs[COLS[n]]) for n in spec.inputs]
+        # Pageable H2D uploads can return after staging. The nonblocking
+        # compute stream does not wait for copies on the default stream.
+        self.cuda.check(self.cuda.cudaStreamSynchronize(None), "complete input uploads")
         self.outs = [self.alloc() for _ in spec.outputs]
 
     def alloc(self, values=None):
