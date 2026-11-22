@@ -1,0 +1,247 @@
+{
+  "version": "0.9.3",
+  "date": "2026-11-22",
+  "source": "6891e9bb3250f8e91e91991840755cbfc2de0f3b",
+  "tag_object": "5364a5487224013c9dbcfed16d5d1bee8beaa4d5",
+  "dry_run": 44980445096,
+  "tag_run": 44982953955,
+  "packages": {
+    "tacuda-0.9.3-py3-none-win_amd64.whl": "abcd2bf89c5b8435f8baa40819862949a652718782b79accad6d3708ccc53d35",
+    "tacuda-0.9.3-py3-none-manylinux_2_35_x86_64.whl": "0c0b9109f0c46a36ff85a57e832dba44b005e6940a0fe2296a651a141eb12e05",
+    "tacuda-0.9.3.tar.gz": "8cbe3da5593b93f49d0cb6c6631e7d93b93c2e0db997f8fe4b04a931176fcb2e",
+    "tacuda-0.9.3.tgz": "f955ae5af371a3731de9c41f6085e89ad949dae514fd8d4ad27997e98b797184",
+    "Tacuda.0.9.3.nupkg": "0be0f3b7ab3eb8f5bfa8b05b66033704c20690bb18166f47de8386300cf65a8a"
+  },
+  "natives": {
+    "tacuda.dll": {
+      "sha256": "ce74882d037f5985ad780aba4ab56c183153ce99194e4d63c9832bd8763a5fe7",
+      "size": 114514944
+    },
+    "libtacuda.so": {
+      "sha256": "2fc86822d689411951ba1027be36087970241013ff3d2a6aca40747d39ed7ca6",
+      "size": 116438328
+    }
+  },
+  "registries": {
+    "github_release": "https://github.com/Ta-Cuda/tacuda/releases/tag/v0.9.3",
+    "pypi": "https://pypi.org/project/tacuda/0.9.3/",
+    "npm": "https://www.npmjs.com/package/tacuda/v/0.9.3",
+    "nuget": "https://www.nuget.org/packages/Tacuda/0.9.3"
+  },
+  "linux_tag_ctest": {
+    "total": 556,
+    "passed": 555,
+    "skipped": [
+      "ScratchCapture.MissingPoolsReturnUnsupportedWithoutRuntimeError"
+    ],
+    "failed": []
+  },
+  "oracle": {
+    "reference": "TA-Lib 0.8.3",
+    "differential": 1928,
+    "streaming": 839
+  },
+  "windows_source_ctest": {
+    "total": 550,
+    "passed": 549,
+    "skipped": [
+      "ScratchCapture.MissingPoolsReturnUnsupportedWithoutRuntimeError"
+    ],
+    "failed": []
+  },
+  "installed_packages": {
+    "44980445096/linux": {
+      "checks": {
+        "venv": 0,
+        "wheel-install": 0,
+        "wheel-gpu-smoke": 0,
+        "npm-install": 0,
+        "npm-gpu-smoke": 0,
+        "nuget-gpu-smoke": 0,
+        "wheel-typed": 0,
+        "installed-python-pipeline": 0,
+        "installed-node-pipeline": 0,
+        "npm-typed": 0,
+        "nuget-typed": 0,
+        "production-exports": 0,
+        "fused-packaged-native": 0,
+        "scan-packaged-native": 0,
+        "corpus-packaged-native": 0,
+        "streaming-packaged-native": 0,
+        "batch-corpus-packaged-native": 0,
+        "extra-corpus-packaged-native": 0,
+        "new-corpus-packaged-native": 0,
+        "new-batch-packaged-native": 0,
+        "indicator_nan_contract": 0,
+        "batch_rows": 0,
+        "batch_short": 0,
+        "hilbert_libm_fma": 0
+      },
+      "native_sha256": "c910edea92e624efb7bdd8e4636e4930912ca62713deb575b60dc7d1e6cb92e7"
+    },
+    "44980445096/windows": {
+      "checks": {
+        "venv": 0,
+        "wheel-install": 0,
+        "wheel-gpu-smoke": 0,
+        "npm-install": 0,
+        "npm-gpu-smoke": 0,
+        "nuget-gpu-smoke": 0,
+        "wheel-typed": 0,
+        "installed-python-pipeline": 0,
+        "installed-node-pipeline": 0,
+        "npm-typed": 0,
+        "nuget-typed": 0,
+        "production-exports": 0,
+        "fused-packaged-native": 0,
+        "scan-packaged-native": 0,
+        "corpus-packaged-native": 0,
+        "streaming-packaged-native": 0,
+        "batch-corpus-packaged-native": 0,
+        "extra-corpus-packaged-native": 0,
+        "new-corpus-packaged-native": 0,
+        "new-batch-packaged-native": 0,
+        "indicator_nan_contract": 0,
+        "batch_rows": 0,
+        "batch_short": 0,
+        "hilbert_libm_fma": 0
+      },
+      "native_sha256": "1e456c8eaf3dc79fcb5d9b9965054a8fde8dc8aaa89ab1dc32589106bd84e69e"
+    },
+    "44982953955/linux": {
+      "checks": {
+        "venv": 0,
+        "wheel-install": 0,
+        "wheel-gpu-smoke": 0,
+        "npm-install": 0,
+        "npm-gpu-smoke": 0,
+        "nuget-gpu-smoke": 0,
+        "wheel-typed": 0,
+        "installed-python-pipeline": 0,
+        "installed-node-pipeline": 0,
+        "npm-typed": 0,
+        "nuget-typed": 0,
+        "production-exports": 0,
+        "fused-packaged-native": 0,
+        "scan-packaged-native": 0,
+        "corpus-packaged-native": 0,
+        "streaming-packaged-native": 0,
+        "batch-corpus-packaged-native": 0,
+        "extra-corpus-packaged-native": 0,
+        "new-corpus-packaged-native": 0,
+        "new-batch-packaged-native": 0,
+        "indicator_nan_contract": 0,
+        "batch_rows": 0,
+        "batch_short": 0,
+        "hilbert_libm_fma": 0
+      },
+      "native_sha256": "2fc86822d689411951ba1027be36087970241013ff3d2a6aca40747d39ed7ca6"
+    },
+    "44982953955/windows": {
+      "checks": {
+        "venv": 0,
+        "wheel-install": 0,
+        "wheel-gpu-smoke": 0,
+        "npm-install": 0,
+        "npm-gpu-smoke": 0,
+        "nuget-gpu-smoke": 0,
+        "wheel-typed": 0,
+        "installed-python-pipeline": 0,
+        "installed-node-pipeline": 0,
+        "npm-typed": 0,
+        "nuget-typed": 0,
+        "production-exports": 0,
+        "fused-packaged-native": 0,
+        "scan-packaged-native": 0,
+        "corpus-packaged-native": 0,
+        "streaming-packaged-native": 0,
+        "batch-corpus-packaged-native": 0,
+        "extra-corpus-packaged-native": 0,
+        "new-corpus-packaged-native": 0,
+        "new-batch-packaged-native": 0,
+        "indicator_nan_contract": 0,
+        "batch_rows": 0,
+        "batch_short": 0,
+        "hilbert_libm_fma": 0
+      },
+      "native_sha256": "ce74882d037f5985ad780aba4ab56c183153ce99194e4d63c9832bd8763a5fe7"
+    }
+  },
+  "platforms": {
+    "linux": "Ubuntu 24.04, GeForce RTX 3090 Ti",
+    "windows": "Windows Server 2022, GeForce GT 1030"
+  },
+  "public_downloads": {
+    "python_and_github_sha256": {
+      "tacuda-0.9.3-py3-none-manylinux_2_35_x86_64.whl": "0c0b9109f0c46a36ff85a57e832dba44b005e6940a0fe2296a651a141eb12e05",
+      "tacuda-0.9.3-py3-none-win_amd64.whl": "abcd2bf89c5b8435f8baa40819862949a652718782b79accad6d3708ccc53d35",
+      "tacuda-0.9.3.tar.gz": "8cbe3da5593b93f49d0cb6c6631e7d93b93c2e0db997f8fe4b04a931176fcb2e",
+      "tacuda.dll": "ce74882d037f5985ad780aba4ab56c183153ce99194e4d63c9832bd8763a5fe7",
+      "libtacuda.so": "2fc86822d689411951ba1027be36087970241013ff3d2a6aca40747d39ed7ca6"
+    },
+    "nuget_unsigned_payload_entries_compared": 13,
+    "npm_integrity_verified": true
+  },
+  "optimizer_catalog": {
+    "strategies": 97,
+    "cli_cases_per_host": 485,
+    "matching_reports": 485,
+    "matching_gpu_cpu_trade_ledgers_per_host": 97,
+    "dry_run": 44980445096,
+    "modes": [
+      "GPU and CPU backtest",
+      "grid",
+      "genetic",
+      "walk-forward"
+    ]
+  },
+  "linux_optimizer_with_talib": {
+    "passed": 187,
+    "skipped": 0,
+    "reference": "TA-Lib 0.8.3",
+    "dry_run": 44980445096
+  },
+  "rsi_benchmark": {
+    "file": "rsi-performance.json",
+    "scope": "GPU-resident RSI(10), caller-owned stream, 6 alternating pairs, 9 groups per process, reference output checked",
+    "unit": "median milliseconds per call",
+    "platforms": {
+      "windows": {
+        "1x1024": {
+          "0.9.2": 0.03277,
+          "0.9.3": 0.03153
+        },
+        "1x100000": {
+          "0.9.2": 0.23918,
+          "0.9.3": 0.22782
+        },
+        "1x1000000": {
+          "0.9.2": 2.14472,
+          "0.9.3": 1.83622
+        },
+        "64x2048": {
+          "0.9.2": 2.08975,
+          "0.9.3": 2.14789
+        }
+      },
+      "linux": {
+        "1x1024": {
+          "0.9.2": 0.01599,
+          "0.9.3": 0.02596
+        },
+        "1x100000": {
+          "0.9.2": 0.02181,
+          "0.9.3": 0.0539
+        },
+        "1x1000000": {
+          "0.9.2": 0.13321,
+          "0.9.3": 0.14243
+        },
+        "64x2048": {
+          "0.9.2": 1.01763,
+          "0.9.3": 2.08077
+        }
+      }
+    }
+  }
+}
