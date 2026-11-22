@@ -6,10 +6,12 @@
 #include "portfolio/Portfolio.h"
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cmath>
 #include <iterator>
 #include <stdexcept>
+#include <thread>
 
 namespace topt {
 
@@ -201,27 +203,35 @@ PortfolioResult run_portfolio(const std::vector<Series>& aligned,
       std::chrono::duration<double>(Clock::now() - indicatorStart).count();
   const auto signalStart = Clock::now();
 
+  // Symbols are independent (own signals, own simulation, own result slot;
+  // the strategy is stateless between signals() calls), so they are
+  // simulated in parallel. Every symbol writes only res.symbols[s], and the
+  // aggregation below runs after the join in symbol order, so the result is
+  // identical for any thread count.
   for (int s = 0; s < numSymbols; ++s) {
+    res.symbols[static_cast<std::size_t>(s)].name = names[static_cast<std::size_t>(s)];
+  }
+  auto simulate_symbol = [&](int s) {
     SymbolResult& sr = res.symbols[static_cast<std::size_t>(s)];
-    sr.name = names[static_cast<std::size_t>(s)];
-
-    std::vector<std::vector<const float*>> lines;
-    lines.reserve(requests.size());
-    int warmup = 0;
-    for (std::size_t r = 0; r < requests.size(); ++r) {
-      std::vector<const float*> ptrs;
-      for (const auto& line : store[r][static_cast<std::size_t>(s)]) {
-        ptrs.push_back(line.data());
-        warmup = std::max(warmup, first_finite(line.data(), n));
-      }
-      lines.push_back(std::move(ptrs));
-    }
-    if (warmup >= n - 1) {
-      sr.error = "insufficient data for indicator warm-up";
-      continue;
-    }
-
+    // Nothing may escape a worker thread: every failure becomes this
+    // symbol's error instead of terminating the process.
     try {
+      std::vector<std::vector<const float*>> lines;
+      lines.reserve(requests.size());
+      int warmup = 0;
+      for (std::size_t r = 0; r < requests.size(); ++r) {
+        std::vector<const float*> ptrs;
+        for (const auto& line : store[r][static_cast<std::size_t>(s)]) {
+          ptrs.push_back(line.data());
+          warmup = std::max(warmup, first_finite(line.data(), n));
+        }
+        lines.push_back(std::move(ptrs));
+      }
+      if (warmup >= n - 1) {
+        sr.error = "insufficient data for indicator warm-up";
+        return;
+      }
+
       IndicatorView view(std::move(lines));
       std::vector<Signal> sig(static_cast<std::size_t>(n), 0);
       strategy.signals(aligned[static_cast<std::size_t>(s)], ps, view,
@@ -232,11 +242,37 @@ PortfolioResult run_portfolio(const std::vector<Series>& aligned,
                         symExec);
       sr.metrics = compute_metrics(sr.sim, symExec.barsPerYear);
       sr.valid = true;
-      ++res.validSymbols;
     } catch (const std::exception& e) {
       sr.valid = false;
       sr.error = e.what();
+    } catch (...) {
+      sr.valid = false;
+      sr.error = "unknown error";
     }
+  };
+
+  int threads = cfg.threads > 0
+                    ? cfg.threads
+                    : static_cast<int>(std::max(1u, std::thread::hardware_concurrency()));
+  threads = std::min(threads, numSymbols);
+  if (threads <= 1) {
+    for (int s = 0; s < numSymbols; ++s) simulate_symbol(s);
+  } else {
+    std::atomic<int> next{0};
+    auto worker = [&]() {
+      for (;;) {
+        const int s = next.fetch_add(1);
+        if (s >= numSymbols) return;
+        simulate_symbol(s);
+      }
+    };
+    std::vector<std::thread> pool;
+    pool.reserve(static_cast<std::size_t>(threads));
+    for (int t = 0; t < threads; ++t) pool.emplace_back(worker);
+    for (auto& th : pool) th.join();
+  }
+  for (const SymbolResult& sr : res.symbols) {
+    if (sr.valid) ++res.validSymbols;
   }
   res.signalSec =
       std::chrono::duration<double>(Clock::now() - signalStart).count();

@@ -47,6 +47,7 @@ const char* to_string(Family f) {
   case Family::MAX: return "MAX";
   case Family::MIN: return "MIN";
   case Family::TRANGE: return "TRANGE";
+  case Family::RANGE: return "RANGE";
   case Family::ASI: return "ASI";
   case Family::SAR_EL: return "SAR_EL";
   case Family::OBTR: return "OBTR";
@@ -90,6 +91,7 @@ bool family_single_input(Family f) {
   case Family::MINUS_DI:
   case Family::OBV:
   case Family::TRANGE:
+  case Family::RANGE:
   case Family::ASI:
   case Family::SAR_EL:
   case Family::OBTR:

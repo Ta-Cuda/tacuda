@@ -18,6 +18,7 @@
 #include "backend/BatchBackend.h"
 #include "cli/Args.h"
 #include "core/Fitness.h"
+#include "core/ParamSpace.h"
 #include "data/CsvLoader.h"
 #include "data/Synthetic.h"
 #include "engine/IndicatorCache.h"
@@ -181,6 +182,7 @@ int cmd_portfolio(const topt::CliOptions& opt) {
 
   topt::PortfolioConfig cfg;
   cfg.exec = opt.exec;
+  cfg.threads = opt.threads; // per-symbol signals + simulation in parallel
   topt::PortfolioResult res = topt::run_portfolio(series, names, *strategy, ps,
                                                   *backend, cfg, &fitness);
 
@@ -214,6 +216,7 @@ topt::GridConfig make_grid_config(const topt::CliOptions& opt) {
   cfg.threads = opt.threads;
   cfg.cacheBytes = opt.cacheMb << 20;
   cfg.quiet = opt.quiet;
+  cfg.minTrades = opt.minTrades;
   return cfg;
 }
 
@@ -260,13 +263,21 @@ int cmd_grid(const topt::CliOptions& opt) {
   std::vector<topt::VariantResult> results =
       topt::run_grid(bars, *strategy, variants, cache, cfg, fitness);
 
-  topt::print_grid_report(stdout, results, opt.fitness, opt.top);
+  // The exhaustive grid always carries the neighbourhood-mean fitness (a
+  // cheap post-pass); --rank robust makes it the ranking criterion.
+  topt::compute_robust_fitness(
+      results, topt::value_list_sizes(
+                   topt::build_value_lists(strategy->params(), opt.gridAxes, opt.sets)));
+  const bool byRobust = opt.rank == "robust";
+
+  topt::print_grid_report(stdout, results, opt.fitness, opt.top, "Grid results", byRobust);
   if (!opt.outCsv.empty()) {
-    topt::write_grid_csv(opt.outCsv, results);
+    topt::write_grid_csv(opt.outCsv, results, byRobust);
     if (!opt.quiet) std::fprintf(stderr, "wrote %s\n", opt.outCsv.c_str());
   }
   if (!opt.outJson.empty()) {
-    topt::write_grid_json(opt.outJson, opt.strategy, opt.fitness, results, opt.top);
+    topt::write_grid_json(opt.outJson, opt.strategy, opt.fitness, results, opt.top,
+                          byRobust);
     if (!opt.quiet) std::fprintf(stderr, "wrote %s\n", opt.outJson.c_str());
   }
   if (!opt.quiet) {
@@ -337,6 +348,7 @@ int cmd_wfo(const topt::CliOptions& opt) {
                                                 : topt::WfoOptimizer::Grid;
   cfg.windows = opt.windows;
   cfg.isFraction = opt.isFraction;
+  cfg.robust = opt.rank == "robust";
 
   topt::IndicatorCache cache(bars, *backend);
   topt::WfoResult res =

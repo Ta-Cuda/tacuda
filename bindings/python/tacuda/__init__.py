@@ -5,8 +5,8 @@
 # ============================================================================
 """ctypes based Python bindings for the :mod:`tacuda` library.
 
-The shared library must be built prior to importing this module.  The
-bindings are generated from the public ``tacuda.h`` header in order to keep
+Platform wheels include the shared library. The bindings are generated
+from the public ``tacuda.h`` header in order to keep
 the Python API in sync with the C++ implementation and to avoid large amounts
 of manually written boilerplate.
 """
@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import ctypes
 import ctypes.util
+from contextlib import nullcontext
 import inspect
 import operator
 import os
@@ -24,6 +25,22 @@ from typing import Any, Dict, List, Tuple
 import numpy as np
 
 from . import _generated
+
+
+def _open_native(path: str, *, search_path: bool = False) -> ctypes.CDLL:
+    # Python 3.8+ does not search PATH for a DLL's dependencies by default.
+    if sys.platform != "win32":
+        return ctypes.CDLL(path)
+    cuda_bin = os.path.join(os.environ.get("CUDA_PATH", ""), "bin")
+    have_cuda_bin = os.path.isabs(cuda_bin) and os.path.isdir(cuda_bin)
+    try:
+        with os.add_dll_directory(cuda_bin) if have_cuda_bin else nullcontext():
+            return ctypes.CDLL(path)
+    except OSError:
+        if not search_path:
+            raise
+        # Preserve the explicit override's support for dependencies on PATH.
+        return ctypes.CDLL(path, winmode=0)
 
 
 def _load_lib() -> ctypes.CDLL:
@@ -36,12 +53,11 @@ def _load_lib() -> ctypes.CDLL:
     else:
         names = ["libtacuda.so", "tacuda.so"]
 
-    # Environment variables for explicit locations
-    env_candidates: List[str] = []
     env = os.environ.get("TACUDA_LIBRARY")
     if env:
-        env_candidates.append(env)
+        return _open_native(os.path.abspath(env), search_path=True)
 
+    env_candidates: List[str] = []
     env_dir = os.environ.get("TACUDA_LIBRARY_PATH") or os.environ.get(
         "TACUDA_LIBRARY_DIR"
     )
@@ -52,44 +68,52 @@ def _load_lib() -> ctypes.CDLL:
     for candidate in env_candidates:
         if candidate and os.path.exists(candidate):
             try:
-                # Python 3.8+: use winmode to search for dependencies in PATH
-                if sys.version_info >= (3, 8) and sys.platform.startswith("win"):
-                    lib = ctypes.CDLL(candidate, winmode=0)  # 0 = default search
-                else:
-                    lib = ctypes.CDLL(candidate)
-                return lib
+                return _open_native(candidate, search_path=True)
             except OSError:
                 pass
 
-    # Try system paths via ctypes.util.find_library
+    # A platform wheel and its native library are released together.
+    here = os.path.abspath(os.path.dirname(__file__))
+    for name in names:
+        bundled = os.path.join(here, name)
+        if os.path.isfile(bundled):
+            try:
+                return _open_native(bundled)
+            except OSError as exc:
+                raise OSError(f"Cannot load {bundled}. Check its CUDA runtime dependencies. {exc}") from exc
+
+    # A source checkout may use a system installation or local build.
     libname = ctypes.util.find_library("tacuda")
     if libname:
         try:
-            return ctypes.CDLL(libname)
+            return _open_native(libname)
         except OSError:
             pass
 
     # Fall back to package-relative locations
-    here = os.path.abspath(os.path.dirname(__file__))
     root = os.path.abspath(os.path.join(here, "..", ".."))
     search_paths = [
         os.getcwd(),
         os.path.join(os.getcwd(), "build"),
-        here,
         os.path.join(here, "lib"),
         root,
         os.path.join(root, "lib"),
         os.path.join(root, "build"),
     ]
+    first_error = None
     for base in search_paths:
         for n in names:
             path = os.path.join(base, n)
             if os.path.exists(path):
                 try:
-                    return ctypes.CDLL(path)
-                except OSError:
-                    continue
+                    return _open_native(path)
+                except OSError as exc:
+                    if first_error is None:
+                        first_error = (path, exc)
 
+    if first_error is not None:
+        path, error = first_error
+        raise OSError(f"Cannot load {path}. Check its CUDA runtime dependencies. {error}") from error
     raise OSError(
         "tacuda library not found. Build the project first or set "
         "TACUDA_LIBRARY[_PATH]."

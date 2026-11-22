@@ -30,6 +30,10 @@ struct PortfolioConfig {
   // exec.capital is the TOTAL portfolio capital; each symbol trades an
   // equal share (capital / numSymbols) with the same qty and costs.
   ExecConfig exec;
+  // CPU threads for the per-symbol signals + simulation + metrics phase
+  // (symbols are independent, so the result does not depend on the thread
+  // count). 0 = hardware concurrency, 1 = sequential.
+  int threads = 0;
 };
 
 struct SymbolResult {
@@ -70,7 +74,8 @@ struct PortfolioResult {
 // Multi-symbol backtest with shared parameters: every indicator request is
 // computed for all symbols in one batch-backend call, then each symbol runs
 // the usual signals -> warm-up mask -> next-bar-open simulation on its own
-// capital share. Series must be aligned (equal lengths) beforehand.
+// capital share, symbols in parallel on cfg.threads CPU threads. Series must
+// be aligned (equal lengths) beforehand.
 // `fitness` is optional (nullptr -> portfolio fitness stays 0).
 // Throws std::invalid_argument on an invalid parameter set or input shape
 // mismatches; per-symbol data problems mark that symbol invalid instead.

@@ -23,20 +23,28 @@ void print_backtest_report(std::FILE* out, const std::string& strategyName,
                            const ExecConfig& exec);
 
 // Top-N console table for a set of evaluated variants, sorted by fitness
-// (descending). `title` names the run kind ("Grid results", "Genetic
-// results"). Returns indices of the printed rows into `results`.
+// (descending), or by the neighbourhood-mean fitness when `byRobust` is set
+// (then the robust value and the neighbourhood size are extra columns).
+// `title` names the run kind ("Grid results", "Genetic results"). Returns
+// indices of the printed rows into `results`.
 std::vector<std::size_t> print_grid_report(std::FILE* out,
                                            const std::vector<VariantResult>& results,
                                            const std::string& fitnessText, int topN,
-                                           const char* title = "Grid results");
+                                           const char* title = "Grid results",
+                                           bool byRobust = false);
 
-// CSV with one row per variant (params, metrics, fitness, status).
-void write_grid_csv(const std::string& path, const std::vector<VariantResult>& results);
+// CSV with one row per variant (params, metrics, fitness, robust fitness,
+// status); rows ranked by fitness, or by robust fitness when `byRobust`.
+// The robustFitness cell is empty where it was not computed (genetic runs,
+// skipped variants).
+void write_grid_csv(const std::string& path, const std::vector<VariantResult>& results,
+                    bool byRobust = false);
 
-// JSON summary: run config echo, best variant, top-N array.
+// JSON summary: run config echo, ranking criterion, best variant, top-N array.
 void write_grid_json(const std::string& path, const std::string& strategyName,
                      const std::string& fitnessText,
-                     const std::vector<VariantResult>& results, int topN);
+                     const std::vector<VariantResult>& results, int topN,
+                     bool byRobust = false);
 
 // JSON report for one backtest, optionally with the trade list and a
 // Monte-Carlo section (mc may be nullptr).

@@ -128,6 +128,20 @@ TEST_F(DeviceApiTest, RSI_MatchesHostApi) {
     }
 }
 
+TEST_F(DeviceApiTest, RSI_AllowsOverlappingInputAndOutput) {
+    constexpr int n = N - 1, period = 14;
+    std::vector<float> expected(n), actual(n);
+    ASSERT_EQ(ct_rsi(hostInput.data(), expected.data(), n, period), CT_STATUS_SUCCESS);
+    for (int offset : {0, 1}) {
+        ASSERT_EQ(ct_device_upload(d_input, hostInput.data(), n, 0), CT_STATUS_SUCCESS);
+        ASSERT_EQ(ct_rsi_d(d_input, d_input + offset, n, period, 0), CT_STATUS_SUCCESS);
+        ASSERT_EQ(ct_device_download(actual.data(), d_input + offset, n, 0), CT_STATUS_SUCCESS);
+        ASSERT_EQ(ct_device_sync(0), CT_STATUS_SUCCESS);
+        for (int i = 0; i < period; ++i) EXPECT_TRUE(std::isnan(actual[i]));
+        for (int i = period; i < n; ++i) ASSERT_EQ(actual[i], expected[i]) << i;
+    }
+}
+
 // ============================================================================
 // Pipeline test: multiple operations on same device data
 // ============================================================================

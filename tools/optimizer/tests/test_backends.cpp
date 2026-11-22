@@ -16,6 +16,7 @@
 #include "backend/TalibBackend.h"
 #include "data/Synthetic.h"
 #include "engine/IndicatorCache.h"
+#include "strategy/ExpHelpers.h"
 
 using namespace topt;
 using topt::testing::TestBackend;
@@ -70,6 +71,7 @@ std::vector<SampleRequest> sample_requests() {
       {{Family::MAX, Column::High, {20.0}}},
       {{Family::MIN, Column::Low, {20.0}}},
       {{Family::TRANGE, Column::Close, {}}},
+      {{Family::RANGE, Column::Close, {}}, 0.0, 0.0}, // one float subtraction: exact
       // --- club pack (0.4.0) ---
       {{Family::ASI, Column::Close, {}}, 0.5, 2e-3},
       {{Family::SAR_EL, Column::Close, {0.02, 0.2}}, 0.05, 1e-3},
@@ -101,6 +103,9 @@ std::vector<SampleRequest> sample_requests() {
       {derived(Family::ROLLING_MEAN, {18.0},
                IndicatorRequest{Family::TRENDSCORE, Column::Close, {10.0}}),
        0.01, 1e-3},
+      // Average(Range, 4) / Average(TrueRange, 10) of the EXPERIMENTS pack.
+      {topt::exp::avg_range_request(4)},
+      {topt::exp::avg_true_range_request(10)},
   };
 }
 
@@ -262,6 +267,29 @@ TEST(Backends, DerivedChainMatchesManualTwoStep) {
 
   expect_lines_close(viaChain, manual, "chained ROLLING_MEAN(WOBV)", 1e-6,
                      1e-9);
+}
+
+TEST(Backends, RangeChainsReproduceTheCpuHelpers) {
+  // The strategies moved Average(Range, n) / Average(TrueRange, n) from
+  // signals() into chained requests; the chain must reproduce the helpers.
+  Series bars = generate_synthetic(3000, 11);
+  const int n = bars.size();
+  TestBackend backend(bars);
+
+  std::vector<float> rangeMean(static_cast<std::size_t>(n));
+  std::vector<float*> outs{rangeMean.data()};
+  backend.compute(topt::exp::avg_range_request(4), outs);
+  expect_lines_close(rangeMean, topt::exp::avg_range(bars, 4),
+                     "ROLLING_MEAN(RANGE, 4) vs avg_range", 1e-4, 1e-5);
+
+  std::vector<float> trange(static_cast<std::size_t>(n));
+  std::vector<float*> trOuts{trange.data()};
+  backend.compute(IndicatorRequest{Family::TRANGE, Column::Close, {}}, trOuts);
+  std::vector<float> trMean(static_cast<std::size_t>(n));
+  std::vector<float*> trMeanOuts{trMean.data()};
+  backend.compute(topt::exp::avg_true_range_request(10), trMeanOuts);
+  expect_lines_close(trMean, topt::exp::rolling_mean(trange.data(), n, 10),
+                     "ROLLING_MEAN(TRANGE, 10) vs rolling_mean", 1e-4, 1e-5);
 }
 
 TEST(Backends, ChainKeysAreDistinct) {

@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.9.3 — 2026-11-22
+------------------
+- GPU RSI accumulates Wilder gain and loss in double precision. This fixes a false pivot on equal closes that changed trades and the grid winner for `exp03_micro_mw`.
+- The Python wheel prefers its bundled native library and resolves Windows CUDA runtime dependencies through `CUDA_PATH\bin`. Python and Node.js report a broken explicit `TACUDA_LIBRARY` override.
+- The genetic optimizer and Monte Carlo simulations now use portable seeded sampling. A fixed seed can produce a different result from 0.9.2. The same seed and inputs reproduce the new sequence on Linux and Windows.
+- `tacuda-opt` adds minimum-trade filters, robust grid ranking, additional fitness metrics, and parallel per-symbol portfolio evaluation. Rounded integer grid axes are deduplicated and indicator workspaces are reused. Grid CSV and JSON have additional fields. See the [optimizer guide](https://github.com/Ta-Cuda/tacuda/blob/v0.9.3/docs/STRATEGY_OPTIMIZER.md).
+- Performance depends on the workload. On an RTX 3090 Ti, a compiler-matched GPU-resident RSI(10) on 100,000 bars took 0.022 ms in the previous code and 0.053 ms with the correction. On a GT 1030, one million bars improved from 2.14 to 1.83 ms. Large Windows bootstrap and Linux permutation runs can take longer with the portable sampler.
+
 0.9.2 — 2026-11-20
 ------------------
 - All six host Hilbert indicators now use the GPU's Hilbert core and the same

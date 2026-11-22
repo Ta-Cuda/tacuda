@@ -5,6 +5,7 @@
 /* ======================================================================== */
 #include "core/ParamSpace.h"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdlib>
 #include <stdexcept>
@@ -117,7 +118,23 @@ std::vector<std::vector<double>> build_value_lists(
       if (a.name == d.name) axis = &a;
     }
     if (axis) {
-      valueLists.push_back(axis->values);
+      if (!d.integer) {
+        valueLists.push_back(axis->values);
+        continue;
+      }
+      // Integer parameters: round first and drop values that collapse onto
+      // an earlier one (period=1.2,1.4 is one variant, not two), so the
+      // enumeration stays a duplicate-free cartesian product and the robust
+      // (neighbourhood) ranking sees every axis step exactly once.
+      std::vector<double> rounded;
+      rounded.reserve(axis->values.size());
+      for (double v : axis->values) {
+        const double r = std::round(v);
+        if (std::find(rounded.begin(), rounded.end(), r) == rounded.end()) {
+          rounded.push_back(r);
+        }
+      }
+      valueLists.push_back(std::move(rounded));
       continue;
     }
     const std::pair<std::string, double>* fixed = nullptr;
@@ -127,6 +144,14 @@ std::vector<std::vector<double>> build_value_lists(
     valueLists.push_back({fixed ? fixed->second : d.defval});
   }
   return valueLists;
+}
+
+std::vector<std::size_t> value_list_sizes(
+    const std::vector<std::vector<double>>& valueLists) {
+  std::vector<std::size_t> sizes;
+  sizes.reserve(valueLists.size());
+  for (const auto& list : valueLists) sizes.push_back(list.size());
+  return sizes;
 }
 
 ParamSet materialize(const std::vector<ParamDef>& defs,

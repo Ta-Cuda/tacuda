@@ -7,9 +7,10 @@
 
 #include <cuda_runtime.h>
 #include <limits>
-#include <memory>
+#include <mutex>
 #include <stdexcept>
 #include <string>
+#include <vector>
 
 #include <tacuda.h>
 #include <tacuda_device.h>
@@ -38,15 +39,84 @@ void check(ctStatus_t st, const char* what) {
   if (st != CT_STATUS_SUCCESS) raise(what, st);
 }
 
-// RAII device buffer for per-call outputs.
-struct DeviceArray {
-  float* ptr = nullptr;
-  explicit DeviceArray(int n) : ptr(ct_device_alloc(n)) {
-    if (!ptr) throw std::runtime_error("tacuda backend: device allocation failed");
+// Process-wide GPU workspace shared by every TacudaBackend: persistent
+// output lines (one per family output) and scratch lines for chained
+// requests, all sized for one series length.
+//
+// Why shared rather than per backend: the `tacuda-device` portfolio path
+// creates one backend per symbol, and per-backend buffers would multiply
+// this memory by the symbol count (the baseline that is benchmarked at 1024
+// symbols). A lease serializes compute() calls across backends — the single
+// legacy stream serializes the GPU work anyway, and the IndicatorCache
+// already serializes calls on one backend.
+//
+// Why persistent at all: before this, every compute() paid a cudaMalloc and
+// a cudaFree per output line and per chain link — ~116 us per 4 MB line on
+// the RTX 3090 Ti box (negligible below ~1 MB, where the driver caches
+// small blocks).
+//
+// Downloads deliberately stay direct into the caller's pageable lines. A
+// pageable D2H copy measures ~7.9 GB/s there against ~12.6 GB/s into
+// page-locked memory, so staging through a pinned buffer and copying again
+// (~500 us per 4 MB) loses to the direct download (~470 us), and pinning the
+// destination lines themselves costs ~0.25 ms/MB up front.
+class DeviceWorkspace {
+public:
+  static constexpr int kMaxLines = 3; // BBANDS / MACD have three outputs
+
+  static DeviceWorkspace& instance() {
+    static DeviceWorkspace ws;
+    return ws;
   }
-  ~DeviceArray() { ct_device_free(ptr); }
-  DeviceArray(const DeviceArray&) = delete;
-  DeviceArray& operator=(const DeviceArray&) = delete;
+
+  std::unique_lock<std::mutex> lease() { return std::unique_lock<std::mutex>(mutex_); }
+
+  // Caller holds the lease. Re-allocates when the series length changes.
+  void prepare(int n) {
+    if (n == n_) return;
+    release();
+    n_ = n;
+  }
+
+  int size() const { return n_; }
+
+  float* line(int k) {
+    auto idx = static_cast<std::size_t>(k);
+    if (!lines_[idx]) lines_[idx] = alloc(n_);
+    return lines_[idx];
+  }
+
+  float* scratch(std::size_t depth) {
+    while (scratch_.size() <= depth) scratch_.push_back(alloc(n_));
+    return scratch_[depth];
+  }
+
+private:
+  DeviceWorkspace() = default;
+  // No release at process exit on purpose: the CUDA runtime may already be
+  // torn down when function-local statics are destroyed, and the driver
+  // reclaims the memory anyway.
+  ~DeviceWorkspace() = default;
+
+  static float* alloc(int n) {
+    float* d = ct_device_alloc(n);
+    if (!d) throw std::runtime_error("tacuda backend: device allocation failed");
+    return d;
+  }
+
+  void release() {
+    for (float*& p : lines_) {
+      if (p) ct_device_free(p);
+      p = nullptr;
+    }
+    for (float* p : scratch_) ct_device_free(p);
+    scratch_.clear();
+  }
+
+  std::mutex mutex_;
+  int n_ = 0;
+  std::array<float*, kMaxLines> lines_{};
+  std::vector<float*> scratch_;
 };
 
 } // namespace
@@ -91,20 +161,19 @@ float* TacudaBackend::column_device(Column c) {
 
 // Computes any single-output request (including club families and derived
 // chains) into a device buffer — no host round-trip anywhere in the chain.
-void TacudaBackend::compute_line_device(const IndicatorRequest& req,
-                                        float* dOut) {
+void TacudaBackend::compute_line_device(const IndicatorRequest& req, float* dOut,
+                                        std::size_t depth) {
   const int n = bars_.size();
   const int p0 = req.params.empty() ? 0 : static_cast<int>(req.params.at(0));
 
   // Resolve the input line: OHLCV column, or the chained upstream line
-  // computed recursively into a scratch device buffer.
-  std::unique_ptr<DeviceArray> chained;
+  // computed recursively into the workspace scratch line of this depth.
   const float* dIn = nullptr;
   if (family_single_input(req.family)) {
     if (req.chain) {
-      chained = std::make_unique<DeviceArray>(n);
-      compute_line_device(*req.chain, chained->ptr);
-      dIn = chained->ptr;
+      float* upstream = DeviceWorkspace::instance().scratch(depth);
+      compute_line_device(*req.chain, upstream, depth + 1);
+      dIn = upstream;
     } else {
       dIn = column_device(req.input);
     }
@@ -215,6 +284,10 @@ void TacudaBackend::compute_line_device(const IndicatorRequest& req,
     check(ct_trange_d(column_device(Column::High), column_device(Column::Low),
                       column_device(Column::Close), dOut, n, 0), "ct_trange_d");
     break;
+  case Family::RANGE:
+    check(ct_sub_d(column_device(Column::High), column_device(Column::Low), dOut, n, 0),
+          "ct_sub_d");
+    break;
   case Family::ASI:
     check(ct_asi_d(column_device(Column::Open), column_device(Column::High),
                    column_device(Column::Low), column_device(Column::Close),
@@ -246,47 +319,54 @@ void TacudaBackend::compute_line_device(const IndicatorRequest& req,
   }
 }
 
+void TacudaBackend::download_lines(const std::vector<float*>& outs, int nOut) {
+  DeviceWorkspace& ws = DeviceWorkspace::instance();
+  const int n = bars_.size();
+  // Straight into the caller's lines, one stream sync for all of them (see
+  // the DeviceWorkspace note on why there is no pinned staging here).
+  for (int k = 0; k < nOut; ++k) {
+    check(ct_device_download(outs[static_cast<std::size_t>(k)], ws.line(k), n, 0),
+          "download");
+  }
+  check(ct_device_sync(0), "stream sync");
+}
+
 void TacudaBackend::compute(const IndicatorRequest& req, const std::vector<float*>& outs) {
   const int n = bars_.size();
-  if (static_cast<int>(outs.size()) != family_outputs(req.family)) {
+  const int nOut = family_outputs(req.family);
+  if (static_cast<int>(outs.size()) != nOut) {
     throw std::invalid_argument("tacuda backend: wrong number of output buffers");
   }
   validate_chain(req);
 
+  DeviceWorkspace& ws = DeviceWorkspace::instance();
+  auto lease = ws.lease();
+  ws.prepare(n);
+
   // Single-output families (incl. the club pack and derived chains) share
   // one device-side path; only the final line is downloaded. (Since 0.5.0
   // ct_trange_d itself reports NaN at bar 0, TA-Lib style — no mask needed.)
-  if (family_outputs(req.family) == 1) {
-    DeviceArray out(n);
-    compute_line_device(req, out.ptr);
-    check(ct_device_download(outs[0], out.ptr, n, 0), "download");
-    check(ct_device_sync(0), "stream sync");
+  if (nOut == 1) {
+    compute_line_device(req, ws.line(0), 0);
+    download_lines(outs, 1);
     return;
   }
 
   switch (req.family) {
-  case Family::BBANDS: {
-    DeviceArray upper(n), middle(n), lower(n);
-    check(ct_bbands_d(column_device(req.input), upper.ptr, middle.ptr, lower.ptr, n,
+  case Family::BBANDS:
+    check(ct_bbands_d(column_device(req.input), ws.line(0), ws.line(1), ws.line(2), n,
                       static_cast<int>(req.params.at(0)),
                       static_cast<float>(req.params.at(1)),
                       static_cast<float>(req.params.at(2)), 0), "ct_bbands_d");
-    check(ct_device_download(outs[0], upper.ptr, n, 0), "download");
-    check(ct_device_download(outs[1], middle.ptr, n, 0), "download");
-    check(ct_device_download(outs[2], lower.ptr, n, 0), "download");
+    download_lines(outs, 3);
     break;
-  }
   case Family::MACD: {
     const int fast = static_cast<int>(req.params.at(0));
     const int slow = static_cast<int>(req.params.at(1));
     const int sig = static_cast<int>(req.params.at(2));
-    DeviceArray macd(n), signal(n), hist(n);
-    check(ct_macd_d(column_device(req.input), macd.ptr, signal.ptr, hist.ptr, n,
+    check(ct_macd_d(column_device(req.input), ws.line(0), ws.line(1), ws.line(2), n,
                     fast, slow, sig, CT_MA_EMA, 0), "ct_macd_d");
-    check(ct_device_download(outs[0], macd.ptr, n, 0), "download");
-    check(ct_device_download(outs[1], signal.ptr, n, 0), "download");
-    check(ct_device_download(outs[2], hist.ptr, n, 0), "download");
-    check(ct_device_sync(0), "stream sync");
+    download_lines(outs, 3);
     const int firstValid = slow + sig - 2; // TA-Lib MACD lookback
     for (int k = 0; k < 3; ++k) mask_warmup(outs[static_cast<std::size_t>(k)], n, firstValid);
     break;
@@ -294,13 +374,10 @@ void TacudaBackend::compute(const IndicatorRequest& req, const std::vector<float
   case Family::STOCH: {
     const int kPeriod = static_cast<int>(req.params.at(0));
     const int dPeriod = static_cast<int>(req.params.at(1));
-    DeviceArray slowK(n), slowD(n);
     check(ct_stochastic_d(column_device(Column::High), column_device(Column::Low),
-                          column_device(Column::Close), slowK.ptr, slowD.ptr, n,
+                          column_device(Column::Close), ws.line(0), ws.line(1), n,
                           kPeriod, dPeriod, 0), "ct_stochastic_d");
-    check(ct_device_download(outs[0], slowK.ptr, n, 0), "download");
-    check(ct_device_download(outs[1], slowD.ptr, n, 0), "download");
-    check(ct_device_sync(0), "stream sync");
+    download_lines(outs, 2);
     // TA-Lib reports %K and %D from the same index; tacuda's raw slowK
     // starts dPeriod-1 bars earlier.
     const int firstValid = kPeriod + 2 * (dPeriod - 1) - 1;
@@ -311,8 +388,6 @@ void TacudaBackend::compute(const IndicatorRequest& req, const std::vector<float
   default:
     throw std::invalid_argument("tacuda backend: unhandled family");
   }
-
-  check(ct_device_sync(0), "stream sync");
 }
 
 } // namespace topt

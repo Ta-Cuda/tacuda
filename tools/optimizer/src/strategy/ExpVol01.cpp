@@ -37,7 +37,7 @@ public:
     return {
         {"fast", 9, 3, 50, 1, true},
         {"slow", 18, 6, 120, 1, true},
-        {"chlen", 12, 4, 40, 1, true},
+        {"chlen", 30, 4, 40, 1, true},
         {"trailbar", 8, 2, 30, 1, true},
         {"rebars", 15, 0, 40, 1, true},
     };
@@ -153,7 +153,7 @@ public:
          {ps.get("fast"), ps.get("slow"), ps.get("sig")}},
         {Family::MAX, Column::High, {ps.get("trailbar")}},
         {Family::MIN, Column::Low, {ps.get("trailbar")}},
-        {Family::TRANGE, Column::Close, {}},
+        avg_true_range_request(4), // Average(TrueRange, 4), computed once per series
     };
   }
 
@@ -165,7 +165,7 @@ public:
     const int n = bars.size();
     const int ncos = ps.get_int("ncos");
     const int nbars = ps.get_int("nbars");
-    std::vector<float> atr4 = rolling_mean(ind.line(3), n, 4);
+    const float* atr4 = ind.line(3);
 
     struct Cross { int bar; float high, low; };
     std::deque<Cross> crossings;
@@ -316,7 +316,7 @@ public:
         {Family::EMA, Column::Low, {4}},
         {Family::MAX, Column::High, {static_cast<double>(ps.get_int("trailbar"))}},
         {Family::MIN, Column::Low, {static_cast<double>(ps.get_int("trailbar"))}},
-        {Family::TRANGE, Column::Close, {}},
+        avg_true_range_request(10), // Average(TrueRange, 10)
     };
   }
 
@@ -332,7 +332,7 @@ public:
     const int n = bars.size();
     const int strength = ps.get_int("strength");
     const int numswing = ps.get_int("numswing");
-    std::vector<float> atr10 = rolling_mean(ind.line(4), n, 10);
+    const float* atr10 = ind.line(4);
 
     std::deque<float> swingHighs, swingLows;
     int pos = 0;
@@ -594,6 +594,7 @@ public:
     return {
         {Family::MAX, Column::High, {ps.get("trailbar")}},
         {Family::MIN, Column::Low, {ps.get("trailbar")}},
+        avg_range_request(4), // Average(Range, 4)
     };
   }
 
@@ -605,7 +606,7 @@ public:
     const float lmult = static_cast<float>(ps.get("lmult"));
     const float smult = static_cast<float>(ps.get("smult"));
     const int maxBars = ps.get_int("maxbars");
-    std::vector<float> rng4 = avg_range(bars, 4);
+    const float* rng4 = ind.line(2);
 
     int pos = 0, barsIn = 0;
     float entryRef = 0.f;

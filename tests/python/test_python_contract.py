@@ -14,6 +14,7 @@ import importlib
 import os
 import pathlib
 import sys
+import tempfile
 import unittest
 from unittest import mock
 
@@ -76,6 +77,48 @@ class ContractTest(unittest.TestCase):
         self.assertEqual(len(calls), 1, f"expected one {name} call")
         return calls[0]
 
+
+class NativeLoaderTests(ContractTest):
+    def test_windows_registers_cuda_bin_while_loading(self):
+        with tempfile.TemporaryDirectory() as toolkit:
+            cuda_bin = pathlib.Path(toolkit) / "bin"
+            cuda_bin.mkdir()
+            directory = mock.MagicMock()
+
+            def load(path):
+                directory.__enter__.assert_called_once()
+                directory.__exit__.assert_not_called()
+                return self.recorder
+
+            with mock.patch.dict(os.environ, {"CUDA_PATH": toolkit}), \
+                    mock.patch.object(sys, "platform", "win32"), \
+                    mock.patch.object(os, "add_dll_directory", return_value=directory, create=True) as register, \
+                    mock.patch("ctypes.CDLL", side_effect=load):
+                self.assertIs(self.tacuda._open_native("tacuda.dll"), self.recorder)
+            register.assert_called_once_with(str(cuda_bin))
+            directory.__exit__.assert_called_once()
+
+    def test_bundled_native_precedes_system_and_build_copies(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            package = pathlib.Path(tmp) / "tacuda"
+            package.mkdir()
+            for name in ("tacuda.dll", "libtacuda.so", "libtacuda.dylib"):
+                (package / name).touch()
+            env = {"TACUDA_LIBRARY": "", "TACUDA_LIBRARY_PATH": "", "TACUDA_LIBRARY_DIR": ""}
+            with mock.patch.dict(os.environ, env), \
+                    mock.patch.object(self.tacuda, "__file__", str(package / "__init__.py")), \
+                    mock.patch.object(self.tacuda, "_open_native") as load, \
+                    mock.patch("ctypes.util.find_library") as system_lookup:
+                self.assertIs(self.tacuda._load_lib(), load.return_value)
+                self.assertEqual(pathlib.Path(load.call_args.args[0]).parent, package)
+                system_lookup.assert_not_called()
+
+    def test_broken_explicit_native_does_not_load_another_build(self):
+        with mock.patch.dict(os.environ, {"TACUDA_LIBRARY": "missing-native"}), \
+                mock.patch.object(self.tacuda, "_open_native", side_effect=OSError("missing-native")) as load:
+            with self.assertRaisesRegex(OSError, "missing-native"):
+                self.tacuda._load_lib()
+            load.assert_called_once_with(os.path.abspath("missing-native"), search_path=True)
 
 class TransferCountTests(ContractTest):
     def upload(self, *args, **kwargs):

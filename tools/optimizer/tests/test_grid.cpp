@@ -5,6 +5,8 @@
 /* ======================================================================== */
 #include <gtest/gtest.h>
 
+#include <stdexcept>
+
 #include "TestBackend.h"
 #include "core/Fitness.h"
 #include "core/ParamSpace.h"
@@ -166,6 +168,141 @@ TEST(GridSearch, FitnessOrdersResults) {
     ASSERT_TRUE(r.valid) << r.error;
     EXPECT_DOUBLE_EQ(r.fitness, r.metrics.netProfit);
   }
+}
+
+TEST(GridSearch, MinTradesMarksSparseVariantsSkipped) {
+  Series bars = generate_synthetic(2000, 31);
+  TestBackend backend(bars);
+  IndicatorCache cache(bars, backend);
+  auto s = make_strategy("ma_cross");
+  auto variants = ma_cross_variants(*s, "fast=5", "slow=20");
+  auto fitness = FitnessExpr::parse("netprofit", fitness_variable_names());
+
+  auto plain = run_grid(bars, *s, variants, cache, quiet_config(), fitness);
+  ASSERT_EQ(plain.size(), 1u);
+  ASSERT_TRUE(plain[0].valid);
+  ASSERT_GT(plain[0].metrics.numTrades, 0);
+
+  GridConfig strict = quiet_config();
+  strict.minTrades = plain[0].metrics.numTrades + 1;
+  auto filtered = run_grid(bars, *s, variants, cache, strict, fitness);
+  ASSERT_EQ(filtered.size(), 1u);
+  EXPECT_FALSE(filtered[0].valid);
+  EXPECT_NE(filtered[0].error.find("trades"), std::string::npos) << filtered[0].error;
+  // The metrics stay available for the CSV even though the variant is skipped.
+  EXPECT_EQ(filtered[0].metrics.numTrades, plain[0].metrics.numTrades);
+
+  GridConfig loose = quiet_config();
+  loose.minTrades = plain[0].metrics.numTrades;
+  auto kept = run_grid(bars, *s, variants, cache, loose, fitness);
+  EXPECT_TRUE(kept[0].valid);
+}
+
+TEST(GridSearch, RobustFitnessAveragesValidAxisNeighbours) {
+  // 3x3 grid in enumerate_variants order (second axis fastest):
+  // fitness(i, j) = 10*i + j; the centre's lower neighbour (2, 1) is invalid.
+  std::vector<VariantResult> results(9);
+  for (std::size_t i = 0; i < 3; ++i) {
+    for (std::size_t j = 0; j < 3; ++j) {
+      VariantResult& v = results[i * 3 + j];
+      v.valid = true;
+      v.fitness = 10.0 * static_cast<double>(i) + static_cast<double>(j);
+    }
+  }
+  results[7].valid = false; // (2, 1)
+  compute_robust_fitness(results, {3, 3});
+
+  // Corner (0, 0): itself, (0, 1) and (1, 0).
+  EXPECT_EQ(results[0].neighborhood, 3);
+  EXPECT_NEAR(results[0].robustFitness, (0.0 + 1.0 + 10.0) / 3.0, 1e-12);
+  // Centre (1, 1): itself, (0, 1), (1, 0), (1, 2); (2, 1) is invalid.
+  EXPECT_EQ(results[4].neighborhood, 4);
+  EXPECT_NEAR(results[4].robustFitness, (11.0 + 1.0 + 10.0 + 12.0) / 4.0, 1e-12);
+  // Edge (2, 2): itself, (1, 2); (2, 1) is invalid.
+  EXPECT_EQ(results[8].neighborhood, 2);
+  EXPECT_NEAR(results[8].robustFitness, (22.0 + 12.0) / 2.0, 1e-12);
+  // The invalid variant stays out of the ranking.
+  EXPECT_EQ(results[7].neighborhood, 0);
+  EXPECT_DOUBLE_EQ(results[7].robustFitness, 0.0);
+
+  // A fixed (single-value) axis contributes no neighbours.
+  std::vector<VariantResult> line(3);
+  for (std::size_t k = 0; k < 3; ++k) {
+    line[k].valid = true;
+    line[k].fitness = static_cast<double>(k);
+  }
+  compute_robust_fitness(line, {1, 3});
+  EXPECT_EQ(line[1].neighborhood, 3);
+  EXPECT_NEAR(line[1].robustFitness, 1.0, 1e-12);
+
+  // Shape mismatch is an error, not a silent misalignment.
+  EXPECT_THROW(compute_robust_fitness(results, {2, 2}), std::invalid_argument);
+}
+
+TEST(GridSearch, RobustRankingPrefersPlateausOverSpikes) {
+  // One axis, seven steps: an isolated spike (9 next to 0) against a plateau
+  // of sixes. Raw fitness picks the spike, the neighbourhood mean the plateau.
+  const double fitness[] = {9.0, 0.0, 5.0, 6.0, 6.0, 6.0, 5.0};
+  std::vector<VariantResult> results(7);
+  for (std::size_t k = 0; k < 7; ++k) {
+    results[k].valid = true;
+    results[k].fitness = fitness[k];
+  }
+  compute_robust_fitness(results, {7});
+
+  std::size_t bestRaw = 0, bestRobust = 0;
+  for (std::size_t k = 1; k < results.size(); ++k) {
+    if (results[k].fitness > results[bestRaw].fitness) bestRaw = k;
+    if (results[k].robustFitness > results[bestRobust].robustFitness) bestRobust = k;
+  }
+  EXPECT_EQ(bestRaw, 0u);
+  EXPECT_EQ(bestRobust, 4u);
+  EXPECT_NEAR(results[0].robustFitness, 4.5, 1e-12);
+  EXPECT_NEAR(results[4].robustFitness, 6.0, 1e-12);
+}
+
+TEST(GridSearch, RobustFitnessFollowsEnumerationOrderOnARealGrid) {
+  // The neighbour lookup relies on the enumerate_variants() layout; check it
+  // against neighbours found by parameter value on a real run.
+  Series bars = generate_synthetic(4000, 41);
+  TestBackend backend(bars);
+  IndicatorCache cache(bars, backend);
+  auto s = make_strategy("ma_cross");
+  std::vector<GridAxis> axes = {parse_grid_spec("fast=3..15:3"),
+                                parse_grid_spec("slow=20..60:10")};
+  auto variants = enumerate_variants(s->params(), axes, {});
+  auto fitness = FitnessExpr::parse("netprofit", fitness_variable_names());
+  auto results = run_grid(bars, *s, variants, cache, quiet_config(), fitness);
+  ASSERT_EQ(results.size(), 25u);
+  compute_robust_fitness(results,
+                         value_list_sizes(build_value_lists(s->params(), axes, {})));
+
+  auto find = [&](double fast, double slow) -> const VariantResult& {
+    for (const auto& r : results) {
+      if (r.params.get("fast") == fast && r.params.get("slow") == slow) return r;
+    }
+    throw std::logic_error("variant not found");
+  };
+  for (const auto& r : results) ASSERT_TRUE(r.valid) << r.params.to_string();
+
+  const VariantResult& centre = find(9, 40);
+  EXPECT_EQ(centre.neighborhood, 5);
+  EXPECT_NEAR(centre.robustFitness,
+              (centre.fitness + find(6, 40).fitness + find(12, 40).fitness +
+               find(9, 30).fitness + find(9, 50).fitness) / 5.0,
+              1e-9);
+
+  const VariantResult& corner = find(3, 20);
+  EXPECT_EQ(corner.neighborhood, 3);
+  EXPECT_NEAR(corner.robustFitness,
+              (corner.fitness + find(6, 20).fitness + find(3, 30).fitness) / 3.0, 1e-9);
+
+  const VariantResult& edge = find(15, 40);
+  EXPECT_EQ(edge.neighborhood, 4);
+  EXPECT_NEAR(edge.robustFitness,
+              (edge.fitness + find(12, 40).fitness + find(15, 30).fitness +
+               find(15, 50).fitness) / 4.0,
+              1e-9);
 }
 
 TEST(GridSearch, NonFiniteFitnessIsAnErrorNotARankedResult) {

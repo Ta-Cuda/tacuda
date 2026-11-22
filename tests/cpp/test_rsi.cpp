@@ -23,6 +23,35 @@ TEST(Tacuda, RSI) {
   expect_approx_equal(out, ref);
 }
 
+TEST(Tacuda, RSI_PreservesPivotsAcrossUnchangedCloses) {
+  constexpr int n = 96, period = 7, rows = 2;
+  std::vector<float> prices(rows * n), batch(rows * n);
+  for (int row = 0; row < rows; ++row) {
+    float* x = prices.data() + row * n;
+    const float direction = row == 0 ? 1.0f : -1.0f;
+    x[0] = 100.0f;
+    x[1] = 100.0f + 2.0f * direction;
+    std::fill(x + 2, x + n, 100.0f + direction);
+  }
+  ASSERT_EQ(ct_rsi_batch(prices.data(), batch.data(), n, rows, period, 0),
+            CT_STATUS_SUCCESS);
+  for (int row = 0; row < rows; ++row) {
+    std::vector<float> single(n);
+    ASSERT_EQ(ct_rsi(prices.data() + row * n, single.data(), n, period),
+              CT_STATUS_SUCCESS);
+    // Both Wilder averages decay by the same factor on every flat bar.
+    const float expected = static_cast<float>((row == 0 ? 200.0 : 100.0) / 3.0);
+    for (int i = 0; i < n; ++i) {
+      if (i < period) {
+        ASSERT_TRUE(std::isnan(single[i]) && std::isnan(batch[row * n + i]));
+      } else {
+        ASSERT_EQ(single[i], expected) << "row " << row << ", bar " << i;
+        ASSERT_EQ(batch[row * n + i], expected) << "row " << row << ", bar " << i;
+      }
+    }
+  }
+}
+
 TEST(Tacuda, RSI_LargePeriod) {
   const int N = 200000;
   std::vector<float> x(N);

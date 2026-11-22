@@ -242,6 +242,45 @@ TEST(Portfolio, DeterministicAcrossRuns) {
   EXPECT_EQ(a.equity, b.equity);
 }
 
+TEST(Portfolio, ThreadCountDoesNotChangeResults) {
+  const int numSymbols = 6;
+  std::vector<Series> series = make_series(numSymbols, 2500, 70);
+  auto strategy = make_strategy("exp01_channel_breakout");
+  ParamSet ps;
+  for (const auto& def : strategy->params()) ps.values.emplace_back(def.name, def.defval);
+
+  auto run_with = [&](int threads) {
+    PortfolioConfig cfg;
+    cfg.exec = exec_with_capital(12000.0);
+    cfg.threads = threads;
+    auto backend = make_test_batch(series);
+    return run_portfolio(series, make_names(numSymbols), *strategy, ps, *backend,
+                         cfg, nullptr);
+  };
+  PortfolioResult one = run_with(1);
+  PortfolioResult many = run_with(8);
+  PortfolioResult all = run_with(0);
+
+  ASSERT_EQ(one.validSymbols, numSymbols);
+  EXPECT_EQ(many.validSymbols, numSymbols);
+  EXPECT_EQ(all.validSymbols, numSymbols);
+  EXPECT_EQ(one.equity, many.equity);
+  EXPECT_EQ(one.equity, all.equity);
+  ASSERT_EQ(one.trades.size(), many.trades.size());
+  for (std::size_t i = 0; i < one.trades.size(); ++i) {
+    EXPECT_EQ(one.trades[i].entryBar, many.trades[i].entryBar);
+    EXPECT_EQ(one.trades[i].exitBar, many.trades[i].exitBar);
+    EXPECT_DOUBLE_EQ(one.trades[i].pnl, many.trades[i].pnl);
+  }
+  for (int s = 0; s < numSymbols; ++s) {
+    const auto& a = one.symbols[static_cast<std::size_t>(s)];
+    const auto& b = many.symbols[static_cast<std::size_t>(s)];
+    EXPECT_EQ(a.name, b.name);
+    EXPECT_DOUBLE_EQ(a.metrics.netProfit, b.metrics.netProfit);
+    EXPECT_EQ(a.metrics.numTrades, b.metrics.numTrades);
+  }
+}
+
 TEST(Portfolio, MonteCarloOverPortfolioTrades) {
   std::vector<Series> series = make_series(3, 3000);
   auto strategy = make_strategy("ma_cross");

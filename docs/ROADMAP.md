@@ -1,13 +1,12 @@
 # TaCuda Roadmap
 
-Last reviewed: 2026-11-20 for 0.9.2.
+Last reviewed: 2026-11-22 for 0.9.3.
 This document tracks where the project stands and what ships next.
 Order inside a milestone is priority order; items move, versions don't slip silently.
 
-## Current release (0.9.2)
+## Current release (0.9.3)
 
-Release 0.9.2 adds row-batched and short-history dispatch, shared Hilbert
-phase weights, rolling-window corrections and Python stream validation.
+Release 0.9.3 corrects GPU RSI, native-library selection and cross-platform optimizer sampling.
 See the [changelog](CHANGELOG.md) and [dispatch rules](BATCH_API.md).
 
 | Area | State |

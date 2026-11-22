@@ -86,6 +86,7 @@ public:
         {Family::ADX, Column::Close, {ps.get("adxlen")}},
         {Family::MAX, Column::High, {6}},
         {Family::MIN, Column::Low, {6}},
+        avg_range_request(4),
     };
   }
 
@@ -97,7 +98,7 @@ public:
     const int n = bars.size();
     const int avglen = ps.get_int("avglen");
     const int ch = ps.get_int("ch");
-    const std::vector<float> ar4 = avg_range(bars, 4);
+    const float* ar4 = ind.line(3);
 
     // WAverage of the ADX 1-bar differential (weights avglen..1, newest first).
     std::vector<float> deltaAvg(static_cast<std::size_t>(n),
@@ -183,19 +184,18 @@ public:
   }
 
   std::vector<IndicatorRequest> indicators(const ParamSet& ps) const override {
-    // Swing detection and the average range run on raw bars; no precomputed
-    // indicator lines are needed.
+    // Swing detection runs on raw bars; only the Average(Range, 4) of the
+    // trail comes from the backend.
     (void)ps;
-    return {};
+    return {avg_range_request(4)};
   }
 
   void signals(const Series& bars, const ParamSet& ps, const IndicatorView& ind,
                Signal* out) const override {
-    (void)ind;
     const int n = bars.size();
     const int s = ps.get_int("stren");
     const int maxAge = ps.get_int("maxage");
-    const std::vector<float> ar4 = avg_range(bars, 4);
+    const float* ar4 = ind.line(0);
 
     struct Swing { int bar; float price; };
     std::deque<Swing> highs, lows;
@@ -319,7 +319,7 @@ public:
 
   std::vector<IndicatorRequest> indicators(const ParamSet& ps) const override {
     (void)ps;
-    return {{Family::OBV, Column::Close, {}}};
+    return {{Family::OBV, Column::Close, {}}, avg_range_request(4)};
   }
 
   void signals(const Series& bars, const ParamSet& ps, const IndicatorView& ind,
@@ -330,7 +330,7 @@ public:
     const int barsback = ps.get_int("barsback");
     const int newhighs = ps.get_int("newhighs");
     const int newlows = ps.get_int("newlows");
-    const std::vector<float> ar4 = avg_range(bars, 4);
+    const float* ar4 = ind.line(1);
     const std::vector<float> hi = rolling_max(obv, n, length);
     const std::vector<float> lo = rolling_min(obv, n, length);
 
@@ -382,6 +382,7 @@ public:
     return {
         {Family::MAX, Column::High, {lb}},
         {Family::MIN, Column::Low, {lb}},
+        avg_range_request(4),
     };
   }
 
@@ -392,7 +393,7 @@ public:
     const int n = bars.size();
     const int len = ps.get_int("len");
     const int lookback = ps.get_int("lookback");
-    const std::vector<float> ar4 = avg_range(bars, 4);
+    const float* ar4 = ind.line(2);
 
     // VolumeMove = XAverage((C-O)/(H-L) * Volume, len).
     std::vector<float> raw(static_cast<std::size_t>(n), 0.f);
@@ -472,6 +473,7 @@ public:
         {Family::STOCH, Column::Close, {ps.get("length"), 3}},
         {Family::MAX, Column::High, {5}},
         {Family::MIN, Column::Low, {5}},
+        avg_range_request(4),
     };
   }
 
@@ -483,7 +485,7 @@ public:
     const int n = bars.size();
     const float ob = static_cast<float>(ps.get("ob"));
     const float os = static_cast<float>(ps.get("os"));
-    const std::vector<float> ar4 = avg_range(bars, 4);
+    const float* ar4 = ind.line(3);
 
     enum class St { Flat, LongSig, ShortSig, ShortRev, LongRev };
     St st = St::Flat;
@@ -573,6 +575,7 @@ public:
         {Family::CCI, Column::Close, {ps.get("ccilen")}},
         {Family::MAX, Column::High, {3}},
         {Family::MIN, Column::Low, {3}},
+        avg_range_request(4),
     };
   }
 
@@ -584,7 +587,7 @@ public:
     const float* hi3 = ind.line(2);
     const float* lo3 = ind.line(3);
     const int n = bars.size();
-    const std::vector<float> ar4 = avg_range(bars, 4);
+    const float* ar4 = ind.line(4);
     const std::vector<float> cciAvg = ema_line(cci, n, ps.get_int("cciavg"));
 
     int bbStatus = 0;
@@ -661,7 +664,7 @@ public:
 };
 
 // --- exp02_pct_change_channel ------------------------------------------------
-// A move of more than ~2% over `pchng` bars arms a fade-the-extreme stop at
+// A move outside the configured percent-change thresholds over `pchng` bars arms a fade stop at
 // the recent 3-bar extreme for three bars. Exits: first profitable open or
 // a 5-bar channel break.
 class PctChangeChannelV2 final : public IStrategy {
@@ -671,8 +674,8 @@ public:
   std::vector<ParamDef> params() const override {
     return {
         {"pchng", 5, 2, 20, 1, true},
-        {"obought", 102.0, 100.5, 110.0, 0.5, false},
-        {"osold", 98.0, 90.0, 99.5, 0.5, false},
+        {"obought", 101.0, 100.5, 110.0, 0.5, false},
+        {"osold", 99.0, 90.0, 99.5, 0.5, false},
         {"bands", 3, 2, 10, 1, true},
     };
   }
@@ -703,7 +706,6 @@ public:
     const float os = static_cast<float>(ps.get("osold"));
 
     int pos = 0;
-    float entryRef = 0.f;
     int fillBar = -1;
     float highBand = 0.f, lowBand = 0.f;
     int osUntil = -1, obUntil = -1;
@@ -711,9 +713,9 @@ public:
     for (int i = 0; i < n; ++i) {
       // 1) Exits: first profitable open, then the 5-bar channel.
       if (pos != 0 && i > fillBar) {
-        if (pos == 1 && O(bars, i) > entryRef) {
+        if (pos == 1 && O(bars, i) > O(bars, fillBar)) {
           pos = 0;
-        } else if (pos == -1 && O(bars, i) < entryRef) {
+        } else if (pos == -1 && O(bars, i) < O(bars, fillBar)) {
           pos = 0;
         } else if (pos == 1 && i >= 1 && finite(lo5[i - 1]) &&
                    L(bars, i) <= lo5[i - 1]) {
@@ -730,7 +732,6 @@ public:
         if (canLong || canShort) {
           pos = (canLong && canShort) ? pick_side(bars, i, highBand, lowBand)
                                       : (canLong ? 1 : -1);
-          entryRef = C(bars, i);
           fillBar = i + 1;
           osUntil = obUntil = -1;
         }
@@ -766,7 +767,7 @@ public:
   std::vector<ParamDef> params() const override {
     return {
         {"length", 9, 5, 30, 1, true},
-        {"sdev", 2.0, 1.0, 3.0, 0.25, false},
+        {"sdev", 1.5, 1.0, 3.0, 0.25, false},
         {"rsihi", 55, 45, 80, 1, true},
         {"rsilo", 45, 20, 55, 1, true},
     };
@@ -783,6 +784,7 @@ public:
         {Family::RSI, Column::Close, {4}},
         {Family::MAX, Column::High, {5}},
         {Family::MIN, Column::Low, {5}},
+        avg_range_request(4),
     };
   }
 
@@ -796,7 +798,7 @@ public:
     const int n = bars.size();
     const float rsiHi = static_cast<float>(ps.get("rsihi"));
     const float rsiLo = static_cast<float>(ps.get("rsilo"));
-    const std::vector<float> ar4 = avg_range(bars, 4);
+    const float* ar4 = ind.line(4);
 
     int pos = 0;
     int squeezeBar = -1;

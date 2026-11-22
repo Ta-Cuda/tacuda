@@ -17,8 +17,8 @@ namespace topt {
 // column one numSeries x seriesLen matrix (series-major) is uploaded to the
 // device once and reused; each compute() issues a single ct_*_batch_d call
 // that fans the per-symbol kernels out over TaCuda's internal stream pool,
-// then downloads each output line as one matrix-sized transfer and scatters
-// it into the per-symbol buffers.
+// then downloads each output line as one matrix-sized transfer into a
+// page-locked staging buffer and scatters it into the per-symbol buffers.
 class TacudaBatchBackend final : public IBatchIndicatorBackend {
 public:
   // All series must be non-empty and share one length.
@@ -43,9 +43,16 @@ private:
   const std::vector<Series>& series_;
   int numSeries_ = 0;
   int seriesLen_ = 0;
+  // Download staging of numSeries x seriesLen floats: page-locked when the
+  // host allows it (allocated once per backend; the matrix-sized D2H copy is
+  // the PCIe floor of trivial request sets), else a pageable fallback.
+  float* staging();
+
   std::array<float*, 5> deviceMatrices_{}; // indexed by Column, lazy upload
   std::array<float*, 3> lineMatrices_{};   // reusable output matrices
-  std::vector<float> staging_;             // reusable download buffer
+  float* pinnedStaging_ = nullptr;         // cudaHostAlloc, or nullptr
+  bool pinnedTried_ = false;
+  std::vector<float> pageableStaging_;     // fallback when page-locking failed
 };
 
 } // namespace topt

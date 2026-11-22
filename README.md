@@ -18,10 +18,10 @@
 > [compatibility guide](docs/TA_LIB_COMPATIBILITY.md) for tolerances, typed
 > outputs, MA types, numerical changes and performance limits.
 
-**Release 0.9.2** makes host Hilbert results reproducible across libm FMA modes,
-adds batched execution across rows and short histories, and corrects rolling
-STDDEV, SUM and NaN warm-up. Use matching 0.9.2 natives and bindings.
-See the [release notes](docs/CHANGELOG.md) for numerical and dispatch changes.
+**Release 0.9.3** corrects GPU RSI pivots on equal closes, makes seeded strategy
+searches and Monte Carlo sampling reproducible across platforms, and improves
+Windows native-library discovery. Use matching 0.9.3 natives and bindings.
+See the [release notes and performance measurements](docs/CHANGELOG.md).
 
 TACUDA delivers lightning-fast technical analysis indicators powered by NVIDIA CUDA GPUs. Built for quantitative traders, researchers, and financial analysts who demand maximum performance from their computational workflows.
 
@@ -38,7 +38,7 @@ Implementation semantics (EMA seeding, warmup NaNs, indexing conventions) are do
 
 ---
 
-[0.9.2 release workflow](https://github.com/Ta-Cuda/tacuda/actions/runs/44726352021) В· [GPU and package verification](docs/validation/2026-11-20/tag-validation.json).
+[0.9.3 release workflow](https://github.com/Ta-Cuda/tacuda/actions/runs/44726352021) В· [GPU and package verification](docs/validation/2026-11-20/tag-validation.json).
 
 ## Fused batches in 0.9.0
 
@@ -120,7 +120,7 @@ with tacuda.stream.Rsi(14) as rsi:
 
 | Component | Version | Notes |
 |-----------|---------|-------|
-| **NVIDIA GPU** | Compute ≥ 6.0 | The 0.9.2 prebuilt binaries include SM60/61/70/75/80/86/89/90; source builds can select architectures with `-DTACUDA_CUDA_ARCHITECTURES=<arch>` |
+| **NVIDIA GPU** | Compute ≥ 6.0 | The 0.9.3 prebuilt binaries include SM60/61/70/75/80/86/89/90; source builds can select architectures with `-DTACUDA_CUDA_ARCHITECTURES=<arch>` |
 | **CUDA Toolkit** | 11.x / 12.x | 12.x recommended |
 | **CMake** | ≥ 3.22 | |
 | **Compiler** | C++17 | GCC, Clang, or MSVC |
@@ -550,7 +550,7 @@ Adding a new indicator touches four places (see
 
 ## ✅ Status & TODO
 
-### ✅ Implemented as of 0.9.2
+### ✅ Implemented as of 0.9.3
 
 - [x] **All 237 functions from TA-Lib 0.8.3 implemented** (incl. MACDEXT with independent MA types and 19 element-wise vector math functions); numerical parity is verified per function by the strict differential corpus — 241/241 specs and 1928/1928 cells passed, remaining corner-case notes in [docs/IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md)
 - [x] **All 61 candlestick patterns** match TA-Lib signal-for-signal (double-precision literal ports, exact-equality oracle with hand-crafted activation fixtures for the rare patterns)

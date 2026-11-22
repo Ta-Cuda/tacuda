@@ -5,6 +5,8 @@
 /* ======================================================================== */
 #include <gtest/gtest.h>
 
+#include <cmath>
+
 #include "core/Fitness.h"
 #include "engine/Metrics.h"
 
@@ -57,6 +59,44 @@ TEST(Fitness, RejectsSyntaxErrors) {
                std::invalid_argument);
 }
 
+TEST(Fitness, FunctionsEvaluate) {
+  const auto v = vars({{"netprofit", -40.0}, {"maxdd", 16.0}, {"trades", 9.0}});
+  EXPECT_DOUBLE_EQ(FitnessExpr::parse("abs(netprofit)", fitness_variable_names()).eval(v),
+                   40.0);
+  EXPECT_DOUBLE_EQ(FitnessExpr::parse("sqrt(maxdd)", fitness_variable_names()).eval(v), 4.0);
+  EXPECT_DOUBLE_EQ(FitnessExpr::parse("log(1)", fitness_variable_names()).eval(v), 0.0);
+  EXPECT_DOUBLE_EQ(
+      FitnessExpr::parse("MAX(netprofit, 0, -1)", fitness_variable_names()).eval(v), 0.0);
+  EXPECT_DOUBLE_EQ(
+      FitnessExpr::parse("min(trades, maxdd) * 2", fitness_variable_names()).eval(v), 18.0);
+  // Functions nest and mix with the arithmetic grammar.
+  EXPECT_DOUBLE_EQ(FitnessExpr::parse("netprofit / max(sqrt(maxdd), 1) + abs(-2)",
+                                      fitness_variable_names())
+                       .eval(v),
+                   -8.0);
+}
+
+TEST(Fitness, FunctionsOutsideTheirDomainAreNotFinite) {
+  const auto v = vars({{"netprofit", -4.0}});
+  EXPECT_TRUE(std::isnan(
+      FitnessExpr::parse("sqrt(netprofit)", fitness_variable_names()).eval(v)));
+  EXPECT_FALSE(std::isfinite(
+      FitnessExpr::parse("log(0)", fitness_variable_names()).eval(v)));
+}
+
+TEST(Fitness, FunctionArityAndSyntaxAreChecked) {
+  EXPECT_THROW(FitnessExpr::parse("abs(1, 2)", fitness_variable_names()),
+               std::invalid_argument);
+  EXPECT_THROW(FitnessExpr::parse("max(1)", fitness_variable_names()),
+               std::invalid_argument);
+  EXPECT_THROW(FitnessExpr::parse("sqrt 4", fitness_variable_names()),
+               std::invalid_argument);
+  EXPECT_THROW(FitnessExpr::parse("min(1, 2", fitness_variable_names()),
+               std::invalid_argument);
+  EXPECT_THROW(FitnessExpr::parse("hypot(1, 2)", fitness_variable_names()),
+               std::invalid_argument);
+}
+
 TEST(Fitness, MetricsVariablesRoundTrip) {
   MetricsResult m;
   m.netProfit = 500.0;
@@ -65,4 +105,17 @@ TEST(Fitness, MetricsVariablesRoundTrip) {
   auto v = fitness_variables(m);
   auto e = FitnessExpr::parse("netprofit - 2*maxdd + sharpe", fitness_variable_names());
   EXPECT_NEAR(e.eval(v), 500.0 - 240.0 + 1.4, 1e-12);
+}
+
+TEST(Fitness, QualityMetricsAreVariables) {
+  MetricsResult m;
+  m.calmar = 2.5;
+  m.sqn = 1.7;
+  m.payoff = 1.2;
+  m.maxConsecLosses = 4;
+  m.maxDrawdownBars = 30;
+  auto v = fitness_variables(m);
+  auto e = FitnessExpr::parse("calmar + sqn + payoff - maxconseclosses - maxddbars",
+                              fitness_variable_names());
+  EXPECT_NEAR(e.eval(v), 2.5 + 1.7 + 1.2 - 4.0 - 30.0, 1e-12);
 }

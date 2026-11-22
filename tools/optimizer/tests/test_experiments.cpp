@@ -9,6 +9,7 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <limits>
@@ -99,6 +100,54 @@ TEST(Experiments, FastSlowValidationRejectsDegenerateGrids) {
     EXPECT_FALSE(s->validate(ps)) << name << ": fast == slow must be invalid";
     ps.set(fastKey, slow + 1.0);
     EXPECT_FALSE(s->validate(ps)) << name << ": fast > slow must be invalid";
+  }
+}
+
+TEST(Experiments, DailyDefaultsTradeOnQuietSeriesAndStayFlatWithoutSetups) {
+  const Series daily = generate_synthetic(5000, 42);
+  Series flat = daily;
+  for (auto* prices : {&flat.open, &flat.high, &flat.low, &flat.close}) {
+    prices->assign(daily.size(), 100.f);
+  }
+  for (bool hasSetups : {true, false}) {
+    const Series& bars = hasSetups ? daily : flat;
+    TestBackend backend(bars);
+    IndicatorCache cache(bars, backend);
+    for (const char* name : {"exp01_ma_crossover", "exp02_bull_beater",
+                             "exp02_pct_change_channel"}) {
+      auto strategy = make_strategy(name);
+      auto run = run_variant(bars, *strategy, params_of(*strategy), cache, ExecConfig{}, nullptr);
+      ASSERT_TRUE(run.valid) << name << ": " << run.error;
+      EXPECT_EQ(run.metrics.numTrades > 0, hasSetups) << name;
+    }
+  }
+}
+
+TEST(Experiments, PercentChangeProfitableOpenUsesNextOpenEntryAfterGap) {
+  auto strategy = make_strategy("exp02_pct_change_channel");
+  for (int dir : {1, -1}) {
+    // The entry decision closes at 100. A gap moves the fill three points
+    // against the trader. Only the last open is profitable vs that fill.
+    Series bars = generate_synthetic(10, 42);
+    bars.close.assign(10, 100.f);
+    bars.open.assign(10, 100.f);
+    bars.close[5] = 100.f - 2 * dir;
+    bars.open[7] = 100.f + 3 * dir;
+    bars.open[8] = 100.f + dir;
+    bars.open[9] = 100.f + 4 * dir;
+    for (int i = 0; i < bars.size(); ++i) {
+      bars.high[i] = std::max(bars.open[i], bars.close[i]);
+      bars.low[i] = std::min(bars.open[i], bars.close[i]);
+    }
+    std::vector<float> entry(10, 100.f), hi(10, 110.f), lo(10, 90.f);
+    IndicatorView indicators({{entry.data()}, {entry.data()}, {hi.data()}, {lo.data()}});
+    std::vector<Signal> signals(10);
+    strategy->signals(bars, params_of(*strategy), indicators, signals.data());
+    EXPECT_EQ(signals[5], 0);
+    EXPECT_EQ(signals[6], dir);
+    EXPECT_EQ(signals[7], dir);
+    EXPECT_EQ(signals[8], dir);
+    EXPECT_EQ(signals[9], 0);
   }
 }
 

@@ -666,6 +666,7 @@ public:
         {Family::EMA, Column::Close, {ps.get("len1")}},
         {Family::EMA, Column::Close, {ps.get("len2")}},
         {Family::EMA, Column::Close, {ps.get("len3")}},
+        avg_range_request(4),
     };
   }
 
@@ -676,7 +677,7 @@ public:
     const float* a2 = ind.line(1);
     const float* a3 = ind.line(2);
     const int n = bars.size();
-    const std::vector<float> ar4 = avg_range(bars, 4);
+    const float* ar4 = ind.line(3);
 
     int pos = 0;
     bool stopSet = false;
@@ -829,6 +830,7 @@ public:
     return {
         {Family::KURTOSIS, Column::Close, {ps.get("kurtlen")}},
         {Family::SKEW, Column::Close, {ps.get("skewlen")}},
+        avg_range_request(4),
     };
   }
 
@@ -838,7 +840,7 @@ public:
     const float* kurt = ind.line(0);
     const float* skew = ind.line(1);
     const int n = bars.size();
-    const std::vector<float> ar4 = avg_range(bars, 4);
+    const float* ar4 = ind.line(2);
 
     int pos = 0;
     bool trailSet = false;

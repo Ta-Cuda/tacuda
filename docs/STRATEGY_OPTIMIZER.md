@@ -34,6 +34,23 @@ simulation dominates; on the indicator-heavy `bbands_breakout` grid (900
 unique BBANDS, 2700 lines over 1M bars) the GPU backend is ~1.4x faster
 end-to-end (8.2 s vs 11.6 s).
 
+The 2026-11 optimizer round, old binary against new on the same box
+(i3-12100F, 4C/8T), median of five runs:
+
+| Change | Scenario | Before | After |
+|--------|----------|--------|-------|
+| Per-symbol signals + simulation in parallel | `portfolio` 16 × 500k, signal phase | 0.07–0.14 s | 0.02–0.03 s (×3.7–5.0) |
+| | the same runs end-to-end | 1.00–1.14 s | 0.93–1.02 s |
+| `Average(Range, n)` / `Average(TrueRange, n)` as cached requests | grids over volume 1–4 systems, 300k bars | 1.51–7.65 s | 1.36–7.04 s (×1.04–1.11) |
+| Persistent GPU output lines | `bbands_breakout` grid, 900 variants, 1M bars | 7.95 s | 7.65 s (×1.04) |
+| Page-locked download staging, batch backend | `portfolio` 16 × 500k, indicator phase | 0.139–0.244 s | 0.132–0.233 s (×1.04–1.05) |
+
+The end-to-end portfolio gain is small because data generation and CUDA
+start-up dominate a one-second run; the parallel phase grows in weight
+with the symbol count. Every result is identical to the previous binary
+(all 97 strategies on the TA-Lib and GPU backends, grid CSV, genetic,
+walk-forward, portfolio on one thread and on all cores).
+
 ## Build
 
 The optimizer builds together with the library when
@@ -101,6 +118,11 @@ overflow are rejected before loading a backend. A range also requires a
 positive step that actually advances its floating-point value; a single-point
 range finishes immediately. This prevents malformed grids from looping forever.
 
+Integer parameters are rounded before the grid is enumerated, and axis values
+that round to the same integer collapse into one: `--grid period=1.2,1.4,2` is
+two variants (1 and 2), not three rows of which two are identical. The genetic
+search draws its genes from the same lists.
+
 The declared parameter min/max values are search-grid suggestions, not hard
 limits for every `--set` override. Valid configurations outside those bounds
 remain usable. Integer conversion keeps nearest-integer rounding, with halfway
@@ -138,6 +160,14 @@ MaxDrawdown (absolute and % of peak), annualized Sharpe and Sortino
 (`--bars-per-year`, default 252, population std over per-bar equity
 diffs), WinRate, AvgTrade, trade count, exposure.
 
+Quality metrics: Calmar (net profit / max drawdown; 1e9 for a profit
+without a drawdown), SQN (Van Tharp: `sqrt(N) * mean / std` of the trade
+PnLs, population std, 0 below two trades), AvgWin, AvgLoss (a positive
+magnitude), Payoff (AvgWin / AvgLoss; 1e9 with winners and no losers), the
+longest winning and losing streaks (a zero-PnL trade is a loss, as in
+WinRate) and the longest drawdown in bars (consecutive bars below the
+running equity peak).
+
 Drawdown starts from the funded capital. A ranged segment (IS/OOS, walk-forward)
 can trade on its first bar, so that bar's result is part of the curve and, when
 it moved equity, one more per-bar diff. A run that starts flat keeps its n-1
@@ -148,17 +178,32 @@ fitness expression that evaluates to a non-finite value marks the variant
 invalid with an error instead of ranking it.
 
 `--fitness` accepts an arithmetic expression over those metrics
-(`+ - * / ( )`, unary minus, case-insensitive variables):
+(`+ - * / ( )`, unary minus, and the functions `abs(x)`, `sqrt(x)`,
+`log(x)` (natural), `min(a, b, ...)`, `max(a, b, ...)`; names are
+case-insensitive):
 
 ```
 --fitness sharpe
 --fitness "netprofit - 2*maxdd"
 --fitness "pf * winrate - maxddpct * 100"
+--fitness "netprofit / max(maxdd, 1)"
+--fitness "min(pf, 5) * sqrt(trades)"
 ```
 
 Variables: `netprofit grossprofit grossloss pf profitfactor maxdd maxddpct
-sharpe sortino winrate trades numtrades avgtrade exposure`. Division by
-zero yields 0.
+sharpe sortino winrate trades numtrades avgtrade exposure calmar sqn avgwin
+avgloss payoff maxconsecwins maxconseclosses maxddbars`. Division by zero
+yields 0. A function outside its domain (`sqrt` of a negative, `log` of
+zero) gives a non-finite value, which marks the variant invalid like any
+other non-finite fitness. `min` / `max` are the way to tame the 1e9 caps of
+`pf`, `calmar` and `payoff`.
+
+`--min-trades N` (`grid`, `genetic` and the in-sample optimization of
+`wfo`) skips variants that close fewer than N trades: they are listed as
+skipped with the status `fewer than N trades (k)` and keep their metrics in
+the CSV. Without it a three-trade variant with a capped profit factor wins
+any ratio-style fitness. The out-of-sample evaluation of `wfo` is never
+filtered.
 
 ### Backends
 
@@ -187,10 +232,11 @@ output lines are downloaded. Grid variants share overlapping requests
 through a host-side cache — a 100×100 `ma_cross` grid computes 200 EMA
 lines instead of 20 000.
 
-Since 0.4.0 the request set covers 39 families (the 22 classic ones plus
-the STAD club pack: ASI, SAR_EL, OBTR, WOBV, HPI, MARKET_STRENGTH,
-TRENDSCORE, REFDEV, SKEW, KURTOSIS, PIVOT_HIGH/LOW, XAVERAGE and the
-NaN-strict ROLLING_MEAN/MAX/MIN/STD), and a request can **chain** on
+The request set covers 40 families (the 22 classic ones, RANGE = high - low,
+and the STAD club pack since 0.4.0: ASI, SAR_EL, OBTR, WOBV, HPI,
+MARKET_STRENGTH, TRENDSCORE, REFDEV, SKEW, KURTOSIS, PIVOT_HIGH/LOW,
+XAVERAGE and the NaN-strict ROLLING_MEAN/MAX/MIN/STD), and a request can
+**chain** on
 another request's output line (`IndicatorRequest::chain`, built with
 `derived()`): "XAverage of OBTR" is one request whose whole chain is
 computed inside the backend — on the GPU paths without any host
@@ -200,11 +246,59 @@ single-output upstream requests (`validate_chain()`), and the indicator
 cache key folds the chain in, so chained lines dedupe across variants
 like any other request.
 
+A series that does not depend on the strategy parameters belongs in
+`indicators()`, not in `signals()`: `signals()` runs once per variant, a
+request once per run. The pack's `Average(Range, n)` and
+`Average(TrueRange, n)` are such requests — `avg_range_request(n)` and
+`avg_true_range_request(n)` in `ExpHelpers.h`, a ROLLING_MEAN chained on
+RANGE / TRANGE — where 20 systems of volumes 1–4 used to recompute them in
+every `signals()` call. The trade-off shows in `portfolio`, which has a
+single variant: the line is now a GPU round trip instead of a few
+milliseconds of host arithmetic, +2…+38 ms of indicator phase at 16 × 500k
+(the top end for systems that needed only Close before and now upload the
+High and Low matrices).
+
+The single-series GPU backend keeps its output lines and chain scratch in
+a process-wide workspace instead of allocating them per call: a
+`cudaMalloc` + `cudaFree` pair costs ~116 µs for a 4 MB line on the RTX
+3090 Ti box and nothing measurable below ~1 MB. Downloads go straight into
+the cache lines. Page-locked staging was measured and rejected there: a
+pageable device-to-host copy runs at ~7.9 GB/s against ~12.6 GB/s into
+pinned memory, so staging through a pinned buffer and copying again
+(~500 µs per 4 MB) loses to the direct copy (~470 µs), and pinning the
+cache lines themselves costs ~0.25 ms/MB up front. Only the portfolio batch
+backend page-locks its staging matrix, because it needs one anyway before
+scattering to per-symbol buffers.
+
 Variants are processed in deterministic memory-bounded chunks: per chunk
 the unique requests are computed once, simulations run in parallel
 (`--threads`, default all cores), then the cache is cleared. The budget is
 `--cache-mb` (default 2048). Reports are byte-identical for any thread
 count and chunking (verified by tests).
+
+### Robust (neighbourhood) ranking
+
+The best variant of a grid often sits on an isolated spike: one step away
+the result collapses, the signature of an over-fitted parameter set. `grid`
+therefore computes, next to the fitness, its mean over the variant and its
+neighbours one step up and one step down on every gridded axis (2k
+neighbours for k axes, fewer on the edges). `--rank robust` orders the
+table, the CSV and the JSON by that mean instead of the raw fitness; the
+extra console columns are the mean (`robust`) and how many values went into
+it (`nbh`). The CSV and JSON carry `robustFitness` / `neighborhood` for
+every grid run whatever the ranking, so both orders can be compared from
+one file.
+
+- Skipped and invalid variants are left out of the mean, so a variant
+  surrounded by `--min-trades` rejects is averaged over fewer values. Read
+  `nbh` before trusting a high `robust`.
+- A step is one position on the axis, not a parameter distance:
+  `--grid period=5,50,500` makes 5 and 500 the neighbours of 50. Use evenly
+  spaced ranges when ranking robustly.
+- It is a post-pass over results that exist anyway: no extra simulations.
+- `wfo --rank robust` picks every window's in-sample winner by the mean
+  (`--optimizer grid` only). `genetic` cannot offer it: the search does not
+  evaluate a variant's whole neighbourhood.
 
 ### Genetic optimization
 
@@ -228,7 +322,11 @@ Properties enforced by design and covered by tests:
 - invalid parameter combinations get `-inf` fitness: they lose every
   tournament and never enter the elite, but do not crash the run;
 - elitism makes the best fitness non-decreasing between generations;
-- a fixed `--ga-seed` (default 42) makes the whole run deterministic.
+- a fixed `--ga-seed` (default 42) produces the same candidate sequence on
+  Linux and Windows for the same axes, settings and fitness ordering.
+  Reuse the same input CSV to reproduce a search across hosts. The sampler
+  changed after 0.9.2, so a seed from that release can explore different
+  candidates in a newer build.
 
 The console/CSV/JSON reports are the grid ones over all evaluated
 variants, plus a `generations N, unique variants evaluated M` line.
@@ -255,6 +353,10 @@ bar fills at the first OOS open. A position still open at the segment end
 is force-closed at its last close. Windows where no variant is valid
 (e.g. the IS segment is shorter than the indicator warm-up) are reported
 as skipped and contribute flat equity.
+
+`--min-trades` applies to the in-sample optimization only. `--rank robust`
+(grid optimizer) picks each window's in-sample winner by the neighbourhood
+mean instead of the raw fitness; the report and JSON name the criterion.
 
 The OOS equity curves are stitched by chaining per-window equity deltas
 into one continuous curve; overall OOS metrics are computed over it. WFE
@@ -287,10 +389,12 @@ defaults otherwise) across several symbols and aggregates the result:
   94 EXPERIMENTS systems — runs unchanged on any of the three paths.
 - **Timing.** The report and JSON split the run into the indicator phase
   (all backend calls: uploads + kernels + downloads) and the
-  signals+simulation phase (per-symbol CPU work), so backends are compared
-  on the part they actually own. A three-backend comparison over the whole
-  EXPERIMENTS pack lives in `scripts/bench_experiments_batch.py`; the
-  measured numbers and their analysis are in
+  signals+simulation phase (per-symbol CPU work, symbols in parallel on
+  `--threads`; the result is identical for any thread count), so backends
+  are compared on the part they actually own. A three-backend comparison
+  over the whole EXPERIMENTS pack lives in
+  `scripts/bench_experiments_batch.py`; the measured numbers and their
+  analysis are in
   [EXPERIMENTS.md](EXPERIMENTS.md#batch-api-portfolio-path).
 - **Accounting.** `--capital` is the total: each symbol trades an equal
   share (`capital / K`) with the same `--qty` and costs, one position per
@@ -322,9 +426,10 @@ The report shows P5/P25/P50/P75/P95 and the worst value for `netProfit`
 and `maxDD`, the original chronological order's stats, `P(net loss)` and
 `P(maxDD > original)`. The equity path is trade-level (capital plus
 cumulative closed-trade PnL), so open-position excursions between entry
-and exit are not part of the MC drawdown. `--mc-seed` (default 42) makes
-the run deterministic; the section is appended to the JSON output as
-`monteCarlo`.
+and exit are not part of the MC drawdown. With the same trade list and
+`--mc-seed` (default 42), permutation and bootstrap draw the same samples
+on Linux and Windows. The JSON report includes them as summary statistics
+in `monteCarlo`. The sampling sequence changed after 0.9.2.
 
 ## Examples
 
@@ -342,6 +447,12 @@ tacuda-opt grid --synthetic 1000000 --strategy ma_cross \
 tacuda-opt grid --data BTCUSDT_1h.csv --strategy rsi_reversion \
     --grid period=7..28:7 --grid low=20..35:5 --grid high=65..80:5 \
     --fitness sharpe --out-json rsi.json
+
+# plateau over spike: rank by the neighbourhood mean, ignore variants with
+# fewer than 30 trades, cap the ratio's denominator with a function
+tacuda-opt grid --data ES_5min.csv --strategy ma_cross \
+    --grid fast=2..40:2 --grid slow=50..250:10 \
+    --fitness "netprofit / max(maxdd, 1)" --min-trades 30 --rank robust
 
 # genetic search over the same 10 000-variant space (~3% of the work)
 tacuda-opt genetic --synthetic 1000000 --strategy ma_cross \
@@ -427,7 +538,7 @@ P(net loss) 0.0%   P(maxDD > original) 0.0%
 ## Tests
 
 `tools/optimizer/tests/` (GoogleTest, ctest label `optimizer`, target
-`tacuda_opt_tests`, 115 tests): simulator fills/costs/reversals against
+`tacuda_opt_tests`, 185 tests): simulator fills/costs/reversals against
 hand-computed cases (including ranged segments used by walk-forward),
 look-ahead guards (shifted signals change the outcome; signals are causal
 when future data changes), determinism across runs and thread counts,
@@ -446,8 +557,14 @@ hand-checked drawdown cases, ordered percentiles, seed determinism,
 bootstrap variability, empty/invalid inputs. Backend-vs-reference
 comparisons (single-series and `ct_*_batch_d` portfolio matrices vs the
 C++ reference) run when a GPU / TA-Lib is present and are skipped
-otherwise. All engine tests use a plain C++ reference backend, so they
-pass on machines with no GPU.
+otherwise. The 2026-11 round added: fitness functions and their domain
+errors, the quality metrics against hand computation, integer-axis
+de-duplication, `--min-trades`, the neighbourhood mean on hand-built grids
+(a spike against a plateau) and against neighbours found by parameter value
+on a real grid, robust walk-forward, portfolio results identical on 1, 8 and
+all threads, RANGE and the average-range chains against the CPU helpers.
+All engine tests use a plain C++ reference backend, so they pass on
+machines with no GPU.
 
 ```bash
 cd build && ctest -L optimizer --output-on-failure
@@ -464,5 +581,7 @@ cd build && ctest -L optimizer --output-on-failure
 - Monte-Carlo operates on closed-trade PnLs (trade-level equity), not on
   per-bar open-position excursions.
 - Strategies are compiled in; there is no plugin/scripting layer.
+- Robust ranking needs the exhaustive grid: `genetic` (and `wfo --optimizer
+  genetic`) rank by raw fitness only.
 - Walk-forward windows are equal-length rolling (anchored mode is not
   implemented).

@@ -117,6 +117,19 @@ TEST(MonteCarlo, ResampleVariesNetProfit) {
   EXPECT_GT(res.probNetLoss, 0.0); // bootstrap can draw the losing trades
 }
 
+TEST(MonteCarlo, FixedSeedProducesPortableDrawdownAndProfitPercentiles) {
+  const auto trades = make_trades({4, -2, 6, -8, 3, 5, -1});
+  const auto permute = run_monte_carlo(trades, 200, make_cfg(32, McMode::Permute, 41));
+  EXPECT_EQ(permute.maxDrawdown.p50, 9);
+  EXPECT_EQ(permute.maxDrawdown.p95, 11);
+  EXPECT_EQ(permute.probDdAboveOriginal, 17.0 / 32);
+  const auto resample = run_monte_carlo(trades, 200, make_cfg(32, McMode::Resample, 41));
+  EXPECT_EQ(resample.netProfit.p5, -17);
+  EXPECT_EQ(resample.netProfit.p50, 2);
+  EXPECT_EQ(resample.netProfit.p95, 22);
+  EXPECT_EQ(resample.maxDrawdown.worst, 27);
+}
+
 TEST(MonteCarlo, EmptyTradesYieldZeroResult) {
   McResult res = run_monte_carlo({}, 1000.0, make_cfg(100, McMode::Permute));
   EXPECT_EQ(res.numTrades, 0);

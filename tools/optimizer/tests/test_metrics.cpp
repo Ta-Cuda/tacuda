@@ -40,6 +40,61 @@ TEST(Metrics, TradeAggregates) {
   EXPECT_NEAR(m.exposure, 4.0 / 6.0, 1e-12);
 }
 
+TEST(Metrics, QualityMetricsMatchHandComputation) {
+  MetricsResult m = compute_metrics(make_sim(), 252);
+  // Trades 25, -10, 15: two winners averaging 20, one loser of 10.
+  EXPECT_DOUBLE_EQ(m.avgWin, 20.0);
+  EXPECT_DOUBLE_EQ(m.avgLoss, 10.0);
+  EXPECT_DOUBLE_EQ(m.payoff, 2.0);
+  EXPECT_EQ(m.maxConsecWins, 1);
+  EXPECT_EQ(m.maxConsecLosses, 1);
+  // Calmar: net 30 over the 20 max drawdown.
+  EXPECT_DOUBLE_EQ(m.calmar, 1.5);
+  // SQN: mean 10, deviations 15/-20/5 -> population variance 650/3.
+  const double sd = std::sqrt(650.0 / 3.0);
+  EXPECT_NEAR(m.sqn, std::sqrt(3.0) * 10.0 / sd, 1e-12);
+  // Equity 1000,1010,990,1020,1005,1030 never spends two bars under a peak.
+  EXPECT_EQ(m.maxDrawdownBars, 1);
+}
+
+TEST(Metrics, StreaksAndDrawdownLengthCountRuns) {
+  SimResult sim;
+  sim.initialCapital = 100.0;
+  // Peak 110 at bar 1, then four bars below it before a new high.
+  sim.equity = {100.0, 110.0, 105.0, 100.0, 108.0, 109.0, 120.0, 115.0};
+  sim.finalEquity = sim.equity.back();
+  sim.trades = {Trade{0, 1, 1, 1.0, 2.0, 10.0}, Trade{1, 2, 1, 1.0, 2.0, -5.0},
+                Trade{2, 3, 1, 1.0, 2.0, 0.0},  Trade{3, 4, 1, 1.0, 2.0, -3.0},
+                Trade{4, 5, 1, 1.0, 2.0, 8.0},  Trade{5, 6, 1, 1.0, 2.0, 5.0}};
+  MetricsResult m = compute_metrics(sim, 252);
+  EXPECT_EQ(m.maxDrawdownBars, 4);
+  EXPECT_EQ(m.maxConsecLosses, 3); // -5, 0, -3: a zero trade is a loser
+  EXPECT_EQ(m.maxConsecWins, 2);
+  EXPECT_DOUBLE_EQ(m.avgLoss, 8.0 / 3.0);
+}
+
+TEST(Metrics, QualityMetricsDegenerateCases) {
+  SimResult flat;
+  flat.initialCapital = 100.0;
+  flat.equity = {100.0, 100.0};
+  flat.finalEquity = 100.0;
+  MetricsResult none = compute_metrics(flat, 252);
+  EXPECT_DOUBLE_EQ(none.calmar, 0.0);
+  EXPECT_DOUBLE_EQ(none.sqn, 0.0);
+  EXPECT_DOUBLE_EQ(none.payoff, 0.0);
+  EXPECT_EQ(none.maxDrawdownBars, 0);
+
+  SimResult up;
+  up.initialCapital = 100.0;
+  up.equity = {100.0, 110.0};
+  up.finalEquity = 110.0;
+  up.trades = {Trade{0, 1, 1, 1.0, 2.0, 10.0}};
+  MetricsResult one = compute_metrics(up, 252);
+  EXPECT_DOUBLE_EQ(one.calmar, 1e9);  // profit without drawdown
+  EXPECT_DOUBLE_EQ(one.payoff, 1e9);  // winners, no losers
+  EXPECT_DOUBLE_EQ(one.sqn, 0.0);     // undefined below two trades
+}
+
 TEST(Metrics, DrawdownFromEquityCurve) {
   MetricsResult m = compute_metrics(make_sim(), 252);
   // Peak 1010 -> trough 990 gives 20 absolute; 1020 -> 1005 gives 15.

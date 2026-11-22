@@ -22,16 +22,20 @@ std::string fmt(double v, int prec = 2) {
   return buf;
 }
 
-// Ranks valid variants by fitness descending; ties keep enumeration order.
-std::vector<std::size_t> rank_by_fitness(const std::vector<VariantResult>& results) {
+// Ranks valid variants by fitness (or robust fitness) descending; ties keep
+// enumeration order.
+std::vector<std::size_t> rank_by_fitness(const std::vector<VariantResult>& results,
+                                         bool byRobust = false) {
   std::vector<std::size_t> idx;
   idx.reserve(results.size());
   for (std::size_t i = 0; i < results.size(); ++i) {
     if (results[i].valid) idx.push_back(i);
   }
-  std::stable_sort(idx.begin(), idx.end(), [&](std::size_t a, std::size_t b) {
-    return results[a].fitness > results[b].fitness;
-  });
+  auto key = [&](std::size_t i) {
+    return byRobust ? results[i].robustFitness : results[i].fitness;
+  };
+  std::stable_sort(idx.begin(), idx.end(),
+                   [&](std::size_t a, std::size_t b) { return key(a) > key(b); });
   return idx;
 }
 
@@ -84,6 +88,14 @@ void append_metrics_json(std::string& out, const MetricsResult& m) {
   out += ",\"avgTrade\":" + json_number(m.avgTrade);
   out += ",\"exposure\":" + json_number(m.exposure);
   out += ",\"numTrades\":" + std::to_string(m.numTrades);
+  out += ",\"calmar\":" + json_number(m.calmar);
+  out += ",\"sqn\":" + json_number(m.sqn);
+  out += ",\"avgWin\":" + json_number(m.avgWin);
+  out += ",\"avgLoss\":" + json_number(m.avgLoss);
+  out += ",\"payoff\":" + json_number(m.payoff);
+  out += ",\"maxConsecWins\":" + std::to_string(m.maxConsecWins);
+  out += ",\"maxConsecLosses\":" + std::to_string(m.maxConsecLosses);
+  out += ",\"maxDrawdownBars\":" + std::to_string(m.maxDrawdownBars);
   out += '}';
 }
 
@@ -119,6 +131,14 @@ void print_backtest_report(std::FILE* out, const std::string& strategyName,
   std::fprintf(out, "%-22s %13s%%\n", "Win rate", fmt(m.winRate * 100.0, 1).c_str());
   std::fprintf(out, "%-22s %14s\n", "Avg trade", fmt(m.avgTrade).c_str());
   std::fprintf(out, "%-22s %13s%%\n", "Exposure", fmt(m.exposure * 100.0, 1).c_str());
+  std::fprintf(out, "%-22s %14s\n", "Calmar (NP / MaxDD)", fmt(m.calmar, 3).c_str());
+  std::fprintf(out, "%-22s %14s\n", "SQN", fmt(m.sqn, 3).c_str());
+  std::fprintf(out, "%-22s %14s\n", "Avg win", fmt(m.avgWin).c_str());
+  std::fprintf(out, "%-22s %14s\n", "Avg loss", fmt(m.avgLoss).c_str());
+  std::fprintf(out, "%-22s %14s\n", "Payoff ratio", fmt(m.payoff, 3).c_str());
+  std::fprintf(out, "%-22s %14d\n", "Max consec. wins", m.maxConsecWins);
+  std::fprintf(out, "%-22s %14d\n", "Max consec. losses", m.maxConsecLosses);
+  std::fprintf(out, "%-22s %14d\n", "Max DD length (bars)", m.maxDrawdownBars);
   std::fprintf(out, "%-22s %14s\n", "Final equity", fmt(sim.finalEquity).c_str());
   std::fprintf(out, "%-22s %14s\n", "Initial capital", fmt(sim.initialCapital).c_str());
   std::fprintf(out, "(fills: next bar open, commission %.2f bps + %.2f fixed, "
@@ -129,31 +149,48 @@ void print_backtest_report(std::FILE* out, const std::string& strategyName,
 std::vector<std::size_t> print_grid_report(std::FILE* out,
                                            const std::vector<VariantResult>& results,
                                            const std::string& fitnessText, int topN,
-                                           const char* title) {
-  std::vector<std::size_t> ranked = rank_by_fitness(results);
+                                           const char* title, bool byRobust) {
+  std::vector<std::size_t> ranked = rank_by_fitness(results, byRobust);
   std::size_t invalid = results.size() - ranked.size();
 
-  std::fprintf(out, "\n=== %s: %zu variants (%zu skipped), fitness = %s ===\n",
-               title, results.size(), invalid, fitnessText.c_str());
-  std::fprintf(out, "%4s  %-32s %12s %12s %9s %8s %8s %7s %7s\n", "#", "params",
-               "fitness", "netProfit", "maxDD%", "PF", "Sharpe", "trades", "win%");
+  std::fprintf(out, "\n=== %s: %zu variants (%zu skipped), fitness = %s%s ===\n",
+               title, results.size(), invalid, fitnessText.c_str(),
+               byRobust ? ", ranked by neighbourhood-mean fitness" : "");
+  if (byRobust) {
+    std::fprintf(out, "%4s  %-32s %12s %12s %4s %12s %9s %8s %8s %7s %7s\n", "#",
+                 "params", "robust", "fitness", "nbh", "netProfit", "maxDD%", "PF",
+                 "Sharpe", "trades", "win%");
+  } else {
+    std::fprintf(out, "%4s  %-32s %12s %12s %9s %8s %8s %7s %7s\n", "#", "params",
+                 "fitness", "netProfit", "maxDD%", "PF", "Sharpe", "trades", "win%");
+  }
   std::size_t shown = std::min<std::size_t>(ranked.size(),
                                             topN > 0 ? static_cast<std::size_t>(topN)
                                                      : ranked.size());
   for (std::size_t r = 0; r < shown; ++r) {
     const VariantResult& v = results[ranked[r]];
     const MetricsResult& m = v.metrics;
-    std::fprintf(out, "%4zu  %-32s %12s %12s %9s %8s %8s %7d %7s\n", r + 1,
-                 v.params.to_string().c_str(), fmt(v.fitness, 4).c_str(),
-                 fmt(m.netProfit).c_str(), fmt(m.maxDrawdownPct * 100.0, 1).c_str(),
-                 fmt(m.profitFactor, 2).c_str(), fmt(m.sharpe, 2).c_str(),
-                 m.numTrades, fmt(m.winRate * 100.0, 1).c_str());
+    if (byRobust) {
+      std::fprintf(out, "%4zu  %-32s %12s %12s %4d %12s %9s %8s %8s %7d %7s\n", r + 1,
+                   v.params.to_string().c_str(), fmt(v.robustFitness, 4).c_str(),
+                   fmt(v.fitness, 4).c_str(), v.neighborhood, fmt(m.netProfit).c_str(),
+                   fmt(m.maxDrawdownPct * 100.0, 1).c_str(),
+                   fmt(m.profitFactor, 2).c_str(), fmt(m.sharpe, 2).c_str(),
+                   m.numTrades, fmt(m.winRate * 100.0, 1).c_str());
+    } else {
+      std::fprintf(out, "%4zu  %-32s %12s %12s %9s %8s %8s %7d %7s\n", r + 1,
+                   v.params.to_string().c_str(), fmt(v.fitness, 4).c_str(),
+                   fmt(m.netProfit).c_str(), fmt(m.maxDrawdownPct * 100.0, 1).c_str(),
+                   fmt(m.profitFactor, 2).c_str(), fmt(m.sharpe, 2).c_str(),
+                   m.numTrades, fmt(m.winRate * 100.0, 1).c_str());
+    }
   }
   ranked.resize(shown);
   return ranked;
 }
 
-void write_grid_csv(const std::string& path, const std::vector<VariantResult>& results) {
+void write_grid_csv(const std::string& path, const std::vector<VariantResult>& results,
+                    bool byRobust) {
   std::ofstream f = open_file(path);
   f << "rank";
   if (!results.empty()) {
@@ -162,9 +199,11 @@ void write_grid_csv(const std::string& path, const std::vector<VariantResult>& r
     }
   }
   f << ",fitness,netProfit,grossProfit,grossLoss,profitFactor,maxDrawdown,"
-       "maxDrawdownPct,sharpe,sortino,winRate,avgTrade,exposure,numTrades,status\n";
+       "maxDrawdownPct,sharpe,sortino,winRate,avgTrade,exposure,numTrades,"
+       "calmar,sqn,avgWin,avgLoss,payoff,maxConsecWins,maxConsecLosses,"
+       "maxDrawdownBars,robustFitness,neighborhood,status\n";
 
-  std::vector<std::size_t> ranked = rank_by_fitness(results);
+  std::vector<std::size_t> ranked = rank_by_fitness(results, byRobust);
   std::vector<std::size_t> order = ranked;
   for (std::size_t i = 0; i < results.size(); ++i) {
     if (!results[i].valid) order.push_back(i);
@@ -184,42 +223,53 @@ void write_grid_csv(const std::string& path, const std::vector<VariantResult>& r
       << json_number(m.maxDrawdownPct) << ',' << json_number(m.sharpe) << ','
       << json_number(m.sortino) << ',' << json_number(m.winRate) << ','
       << json_number(m.avgTrade) << ',' << json_number(m.exposure) << ','
-      << m.numTrades << ',' << (v.valid ? "ok" : v.error) << '\n';
+      << m.numTrades << ',' << json_number(m.calmar) << ',' << json_number(m.sqn)
+      << ',' << json_number(m.avgWin) << ',' << json_number(m.avgLoss) << ','
+      << json_number(m.payoff) << ',' << m.maxConsecWins << ','
+      << m.maxConsecLosses << ',' << m.maxDrawdownBars << ','
+      << (v.neighborhood > 0 ? json_number(v.robustFitness) : std::string()) << ','
+      << v.neighborhood << ',' << (v.valid ? "ok" : v.error) << '\n';
   }
 }
 
 void write_grid_json(const std::string& path, const std::string& strategyName,
                      const std::string& fitnessText,
-                     const std::vector<VariantResult>& results, int topN) {
-  std::vector<std::size_t> ranked = rank_by_fitness(results);
+                     const std::vector<VariantResult>& results, int topN,
+                     bool byRobust) {
+  std::vector<std::size_t> ranked = rank_by_fitness(results, byRobust);
   std::size_t shown = std::min<std::size_t>(ranked.size(),
                                             topN > 0 ? static_cast<std::size_t>(topN)
                                                      : ranked.size());
+  auto append_variant = [&](std::string& dst, const VariantResult& v) {
+    dst += "\"params\":";
+    append_params_json(dst, v.params);
+    dst += ",\"fitness\":" + json_number(v.fitness);
+    if (v.neighborhood > 0) { // only where compute_robust_fitness() ran (grid)
+      dst += ",\"robustFitness\":" + json_number(v.robustFitness);
+      dst += ",\"neighborhood\":" + std::to_string(v.neighborhood);
+    }
+    dst += ",\"metrics\":";
+    append_metrics_json(dst, v.metrics);
+  };
   std::string out;
   out += "{\"strategy\":";
   json_escape(out, strategyName);
   out += ",\"fitness\":";
   json_escape(out, fitnessText);
+  out += ",\"rank\":";
+  json_escape(out, byRobust ? "robust" : "fitness");
   out += ",\"variants\":" + std::to_string(results.size());
   out += ",\"evaluated\":" + std::to_string(ranked.size());
   if (!ranked.empty()) {
-    const VariantResult& best = results[ranked.front()];
-    out += ",\"best\":{\"params\":";
-    append_params_json(out, best.params);
-    out += ",\"fitness\":" + json_number(best.fitness);
-    out += ",\"metrics\":";
-    append_metrics_json(out, best.metrics);
+    out += ",\"best\":{";
+    append_variant(out, results[ranked.front()]);
     out += '}';
   }
   out += ",\"top\":[";
   for (std::size_t r = 0; r < shown; ++r) {
     if (r) out += ',';
-    const VariantResult& v = results[ranked[r]];
-    out += "{\"rank\":" + std::to_string(r + 1) + ",\"params\":";
-    append_params_json(out, v.params);
-    out += ",\"fitness\":" + json_number(v.fitness);
-    out += ",\"metrics\":";
-    append_metrics_json(out, v.metrics);
+    out += "{\"rank\":" + std::to_string(r + 1) + ',';
+    append_variant(out, results[ranked[r]]);
     out += '}';
   }
   out += "]}";
@@ -435,10 +485,11 @@ void print_wfo_report(std::FILE* out, const std::string& strategyName,
                       const std::string& fitnessText) {
   std::fprintf(out,
                "\n=== Walk-forward: %s, %zu windows, IS %.0f%%, optimizer %s, "
-               "fitness = %s ===\n",
+               "fitness = %s%s ===\n",
                strategyName.c_str(), res.windows.size(), cfg.isFraction * 100.0,
                cfg.optimizer == WfoOptimizer::Grid ? "grid" : "genetic",
-               fitnessText.c_str());
+               fitnessText.c_str(),
+               cfg.robust ? ", IS winner by neighbourhood-mean fitness" : "");
   std::fprintf(out, "%4s  %-19s %-19s %-28s %12s %12s %12s %7s\n", "#", "IS bars",
                "OOS bars", "params", "IS fit", "OOS fit", "OOS NP", "trades");
   for (std::size_t w = 0; w < res.windows.size(); ++w) {
@@ -482,6 +533,8 @@ void write_wfo_json(const std::string& path, const std::string& strategyName,
   json_escape(out, fitnessText);
   out += ",\"optimizer\":";
   json_escape(out, cfg.optimizer == WfoOptimizer::Grid ? "grid" : "genetic");
+  out += ",\"rank\":";
+  json_escape(out, cfg.robust ? "robust" : "fitness");
   out += ",\"windows\":" + std::to_string(res.windows.size());
   out += ",\"isFraction\":" + json_number(cfg.isFraction);
   out += ",\"wfe\":" + json_number(res.wfe);
@@ -503,6 +556,9 @@ void write_wfo_json(const std::string& path, const std::string& strategyName,
       out += ",\"params\":";
       append_params_json(out, wr.params);
       out += ",\"isFitness\":" + json_number(wr.isFitness);
+      if (cfg.robust) {
+        out += ",\"isRobustFitness\":" + json_number(wr.isRobustFitness);
+      }
       out += ",\"isMetrics\":";
       append_metrics_json(out, wr.isMetrics);
       out += ",\"oosFitness\":" + json_number(wr.oosFitness);

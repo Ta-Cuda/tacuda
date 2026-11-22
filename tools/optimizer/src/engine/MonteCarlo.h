@@ -62,7 +62,7 @@ struct McResult {
 
 // Runs cfg.iterations randomizations of the closed-trade PnL sequence and
 // summarizes the resulting equity-path statistics. Deterministic for a given
-// (trades, cfg) on a given platform. Trades must be in chronological order
+// (trades, cfg) across Linux and Windows. Trades must be in chronological order
 // (as produced by simulate / run_portfolio). With no trades returns a
 // zero-filled result with numTrades == 0.
 // Throws std::invalid_argument when cfg.iterations <= 0.

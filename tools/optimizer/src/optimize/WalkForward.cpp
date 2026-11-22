@@ -15,12 +15,16 @@ namespace topt {
 namespace {
 
 // Best valid variant of a finished IS optimization; -1 when none is valid.
-// Ties keep the earlier variant (stable, deterministic).
-std::ptrdiff_t best_valid(const std::vector<VariantResult>& results) {
+// Ties keep the earlier variant (stable, deterministic). `byRobust` ranks by
+// the neighbourhood-mean fitness instead.
+std::ptrdiff_t best_valid(const std::vector<VariantResult>& results, bool byRobust) {
+  auto key = [&](std::size_t i) {
+    return byRobust ? results[i].robustFitness : results[i].fitness;
+  };
   std::ptrdiff_t best = -1;
   for (std::size_t i = 0; i < results.size(); ++i) {
     if (!results[i].valid) continue;
-    if (best < 0 || results[i].fitness > results[static_cast<std::size_t>(best)].fitness) {
+    if (best < 0 || key(i) > key(static_cast<std::size_t>(best))) {
       best = static_cast<std::ptrdiff_t>(i);
     }
   }
@@ -76,10 +80,18 @@ WfoResult run_wfo(const Series& bars, const IStrategy& strategy,
   const int n = bars.size();
   const std::vector<WfoWindow> windows = make_wfo_windows(n, cfg.windows, cfg.isFraction);
 
+  if (cfg.robust && cfg.optimizer != WfoOptimizer::Grid) {
+    throw std::invalid_argument(
+        "wfo: robust (neighbourhood) ranking requires the grid optimizer");
+  }
+
   // Grid variants are the same for every window; enumerate once.
   std::vector<ParamSet> variants;
+  std::vector<std::size_t> axisSizes;
   if (cfg.optimizer == WfoOptimizer::Grid) {
-    variants = enumerate_variants(strategy.params(), axes, sets);
+    const std::vector<ParamDef> defs = strategy.params();
+    variants = enumerate_variants(defs, axes, sets);
+    axisSizes = value_list_sizes(build_value_lists(defs, axes, sets));
     if (variants.empty()) throw std::invalid_argument("wfo: empty variant grid");
   }
 
@@ -107,12 +119,14 @@ WfoResult run_wfo(const Series& bars, const IStrategy& strategy,
       std::vector<VariantResult> results =
           run_grid(bars, strategy, variants, cache, g, fitness);
       res.isEvaluations += results.size();
-      std::ptrdiff_t best = best_valid(results);
+      if (cfg.robust) compute_robust_fitness(results, axisSizes);
+      std::ptrdiff_t best = best_valid(results, cfg.robust);
       if (best >= 0) {
         const VariantResult& v = results[static_cast<std::size_t>(best)];
         wr.optimized = true;
         wr.params = v.params;
         wr.isFitness = v.fitness;
+        wr.isRobustFitness = v.robustFitness;
         wr.isMetrics = v.metrics;
       }
     } else {

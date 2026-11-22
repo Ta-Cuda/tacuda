@@ -7,7 +7,7 @@
 const assert = require('node:assert/strict');
 const path = require('node:path');
 const fs = require('node:fs');
-const t = require('../../bindings/nodejs');
+const t = require(process.env.TACUDA_NODE_BINDINGS || '../../bindings/nodejs');
 const f = JSON.parse(fs.readFileSync(path.join(__dirname, '../fixtures/talib08_typed.json')));
 const check = (got, expected) => {
   assert.equal(got.length, expected.length);

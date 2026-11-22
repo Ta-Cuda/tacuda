@@ -29,11 +29,19 @@ std::pair<std::string, double> parse_set_spec(const std::string& spec);
 // Per declared parameter (strategy order): the list of values it can take —
 // the grid axis when one is given, otherwise a single value from --set or
 // the declared default. Validates that every axis/set name is declared.
+// Integer parameters get their axis values rounded and de-duplicated, so
+// the lists never enumerate the same variant twice.
 // This is the search space shared by grid enumeration and the genetic
 // optimizer (genes are indices into these lists).
 std::vector<std::vector<double>> build_value_lists(
     const std::vector<ParamDef>& defs, const std::vector<GridAxis>& axes,
     const std::vector<std::pair<std::string, double>>& sets);
+
+// Per-parameter value counts of build_value_lists(): the grid shape that
+// enumerate_variants() walks (last parameter fastest) and that
+// compute_robust_fitness() needs to locate a variant's axis neighbours.
+std::vector<std::size_t> value_list_sizes(
+    const std::vector<std::vector<double>>& valueLists);
 
 // Assembles a ParamSet from per-parameter value indices (declaration order).
 // Integer parameters are rounded.

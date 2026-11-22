@@ -5,12 +5,13 @@
 /* ======================================================================== */
 #include "optimize/Genetic.h"
 
+#include "core/PortableRandom.h"
+
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <limits>
 #include <numeric>
-#include <random>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -105,8 +106,7 @@ private:
     for (auto& genome : pop_) {
       genome.resize(valueLists_.size());
       for (std::size_t i = 0; i < valueLists_.size(); ++i) {
-        std::uniform_int_distribution<std::size_t> pick(0, valueLists_[i].size() - 1);
-        genome[i] = pick(rng_);
+        genome[i] = rng_.index(valueLists_[i].size());
       }
     }
     popEval_.assign(pop_.size(), 0);
@@ -147,21 +147,19 @@ private:
   }
 
   std::size_t tournament_pick() {
-    std::uniform_int_distribution<std::size_t> pick(0, pop_.size() - 1);
-    std::size_t best = pick(rng_);
+    std::size_t best = rng_.index(pop_.size());
     for (int k = 1; k < cfg_.tournament; ++k) {
-      std::size_t challenger = pick(rng_);
+      std::size_t challenger = rng_.index(pop_.size());
       if (fitness_of(challenger) > fitness_of(best)) best = challenger;
     }
     return best;
   }
 
   Genome crossover(const Genome& a, const Genome& b) {
-    std::uniform_real_distribution<double> uni(0.0, 1.0);
-    if (uni(rng_) >= cfg_.crossoverProb) return a;
+    if (rng_.unit() >= cfg_.crossoverProb) return a;
     Genome child(a.size());
     for (std::size_t i = 0; i < a.size(); ++i) {
-      child[i] = uni(rng_) < 0.5 ? a[i] : b[i];
+      child[i] = rng_.unit() < 0.5 ? a[i] : b[i];
     }
     return child;
   }
@@ -170,14 +168,14 @@ private:
   // clamped to the axis; a draw that rounds to zero still moves +/-1 step
   // so a selected mutation always changes the genome.
   void mutate(Genome& g) {
-    std::uniform_real_distribution<double> uni(0.0, 1.0);
-    std::normal_distribution<double> gauss(0.0, cfg_.mutationSigmaSteps);
     for (std::size_t i = 0; i < g.size(); ++i) {
       const std::size_t size = valueLists_[i].size();
       if (size < 2) continue; // fixed parameter, nothing to mutate
-      if (uni(rng_) >= cfg_.mutationProb) continue;
-      long long delta = std::llround(gauss(rng_));
-      if (delta == 0) delta = uni(rng_) < 0.5 ? -1 : 1;
+      if (rng_.unit() >= cfg_.mutationProb) continue;
+      const double limit = static_cast<double>(size - 1);
+      const double step = rng_.normal() * cfg_.mutationSigmaSteps;
+      long long delta = std::llround(std::clamp(step, -limit, limit));
+      if (delta == 0) delta = rng_.unit() < 0.5 ? -1 : 1;
       long long idx = static_cast<long long>(g[i]) + delta;
       idx = std::max(0ll, std::min(idx, static_cast<long long>(size) - 1));
       g[i] = static_cast<std::size_t>(idx);
@@ -226,7 +224,7 @@ private:
   const GeneticConfig& cfg_;
   const FitnessExpr& fitness_;
   GridConfig evalCfg_;
-  std::mt19937_64 rng_;
+  PortableRandom rng_;
 
   std::vector<Genome> pop_;
   std::vector<std::size_t> popEval_; // individual -> index into evaluated

@@ -20,26 +20,52 @@ MetricsResult compute_metrics(const SimResult& sim, int barsPerYear) {
   m.numTrades = static_cast<int>(sim.trades.size());
 
   int wins = 0;
+  int winStreak = 0, lossStreak = 0;
   double tradePnlSum = 0.0;
   for (const Trade& t : sim.trades) {
     tradePnlSum += t.pnl;
     if (t.pnl > 0.0) {
       m.grossProfit += t.pnl;
       ++wins;
+      ++winStreak;
+      lossStreak = 0;
     } else {
+      // A zero-PnL trade is a loser here, consistent with winRate.
       m.grossLoss += -t.pnl;
+      ++lossStreak;
+      winStreak = 0;
     }
+    m.maxConsecWins = std::max(m.maxConsecWins, winStreak);
+    m.maxConsecLosses = std::max(m.maxConsecLosses, lossStreak);
   }
+  const int losers = m.numTrades - wins;
   m.profitFactor = m.grossLoss > 0.0 ? m.grossProfit / m.grossLoss
                                      : (m.grossProfit > 0.0 ? 1e9 : 0.0);
   m.winRate = m.numTrades > 0 ? static_cast<double>(wins) / m.numTrades : 0.0;
   m.avgTrade = m.numTrades > 0 ? tradePnlSum / m.numTrades : 0.0;
+  m.avgWin = wins > 0 ? m.grossProfit / wins : 0.0;
+  m.avgLoss = losers > 0 ? m.grossLoss / losers : 0.0;
+  m.payoff = m.avgLoss > 0.0 ? m.avgWin / m.avgLoss : (m.avgWin > 0.0 ? 1e9 : 0.0);
   m.exposure = n > 0 ? static_cast<double>(sim.barsInPosition) / n : 0.0;
+
+  // System Quality Number (Van Tharp): sqrt(N) * mean(pnl) / std(pnl) with
+  // the population standard deviation of the per-trade PnLs.
+  if (m.numTrades >= 2) {
+    double var = 0.0;
+    for (const Trade& t : sim.trades) {
+      var += (t.pnl - m.avgTrade) * (t.pnl - m.avgTrade);
+    }
+    var /= m.numTrades;
+    if (var > 0.0) {
+      m.sqn = std::sqrt(static_cast<double>(m.numTrades)) * m.avgTrade / std::sqrt(var);
+    }
+  }
 
   // Drawdowns over the close-marked equity curve. The peak starts at the
   // funded capital: a ranged segment can already trade on its first bar, in
   // which case eq[0] contains a result rather than the starting point.
   double peak = sim.initialCapital;
+  int ddRun = 0, ddBars = 0;
   for (int i = 0; i < n; ++i) {
     peak = std::max(peak, eq[static_cast<std::size_t>(i)]);
     double dd = peak - eq[static_cast<std::size_t>(i)];
@@ -47,7 +73,15 @@ MetricsResult compute_metrics(const SimResult& sim, int barsPerYear) {
     if (peak > 0.0) {
       m.maxDrawdownPct = std::max(m.maxDrawdownPct, dd / peak);
     }
+    // Longest stretch of bars spent below the running peak. Kept branch-free
+    // on purpose: an always-in-the-market equity curve touches its peak
+    // unpredictably, and this loop runs once per bar per variant.
+    ddRun = (ddRun + 1) & -static_cast<int>(dd > 0.0);
+    ddBars = std::max(ddBars, ddRun);
   }
+  m.maxDrawdownBars = ddBars;
+  m.calmar = m.maxDrawdown > 0.0 ? m.netProfit / m.maxDrawdown
+                                 : (m.netProfit > 0.0 ? 1e9 : 0.0);
 
   // Sharpe / Sortino from per-bar equity differences (population std). The
   // first bar is an observation only when it moved equity away from the funded
@@ -84,7 +118,9 @@ const std::vector<std::string>& fitness_variable_names() {
   static const std::vector<std::string> names = {
       "netprofit", "grossprofit", "grossloss", "pf", "profitfactor",
       "maxdd", "maxddpct", "sharpe", "sortino", "winrate",
-      "trades", "numtrades", "avgtrade", "exposure"};
+      "trades", "numtrades", "avgtrade", "exposure",
+      "calmar", "sqn", "avgwin", "avgloss", "payoff",
+      "maxconsecwins", "maxconseclosses", "maxddbars"};
   return names;
 }
 
@@ -104,6 +140,14 @@ std::map<std::string, double> fitness_variables(const MetricsResult& m) {
       {"numtrades", static_cast<double>(m.numTrades)},
       {"avgtrade", m.avgTrade},
       {"exposure", m.exposure},
+      {"calmar", m.calmar},
+      {"sqn", m.sqn},
+      {"avgwin", m.avgWin},
+      {"avgloss", m.avgLoss},
+      {"payoff", m.payoff},
+      {"maxconsecwins", static_cast<double>(m.maxConsecWins)},
+      {"maxconseclosses", static_cast<double>(m.maxConsecLosses)},
+      {"maxddbars", static_cast<double>(m.maxDrawdownBars)},
   };
 }
 

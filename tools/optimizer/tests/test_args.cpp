@@ -191,6 +191,54 @@ TEST(Args, WfoDefaultsAndValidation) {
                std::invalid_argument);
 }
 
+TEST(Args, ParsesMinTradesAndRank) {
+  CliOptions grid = parse({"tacuda-opt", "grid", "--synthetic", "1000", "--strategy",
+                           "ma_cross", "--grid", "fast=5..10:5", "--min-trades", "30",
+                           "--rank", "robust"});
+  EXPECT_EQ(grid.minTrades, 30);
+  EXPECT_EQ(grid.rank, "robust");
+
+  CliOptions wfo = parse({"tacuda-opt", "wfo", "--synthetic", "10000", "--strategy",
+                          "ma_cross", "--grid", "fast=5..20:5", "--rank", "robust",
+                          "--min-trades", "5"});
+  EXPECT_EQ(wfo.rank, "robust");
+  EXPECT_EQ(wfo.minTrades, 5);
+
+  CliOptions ga = parse({"tacuda-opt", "genetic", "--synthetic", "1000", "--strategy",
+                         "ma_cross", "--grid", "fast=2..10:2", "--min-trades", "10"});
+  EXPECT_EQ(ga.minTrades, 10);
+  EXPECT_EQ(ga.rank, "fitness");
+
+  // Defaults.
+  CliOptions plain = parse({"tacuda-opt", "grid", "--synthetic", "1000", "--strategy",
+                            "ma_cross", "--grid", "fast=5..10:5"});
+  EXPECT_EQ(plain.minTrades, 0);
+  EXPECT_EQ(plain.rank, "fitness");
+}
+
+TEST(Args, MinTradesAndRankValidation) {
+  EXPECT_THROW(parse({"tacuda-opt", "grid", "--synthetic", "1000", "--strategy",
+                      "ma_cross", "--grid", "fast=5..10:5", "--min-trades", "-1"}),
+               std::invalid_argument);
+  EXPECT_THROW(parse({"tacuda-opt", "backtest", "--synthetic", "1000", "--strategy",
+                      "ma_cross", "--min-trades", "10"}),
+               std::invalid_argument);
+  EXPECT_THROW(parse({"tacuda-opt", "grid", "--synthetic", "1000", "--strategy",
+                      "ma_cross", "--grid", "fast=5..10:5", "--rank", "weird"}),
+               std::invalid_argument);
+  // Robust ranking needs the exhaustive grid.
+  EXPECT_THROW(parse({"tacuda-opt", "genetic", "--synthetic", "1000", "--strategy",
+                      "ma_cross", "--grid", "fast=2..10:2", "--rank", "robust"}),
+               std::invalid_argument);
+  EXPECT_THROW(parse({"tacuda-opt", "wfo", "--synthetic", "10000", "--strategy",
+                      "ma_cross", "--grid", "fast=5..20:5", "--optimizer", "genetic",
+                      "--rank", "robust"}),
+               std::invalid_argument);
+  EXPECT_THROW(parse({"tacuda-opt", "backtest", "--synthetic", "1000", "--strategy",
+                      "ma_cross", "--rank", "robust"}),
+               std::invalid_argument);
+}
+
 TEST(Args, RejectsUnusableExecutionValues) {
   const char* flags[] = {"--qty", "--capital", "--commission-bps", "--commission-fixed",
                          "--slippage-ticks", "--tick-size"};

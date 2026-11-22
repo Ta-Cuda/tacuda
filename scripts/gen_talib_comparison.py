@@ -297,10 +297,10 @@ def render() -> str:
             --strategies exp03_obtr,exp06_asi,…</code>
         </p>
 
-        <h3 class="sub-head">Current API capabilities (0.9.2 release)</h3>
+        <h3 class="sub-head">Current API capabilities (0.9.3 release)</h3>
         <table class="data">
             <thead>
-                <tr><th>Capability</th><th>TA-Lib 0.8.3</th><th>TaCuda 0.9.2 release</th></tr>
+                <tr><th>Capability</th><th>TA-Lib 0.8.3</th><th>TaCuda 0.9.3 release</th></tr>
             </thead>
             <tbody>
                 <tr><td>Indicator functions</td><td class="num">237, CPU only</td>

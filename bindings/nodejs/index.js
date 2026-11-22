@@ -22,7 +22,11 @@ function findLibrary() {
     const candidates = [];
     
     if (process.env.TACUDA_LIBRARY) {
-        candidates.push(process.env.TACUDA_LIBRARY);
+        const override = path.resolve(process.env.TACUDA_LIBRARY);
+        if (!fs.existsSync(override)) {
+            throw new Error(`TACUDA_LIBRARY points to a missing library: ${override}`);
+        }
+        return override;
     }
     
     const baseDir = path.resolve(__dirname, '..', '..');
@@ -53,13 +57,13 @@ function findLibrary() {
     
     for (const candidate of candidates) {
         if (fs.existsSync(candidate)) {
-            return candidate;
+            return path.resolve(candidate);
         }
     }
     
     throw new Error(
-        'TACUDA library not found. Build the project first or set TACUDA_LIBRARY environment variable.\n' +
-        'Searched in: ' + candidates.slice(0, 5).join(', ')
+        'TACUDA library not found. Set TACUDA_LIBRARY to the full path of the native library.\n' +
+        'Searched in: ' + candidates.join(', ')
     );
 }
 

@@ -5,9 +5,10 @@
 /* ======================================================================== */
 #include "engine/MonteCarlo.h"
 
+#include "core/PortableRandom.h"
+
 #include <algorithm>
 #include <cmath>
-#include <random>
 #include <stdexcept>
 
 namespace topt {
@@ -81,7 +82,7 @@ McResult run_monte_carlo(const std::vector<Trade>& trades, double capital,
   res.originalNetProfit = totalPnl;
   res.originalMaxDrawdown = path_max_drawdown(pnls, capital);
 
-  std::mt19937_64 rng(cfg.seed);
+  PortableRandom rng(cfg.seed);
   std::vector<double> nps, dds;
   nps.reserve(static_cast<std::size_t>(cfg.iterations));
   dds.reserve(static_cast<std::size_t>(cfg.iterations));
@@ -92,13 +93,15 @@ McResult run_monte_carlo(const std::vector<Trade>& trades, double capital,
   for (int it = 0; it < cfg.iterations; ++it) {
     double np;
     if (cfg.mode == McMode::Permute) {
-      std::shuffle(sample.begin(), sample.end(), rng);
+      // Fisher-Yates fixes the order and bounds of the random draws.
+      for (std::size_t n = sample.size(); n > 1; --n) {
+        std::swap(sample[n - 1], sample[rng.index(n)]);
+      }
       np = totalPnl;
     } else {
-      std::uniform_int_distribution<std::size_t> pick(0, pnls.size() - 1);
       np = 0.0;
       for (std::size_t k = 0; k < pnls.size(); ++k) {
-        sample[k] = pnls[pick(rng)];
+        sample[k] = pnls[rng.index(pnls.size())];
         np += sample[k];
       }
     }

@@ -78,6 +78,7 @@ public:
         {Family::RSI, Column::Close, {ps.get("rsilen")}},
         {Family::PLUS_DI, Column::Close, {ps.get("dmilen")}},
         {Family::MINUS_DI, Column::Close, {ps.get("dmilen")}},
+        avg_range_request(4),
     };
   }
 
@@ -88,7 +89,7 @@ public:
     const float* diMinus = ind.line(2);
     const int n = bars.size();
     const float level = static_cast<float>(ps.get("rsilevel"));
-    const std::vector<float> ar4 = avg_range(bars, 4);
+    const float* ar4 = ind.line(3);
 
     int pos = 0;
     bool buySetup = false, sellSetup = false;
@@ -143,7 +144,7 @@ public:
   }
 
   std::vector<IndicatorRequest> indicators(const ParamSet& ps) const override {
-    return {{Family::EMA, Column::Close, {ps.get("length")}}};
+    return {{Family::EMA, Column::Close, {ps.get("length")}}, avg_range_request(4)};
   }
 
   void signals(const Series& bars, const ParamSet& ps, const IndicatorView& ind,
@@ -151,7 +152,7 @@ public:
     const float* ema = ind.line(0);
     const int n = bars.size();
     const int bodyLen = ps.get_int("bodylen");
-    const std::vector<float> ar4 = avg_range(bars, 4);
+    const float* ar4 = ind.line(1);
 
     // Average absolute candle body.
     std::vector<float> avgBody(static_cast<std::size_t>(n), kNaN);
@@ -237,7 +238,7 @@ public:
     return {
         {Family::EMA, Column::Close, {ps.get("closelen")}},
         {Family::EMA, Column::Open, {ps.get("openlen")}},
-        {Family::TRANGE, Column::Close, {}},
+        avg_true_range_request(10), // Average(TrueRange, 10)
     };
   }
 
@@ -246,9 +247,8 @@ public:
     (void)ps;
     const float* emaC = ind.line(0);
     const float* emaO = ind.line(1);
-    const float* tr = ind.line(2);
+    const float* atr10 = ind.line(2);
     const int n = bars.size();
-    const std::vector<float> atr10 = rolling_mean(tr, n, 10);
 
     int pos = 0;
     float buyLvl = 0.f, sellLvl = 0.f, longExit = 0.f, shortExit = 0.f;
@@ -314,7 +314,8 @@ public:
 
   std::vector<IndicatorRequest> indicators(const ParamSet& ps) const override {
     const double dev = ps.get("bbdev");
-    return {{Family::BBANDS, Column::Close, {ps.get("bblen"), dev, dev}}};
+    return {{Family::BBANDS, Column::Close, {ps.get("bblen"), dev, dev}},
+            avg_range_request(4)};
   }
 
   void signals(const Series& bars, const ParamSet& ps, const IndicatorView& ind,
@@ -323,7 +324,7 @@ public:
     const float* lower = ind.line(0, 2);
     const int n = bars.size();
     const int numBars = ps.get_int("numbars");
-    const std::vector<float> ar4 = avg_range(bars, 4);
+    const float* ar4 = ind.line(1);
 
     int pos = 0;
     Trail trail;
@@ -381,6 +382,7 @@ public:
         {Family::BBANDS, Column::Close, {ps.get("bblen"), dev, dev}},
         obtrReq,
         derived(Family::XAVERAGE, {ps.get("obtrlen")}, obtrReq),
+        avg_range_request(4),
     };
   }
 
@@ -391,7 +393,7 @@ public:
     const float* obtrEma = ind.line(2);
     const int n = bars.size();
     const int numBars = ps.get_int("numbars");
-    const std::vector<float> ar4 = avg_range(bars, 4);
+    const float* ar4 = ind.line(3);
 
     int pos = 0;
     Trail trail;
@@ -440,6 +442,7 @@ public:
         {Family::RSI, Column::Close, {ps.get("osclen")}},
         {Family::MAX, Column::High, {4}},
         {Family::MIN, Column::Low, {4}},
+        avg_range_request(4),
     };
   }
 
@@ -450,7 +453,7 @@ public:
     const float* lo4 = ind.line(2);
     const int n = bars.size();
     const int s = ps.get_int("strength");
-    const std::vector<float> ar4 = avg_range(bars, 4);
+    const float* ar4 = ind.line(3);
 
     struct Swing { int bar; float val; };
     std::deque<Swing> priceLows, oscLows, priceHighs, oscHighs;
@@ -558,7 +561,8 @@ public:
 
   std::vector<IndicatorRequest> indicators(const ParamSet& ps) const override {
     return {{Family::RSI, Column::Close,
-             {static_cast<double>(ps.get_int("osclen"))}}};
+             {static_cast<double>(ps.get_int("osclen"))}},
+            avg_range_request(4)};
   }
 
   bool validate(const ParamSet& ps) const override {
@@ -579,7 +583,7 @@ public:
     const int s = ps.get_int("strength");
     const int swings = ps.get_int("swings");
     const float factor = static_cast<float>(ps.get("factor"));
-    const std::vector<float> ar4 = avg_range(bars, 4);
+    const float* ar4 = ind.line(1);
 
     std::deque<float> swingHighs, swingLows;
     float topBand = kNaN, botBand = kNaN;
@@ -730,18 +734,18 @@ public:
   }
 
   std::vector<IndicatorRequest> indicators(const ParamSet& ps) const override {
-    // Close-to-close and range statistics are computed from raw bars.
+    // Close-to-close and range statistics are computed from raw bars; the
+    // Average(Range, 3) stop offset comes from the backend.
     (void)ps;
-    return {};
+    return {avg_range_request(3)};
   }
 
   void signals(const Series& bars, const ParamSet& ps, const IndicatorView& ind,
                Signal* out) const override {
-    (void)ind;
     const int n = bars.size();
     const int length = ps.get_int("length");
     const float mult = static_cast<float>(ps.get("sdev"));
-    const std::vector<float> ar3 = avg_range(bars, 3);
+    const float* ar3 = ind.line(0);
 
     std::vector<float> ctc(static_cast<std::size_t>(n), kNaN);
     std::vector<float> rng(static_cast<std::size_t>(n), kNaN);

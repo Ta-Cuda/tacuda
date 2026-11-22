@@ -1,10 +1,9 @@
 # TaCuda — Node.js Bindings
 
-Version **0.9.2** covers the **237 TA-Lib 0.8.3 functions** with matching
-native libraries and bindings. It adds MA types through ALMA, real int32 and
-mixed outputs, and four-output HA/ICHIMOKU. Flat RSI/IMI now returns 50;
-other numerical changes and performance limits are documented in the
-[compatibility guide](https://github.com/Ta-Cuda/tacuda/blob/v0.9.2/docs/TA_LIB_COMPATIBILITY.md).
+Version **0.9.3** covers the **237 TA-Lib 0.8.3 functions** with matching
+native libraries and bindings. GPU RSI uses double-precision Wilder state.
+The Python and Node.js loaders validate explicit native-library overrides.
+See the [compatibility guide](https://github.com/Ta-Cuda/tacuda/blob/v0.9.3/docs/TA_LIB_COMPATIBILITY.md).
 New streaming families are a separate API surface. Third-party formula
 licenses ship in `THIRD_PARTY_NOTICES.txt`.
 
@@ -17,11 +16,11 @@ TA-Lib 0.8.3 coverage (237 functions): indicators, candlestick patterns, MACDEXT
 - Node.js >= 18.0.0
 - NVIDIA GPU (Compute Capability >= 6.0)
 - For official binaries: a driver compatible with CUDA 12.9; source builds use the toolkit selected by CMake
-- Built `tacuda` shared library (`tacuda.dll` / `libtacuda.so` / `libtacuda.dylib`)
+- A native library matching the npm version
 
 ## Package Scope
 
-- JavaScript wrappers for the complete 1129-function native surface (host + device + batch API)
+- JavaScript wrappers for the complete 395-function native surface (host + device + batch API)
 - Structured OHLCV inputs (`Ohlcv` class or plain `{open, high, low, close, volume}` objects)
 - Batched multi-symbol execution: `rsiBatch`, `smaBatch`, `macdBatch`, ..., `device.*Batch`
 - Full candlestick registry via `cdlPattern()` and `CDL_NAMES`
@@ -34,8 +33,20 @@ TA-Lib 0.8.3 coverage (237 functions): indicators, candlestick patterns, MACDEXT
 npm install tacuda
 ```
 
-> **Note:** The `tacuda` native library must be built separately and placed where
-> the Node.js bindings can find it. See "Library Location" below.
+The npm package contains the JavaScript bindings. On Windows x64 you can use
+the DLL from a matching Python wheel. With the CUDA 12 toolkit installed,
+run these commands from your npm project in PowerShell:
+
+```powershell
+python -m pip install tacuda==0.9.3
+npm install --save-exact tacuda@0.9.3
+$env:Path = "$env:CUDA_PATH\bin;$env:Path"
+$env:TACUDA_LIBRARY = python -c "from importlib.util import find_spec; from pathlib import Path; print(Path(find_spec('tacuda').origin).with_name('tacuda.dll'))"
+node -e "const t=require('tacuda'); console.log(t.sma(Array.from({length:64},(_,i)=>i+1),20).at(-1))"  # 54.5
+```
+
+A native release download or a matching source build also works. Set
+`TACUDA_LIBRARY` to its full path and start a new Node process.
 
 ## Quick Start
 
@@ -100,7 +111,7 @@ const sma64 = tacuda.smaEx(close64, 20);   // float64 storage + compute
 const { macd } = tacuda.macdEx(close64, 12, 26, 9, tacuda.MA_TYPE.EMA);
 ```
 
-## Available Indicators (TA-Lib 0.8.3 coverage)
+## Available Indicators (full TA-Lib coverage)
 
 ### Moving Averages
 `sma`, `ema`, `wma`, `dema`, `tema`, `trima`, `kama`, `t3`, `mama`, `mavp`, `ma`
@@ -149,13 +160,13 @@ The bindings search for the native library in this order:
 1. `TACUDA_LIBRARY` environment variable
 2. `../../build/Release/tacuda.dll` (relative to this directory)
 3. `../../build/Debug/tacuda.dll`
-4. Common system locations
+4. On Windows, `../../Release/tacuda.dll`, then a DLL beside the bindings, then the working directory
 
 ## Running Tests
 
 ```bash
 npm test
-# Runs 173 tests covering all indicators, vector math, MACDEXT, _ex and device API
+# Runs the binding pipeline, including indicators, batch, streaming and device API
 ```
 
 ## Build & Publish (npm)
@@ -168,21 +179,11 @@ npm publish --access public
 
 ## Changelog
 
-Canonical release history is maintained in [`CHANGELOG.md`](../../docs/CHANGELOG.md).
+Canonical release history is maintained in [`CHANGELOG.md`](../../CHANGELOG.md).
 
 ## License
 
 Apache License 2.0 — see [LICENSE](../../LICENSE).
-
-## Streaming and version pairing
-
-Streaming was added in 0.8.0 for incremental single-series and portfolio
-updates across 10 indicator families. Pair bindings with the native library
-from the same release; 0.9.0 also includes precision, input-validation and stream
-correctness fixes. A native older than 0.8.0 does not export the streaming
-functions. See the
-[Streaming API guide](https://github.com/Ta-Cuda/tacuda/blob/main/docs/STREAMING_API.md).
-The 237-function target is native/Python TA-Lib 0.8.3; install the pinned reference requirements to reproduce validation.
 
 ## Fused portfolio batches (0.9.0)
 
@@ -191,4 +192,4 @@ per call. Supported device batches are CUDA Graph compatible; user-stream
 calls stay asynchronous. `TACUDA_BATCH_FUSED=auto|0|1` controls automatic,
 per-series or forced fused dispatch. Period/shape limits apply, and the
 double internal arithmetic can change the last float32 bits from 0.8.
-See [batch dispatch and migration](https://github.com/Ta-Cuda/tacuda/blob/v0.9.2/docs/BATCH_API.md#fused-execution).
+See [batch dispatch and migration](https://github.com/Ta-Cuda/tacuda/blob/v0.9.3/docs/BATCH_API.md#fused-execution).

@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 # Set library path for Windows
 tacuda_dll = os.path.join(os.path.dirname(__file__), "..", "..", "build", "Release", "tacuda.dll")
 if os.path.exists(tacuda_dll):
-    os.environ["TACUDA_LIBRARY"] = tacuda_dll
+    os.environ.setdefault("TACUDA_LIBRARY", tacuda_dll)
 
 import tacuda
 
@@ -61,7 +61,7 @@ def validate_range(arr, min_val, max_val, name, eps=1e-6):
     """Check values are in range (ignoring NaN, with tolerance for float errors)."""
     valid = arr[~np.isnan(arr)]
     if len(valid) == 0:
-        return True
+        return False
     # Allow small epsilon for floating point errors
     if np.any(valid < min_val - eps) or np.any(valid > max_val + eps):
         bad = valid[(valid < min_val - eps) | (valid > max_val + eps)]
@@ -73,8 +73,8 @@ def validate_range(arr, min_val, max_val, name, eps=1e-6):
 def validate_non_negative(arr, name, eps=1e-6):
     """Check values are non-negative (ignoring NaN, with tolerance)."""
     valid = arr[~np.isnan(arr)]
-    if len(valid) == 0:
-        return True
+    if len(valid) == 0 or not np.isfinite(valid).all():
+        return False
     if np.any(valid < -eps):
         bad = valid[valid < -eps]
         print(f"    {name} has negative values: {bad[:5]}")
@@ -86,8 +86,8 @@ def validate_bbands(upper, middle, lower):
     """Check BBands order: upper >= middle >= lower."""
     mask = ~(np.isnan(upper) | np.isnan(middle) | np.isnan(lower))
     u, m, l_ = upper[mask], middle[mask], lower[mask]
-    if len(u) == 0:
-        return True
+    if len(u) == 0 or not all(np.isfinite(line).all() for line in (u, m, l_)):
+        return False
     if np.any(u < m) or np.any(m < l_):
         idx = np.where((u < m) | (m < l_))[0][0]
         print(f"    BBands order violated at {idx}: U={u[idx]}, M={m[idx]}, L={l_[idx]}")
@@ -152,7 +152,7 @@ def run_pipeline_test():
     # OBV
     try:
         obv = tacuda.obv(close, volume)
-        test_result("OBV", True, results)
+        test_result("OBV", np.isfinite(obv).any(), results)
     except Exception as e:
         print(f"  [ERROR] OBV: {e}")
         results["failed"] += 1
@@ -168,7 +168,7 @@ def run_pipeline_test():
     # EMA (fast)
     try:
         ema_fast = tacuda.ema(close, period=12)
-        test_result("EMA(12)", True, results)
+        test_result("EMA(12)", np.isfinite(ema_fast).any(), results)
     except Exception as e:
         print(f"  [ERROR] EMA(12): {e}")
         results["failed"] += 1
@@ -176,7 +176,7 @@ def run_pipeline_test():
     # EMA (slow)
     try:
         ema_slow = tacuda.ema(close, period=26)
-        test_result("EMA(26)", True, results)
+        test_result("EMA(26)", np.isfinite(ema_slow).any(), results)
     except Exception as e:
         print(f"  [ERROR] EMA(26): {e}")
         results["failed"] += 1
@@ -184,7 +184,7 @@ def run_pipeline_test():
     # Trend = EMA(12) - EMA(26)
     try:
         trend = np.where(np.isnan(ema_fast) | np.isnan(ema_slow), np.nan, ema_fast - ema_slow)
-        test_result("Trend (EMA12-EMA26)", True, results)
+        test_result("Trend (EMA12-EMA26)", np.isfinite(trend).any(), results)
     except Exception as e:
         print(f"  [ERROR] Trend: {e}")
         results["failed"] += 1
@@ -192,7 +192,7 @@ def run_pipeline_test():
     # MACD
     try:
         macd, signal, hist = tacuda.macd(close, fastPeriod=12, slowPeriod=26, signalPeriod=9, type=0)
-        test_result("MACD(12,26,9)", True, results)
+        test_result("MACD(12,26,9)", all(np.isfinite(line).any() for line in (macd, signal, hist)), results)
     except Exception as e:
         print(f"  [ERROR] MACD: {e}")
         results["failed"] += 1
@@ -218,7 +218,7 @@ def run_pipeline_test():
     # SMA
     try:
         sma = tacuda.sma(close, period=20)
-        test_result("SMA(20)", True, results)
+        test_result("SMA(20)", np.isfinite(sma).any(), results)
     except Exception as e:
         print(f"  [ERROR] SMA: {e}")
         results["failed"] += 1
@@ -226,7 +226,7 @@ def run_pipeline_test():
     # WMA
     try:
         wma = tacuda.wma(close, period=10)
-        test_result("WMA(10)", True, results)
+        test_result("WMA(10)", np.isfinite(wma).any(), results)
     except Exception as e:
         print(f"  [ERROR] WMA: {e}")
         results["failed"] += 1
@@ -242,7 +242,7 @@ def run_pipeline_test():
     # Sum
     try:
         sum_result = tacuda.sum(close, period=10)
-        test_result("Sum(10)", True, results)
+        test_result("Sum(10)", np.isfinite(sum_result).any(), results)
     except Exception as e:
         print(f"  [ERROR] Sum: {e}")
         results["failed"] += 1

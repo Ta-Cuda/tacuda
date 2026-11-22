@@ -1,10 +1,9 @@
 # TaCuda — Python Bindings
 
-Version **0.9.2** covers the **237 TA-Lib 0.8.3 functions** with matching
-native libraries and bindings. It adds MA types through ALMA, real int32 and
-mixed outputs, and four-output HA/ICHIMOKU. Flat RSI/IMI now returns 50;
-other numerical changes and performance limits are documented in the
-[compatibility guide](https://github.com/Ta-Cuda/tacuda/blob/v0.9.2/docs/TA_LIB_COMPATIBILITY.md).
+Version **0.9.3** covers the **237 TA-Lib 0.8.3 functions** with matching
+native libraries and bindings. GPU RSI uses double-precision Wilder state.
+The Python and Node.js loaders validate explicit native-library overrides.
+See the [compatibility guide](https://github.com/Ta-Cuda/tacuda/blob/v0.9.3/docs/TA_LIB_COMPATIBILITY.md).
 New streaming families are a separate API surface. Third-party formula
 licenses ship in `THIRD_PARTY_NOTICES.txt`.
 
@@ -17,7 +16,7 @@ zero-copy device API.
 
 - NVIDIA GPU (Compute Capability >= 6.0)
 - For official binaries: a driver compatible with CUDA 12.9; source builds use the toolkit selected by CMake
-- Built `tacuda` shared library (`tacuda.dll` / `libtacuda.so` / `libtacuda.dylib`)
+- The Windows x64 and Linux x86-64 wheels include the native library. Source installations need a matching native build.
 - Python >= 3.8, NumPy >= 1.20
 
 ## Package Scope
@@ -32,8 +31,8 @@ zero-copy device API.
 pip install tacuda
 ```
 
-> **Note:** The `tacuda` native library must be built separately and placed where
-> the Python bindings can find it. See "Library Location" below.
+On Windows the wheel locates its native DLL and uses `CUDA_PATH\bin` for the
+CUDA runtime. Set `TACUDA_LIBRARY` to a full path to select a different build.
 
 ## Quick Start
 
@@ -102,7 +101,7 @@ Single-series functions require a 1D array and raise `ValueError` otherwise,
 because a matrix would be read as one concatenated series crossing symbol
 boundaries. Use the `*_batch` functions for `(numSeries, seriesLen)` matrices.
 
-## Available Indicators (TA-Lib 0.8.3 coverage)
+## Available Indicators (full TA-Lib coverage)
 
 | Category | Indicators |
 |----------|-----------|
@@ -124,8 +123,12 @@ The bindings search for the native library in this order:
 
 1. `TACUDA_LIBRARY` environment variable (full path to shared library)
 2. `TACUDA_LIBRARY_PATH` / `TACUDA_LIBRARY_DIR` + library name
-3. System library path (`ctypes.util.find_library`)
-4. Common build directories relative to the package
+3. Native library bundled beside the Python module
+4. System library path (`ctypes.util.find_library`), then working-directory and source-build locations
+
+The loader registers `CUDA_PATH\bin` while loading a Windows DLL.
+An invalid `TACUDA_LIBRARY` raises a load error. Start a new Python process
+after switching DLLs.
 
 ## Regenerating Metadata
 
@@ -137,41 +140,20 @@ python bindings/generate_bindings.py
 
 ## Build & Publish (PyPI)
 
-Releases are built and published only by the `release-packages` workflow
-(see [CONTRIBUTING.md](../../docs/CONTRIBUTING.md#release-criteria)): one
-platform wheel per native plus a source-only sdist. For a local build, make
-the sdist before any native is in `tacuda/` (setuptools packs package data
-into it), then put exactly one native there and build only the wheel. Wipe
-the setuptools cache before each build: `build/lib` is never pruned, so a
-second wheel would otherwise also carry the previous build's native:
-
 ```bash
 cd bindings/python
-rm -rf build dist ./*.egg-info
-python -m build --sdist          # tacuda/ must not contain a native yet
-rm -rf build ./*.egg-info
-cp /path/to/libtacuda.so tacuda/ # or tacuda.dll for a Windows wheel
-python -m build --wheel
+python -m build
 python -m twine check dist/*
+python -m twine upload dist/*
 ```
 
 ## Changelog
 
-Canonical release history is maintained in [`CHANGELOG.md`](../../docs/CHANGELOG.md).
+Canonical release history is maintained in [`CHANGELOG.md`](../../CHANGELOG.md).
 
 ## License
 
 Apache License 2.0 — see [LICENSE](../../LICENSE).
-
-## Streaming and version pairing
-
-Streaming was added in 0.8.0 for incremental single-series and portfolio
-updates across 10 indicator families. Pair bindings with the native library
-from the same release; 0.9.0 also includes precision, input-validation and stream
-correctness fixes. A native older than 0.8.0 does not export the streaming
-functions. See the
-[Streaming API guide](https://github.com/Ta-Cuda/tacuda/blob/main/docs/STREAMING_API.md).
-The 237-function target is native/Python TA-Lib 0.8.3; install the pinned reference requirements to reproduce validation.
 
 ## Fused portfolio batches (0.9.0)
 
@@ -180,4 +162,4 @@ per call. Supported device batches are CUDA Graph compatible; user-stream
 calls stay asynchronous. `TACUDA_BATCH_FUSED=auto|0|1` controls automatic,
 per-series or forced fused dispatch. Period/shape limits apply, and the
 double internal arithmetic can change the last float32 bits from 0.8.
-See [batch dispatch and migration](https://github.com/Ta-Cuda/tacuda/blob/v0.9.2/docs/BATCH_API.md#fused-execution).
+See [batch dispatch and migration](https://github.com/Ta-Cuda/tacuda/blob/v0.9.3/docs/BATCH_API.md#fused-execution).

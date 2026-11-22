@@ -89,6 +89,30 @@ TEST(Genetic, NeverEvaluatesTheSameGenomeTwice) {
   EXPECT_EQ(unique.size(), res.evaluated.size());
 }
 
+TEST(Genetic, FixedSeedVisitsPortableSequenceIncludingMutations) {
+  const Series bars = generate_synthetic(100, 1);
+  const std::vector<GridAxis> axes = {parse_grid_spec("fast=2..9:1"),
+                                      parse_grid_spec("slow=20..26:1")};
+  GeneticConfig cfg = quiet_ga();
+  cfg.seed = 41;
+  cfg.population = 6;
+  cfg.elite = 1;
+  cfg.maxGenerations = 3;
+  cfg.tournament = 3;
+  cfg.crossoverProb = 0.8;
+  cfg.mutationProb = 0.9;
+  // Constant fitness isolates sampling and stable tie-breaking from prices.
+  const auto result = run_ga(bars, cfg, axes, "0");
+  std::vector<std::pair<int, int>> visited;
+  for (const auto& v : result.evaluated) {
+    visited.emplace_back(v.params.get_int("fast"), v.params.get_int("slow"));
+  }
+  const std::vector<std::pair<int, int>> expected = {
+      {5, 23}, {6, 20}, {3, 23}, {3, 26}, {4, 20}, {4, 25},
+      {5, 20}, {7, 25}, {2, 22}, {4, 26}, {5, 25}, {5, 24}};
+  EXPECT_EQ(visited, expected);
+}
+
 TEST(Genetic, BestFitnessIsMonotoneWithElitism) {
   Series bars = generate_synthetic(3000, 31);
   std::vector<GridAxis> axes = {parse_grid_spec("fast=2..20:1"),

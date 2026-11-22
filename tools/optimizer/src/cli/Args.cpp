@@ -77,10 +77,18 @@ OPTIMIZATION
   --fitness EXPR         metric expression, e.g. "netprofit - 2*maxdd"
                          variables: netprofit grossprofit grossloss pf maxdd
                          maxddpct sharpe sortino winrate trades avgtrade exposure
+                         calmar sqn avgwin avgloss payoff maxconsecwins
+                         maxconseclosses maxddbars; functions abs sqrt log min max
+  --min-trades N         skip variants that close fewer than N trades (grid,
+                         genetic, wfo in-sample; default 0 = off)
+  --rank KIND            fitness (default) | robust: rank grid results, and pick
+                         wfo in-sample winners, by the mean fitness over the
+                         variant and its one-step neighbours on every grid axis
   --top N                rows in the console table / JSON top (default 20)
-  --threads N            simulation threads; in `portfolio` also parallelizes
-                         the per-symbol CPU (TA-Lib) indicator phase across
-                         symbols (default: all cores; GPU backends ignore it)
+  --threads N            simulation threads: grid/genetic/wfo variants, and in
+                         `portfolio` the per-symbol signals+simulation phase and
+                         the per-symbol CPU (TA-Lib) indicator phase (default:
+                         all cores; GPU indicator paths ignore it)
   --cache-mb N           indicator cache budget per chunk, MB (default 2048)
 
 GENETIC (genetic command; wfo with --optimizer genetic)
@@ -200,6 +208,10 @@ CliOptions parse_cli(int argc, const char* const* argv) {
       opt.fitness = need_value();
     } else if (arg == "--top") {
       opt.top = static_cast<int>(to_ll(need_value(), arg));
+    } else if (arg == "--min-trades") {
+      opt.minTrades = static_cast<int>(to_ll(need_value(), arg));
+    } else if (arg == "--rank") {
+      opt.rank = need_value();
     } else if (arg == "--threads") {
       opt.threads = static_cast<int>(to_ll(need_value(), arg));
     } else if (arg == "--cache-mb") {
@@ -293,6 +305,27 @@ CliOptions parse_cli(int argc, const char* const* argv) {
   if (opt.command == "portfolio" && !opt.gridAxes.empty()) {
     throw std::invalid_argument(
         "portfolio uses fixed parameters (--set), not --grid axes");
+  }
+  if (opt.minTrades < 0) {
+    throw std::invalid_argument("--min-trades must be >= 0");
+  }
+  if (opt.minTrades > 0 && opt.command != "grid" && opt.command != "genetic" &&
+      opt.command != "wfo") {
+    throw std::invalid_argument(
+        "--min-trades is only valid for grid, genetic and wfo commands");
+  }
+  if (opt.rank != "fitness" && opt.rank != "robust") {
+    throw std::invalid_argument("--rank must be fitness or robust");
+  }
+  if (opt.rank == "robust") {
+    if (opt.command != "grid" && opt.command != "wfo") {
+      throw std::invalid_argument(
+          "--rank robust needs the exhaustive grid: grid, or wfo with --optimizer grid");
+    }
+    if (opt.command == "wfo" && opt.wfoOptimizer != "grid") {
+      throw std::invalid_argument(
+          "--rank robust needs the exhaustive grid: use wfo --optimizer grid");
+    }
   }
   if (opt.mcIterations < 0) {
     throw std::invalid_argument("--mc must be >= 0");

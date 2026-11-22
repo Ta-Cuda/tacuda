@@ -18,8 +18,8 @@ enum class Column : std::uint8_t { Open = 0, High, Low, Close, Volume };
 
 // Indicator families the optimizer knows how to compute on any backend.
 // Families that read fixed OHLCV columns (ATR, ADX, CCI, STOCH, TRANGE,
-// PLUS_DI, MINUS_DI use High/Low/Close; OBV uses Close+Volume) ignore
-// IndicatorRequest::input.
+// PLUS_DI, MINUS_DI use High/Low/Close; RANGE uses High/Low; OBV uses
+// Close+Volume) ignore IndicatorRequest::input.
 enum class Family : std::uint8_t {
   SMA = 0,
   EMA,
@@ -43,6 +43,7 @@ enum class Family : std::uint8_t {
   MAX,             // params: period (rolling highest)
   MIN,             // params: period (rolling lowest)
   TRANGE,          // params: none (H/L/C true range)
+  RANGE,           // params: none (high - low, the EasyLanguage Range series)
   // --- STAD club pack (native ct_* club kernels since 0.4.0) ---
   ASI,             // params: none (O/H/L/C accumulation swing index)
   SAR_EL,          // params: accFact, maxAccel (H/L/C EasyLanguage parabolic)

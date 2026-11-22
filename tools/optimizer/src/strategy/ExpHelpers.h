@@ -67,9 +67,26 @@ inline int day_of_week(std::int64_t unixTs) {
   return static_cast<int>(((unixTs / 86400) % 7 + 7 + 4) % 7);
 }
 
+// EasyLanguage Average(Range, n) and Average(TrueRange, n) as backend
+// requests: a NaN-strict rolling mean chained on the RANGE / TRANGE line.
+// The backend computes the chain once per series (device-side on the
+// tacuda backends) and the indicator cache shares it across variants, so
+// strategies append these to indicators() instead of recomputing
+// avg_range() / rolling_mean() inside every signals() call. Same values as
+// the CPU helpers below up to float rounding, same warm-up (first value at
+// bar n-1 for RANGE, bar n for TRANGE whose bar 0 is NaN).
+inline IndicatorRequest avg_range_request(int n) {
+  return derived(Family::ROLLING_MEAN, {static_cast<double>(n)},
+                 IndicatorRequest{Family::RANGE, Column::Close, {}});
+}
+inline IndicatorRequest avg_true_range_request(int n) {
+  return derived(Family::ROLLING_MEAN, {static_cast<double>(n)},
+                 IndicatorRequest{Family::TRANGE, Column::Close, {}});
+}
+
 // EasyLanguage Average(Range, n): rolling simple mean of high-low, NaN during
-// warm-up. Computed CPU-side because it is a derived series the indicator
-// backends do not expose.
+// warm-up. CPU reference for avg_range_request() (tests) and for callers
+// without a backend.
 inline std::vector<float> avg_range(const Series& bars, int n) {
   const int size = bars.size();
   std::vector<float> out(static_cast<std::size_t>(size),

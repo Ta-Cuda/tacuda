@@ -1,6 +1,6 @@
-# TA-Lib 0.8.3 compatibility in TaCuda 0.9.2
+# TA-Lib 0.8.3 compatibility in TaCuda 0.9.3
 
-TaCuda 0.9.2 targets **237 functions from TA-Lib 0.8.3**. The native and
+TaCuda 0.9.3 targets **237 functions from TA-Lib 0.8.3**. The native and
 Python oracle versions are pinned in `tests/requirements-reference.txt` and
 `tests/reference/talib-0.8.3.json`, against upstream commit
 [`62021c1d14ef5499505af5547384cab509adf3fc`](https://github.com/TA-Lib/ta-lib/tree/62021c1d14ef5499505af5547384cab509adf3fc).
@@ -57,6 +57,10 @@ Names with different historical definitions remain separate:
 | ASI with limit-move scaling | `asi_wilder(..., limitMove)` | Club `asi` |
 | Sample-adjusted Fisher kurtosis | `kurtosis_unbiased(..., period)` | Population `kurtosis` |
 | Selectable-MA volume oscillator | `pvo_ma(..., fastPeriod, slowPeriod, maType)` | EMA `pvo` |
+
+## Numerical changes in 0.9.3
+
+GPU RSI maintains double-precision Wilder state and writes the requested output type. This preserves equal RSI values on the flat-price pivot regression fixture.
 
 ## Numerical changes in 0.9.2
 

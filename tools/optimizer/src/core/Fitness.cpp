@@ -5,17 +5,21 @@
 /* ======================================================================== */
 #include "core/Fitness.h"
 
+#include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <cstdlib>
 #include <stdexcept>
+#include <vector>
 
 namespace topt {
 
 struct FitnessExpr::Node {
-  enum class Kind { Const, Var, Add, Sub, Mul, Div, Neg } kind;
+  enum class Kind { Const, Var, Add, Sub, Mul, Div, Neg, Func } kind;
   double value = 0.0;
-  std::string var;
+  std::string var; // variable name, or the function name for Func
   std::shared_ptr<const Node> lhs, rhs;
+  std::vector<std::shared_ptr<const Node>> args; // Func arguments
 };
 
 namespace {
@@ -127,6 +131,24 @@ struct Parser {
       std::string ident = text.substr(start, pos - start);
       std::string lowered;
       for (char ch : ident) lowered += static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+      static const char* const kFunctions[] = {"abs", "sqrt", "log", "min", "max"};
+      for (const char* fn : kFunctions) {
+        if (lowered != fn) continue;
+        if (!eat('(')) fail("expected '(' after function '" + ident + "'");
+        FitnessExpr::Node n;
+        n.kind = FitnessExpr::Node::Kind::Func;
+        n.var = lowered;
+        n.args.push_back(parse_expr());
+        while (eat(',')) n.args.push_back(parse_expr());
+        if (!eat(')')) fail("missing ')' after the arguments of '" + ident + "'");
+        const bool variadic = lowered == "min" || lowered == "max";
+        if (variadic ? n.args.size() < 2 : n.args.size() != 1) {
+          fail("function '" + ident + "' takes " +
+               (variadic ? std::string("at least two arguments")
+                         : std::string("exactly one argument")));
+        }
+        return make(std::move(n));
+      }
       for (const auto& known : vars) {
         if (lowered == known) {
           FitnessExpr::Node n;
@@ -157,6 +179,16 @@ double eval_node(const FitnessExpr::Node& n, const std::map<std::string, double>
     return denom == 0.0 ? 0.0 : eval_node(*n.lhs, vars) / denom;
   }
   case Kind::Neg: return -eval_node(*n.lhs, vars);
+  case Kind::Func: {
+    std::vector<double> a;
+    a.reserve(n.args.size());
+    for (const auto& arg : n.args) a.push_back(eval_node(*arg, vars));
+    if (n.var == "abs") return std::fabs(a[0]);
+    if (n.var == "sqrt") return std::sqrt(a[0]);
+    if (n.var == "log") return std::log(a[0]);
+    if (n.var == "min") return *std::min_element(a.begin(), a.end());
+    return *std::max_element(a.begin(), a.end()); // max
+  }
   }
   return 0.0;
 }

@@ -41,6 +41,8 @@ struct CliOptions {
   std::size_t cacheMb = 2048;
   bool quiet = false;
   bool jsonTrades = false;
+  int minTrades = 0;              // --min-trades: skip variants with fewer closed trades
+  std::string rank = "fitness";   // --rank fitness | robust (neighbourhood-mean fitness)
 
   // Genetic optimizer (genetic command; wfo with --optimizer genetic).
   int population = 128;

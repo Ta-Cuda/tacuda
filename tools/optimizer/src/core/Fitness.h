@@ -16,8 +16,13 @@ namespace topt {
 // Compiled arithmetic expression over named metric variables.
 // Grammar: expr := term (('+'|'-') term)*
 //          term := factor (('*'|'/') factor)*
-//          factor := number | identifier | '-' factor | '(' expr ')'
-// Identifiers are case-insensitive; see fitness_variable_names().
+//          factor := number | identifier | function '(' expr (',' expr)* ')'
+//                  | '-' factor | '(' expr ')'
+//          function := abs | sqrt | log | min | max
+// Identifiers are case-insensitive; see fitness_variable_names(). abs, sqrt
+// and log (natural) take one argument, min and max two or more. A function
+// applied outside its domain (sqrt(-1), log(0)) yields NaN/-inf, which the
+// optimizer reports as an invalid variant rather than ranking it.
 class FitnessExpr {
 public:
   // Implementation detail, public only so the parser can build the tree.

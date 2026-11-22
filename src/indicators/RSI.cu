@@ -10,12 +10,8 @@
 #include <utils/AffineScan.cuh>
 #include <utils/LeadingNaN.cuh>
 #include <utils/TacudaConfig.h>
-#include <thrust/device_ptr.h>
-#include <thrust/execution_policy.h>
-#include <thrust/scan.h>
-#include <thrust/functional.h>
+#include <cstdint>
 #include <stdexcept>
-#include <cstdlib>
 #include <algorithm>
 
 namespace {
@@ -40,126 +36,108 @@ static RSIBatchCfg getRSICfg(int size) {
 
 // ===================== Templated kernels =====================
 
-// Compute differences -> gains/losses
-template<typename T>
-__global__ void diffs_gain_loss_kernel(const T* __restrict__ in,
-                                       T* __restrict__ gain,
-                                       T* __restrict__ loss,
-                                       int seriesLen, int batchCount)
-{
-  int idx = blockIdx.x * blockDim.x + threadIdx.x;
-  int N   = seriesLen * batchCount;
-  if (idx >= N) return;
+// A float RSI is consumed by strict pivot comparisons. Accumulate in double
+// and round at the output, as TA-Lib does when its result is stored as float.
+using Transform = tacuda::detail::AffineTransform2<double>;
+constexpr int kTile = 16;
 
-  int s = idx / seriesLen;
-  int t = idx - s * seriesLen;
-
-  if (t == 0) { gain[idx] = T(0); loss[idx] = T(0); return; }
-
-  const T* base = in + (size_t)s * seriesLen;
-  T cur  = base[t];
-  T prev = base[t - 1];
-  T d = cur - prev;
-  if (isnan(d)) {
-    // NaN inputs must poison the recursion (TA-Lib computes on the raw
-    // values, so a NaN propagates), not be silently treated as zero change.
-    gain[idx] = d;
-    loss[idx] = d;
-    return;
-  }
-  gain[idx] = d > T(0) ? d : T(0);
-  loss[idx] = d < T(0) ? -d : T(0);
+__device__ double rsi_value(double gain, double loss) {
+  const double total = gain + loss;
+  return total == 0.0 ? 50.0 : 100.0 * (gain / total);
 }
 
-// Initial SMA for gains/losses per series
 template<typename T>
-__global__ void initial_avg_kernel(const T* __restrict__ gain,
-                                   const T* __restrict__ loss,
-                                   const T* __restrict__ input,
-                                   T* __restrict__ avgG0,
-                                   T* __restrict__ avgL0,
+__device__ double price_change(const T* input, size_t index, int stride) {
+  return static_cast<double>(input[index]) - static_cast<double>(input[index - stride]);
+}
+
+// Both terms propagate NaN, so an interior NaN poisons the recursion.
+__device__ double gain_of(double d) { return d < 0.0 ? 0.0 : d; }
+__device__ double loss_of(double d) { return d > 0.0 ? 0.0 : -d; }
+
+template<typename T>
+__global__ void initial_avg_kernel(const T* __restrict__ input,
+                                   double* __restrict__ avgG0,
+                                   double* __restrict__ avgL0,
                                    int* __restrict__ seedIndex,
                                    int seriesLen, int batchCount, int period)
 {
   int s = blockIdx.x * blockDim.x + threadIdx.x;
   if (s >= batchCount) return;
+  const T* row = input + static_cast<size_t>(s) * seriesLen;
+  const int first = tacuda::detail::leading_nan_count(row, seriesLen);
+  const int seed = period < seriesLen - first ? first + period : seriesLen;
+  seedIndex[s] = seed;
 
-  const T* g = gain + (size_t)s * seriesLen;
-  const T* l = loss + (size_t)s * seriesLen;
-  const int first = tacuda::detail::leading_nan_count(input + (size_t)s * seriesLen, seriesLen);
-  seedIndex[s] = period < seriesLen - first ? first + period : seriesLen;
-
-  double sumG = 0.0, sumL = 0.0;
-  for (int i = first; i < seedIndex[s] && i < seriesLen - 1; ++i) {
-    sumG += static_cast<double>(g[i + 1]); sumL += static_cast<double>(l[i + 1]);
+  double gain = 0.0, loss = 0.0;
+  if (seed < seriesLen) {
+    for (int t = first + 1; t <= seed; ++t) {
+      const double d = price_change(row, t, 1);
+      gain += gain_of(d);
+      loss += loss_of(d);
+    }
   }
-
-  avgG0[s] = static_cast<T>(sumG / static_cast<double>(period));
-  avgL0[s] = static_cast<T>(sumL / static_cast<double>(period));
+  const double invP = 1.0 / period;
+  avgG0[s] = gain * invP;
+  avgL0[s] = loss * invP;
 }
 
-// Build affine transforms and keys for segmented scan
 template<typename T>
-__global__ void build_transforms_kernel(const T* __restrict__ gain,
-                                        const T* __restrict__ loss,
-                                        tacuda::detail::AffineTransform2<T>* __restrict__ trans,
+__global__ void build_transforms_kernel(const T* __restrict__ input,
+                                        Transform* __restrict__ trans,
                                         int* __restrict__ keys,
-                                        int seriesLen, int batchCount, const int* seedIndex,
-                                        T a, T invP)
+                                        int seriesLen, int tilesPerSeries, int tiles, const int* seedIndex,
+                                        double a, double invP)
 {
-  int idx = blockIdx.x * blockDim.x + threadIdx.x;
-  int N   = seriesLen * batchCount;
-  if (idx >= N) return;
-
-  int s = idx / seriesLen;
-  int t = idx - s * seriesLen;
-  keys[idx] = s;
-
-  tacuda::detail::AffineTransform2<T> v;
-  if (t <= seedIndex[s]) {
-    v.A = T(1); v.bG = T(0); v.bL = T(0);
-  } else {
-    v.A  = a;
-    v.bG = gain[idx] * invP;
-    v.bL = loss[idx] * invP;
+  const int tile = blockIdx.x * blockDim.x + threadIdx.x;
+  if (tile >= tiles) return;
+  const int s = tile / tilesPerSeries;
+  const int begin = (tile % tilesPerSeries) * kTile;
+  const int end = begin + min(kTile, seriesLen - begin);
+  const T* row = input + static_cast<size_t>(s) * seriesLen;
+  Transform v{1.0, 0.0, 0.0};
+  for (int t = begin; t < end; ++t) {
+    if (t > seedIndex[s]) {
+      const double d = price_change(row, t, 1);
+      v.A *= a;
+      v.bG = a * v.bG + gain_of(d) * invP;
+      v.bL = a * v.bL + loss_of(d) * invP;
+    }
   }
-  trans[idx] = v;
+  if (keys) keys[tile] = s;
+  trans[tile] = v;
 }
 
-// Finalize RSI from prefix scans
 template<typename T>
-__global__ void finalize_rsi_kernel(const tacuda::detail::AffineTransform2<T>* __restrict__ pref,
-                                    const T* __restrict__ avgG0,
-                                    const T* __restrict__ avgL0,
+__global__ void finalize_rsi_kernel(const T* __restrict__ input,
+                                    const Transform* __restrict__ pref,
+                                    const double* __restrict__ avgG0,
+                                    const double* __restrict__ avgL0,
                                     T* __restrict__ out,
-                                    int seriesLen, int batchCount, const int* seedIndex)
+                                    int seriesLen, int tilesPerSeries, int tiles,
+                                    const int* seedIndex, int period, double invP)
 {
-  int idx = blockIdx.x * blockDim.x + threadIdx.x;
-  int N   = seriesLen * batchCount;
-  if (idx >= N) return;
-
-  int s = idx / seriesLen;
-  int t = idx - s * seriesLen;
-
-  if (t < seedIndex[s]) { out[idx] = T(nanf("")); return; }
-
-  T avgG, avgL;
-  if (t == seedIndex[s]) {
-    avgG = avgG0[s];
-    avgL = avgL0[s];
-  } else {
-    auto a = pref[idx];
-    avgG = a.A * avgG0[s] + a.bG;
-    avgL = a.A * avgL0[s] + a.bL;
+  const int tile = blockIdx.x * blockDim.x + threadIdx.x;
+  if (tile >= tiles) return;
+  const int s = tile / tilesPerSeries;
+  const int begin = (tile % tilesPerSeries) * kTile;
+  const int end = begin + min(kTile, seriesLen - begin);
+  const size_t base = static_cast<size_t>(s) * seriesLen;
+  double gain = avgG0[s], loss = avgL0[s];
+  if (begin > seedIndex[s]) {
+    const Transform carry = pref[tile - 1];
+    gain = carry.A * gain + carry.bG;
+    loss = carry.A * loss + carry.bL;
   }
-
-  T rsi;
-  // TA-Lib 0.8.3 defines the zero-total case as neutral 50.
-  if (avgL == T(0)) rsi = (avgG == T(0)) ? T(50) : T(100);
-  else if (avgG == T(0)) rsi = T(0);
-  else { T rs = avgG / avgL; rsi = T(100) - T(100) / (T(1) + rs); }
-
-  out[idx] = rsi;
+  for (int t = begin; t < end; ++t) {
+    if (t < seedIndex[s]) { out[base + t] = T(nanf("")); continue; }
+    if (t > seedIndex[s]) {
+      const double d = price_change(input + base, t, 1);
+      gain = (gain * (period - 1) + gain_of(d)) * invP;
+      loss = (loss * (period - 1) + loss_of(d)) * invP;
+    }
+    out[base + t] = static_cast<T>(rsi_value(gain, loss));
+  }
 }
 
 // Fallback kernel: one thread = one series (for time-major layout)
@@ -180,38 +158,19 @@ void rsi_wilder_one_series(const T* __restrict__ in,
 
   double sumG = 0.0, sumL = 0.0;
   for (int i = 1; i <= period; ++i) {
-    double d = static_cast<double>(in[(size_t)i * stride]) - static_cast<double>(in[(size_t)(i-1) * stride]);
-    if (isnan(d)) { sumG += d; sumL += d; }  // propagate NaN inputs
-    else {
-      sumG += d > 0.0 ? d : 0.0;
-      sumL += d < 0.0 ? -d : 0.0;
-    }
+    const double d = price_change(in, static_cast<size_t>(i) * stride, stride);
+    sumG += gain_of(d);
+    sumL += loss_of(d);
   }
-  double avgG = sumG / period, avgL = sumL / period;
-  {
-    T rsi;
-    // TA-Lib: flat window (both averages zero) yields 0, not 50.
-    if (avgL == 0.0) rsi = (avgG == 0.0) ? T(50) : T(100);
-    else if (avgG == 0.0) rsi = T(0);
-    else { double rs = avgG / avgL; rsi = static_cast<T>(100.0 - 100.0 / (1.0 + rs)); }
-    out[(size_t)period * stride] = rsi;
-  }
-  const double invP = 1.0 / (double)period;
+  const double invP = 1.0 / period;
+  double avgG = sumG * invP, avgL = sumL * invP;
+  out[static_cast<size_t>(period) * stride] = static_cast<T>(rsi_value(avgG, avgL));
   for (int t = period + 1; t < n; ++t) {
-    double d = static_cast<double>(in[(size_t)t * stride]) - static_cast<double>(in[(size_t)(t-1) * stride]);
-    double g, l;
-    if (isnan(d)) { g = d; l = d; }
-    else {
-      g = d > 0.0 ? d : 0.0;
-      l = d < 0.0 ? -d : 0.0;
-    }
-    avgG = (avgG * (period - 1) + g) * invP;
-    avgL = (avgL * (period - 1) + l) * invP;
-    T rsi;
-    if (avgL == 0.0) rsi = (avgG == 0.0) ? T(50) : T(100);
-    else if (avgG == 0.0) rsi = T(0);
-    else { double rs = avgG / avgL; rsi = static_cast<T>(100.0 - 100.0 / (1.0 + rs)); }
-    out[(size_t)t * stride] = rsi;
+    const size_t idx = static_cast<size_t>(t) * stride;
+    const double d = price_change(in, idx, stride);
+    avgG = (avgG * (period - 1) + gain_of(d)) * invP;
+    avgL = (avgL * (period - 1) + loss_of(d)) * invP;
+    out[idx] = static_cast<T>(rsi_value(avgG, avgL));
   }
 }
 
@@ -243,6 +202,18 @@ void rsi_calculate_impl(int period, const T* input, T* output, int size, cudaStr
     return;
   }
 
+  // Tile replay reads prices while other tiles write their output. Preserve
+  // the prices when the caller supplies overlapping device buffers.
+  const auto src = reinterpret_cast<std::uintptr_t>(input);
+  const auto dst = reinterpret_cast<std::uintptr_t>(output);
+  const size_t bytes = static_cast<size_t>(size) * sizeof(T);
+  DeviceBufferPtrAsync<T> inputCopy;
+  if ((src < dst ? dst - src : src - dst) < bytes) {
+    inputCopy = acquireDeviceBufferAsync<T>(size, stream);
+    CUDA_CHECK(cudaMemcpyAsync(inputCopy.get(), input, bytes, cudaMemcpyDeviceToDevice, stream));
+    input = inputCopy.get();
+  }
+
   // No NaN pre-fill: both paths below write every element, warm-up NaNs
   // included (rsi_wilder_one_series / finalize_rsi_kernel).
 
@@ -267,61 +238,42 @@ void rsi_calculate_impl(int period, const T* input, T* output, int size, cudaStr
     return;
   }
 
-  using Affine2 = tacuda::detail::AffineTransform2<T>;
-  using AffineCompose = tacuda::detail::AffineCompose2<T>;
-
-  // ------ Fast path: series-major + segmented scan ------
-  auto dGain  = acquireDeviceBufferAsync<T>(size, stream);
-  auto dLoss  = acquireDeviceBufferAsync<T>(size, stream);
-  auto dAvgG0 = acquireDeviceBufferAsync<T>(batchCount, stream);
-  auto dAvgL0 = acquireDeviceBufferAsync<T>(batchCount, stream);
+  // Scan one transform per tile. Replaying the local Wilder steps costs
+  // less bandwidth than passing three doubles per bar through the scan.
+  const int tilesPerSeries = 1 + (seriesLen - 1) / kTile;
+  const int tiles = tilesPerSeries * batchCount;
+  auto dAvgG0 = acquireDeviceBufferAsync<double>(batchCount, stream);
+  auto dAvgL0 = acquireDeviceBufferAsync<double>(batchCount, stream);
   auto dSeedIndex = acquireDeviceBufferAsync<int>(batchCount, stream);
-  auto dTrans = acquireDeviceBufferAsync<Affine2>(size, stream);
-  auto dKeys  = acquireDeviceBufferAsync<int>(size, stream);
-  auto dPref  = acquireDeviceBufferAsync<Affine2>(size, stream);
+  auto dTrans = acquireDeviceBufferAsync<Transform>(tiles, stream);
+  DeviceBufferPtrAsync<int> dKeys;
+  if (batchCount > 1) dKeys = acquireDeviceBufferAsync<int>(tiles, stream);
 
-  // 1) differences -> gains/losses
-  {
-    dim3 block = defaultBlock();
-    dim3 grid  = defaultGrid(size);
-    diffs_gain_loss_kernel<T><<<grid, block, 0, stream>>>(input, dGain.get(), dLoss.get(), seriesLen, batchCount);
-    CUDA_CHECK(cudaGetLastError());
+  const int seedBlock = 128;
+  initial_avg_kernel<<<(batchCount + seedBlock - 1) / seedBlock, seedBlock, 0, stream>>>(
+      input, dAvgG0.get(), dAvgL0.get(), dSeedIndex.get(), seriesLen, batchCount, period);
+  CUDA_CHECK(cudaGetLastError());
+
+  const dim3 grid = defaultGrid(tiles), block = defaultBlock();
+  const double invP = 1.0 / period;
+  build_transforms_kernel<<<grid, block, 0, stream>>>(
+      input, dTrans.get(), dKeys.get(), seriesLen, tilesPerSeries, tiles, dSeedIndex.get(),
+      (period - 1) * invP, invP);
+  CUDA_CHECK(cudaGetLastError());
+
+  using Compose = tacuda::detail::AffineCompose2<double>;
+  if (batchCount == 1) {
+    tacuda::detail::affine_inclusive_scan<Transform, Compose>(
+        dTrans.get(), dTrans.get(), tiles, stream);
+  } else {
+    tacuda::detail::affine_inclusive_scan_by_key<Transform, Compose>(
+        dKeys.get(), dTrans.get(), dTrans.get(), tiles, stream);
   }
 
-  // 2) initial SMA for each series
-  {
-    int block = 128;
-    int grid  = (batchCount + block - 1) / block;
-    initial_avg_kernel<T><<<grid, block, 0, stream>>>(dGain.get(), dLoss.get(), input, dAvgG0.get(), dAvgL0.get(), dSeedIndex.get(),
-                                                   seriesLen, batchCount, period);
-    CUDA_CHECK(cudaGetLastError());
-  }
-
-  // 3) build transforms and keys
-  {
-    T a    = static_cast<T>((double)(period - 1) / (double)period);
-    T invP = static_cast<T>(1.0 / (double)period);
-    dim3 block = defaultBlock();
-    dim3 grid  = defaultGrid(size);
-    build_transforms_kernel<T><<<grid, block, 0, stream>>>(dGain.get(), dLoss.get(), dTrans.get(), dKeys.get(),
-                                                        seriesLen, batchCount, dSeedIndex.get(), a, invP);
-    CUDA_CHECK(cudaGetLastError());
-  }
-
-  // 4) segmented inclusive_scan by keys (per series)
-  {
-    tacuda::detail::affine_inclusive_scan_by_key<Affine2, AffineCompose>(
-        dKeys.get(), dTrans.get(), dPref.get(), size, stream);
-  }
-
-  // 5) finalize RSI from prefix scans
-  {
-    dim3 block = defaultBlock();
-    dim3 grid  = defaultGrid(size);
-    finalize_rsi_kernel<T><<<grid, block, 0, stream>>>(dPref.get(), dAvgG0.get(), dAvgL0.get(),
-                                                    output, seriesLen, batchCount, dSeedIndex.get());
-    CUDA_CHECK(cudaGetLastError());
-  }
+  finalize_rsi_kernel<<<grid, block, 0, stream>>>(
+      input, dTrans.get(), dAvgG0.get(), dAvgL0.get(), output,
+      seriesLen, tilesPerSeries, tiles, dSeedIndex.get(), period, invP);
+  CUDA_CHECK(cudaGetLastError());
 }
 
 } // namespace

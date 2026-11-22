@@ -96,6 +96,26 @@ TEST(ParamSpace, RoundsIntegerParams) {
   EXPECT_DOUBLE_EQ(variants[1].get("period"), 8.0);
 }
 
+TEST(ParamSpace, IntegerAxesCollapseDuplicatesAfterRounding) {
+  std::vector<ParamDef> defs = {
+      {"period", 14, 2, 100, 1, true},
+      {"width", 2.0, 0.5, 4.0, 0.25, false},
+  };
+  auto lists = build_value_lists(
+      defs, {parse_grid_spec("period=1.2,1.4,2,2.4"), parse_grid_spec("width=1.2,1.4")},
+      {});
+  ASSERT_EQ(lists.size(), 2u);
+  EXPECT_EQ(lists[0], (std::vector<double>{1.0, 2.0}));
+  // Real-valued axes keep every value.
+  EXPECT_EQ(lists[1], (std::vector<double>{1.2, 1.4}));
+
+  auto variants =
+      enumerate_variants(defs, {parse_grid_spec("period=1.2,1.4,2,2.4")}, {});
+  ASSERT_EQ(variants.size(), 2u);
+  EXPECT_DOUBLE_EQ(variants[0].get("period"), 1.0);
+  EXPECT_DOUBLE_EQ(variants[1].get("period"), 2.0);
+}
+
 TEST(ParamSpace, RejectsNonFiniteSetAndListValues) {
   for (const char* value : {"nan", "inf", "-inf", "1e999"}) {
     EXPECT_THROW(parse_set_spec(std::string("period=") + value),

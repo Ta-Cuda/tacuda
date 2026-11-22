@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tacuda"
-version = "0.9.2"
+version = "0.9.3"
 description = "CUDA technical analysis: 237 TA-Lib 0.8.3 functions, typed outputs, fused portfolio batches, CUDA Graph pipelines and incremental streaming."
 readme = "README.md"
 license = {text = "Apache-2.0"}

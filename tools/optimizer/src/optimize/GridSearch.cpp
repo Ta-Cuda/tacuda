@@ -11,6 +11,7 @@
 #include <cmath>
 #include <cstdio>
 #include <stdexcept>
+#include <string>
 #include <thread>
 #include <unordered_set>
 
@@ -19,7 +20,7 @@ namespace topt {
 VariantResult run_variant(const Series& bars, const IStrategy& strategy,
                           const ParamSet& ps, IndicatorCache& cache,
                           const ExecConfig& exec, const FitnessExpr* fitness,
-                          SimResult* simOut, SimRange range) {
+                          SimResult* simOut, SimRange range, int minTrades) {
   VariantResult res;
   res.params = ps;
   if (!strategy.validate(ps)) {
@@ -61,6 +62,11 @@ VariantResult run_variant(const Series& bars, const IStrategy& strategy,
 
     SimResult sim = simulate(bars, sig.data(), exec, range);
     res.metrics = compute_metrics(sim, exec.barsPerYear);
+    if (minTrades > 0 && res.metrics.numTrades < minTrades) {
+      res.error = "fewer than " + std::to_string(minTrades) + " trades (" +
+                  std::to_string(res.metrics.numTrades) + ")";
+      return res;
+    }
     if (fitness) {
       res.fitness = fitness->eval(fitness_variables(res.metrics));
       if (!std::isfinite(res.fitness)) {
@@ -135,7 +141,8 @@ std::vector<VariantResult> run_grid(const Series& bars, const IStrategy& strateg
         std::size_t k = next.fetch_add(1);
         if (k >= chunkEnd) return;
         results[k] = run_variant(bars, strategy, variants[k], cache,
-                                 cfg.exec, &fitness, nullptr, cfg.range);
+                                 cfg.exec, &fitness, nullptr, cfg.range,
+                                 cfg.minTrades);
       }
     };
     std::vector<std::thread> pool;
@@ -163,6 +170,45 @@ std::vector<VariantResult> run_grid(const Series& bars, const IStrategy& strateg
     }
   }
   return results;
+}
+
+void compute_robust_fitness(std::vector<VariantResult>& results,
+                            const std::vector<std::size_t>& axisSizes) {
+  std::size_t total = 1;
+  for (std::size_t s : axisSizes) total *= s;
+  if (total != results.size()) {
+    throw std::invalid_argument(
+        "robust fitness: " + std::to_string(results.size()) +
+        " results do not form the full grid of " + std::to_string(total) +
+        " variants");
+  }
+  const std::size_t dims = axisSizes.size();
+  // Mixed-radix strides of enumerate_variants(): last axis varies fastest.
+  std::vector<std::size_t> stride(dims, 1);
+  for (std::size_t i = dims; i-- > 1;) stride[i - 1] = stride[i] * axisSizes[i];
+
+  for (std::size_t k = 0; k < results.size(); ++k) {
+    VariantResult& v = results[k];
+    v.robustFitness = 0.0;
+    v.neighborhood = 0;
+    if (!v.valid) continue;
+    double sum = v.fitness;
+    int count = 1;
+    for (std::size_t i = 0; i < dims; ++i) {
+      if (axisSizes[i] < 2) continue;
+      const std::size_t idx = (k / stride[i]) % axisSizes[i];
+      if (idx > 0) {
+        const VariantResult& nb = results[k - stride[i]];
+        if (nb.valid) { sum += nb.fitness; ++count; }
+      }
+      if (idx + 1 < axisSizes[i]) {
+        const VariantResult& nb = results[k + stride[i]];
+        if (nb.valid) { sum += nb.fitness; ++count; }
+      }
+    }
+    v.robustFitness = sum / count;
+    v.neighborhood = count;
+  }
 }
 
 } // namespace topt

@@ -9,7 +9,7 @@
  * Similar to C++ test_context_pipeline.cpp, C# TestBindings.cs, Python test_pipeline.py
  */
 
-const tacuda = require('./index');
+const tacuda = require(process.env.TACUDA_NODE_BINDINGS || './index');
 
 const EPS = 1e-6;
 
@@ -44,22 +44,22 @@ function validateRange(arr, lo, hi, name) {
             return false;
         }
     }
-    return true;
+    return hasValidValues(arr);
 }
 
 function validateNonNeg(arr, name) {
     for (let i = 0; i < arr.length; i++) {
-        if (!Number.isNaN(arr[i]) && arr[i] < -EPS) {
-            console.log(`    ${name} negative: ${arr[i]} at i=${i}`);
+        if (!Number.isNaN(arr[i]) && (!Number.isFinite(arr[i]) || arr[i] < -EPS)) {
+            console.log(`    ${name} invalid: ${arr[i]} at i=${i}`);
             return false;
         }
     }
-    return true;
+    return hasValidValues(arr);
 }
 
 function hasValidValues(arr) {
     for (let i = 0; i < arr.length; i++) {
-        if (!Number.isNaN(arr[i])) return true;
+        if (Number.isFinite(arr[i])) return true;
     }
     return false;
 }
@@ -347,10 +347,7 @@ function runAllTests() {
     test('rsiEx float64 in range', () => {
         const close64 = Float64Array.from(close);
         const out = tacuda.rsiEx(close64, 14);
-        for (let i = 0; i < N; i++) {
-            if (!Number.isNaN(out[i]) && (out[i] < -EPS || out[i] > 100 + EPS)) return false;
-        }
-        return true;
+        return validateRange(out, 0, 100, 'rsiEx');
     });
 
     // ---- Device API ----

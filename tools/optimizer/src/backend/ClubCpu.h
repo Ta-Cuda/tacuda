@@ -262,6 +262,17 @@ inline void rolling_strict(const float* in, int n, int len, int mode,
   }
 }
 
+// High-low bar range (EasyLanguage `Range`). Not a club indicator, but it
+// lives in the shared CPU dispatcher so every CPU backend serves it, and
+// `ROLLING_MEAN` chained on it reproduces the pack's Average(Range, n).
+inline void bar_range(const Series& b, float* out) {
+  const int n = b.size();
+  for (int i = 0; i < n; ++i) {
+    const std::size_t ui = static_cast<std::size_t>(i);
+    out[i] = b.high[ui] - b.low[ui];
+  }
+}
+
 // Dispatches a club family over `in` (single-input families) or `bars`
 // (fixed-column families) into outs[0]. Returns false when `f` is not a
 // club family.
@@ -280,6 +291,7 @@ inline bool compute_family(const Series& bars, const IndicatorRequest& req,
   case Family::HPI:
     hpi(bars, static_cast<float>(req.params.at(0)), out);
     return true;
+  case Family::RANGE: bar_range(bars, out); return true;
   case Family::MARKET_STRENGTH: market_strength(in, n, p0, out); return true;
   case Family::TRENDSCORE: trendscore(in, n, p0, out); return true;
   case Family::REFDEV:

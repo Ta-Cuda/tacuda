@@ -30,6 +30,15 @@ struct MetricsResult {
   double avgTrade = 0.0;
   double exposure = 0.0;     // fraction of bars with an open position
   int numTrades = 0;
+  // Robustness / quality metrics.
+  double calmar = 0.0;       // netProfit / maxDrawdown; 1e9 when profitable with no drawdown
+  double sqn = 0.0;          // Van Tharp SQN: sqrt(N) * mean(pnl) / std(pnl); 0 below 2 trades
+  double avgWin = 0.0;       // mean PnL of winning trades
+  double avgLoss = 0.0;      // mean loss magnitude of losing trades (positive)
+  double payoff = 0.0;       // avgWin / avgLoss; 1e9 with winners but no losers
+  int maxConsecWins = 0;     // longest run of winning trades
+  int maxConsecLosses = 0;   // longest run of losing trades (pnl <= 0)
+  int maxDrawdownBars = 0;   // longest run of bars below the running equity peak
 };
 
 MetricsResult compute_metrics(const SimResult& sim, int barsPerYear);

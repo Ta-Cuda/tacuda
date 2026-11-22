@@ -195,6 +195,39 @@ TEST(WalkForward, GeneticOptimizerPerWindowIsDeterministic) {
   EXPECT_LT(r1.isEvaluations, 3u * 70u);
 }
 
+TEST(WalkForward, RobustModePicksByNeighbourhoodMean) {
+  Series bars = generate_synthetic(8000, 51);
+  std::vector<GridAxis> axes = {parse_grid_spec("fast=3..15:3"),
+                                parse_grid_spec("slow=20..60:10")};
+  WfoConfig cfg = quiet_wfo(3, 0.75);
+  cfg.robust = true;
+  WfoResult res = run_wfo_on(bars, cfg, axes);
+
+  ASSERT_EQ(res.windows.size(), 3u);
+  for (const auto& wr : res.windows) {
+    ASSERT_TRUE(wr.optimized) << wr.note;
+    // The robust winner is a valid variant with at least itself and two
+    // neighbours in a 5x5 grid, and its raw fitness is a real number.
+    EXPECT_TRUE(std::isfinite(wr.isRobustFitness));
+    EXPECT_TRUE(std::isfinite(wr.isFitness));
+  }
+
+  // Same windows, same data: the raw-fitness winner's raw fitness is never
+  // below the robust winner's raw fitness.
+  WfoConfig raw = cfg;
+  raw.robust = false;
+  WfoResult rawRes = run_wfo_on(bars, raw, axes);
+  for (std::size_t w = 0; w < res.windows.size(); ++w) {
+    EXPECT_GE(rawRes.windows[w].isFitness, res.windows[w].isFitness - 1e-9);
+  }
+
+  // Robust ranking needs the full grid: the genetic optimizer is rejected.
+  WfoConfig ga = cfg;
+  ga.optimizer = WfoOptimizer::Genetic;
+  ga.genetic.quiet = true;
+  EXPECT_THROW(run_wfo_on(bars, ga, axes), std::invalid_argument);
+}
+
 TEST(WalkForward, WindowsWithoutValidVariantsContributeFlatEquity) {
   Series bars = generate_synthetic(3000, 33);
   // slow=5000 never fits into a 1500-bar IS segment -> every window skipped.

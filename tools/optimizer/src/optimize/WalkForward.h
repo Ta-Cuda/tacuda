@@ -45,6 +45,10 @@ struct WfoConfig {
   WfoOptimizer optimizer = WfoOptimizer::Grid;
   int windows = 6;
   double isFraction = 0.75; // in-sample share of each window
+  // Pick each window's in-sample winner by neighbourhood-mean fitness
+  // (compute_robust_fitness) instead of raw fitness. Grid optimizer only:
+  // the genetic search does not evaluate a variant's full neighbourhood.
+  bool robust = false;
 };
 
 struct WfoWindowResult {
@@ -52,6 +56,7 @@ struct WfoWindowResult {
   bool optimized = false;   // a valid best was found on IS
   ParamSet params;
   double isFitness = 0.0;
+  double isRobustFitness = 0.0; // neighbourhood-mean IS fitness (robust mode)
   MetricsResult isMetrics;
   double oosFitness = 0.0;
   MetricsResult oosMetrics;
